@@ -5,6 +5,8 @@ import (
 
 	"github.com/babylonchain/staking-api-service/internal/db/model"
 	"github.com/babylonchain/staking-api-service/internal/types"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DBClient interface {
@@ -71,4 +73,11 @@ type DBClient interface {
 type DelegationFilter struct {
 	AfterTimestamp int64
 	States         []types.DelegationState
+}
+type DBSession interface {
+	EndSession(ctx context.Context)
+	WithTransaction(ctx context.Context, fn func(sessCtx mongo.SessionContext) (interface{}, error), opts ...*options.TransactionOptions) (interface{}, error)
+}
+type DBTransactionClient interface {
+	StartSession(opts ...*options.SessionOptions) (DBSession, error)
 }

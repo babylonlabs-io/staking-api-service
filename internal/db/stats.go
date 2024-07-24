@@ -48,15 +48,25 @@ func (db *Database) GetOrCreateStatsLock(
 func (db *Database) IncrementOverallStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
-	overallStatsClient := db.Client.Database(db.DbName).Collection(model.OverallStatsCollection)
-	stakerStatsClient := db.Client.Database(db.DbName).Collection(model.StakerStatsCollection)
+	// Define the work to be done in the transaction
+  transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+ 	overallStatsClient := db.Client.Database(db.DbName).Collection(model.OverallStatsCollection)
+  stakerStatsClient := db.Client.Database(db.DbName).Collection(model.StakerStatsCollection)
 
-	// Start a session
-	session, sessionErr := db.Client.StartSession()
-	if sessionErr != nil {
-		return sessionErr
+	err := db.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Active.ToString(), "overall_stats")
+	if err != nil {
+		return nil, err
 	}
-	defer session.EndSession(ctx)
+
+	// The order of the overall stats and staker stats update is important.
+	// The staker stats colleciton will need to be processed first to determine if the staker is new
+	// If the staker stats is the first delegation for the staker, we need to increment the total stakers
+	var stakerStats model.StakerStatsDocument
+	stakerStatsFilter := bson.M{"_id": stakerPkHex}
+	stakerErr := stakerStatsClient.FindOne(ctx, stakerStatsFilter).Decode(&stakerStats)
+	if stakerErr != nil {
+		return nil, stakerErr
+	}
 
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
@@ -66,37 +76,26 @@ func (db *Database) IncrementOverallStats(
 			"total_delegations":  1,
 		},
 	}
-	// Define the work to be done in the transaction
-	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := db.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Active.ToString(), "overall_stats")
-		if err != nil {
-			return nil, err
-		}
 
-		// The order of the overall stats and staker stats update is important.
-		// The staker stats colleciton will need to be processed first to determine if the staker is new
-		// If the staker stats is the first delegation for the staker, we need to increment the total stakers
-		var stakerStats model.StakerStatsDocument
-		stakerStatsFilter := bson.M{"_id": stakerPkHex}
-		stakerErr := stakerStatsClient.FindOne(ctx, stakerStatsFilter).Decode(&stakerStats)
-		if stakerErr != nil {
-			return nil, stakerErr
-		}
-		if stakerStats.TotalDelegations == 1 {
+	if stakerStats.TotalDelegations == 1 {
 			upsertUpdate["$inc"].(bson.M)["total_stakers"] = 1
-		}
-
-		upsertFilter := bson.M{"_id": db.generateOverallStatsId()}
-
-		_, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
 	}
 
-	// Execute the transaction
-	_, txErr := session.WithTransaction(ctx, transactionWork)
+	upsertFilter := bson.M{"_id": db.generateOverallStatsId()}
+
+	_, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+	}
+
+	// Execute the transaction with retries
+	_, txErr := TxWithRetries(
+		ctx, 
+		&dbTransactionClient{db.Client},
+		transactionWork,
+	)
 	if txErr != nil {
 		return txErr
 	}
@@ -110,23 +109,15 @@ func (db *Database) IncrementOverallStats(
 func (db *Database) SubtractOverallStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
-	upsertUpdate := bson.M{
-		"$inc": bson.M{
-			"active_tvl":         -int64(amount),
-			"active_delegations": -1,
-		},
-	}
-	overallStatsClient := db.Client.Database(db.DbName).Collection(model.OverallStatsCollection)
-
-	// Start a session
-	session, sessionErr := db.Client.StartSession()
-	if sessionErr != nil {
-		return sessionErr
-	}
-	defer session.EndSession(ctx)
-
 	// Define the work to be done in the transaction
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		upsertUpdate := bson.M{
+			"$inc": bson.M{
+				"active_tvl":         -int64(amount),
+				"active_delegations": -1,
+			},
+		}
+		overallStatsClient := db.Client.Database(db.DbName).Collection(model.OverallStatsCollection)
 		err := db.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonded.ToString(), "overall_stats")
 		if err != nil {
 			return nil, err
@@ -141,8 +132,12 @@ func (db *Database) SubtractOverallStats(
 		return nil, nil
 	}
 
-	// Execute the transaction
-	_, txErr := session.WithTransaction(ctx, transactionWork)
+	// Execute the transaction with retries
+	_, txErr := TxWithRetries(
+		ctx, 
+		&dbTransactionClient{db.Client},
+		transactionWork,
+	)
 	if txErr != nil {
 		return txErr
 	}
@@ -293,16 +288,9 @@ func (db *Database) FindFinalityProviderStatsByFinalityProviderPkHex(
 }
 
 func (db *Database) updateFinalityProviderStats(ctx context.Context, state, stakingTxHashHex, fpPkHex string, upsertUpdate primitive.M) error {
-	client := db.Client.Database(db.DbName).Collection(model.FinalityProviderStatsCollection)
-
-	// Start a session
-	session, sessionErr := db.Client.StartSession()
-	if sessionErr != nil {
-		return sessionErr
-	}
-	defer session.EndSession(ctx)
-
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		client := db.Client.Database(db.DbName).Collection(model.FinalityProviderStatsCollection)
+
 		err := db.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, state, "finality_provider_stats")
 		if err != nil {
 			return nil, err
@@ -317,8 +305,12 @@ func (db *Database) updateFinalityProviderStats(ctx context.Context, state, stak
 		return nil, nil
 	}
 
-	// Execute the transaction
-	_, txErr := session.WithTransaction(ctx, transactionWork)
+	// Execute the transaction with retries
+	_, txErr := TxWithRetries(
+		ctx, 
+		&dbTransactionClient{db.Client},
+		transactionWork,
+	)
 	if txErr != nil {
 		return txErr
 	}
@@ -356,17 +348,10 @@ func (db *Database) SubtractStakerStats(
 	return db.updateStakerStats(ctx, types.Unbonded.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
-func (db *Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {
-	client := db.Client.Database(db.DbName).Collection(model.StakerStatsCollection)
-
-	// Start a session
-	session, sessionErr := db.Client.StartSession()
-	if sessionErr != nil {
-		return sessionErr
-	}
-	defer session.EndSession(ctx)
-
+func (db *Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {	
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		client := db.Client.Database(db.DbName).Collection(model.StakerStatsCollection)
+
 		err := db.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, state, "staker_stats")
 		if err != nil {
 			return nil, err
@@ -381,8 +366,12 @@ func (db *Database) updateStakerStats(ctx context.Context, state, stakingTxHashH
 		return nil, nil
 	}
 
-	// Execute the transaction
-	_, txErr := session.WithTransaction(ctx, transactionWork)
+	// Execute the transaction with retries
+	_, txErr := TxWithRetries(
+		ctx, 
+		&dbTransactionClient{db.Client},
+		transactionWork,
+	)
 	return txErr
 }
 

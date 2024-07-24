@@ -14,25 +14,17 @@ import (
 func (db *Database) SaveUnbondingTx(
 	ctx context.Context, stakingTxHashHex, txHashHex, txHex, signatureHex string,
 ) error {
-	delegationClient := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
-	unbondingClient := db.Client.Database(db.DbName).Collection(model.UnbondingCollection)
-
-	// Start a session
-	session, err := db.Client.StartSession()
-	if err != nil {
-		return err
-	}
-	defer session.EndSession(ctx)
-
 	// Define the work to be done in the transaction
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		delegationClient := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+		unbondingClient := db.Client.Database(db.DbName).Collection(model.UnbondingCollection)
 		// Find the existing delegation document first, it will be used later in the transaction
 		delegationFilter := bson.M{
 			"_id":   stakingTxHashHex,
 			"state": types.Active,
 		}
 		var delegationDocument model.DelegationDocument
-		err = delegationClient.FindOne(sessCtx, delegationFilter).Decode(&delegationDocument)
+		err := delegationClient.FindOne(sessCtx, delegationFilter).Decode(&delegationDocument)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				return nil, &NotFoundError{
@@ -89,8 +81,12 @@ func (db *Database) SaveUnbondingTx(
 		return nil, nil
 	}
 
-	// Execute the transaction
-	_, err = session.WithTransaction(ctx, transactionWork)
+	// Execute the transaction with retries
+	_, err := TxWithRetries(
+		ctx, 
+		&dbTransactionClient{db.Client},
+		transactionWork,
+	)
 	if err != nil {
 		return err
 	}
