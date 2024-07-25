@@ -18,12 +18,12 @@ type UnisatClientInterface struct {
 	mock.Mock
 }
 
-// FetchInscriptionsUtxosByAddress provides a mock function with given fields: ctx, address, cursor
-func (_m *UnisatClientInterface) FetchInscriptionsUtxosByAddress(ctx context.Context, address string, cursor uint32) ([]*unisat.UnisatUTXO, *types.Error) {
+// FetchInscriptionsUTXOsByAddress provides a mock function with given fields: ctx, address, cursor
+func (_m *UnisatClientInterface) FetchInscriptionsUTXOsByAddress(ctx context.Context, address string, cursor uint32) ([]*unisat.UnisatUTXO, *types.Error) {
 	ret := _m.Called(ctx, address, cursor)
 
 	if len(ret) == 0 {
-		panic("no return value specified for FetchInscriptionsUtxosByAddress")
+		panic("no return value specified for FetchInscriptionsUTXOsByAddress")
 	}
 
 	var r0 []*unisat.UnisatUTXO
