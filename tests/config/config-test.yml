@@ -35,6 +35,6 @@ assets:
     timeout: 100
   unisat:
     host: "https://open-api-testnet.unisat.io"
-    limit: 100
+    limit: 50 
     timeout: 100
     token: "add your token as ASSETS_UNISAT_TOKEN in .env"

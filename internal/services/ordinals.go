@@ -98,11 +98,11 @@ func (s *Services) verifyViaUnisatService(
 	var results []*SafeUTXOPublic
 	for _, utxo := range utxos {
 		key := fmt.Sprintf("%s:%d", utxo.Txid, utxo.Vout)
-		_, ok := inscriptionsUtxosMap[key]
+		inscriptions, ok := inscriptionsUtxosMap[key]
 		results = append(results, &SafeUTXOPublic{
 			TxId:        utxo.Txid,
 			Vout:        utxo.Vout,
-			Inscription: ok,
+			Inscription: ok && len(inscriptions) > 0,
 		})
 	}
 	return results, nil
