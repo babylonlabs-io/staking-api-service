@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/babylonchain/staking-api-service/internal/types"
 	"github.com/go-chi/chi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -32,6 +33,8 @@ var (
 	queueOperationFailureCounter     *prometheus.CounterVec
 	httpResponseWriteFailureCounter  *prometheus.CounterVec
 	clientRequestDurationHistogram   *prometheus.HistogramVec
+	httpServiceErrorCounter          *prometheus.CounterVec
+	httpServiceRequestCounter        *prometheus.CounterVec
 )
 
 // Init initializes the metrics package.
@@ -114,6 +117,22 @@ func registerMetrics() {
 		[]string{"baseurl", "method", "path", "status"},
 	)
 
+	httpServiceErrorCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "http_service_error_total",
+			Help: "Total number of errors encountered when using the http service.",
+		},
+		[]string{"service", "errorCode", "errorStatusCode"},
+	)
+
+	httpServiceRequestCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "http_service_request_total",
+			Help: "Total number of requests made to the http service.",
+		},
+		[]string{"endpoint"},
+	)
+
 	prometheus.MustRegister(
 		httpRequestDurationHistogram,
 		eventProcessingDurationHistogram,
@@ -121,6 +140,8 @@ func registerMetrics() {
 		queueOperationFailureCounter,
 		httpResponseWriteFailureCounter,
 		clientRequestDurationHistogram,
+		httpServiceErrorCounter,
+		httpServiceRequestCounter,
 	)
 }
 
@@ -149,7 +170,6 @@ func StartEventProcessingDurationTimer(queuename string, attempts int32) func(st
 }
 
 // RecordUnprocessableEntity increments the unprocessable entity counter.
-// This is basically the number of items will show up in the unprocessable entity collection
 func RecordUnprocessableEntity(entity string) {
 	unprocessableEntityCounter.WithLabelValues(entity).Inc()
 }
@@ -176,4 +196,25 @@ func StartClientRequestDurationTimer(baseUrl, method, path string) func(statusCo
 			fmt.Sprintf("%d", statusCode),
 		).Observe(duration)
 	}
+}
+
+// IncrementServiceRequest increments the counter for http requests.
+func IncrementHttpServiceRequest(endpoint string, service string) {
+	httpServiceRequestCounter.WithLabelValues(endpoint, service).Inc()
+}
+
+// RecordHttpServiceError increments the service call failure counter.
+func RecordHttpServiceError(service string, err *types.Error) {
+	if err == nil {
+		return
+	}
+	errorCode := string(err.ErrorCode)
+	if errorCode == "" {
+		errorCode = "UNKNOWN"
+	}
+	errorStatusCode := fmt.Sprintf("%d", err.StatusCode)
+	if errorStatusCode == "0" {
+		errorStatusCode = "UNKNOWN"
+	}
+	httpServiceErrorCounter.WithLabelValues(service, errorCode, errorStatusCode).Inc()
 }
