@@ -16,7 +16,20 @@ NOTE: To enable the optional ordinal API endpoint, you will need to provide the
 
 ## Ordinal service Client
 
-WIP
+The Ordinal Service Client is the primary method for checking inscriptions on UTXOs. It connects directly to a running instance of the [Ordinal Service](https://github.com/ordinals/ord).
+
+### Verification Process
+
+1. The `verifyViaOrdinalService` function is called with a list of UTXOs.
+2. It uses the `FetchUTXOInfos` method of the Ordinals client to get information
+   about the UTXOs.
+   - Underlyingly, for every UTXO the Ordinals endpoint `/output/TXID:OUTPUT_ID`
+     is invoked, where `TXID` the transaction hex and `OUTPUT_ID` the output of
+     interest
+3. For each UTXO, it checks:
+   - If the `Runes` field is not empty and not "{}"
+   - If the `Inscriptions` field is not empty
+4. If either condition is true, the UTXO is marked as having an inscription.
 
 ## Unisat Service Client
 
