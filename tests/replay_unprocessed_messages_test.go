@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonchain/staking-api-service/cmd/staking-api-service/scripts"
-	"github.com/babylonchain/staking-api-service/internal/api/handlers"
-	"github.com/babylonchain/staking-api-service/internal/db/model"
-	"github.com/babylonchain/staking-queue-client/client"
+	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
+	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
+	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -65,7 +65,7 @@ func TestReplayUnprocessableMessages(t *testing.T) {
 		"FinalityProviderPkHex",
 		"StakerPkHex",
 	}
-	
+
 	assert.Greater(t, len(responseJSON.Data), 0, "'data' array should not be empty")
 
 	for _, item := range responseJSON.Data {

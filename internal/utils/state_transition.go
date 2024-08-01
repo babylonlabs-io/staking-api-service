@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
 // QualifiedStatesToUnbondingRequest returns the qualified exisitng states to transition to "unbonding_request"

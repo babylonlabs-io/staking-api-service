@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/babylonchain/staking-api-service/internal/observability/tracing"
+	"github.com/babylonlabs-io/staking-api-service/internal/observability/tracing"
 	"github.com/rs/zerolog/log"
 )
 

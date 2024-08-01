@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	testmock "github.com/babylonchain/staking-api-service/tests/mocks"
+	testmock "github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -80,7 +80,7 @@ func TestOptionsRequest(t *testing.T) {
 	client := &http.Client{}
 	req, err := http.NewRequest("OPTIONS", url, nil)
 	assert.NoError(t, err, "making OPTION request to health check endpoint should not fail")
-	req.Header.Add("Origin", "https://dashboard.testnet3.babylonchain.io")
+	req.Header.Add("Origin", "https://dashboard.testnet3.babylonlabs-io.io")
 	req.Header.Add("Access-Control-Request-Headers", "Content-Type")
 	req.Header.Add("Access-Control-Request-Method", "GET")
 

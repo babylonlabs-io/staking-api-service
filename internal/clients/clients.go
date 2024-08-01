@@ -1,9 +1,9 @@
 package clients
 
 import (
-	"github.com/babylonchain/staking-api-service/internal/clients/ordinals"
-	"github.com/babylonchain/staking-api-service/internal/clients/unisat"
-	"github.com/babylonchain/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/clients/ordinals"
+	"github.com/babylonlabs-io/staking-api-service/internal/clients/unisat"
+	"github.com/babylonlabs-io/staking-api-service/internal/config"
 )
 
 type Clients struct {

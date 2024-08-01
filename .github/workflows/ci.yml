@@ -7,14 +7,14 @@ on:
 
 jobs:
   lint_test:
-    uses: babylonchain/.github/.github/workflows/reusable_go_lint_test.yml@v0.1.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.2.0
     with:
      run-unit-tests: true
      run-integration-tests: false
      run-lint: false
      
   docker_pipeline:
-    uses: babylonchain/.github/.github/workflows/reusable_docker_pipeline.yml@v0.1.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.2.0
     secrets: inherit
     with:
       publish: false

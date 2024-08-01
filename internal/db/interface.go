@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 
-	"github.com/babylonchain/staking-api-service/internal/db/model"
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
 type DBClient interface {

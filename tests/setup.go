@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonchain/staking-queue-client/client"
+	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/go-chi/chi"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/require"
@@ -19,17 +19,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	queueConfig "github.com/babylonchain/staking-queue-client/config"
+	queueConfig "github.com/babylonlabs-io/staking-queue-client/config"
 
-	"github.com/babylonchain/staking-api-service/internal/api"
-	"github.com/babylonchain/staking-api-service/internal/api/middlewares"
-	"github.com/babylonchain/staking-api-service/internal/clients"
-	"github.com/babylonchain/staking-api-service/internal/config"
-	"github.com/babylonchain/staking-api-service/internal/db"
-	"github.com/babylonchain/staking-api-service/internal/observability/metrics"
-	"github.com/babylonchain/staking-api-service/internal/queue"
-	"github.com/babylonchain/staking-api-service/internal/services"
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/api/middlewares"
+	"github.com/babylonlabs-io/staking-api-service/internal/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
+	"github.com/babylonlabs-io/staking-api-service/internal/queue"
+	"github.com/babylonlabs-io/staking-api-service/internal/services"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
 type TestServerDependency struct {
@@ -315,7 +315,7 @@ func buildActiveStakingEvent(t *testing.T, numOfEvenet int) []*client.ActiveStak
 	var activeStakingEvents []*client.ActiveStakingEvent
 	stakerPk, err := randomPk()
 	require.NoError(t, err)
-	// To be replaced with https://github.com/babylonchain/staking-api-service/issues/21
+	// To be replaced with https://github.com/babylonlabs-io/staking-api-service/issues/21
 	rand.New(rand.NewSource(time.Now().Unix()))
 
 	for i := 0; i < numOfEvenet; i++ {

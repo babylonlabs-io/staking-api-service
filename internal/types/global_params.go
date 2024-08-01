@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/babylonchain/networks/parameters/parser"
+	"github.com/babylonlabs-io/networks/parameters/parser"
 	"github.com/btcsuite/btcd/btcec/v2"
 )
 

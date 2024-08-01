@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	queue "github.com/babylonchain/staking-queue-client/config"
+	queue "github.com/babylonlabs-io/staking-queue-client/config"
 	"github.com/spf13/viper"
 )
 

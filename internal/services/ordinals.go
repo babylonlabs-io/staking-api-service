@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/babylonchain/staking-api-service/internal/clients/unisat"
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/clients/unisat"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/rs/zerolog/log"
 )
 
