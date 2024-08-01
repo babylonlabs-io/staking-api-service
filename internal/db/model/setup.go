@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/babylonchain/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/rs/zerolog/log"
 
 	"go.mongodb.org/mongo-driver/bson"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )

@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
 // GetOverallStats gets overall stats for babylon staking

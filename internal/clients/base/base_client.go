@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/babylonchain/staking-api-service/internal/observability/metrics"
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/rs/zerolog/log"
 )
 

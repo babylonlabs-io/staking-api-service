@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 
-	"github.com/babylonchain/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

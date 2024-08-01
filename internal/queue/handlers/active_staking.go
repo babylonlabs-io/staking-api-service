@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/babylonchain/staking-api-service/internal/types"
-	queueClient "github.com/babylonchain/staking-queue-client/client"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	queueClient "github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/rs/zerolog/log"
 )
 

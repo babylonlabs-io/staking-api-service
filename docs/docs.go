@@ -57,7 +57,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Error: Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error"
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
                     }
                 }
@@ -139,7 +139,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Error: Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error"
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
                     }
                 }
@@ -176,7 +176,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Error: Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error"
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
                     }
                 }
@@ -224,7 +224,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Error: Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error"
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
                     }
                 }
@@ -258,7 +258,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid request payload",
                         "schema": {
-                            "$ref": "#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error"
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
                     }
                 }
@@ -287,7 +287,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Missing or invalid 'staking_tx_hash_hex' query parameter",
                         "schema": {
-                            "$ref": "#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error"
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
                     }
                 }
@@ -295,7 +295,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_babylonchain_staking-api-service_internal_types.Error": {
+        "github_com_babylonlabs-io_staking-api-service_internal_types.Error": {
             "type": "object",
             "properties": {
                 "err": {},

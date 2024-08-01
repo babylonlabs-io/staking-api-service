@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	baseclient "github.com/babylonchain/staking-api-service/internal/clients/base"
-	"github.com/babylonchain/staking-api-service/internal/config"
-	"github.com/babylonchain/staking-api-service/internal/types"
+	baseclient "github.com/babylonlabs-io/staking-api-service/internal/clients/base"
+	"github.com/babylonlabs-io/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
 // Note: The JSON tags use camel case because this struct is used to

@@ -15,12 +15,12 @@ RUN apk add --no-cache  \
     openssh
 
 # Build
-WORKDIR /go/src/github.com/babylonchain/staking-api-service
+WORKDIR /go/src/github.com/babylonlabs-io/staking-api-service
 # Cache dependencies
-COPY go.mod go.sum /go/src/github.com/babylonchain/staking-api-service/
+COPY go.mod go.sum /go/src/github.com/babylonlabs-io/staking-api-service/
 
 # Copy the rest of the files
-COPY ./ /go/src/github.com/babylonchain/staking-api-service/
+COPY ./ /go/src/github.com/babylonlabs-io/staking-api-service/
 
 
 RUN LDFLAGS='-extldflags "-static" -v' \
@@ -37,12 +37,12 @@ RUN addgroup --gid 1138 -S staking-api-service && adduser --uid 1138 -S staking-
 RUN apk add bash curl jq
 
 # Label should match your github repo
-LABEL org.opencontainers.image.source="https://github.com/babylonchain/staking-api-service:${VERSION}"
+LABEL org.opencontainers.image.source="https://github.com/babylonlabs-io/staking-api-service:${VERSION}"
 
 
 # Copy over binaries from the build-env
-COPY --from=builder /go/src/github.com/babylonchain/staking-api-service/build/staking-api-service /bin/staking-api-service
-COPY --from=builder /go/src/github.com/babylonchain/staking-api-service/contrib/images/staking-api-service/entrypoint.sh /bin/entrypoint.sh
+COPY --from=builder /go/src/github.com/babylonlabs-io/staking-api-service/build/staking-api-service /bin/staking-api-service
+COPY --from=builder /go/src/github.com/babylonlabs-io/staking-api-service/contrib/images/staking-api-service/entrypoint.sh /bin/entrypoint.sh
 
 WORKDIR /home/staking-api-service
 RUN chown -R staking-api-service /home/staking-api-service

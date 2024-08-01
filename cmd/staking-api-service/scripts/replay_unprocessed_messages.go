@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/babylonchain/staking-api-service/internal/config"
-	"github.com/babylonchain/staking-api-service/internal/db"
-	"github.com/babylonchain/staking-api-service/internal/queue"
-	queueClient "github.com/babylonchain/staking-queue-client/client"
+	"github.com/babylonlabs-io/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/queue"
+	queueClient "github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/rs/zerolog/log"
 )
 
