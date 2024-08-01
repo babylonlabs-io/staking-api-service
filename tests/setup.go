@@ -315,7 +315,6 @@ func buildActiveStakingEvent(t *testing.T, numOfEvenet int) []*client.ActiveStak
 	var activeStakingEvents []*client.ActiveStakingEvent
 	stakerPk, err := randomPk()
 	require.NoError(t, err)
-	// To be replaced with https://github.com/babylonlabs-io/staking-api-service/issues/21
 	rand.New(rand.NewSource(time.Now().Unix()))
 
 	for i := 0; i < numOfEvenet; i++ {
