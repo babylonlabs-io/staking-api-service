@@ -52,9 +52,7 @@ func FuzzSuccessfullyVerifyUTXOsAssetsViaOrdinalService(f *testing.F) {
 		numOfUTXOs := randomPositiveInt(r, 100)
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
-		if err != nil {
-			t.Fatalf("Failed to marshal payload: %v", err)
-		}
+		assert.NoError(t, err, "failed to marshal payload")
 
 		// create some ordinal responses that contains inscriptions
 		numOfUTXOsWithAsset := r.Intn(numOfUTXOs)
@@ -127,9 +125,7 @@ func FuzzErrorWhenExceedMaxAllowedLength(f *testing.F) {
 		numOfUTXOs := randomPositiveInt(r, 100) + int(cfg.Assets.MaxUTXOs)
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
-		if err != nil {
-			t.Fatalf("Failed to marshal payload: %v", err)
-		}
+		assert.NoError(t, err)
 
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
@@ -167,11 +163,9 @@ func FuzzErrorWithInvalidTxid(f *testing.F) {
 
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		// Create an invalid UTXO txid
-		payload.UTXOs[r.Intn(numOfUTXOs)].Txid = randomString(r, 32)
+		payload.UTXOs[r.Intn(numOfUTXOs)].Txid = randomString(r, 64)
 		jsonPayload, err := json.Marshal(payload)
-		if err != nil {
-			t.Fatalf("Failed to marshal payload: %v", err)
-		}
+		assert.NoError(t, err)
 
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
@@ -207,9 +201,7 @@ func FuzzFallbacktoUnisat(f *testing.F) {
 		numOfUTXOs := randomPositiveInt(r, int(cfg.Assets.MaxUTXOs))
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
-		if err != nil {
-			t.Fatalf("Failed to marshal payload: %v", err)
-		}
+		assert.NoError(t, err)
 		// create some unitsat responses that contains inscriptions
 		// This number can be greater than the number of input UTXOs
 		// This is to simulate there are a lot of ordinals which may require
@@ -305,9 +297,7 @@ func TestErrorFromUnisat(t *testing.T) {
 	numOfUTXOs := randomPositiveInt(r, 50)
 	payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		t.Fatalf("Failed to marshal payload: %v", err)
-	}
+	assert.NoError(t, err)
 
 	mockOrdinal := new(mocks.OrdinalsClientInterface)
 	mockOrdinal.On("FetchUTXOInfos", mock.Anything, mock.Anything).Return(nil, types.NewErrorWithMsg(
@@ -367,9 +357,7 @@ func FuzzFallbackToUnisatIfOrderNotMaintainedByOrdinalService(f *testing.F) {
 		numOfUTXOs := randomPositiveInt(r, 40) + 10
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
-		if err != nil {
-			t.Fatalf("Failed to marshal payload: %v", err)
-		}
+		assert.NoError(t, err)
 
 		// create some ordinal responses that contains inscriptions
 		numOfUTXOsWithAsset := r.Intn(numOfUTXOs)
