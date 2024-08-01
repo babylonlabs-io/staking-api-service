@@ -75,7 +75,7 @@ func (c *UnisatClient) GetHttpClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *UnisatClient) FetchInscriptionsUtxosByAddress(
+func (c *UnisatClient) FetchInscriptionsUTXOsByAddress(
 	ctx context.Context, address string, cursor uint32,
 ) ([]*UnisatUTXO, *types.Error) {
 	path := fmt.Sprintf(

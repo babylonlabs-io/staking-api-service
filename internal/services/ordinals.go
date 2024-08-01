@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/babylonchain/staking-api-service/internal/clients/unisat"
 	"github.com/babylonchain/staking-api-service/internal/types"
@@ -46,6 +47,14 @@ func (s *Services) verifyViaOrdinalService(
 	}
 
 	for index, output := range outputs {
+		// Check the order of the response is the same as the request
+		if output.Transaction != utxos[index].Txid {
+			return nil, types.NewErrorWithMsg(
+				http.StatusInternalServerError,
+				types.InternalServiceError,
+				"ordinal service response order does not match the request",
+			)
+		}
 		hasInscription := false
 
 		// Check if Runes is not an empty JSON object
@@ -68,18 +77,18 @@ func (s *Services) verifyViaUnisatService(
 	ctx context.Context, address string, utxos []types.UTXOIdentifier,
 ) ([]*SafeUTXOPublic, *types.Error) {
 	cursor := uint32(0)
-	var inscriptionsUtxos []*unisat.UnisatUTXO
+	var inscriptionsUTXOs []*unisat.UnisatUTXO
 	limit := s.cfg.Assets.Unisat.Limit
 
 	for {
-		inscriptions, err := s.Clients.Unisat.FetchInscriptionsUtxosByAddress(
+		inscriptions, err := s.Clients.Unisat.FetchInscriptionsUTXOsByAddress(
 			ctx, address, cursor,
 		)
 		if err != nil {
 			return nil, err
 		}
 		// Append the fetched utxos to the list
-		inscriptionsUtxos = append(inscriptionsUtxos, inscriptions...)
+		inscriptionsUTXOs = append(inscriptionsUTXOs, inscriptions...)
 		// Stop fetching if the total number of utxos is less than the limit
 		if uint32(len(inscriptions)) < limit {
 			break
@@ -88,21 +97,21 @@ func (s *Services) verifyViaUnisatService(
 		cursor += limit
 	}
 
-	// turn inscriptionsUtxos into a map for easier lookup
-	inscriptionsUtxosMap := make(map[string][]*unisat.UnisatInscriptions)
-	for _, inscriptionsUtxo := range inscriptionsUtxos {
-		key := fmt.Sprintf("%s:%d", inscriptionsUtxo.TxId, inscriptionsUtxo.Vout)
-		inscriptionsUtxosMap[key] = inscriptionsUtxo.Inscriptions
+	// turn inscriptionsUTXOs into a map for easier lookup
+	inscriptionsUTXOsMap := make(map[string][]*unisat.UnisatInscriptions)
+	for _, inscriptionsUTXO := range inscriptionsUTXOs {
+		key := fmt.Sprintf("%s:%d", inscriptionsUTXO.TxId, inscriptionsUTXO.Vout)
+		inscriptionsUTXOsMap[key] = inscriptionsUTXO.Inscriptions
 	}
 
 	var results []*SafeUTXOPublic
 	for _, utxo := range utxos {
 		key := fmt.Sprintf("%s:%d", utxo.Txid, utxo.Vout)
-		_, ok := inscriptionsUtxosMap[key]
+		inscriptions, ok := inscriptionsUTXOsMap[key]
 		results = append(results, &SafeUTXOPublic{
 			TxId:        utxo.Txid,
 			Vout:        utxo.Vout,
-			Inscription: ok,
+			Inscription: ok && len(inscriptions) > 0,
 		})
 	}
 	return results, nil
