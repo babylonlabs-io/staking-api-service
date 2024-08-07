@@ -17,6 +17,7 @@ type OverallStatsPublic struct {
 	TotalDelegations  int64  `json:"total_delegations"`
 	TotalStakers      uint64 `json:"total_stakers"`
 	UnconfirmedTvl    uint64 `json:"unconfirmed_tvl"`
+	PendingTvl        uint64 `json:"pending_tvl"`
 }
 
 type StakerStatsPublic struct {
@@ -131,7 +132,11 @@ func (s *Services) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *t
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
 		return nil, types.NewInternalServiceError(err)
 	}
+
 	unconfirmedTvl := uint64(0)
+	confirmedTvl := uint64(0)
+	pendingTvl := uint64(0)
+
 	btcInfo, err := s.DbClient.GetLatestBtcInfo(ctx)
 	if err != nil {
 		// Handle missing BTC information, which may occur during initial setup.
@@ -145,15 +150,18 @@ func (s *Services) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *t
 		}
 	} else {
 		unconfirmedTvl = btcInfo.UnconfirmedTvl
+		confirmedTvl = btcInfo.ConfirmedTvl
+		pendingTvl = unconfirmedTvl - confirmedTvl
 	}
 
 	return &OverallStatsPublic{
-		ActiveTvl:         stats.ActiveTvl,
+		ActiveTvl:         int64(confirmedTvl),
 		TotalTvl:          stats.TotalTvl,
 		ActiveDelegations: stats.ActiveDelegations,
 		TotalDelegations:  stats.TotalDelegations,
 		TotalStakers:      stats.TotalStakers,
 		UnconfirmedTvl:    unconfirmedTvl,
+		PendingTvl:        pendingTvl,
 	}, nil
 }
 

@@ -204,13 +204,14 @@ func TestStatsEndpoints(t *testing.T) {
 
 	// Test the overall stats endpoint
 	overallStats := fetchOverallStatsEndpoint(t, testServer)
-	assert.Equal(t, int64(activeStakingEvent.StakingValue), overallStats.ActiveTvl)
 	assert.Equal(t, int64(activeStakingEvent.StakingValue), overallStats.TotalTvl)
 	assert.Equal(t, int64(1), overallStats.ActiveDelegations)
 	assert.Equal(t, int64(1), overallStats.TotalDelegations)
 	assert.Equal(t, uint64(1), overallStats.TotalStakers)
-	// We have not yet sent any UnconfirmedInfoEvent, hence no recrod in db
+	// We have not yet sent any ConfirmedInfoEvent and UnconfirmedInfoEvent, hence no recrod in db
+	assert.Equal(t, int64(0), overallStats.ActiveTvl)
 	assert.Equal(t, uint64(0), overallStats.UnconfirmedTvl)
+	assert.Equal(t, uint64(0), overallStats.PendingTvl)
 
 	// Test the top staker stats endpoint
 	stakerStats, _ := fetchStakerStatsEndpoint(t, testServer)
@@ -283,7 +284,6 @@ func TestStatsEndpoints(t *testing.T) {
 
 	expectedTvl := int64(activeEvents[0].StakingValue + activeEvents[1].StakingValue)
 	expectedTotalTvl := int64(expectedTvl) + int64(activeStakingEvent.StakingValue)
-	assert.Equal(t, expectedTvl, overallStats.ActiveTvl)
 	assert.Equal(t, expectedTotalTvl, overallStats.TotalTvl)
 	assert.Equal(t, int64(2), overallStats.ActiveDelegations)
 	assert.Equal(t, int64(3), overallStats.TotalDelegations)
@@ -310,6 +310,7 @@ func TestStatsEndpoints(t *testing.T) {
 
 	overallStats = fetchOverallStatsEndpoint(t, testServer)
 	assert.Equal(t, uint64(100), overallStats.UnconfirmedTvl)
+	assert.Equal(t, int64(90), overallStats.ActiveTvl)
 }
 
 func FuzzStatsEndpointReturnHighestUnconfirmedTvlFromEvents(f *testing.F) {
@@ -347,6 +348,8 @@ func FuzzStatsEndpointReturnHighestUnconfirmedTvlFromEvents(f *testing.F) {
 
 		overallStats = fetchOverallStatsEndpoint(t, testServer)
 		assert.Equal(t, &highestHeightEvent.UnconfirmedTvl, &overallStats.UnconfirmedTvl)
+		pendingTvl := highestHeightEvent.UnconfirmedTvl - highestHeightEvent.ConfirmedTvl
+		assert.Equal(t, pendingTvl, overallStats.PendingTvl)
 	})
 }
 
