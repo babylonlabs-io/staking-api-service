@@ -9,7 +9,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/rs/zerolog"
 
-	"github.com/babylonchain/staking-api-service/internal/utils"
+	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 )
 
 type ServerConfig struct {

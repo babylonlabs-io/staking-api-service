@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/babylonchain/staking-api-service/internal/observability/metrics"
-	"github.com/babylonchain/staking-api-service/internal/observability/tracing"
-	"github.com/babylonchain/staking-api-service/internal/queue/handlers"
-	"github.com/babylonchain/staking-api-service/internal/services"
-	"github.com/babylonchain/staking-api-service/internal/types"
-	"github.com/babylonchain/staking-queue-client/client"
-	queueConfig "github.com/babylonchain/staking-queue-client/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
+	"github.com/babylonlabs-io/staking-api-service/internal/observability/tracing"
+	"github.com/babylonlabs-io/staking-api-service/internal/queue/handlers"
+	"github.com/babylonlabs-io/staking-api-service/internal/services"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-queue-client/client"
+	queueConfig "github.com/babylonlabs-io/staking-queue-client/config"
 	"github.com/rs/zerolog/log"
 )
 

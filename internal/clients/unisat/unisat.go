@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	baseclient "github.com/babylonchain/staking-api-service/internal/clients/base"
-	"github.com/babylonchain/staking-api-service/internal/config"
-	"github.com/babylonchain/staking-api-service/internal/types"
+	baseclient "github.com/babylonlabs-io/staking-api-service/internal/clients/base"
+	"github.com/babylonlabs-io/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
 // Note: The JSON tags use camel case because this struct is used to
@@ -75,7 +75,7 @@ func (c *UnisatClient) GetHttpClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *UnisatClient) FetchInscriptionsUtxosByAddress(
+func (c *UnisatClient) FetchInscriptionsUTXOsByAddress(
 	ctx context.Context, address string, cursor uint32,
 ) ([]*UnisatUTXO, *types.Error) {
 	path := fmt.Sprintf(

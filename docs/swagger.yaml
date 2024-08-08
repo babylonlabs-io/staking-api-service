@@ -1,5 +1,5 @@
 definitions:
-  github_com_babylonchain_staking-api-service_internal_types.Error:
+  github_com_babylonlabs-io_staking-api-service_internal_types.Error:
     properties:
       err: {}
       errorCode:
@@ -258,7 +258,7 @@ paths:
         "400":
           description: 'Error: Bad Request'
           schema:
-            $ref: '#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error'
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
   /v1/finality-providers:
     get:
       description: Fetches details of all active finality providers sorted by their
@@ -317,7 +317,7 @@ paths:
         "400":
           description: 'Error: Bad Request'
           schema:
-            $ref: '#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error'
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
   /v1/staker/delegations:
     get:
       description: Retrieves delegations for a given staker
@@ -341,7 +341,7 @@ paths:
         "400":
           description: 'Error: Bad Request'
           schema:
-            $ref: '#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error'
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
   /v1/stats:
     get:
       description: Fetches overall stats for babylon staking including tvl, total
@@ -373,7 +373,7 @@ paths:
         "400":
           description: 'Error: Bad Request'
           schema:
-            $ref: '#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error'
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
       summary: Get Top Staker Stats by Active TVL
   /v1/unbonding:
     post:
@@ -396,7 +396,7 @@ paths:
         "400":
           description: Invalid request payload
           schema:
-            $ref: '#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error'
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
       summary: Unbond delegation
   /v1/unbonding/eligibility:
     get:
@@ -416,6 +416,6 @@ paths:
         "400":
           description: Missing or invalid 'staking_tx_hash_hex' query parameter
           schema:
-            $ref: '#/definitions/github_com_babylonchain_staking-api-service_internal_types.Error'
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
       summary: Check unbonding eligibility
 swagger: "2.0"

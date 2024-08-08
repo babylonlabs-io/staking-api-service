@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/babylonchain/staking-api-service/internal/db"
-	"github.com/babylonchain/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/rs/zerolog/log"
 )
 

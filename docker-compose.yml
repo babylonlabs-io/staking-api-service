@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   staking-api-service:
-    image: babylonchain/staking-api-service:latest
+    image: babylonlabs-io/staking-api-service:latest
     container_name: staking-api-service
     ports:
       - "80:8090"

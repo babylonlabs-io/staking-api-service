@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/babylonchain/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/rs/cors"
 )
 
