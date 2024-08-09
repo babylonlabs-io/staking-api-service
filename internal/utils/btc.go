@@ -18,6 +18,17 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
+type publicKeyWithCoordinates struct {
+	odd  *btcec.PublicKey
+	even *btcec.PublicKey
+}
+
+type supportedAddress struct {
+	Taproot          string `json:"taproot"`
+	NativeSegwitEven string `json:"native_segwit_even"`
+	NativeSegwitOdd  string `json:"native_segwit_odd"`
+}
+
 // GetSchnorrPkFromHex parses Schnorr public keys in 32 bytes
 func GetSchnorrPkFromHex(pkHex string) (*btcec.PublicKey, error) {
 	pkBytes, err := hex.DecodeString(pkHex)
@@ -215,14 +226,65 @@ func GetBtcNetParamesFromString(net string) (*chaincfg.Params, error) {
 	return &netParams, nil
 }
 
-func GetTaprootAddressFromPk(pkHex string, netParams *chaincfg.Params) (string, error) {
+// GetPkWithCoordinatesBytes returns the public key with possible coordinates in bytes
+func GetPkWithCoordinatesBytes(pkHex string, netParams *chaincfg.Params) (*publicKeyWithCoordinates, error) {
+	pkBytes, err := hex.DecodeString(pkHex)
+	if err != nil {
+		return nil, err
+	}
+	if len(pkBytes) != 32 {
+		return nil, fmt.Errorf("invalid public key length, expected 32 bytes")
+	}
+	// Odd
+	pkBytesOdd := append([]byte{0x03}, pkBytes...)
+	// Even
+	pkBytesEven := append([]byte{0x02}, pkBytes...)
+
+	pkOdd, err := btcec.ParsePubKey(pkBytesOdd)
+	if err != nil {
+		return nil, err
+	}
+	pkEven, err := btcec.ParsePubKey(pkBytesEven)
+	if err != nil {
+		return nil, err
+	}
+	return &publicKeyWithCoordinates{
+		odd:  pkOdd,
+		even: pkEven,
+	}, nil
+}
+
+// GetAddressesFromPk returns the all babylon supported addresses from the given public key
+func DeriveAddressesFromNoCoordPk(pkHex string, netParams *chaincfg.Params) (*supportedAddress, error) {
 	pk, err := GetSchnorrPkFromHex(pkHex)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	address, err := bip322.PubKeyToP2TrSpendAddress(pk, netParams)
+	// Get the taproot address
+	taprootAddress, err := bip322.PubKeyToP2TrSpendAddress(pk, netParams)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return address.EncodeAddress(), nil
+	// Generate the Native SegWit addresses for both even and odd public keys
+	pkWithCoordinates, err := GetPkWithCoordinatesBytes(pkHex, netParams)
+	if err != nil {
+		return nil, err
+	}
+	nativeSegwitOdd, err := bip322.PubkeyToP2WPKHAddress(
+		pkWithCoordinates.odd, netParams,
+	)
+	if err != nil {
+		return nil, err
+	}
+	nativeSegwitEven, err := bip322.PubkeyToP2WPKHAddress(
+		pkWithCoordinates.even, netParams,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &supportedAddress{
+		Taproot:          taprootAddress.EncodeAddress(),
+		NativeSegwitEven: nativeSegwitEven.EncodeAddress(),
+		NativeSegwitOdd:  nativeSegwitOdd.EncodeAddress(),
+	}, nil
 }

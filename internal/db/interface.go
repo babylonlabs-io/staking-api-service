@@ -66,6 +66,11 @@ type DBClient interface {
 	CheckDelegationExistByStakerTaprootAddress(
 		ctx context.Context, address string, extraFilter *DelegationFilter,
 	) (bool, error)
+	// InsertPkAddressMappings inserts the btc public key and
+	// its corresponding btc addresses into the database.
+	InsertPkAddressMappings(
+		ctx context.Context, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven string,
+	) error
 }
 
 type DelegationFilter struct {
