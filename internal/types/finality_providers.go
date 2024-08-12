@@ -19,8 +19,15 @@ type FinalityProviderDetails struct {
 	BtcPk       string                      `json:"btc_pk"`
 }
 
+type FinalityProviderFromFile struct {
+	Description FinalityProviderDescription `json:"description"`
+	Commission  string                      `json:"commission"`
+	BtcPk       string                      `json:"btc_pk"`
+	EotsPk      string                      `json:"eots_pk"`
+}
+
 type FinalityProviders struct {
-	FinalityProviders []FinalityProviderDetails `json:"finality_providers"`
+	FinalityProviders []FinalityProviderFromFile `json:"finality_providers"`
 }
 
 func NewFinalityProviders(filePath string) ([]FinalityProviderDetails, error) {
@@ -35,5 +42,20 @@ func NewFinalityProviders(filePath string) ([]FinalityProviderDetails, error) {
 		return nil, err
 	}
 
-	return finalityProviders.FinalityProviders, nil
+	// Convert FinalityProviderFromFile to FinalityProviderDetails
+	var finalityProviderDetails []FinalityProviderDetails
+	for _, fp := range finalityProviders.FinalityProviders {
+		btcPk := fp.BtcPk
+		if fp.EotsPk != "" {
+			btcPk = fp.EotsPk
+		}
+
+		finalityProviderDetails = append(finalityProviderDetails, FinalityProviderDetails{
+			Description: fp.Description,
+			Commission:  fp.Commission,
+			BtcPk:       btcPk,
+		})
+	}
+
+	return finalityProviderDetails, nil
 }

@@ -47,6 +47,7 @@ func shouldGetFinalityProvidersSuccessfully(t *testing.T, testServer *TestServer
 	assert.Equal(t, "Babylon Foundation 2", result[2].Description.Moniker)
 	assert.Equal(t, "0.060000000000000000", result[1].Commission)
 	assert.Equal(t, "0d2f9728abc45c0cdeefdd73f52a0e0102470e35fb689fc5bc681959a61b021f", result[3].BtcPk)
+	assert.Equal(t, "094f5861be4128861d69ea4b66a5f974943f100f55400bf26f5cce124b4c9af7", result[2].BtcPk)
 
 	assert.Equal(t, 4, len(result))
 
