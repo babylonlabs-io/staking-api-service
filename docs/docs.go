@@ -9,7 +9,13 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "email": "contact@babylonlabs.io"
+        },
+        "license": {
+            "name": "API Access License",
+            "url": "https://docs.babylonlabs.io/assets/files/api-access-license.pdf"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -641,12 +647,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Babylon Staking API",
+	Description:      "The Babylon Staking API offers information about the state of the BTC Staking ecosystem.\nYour access and use is governed by the Terms of Service listed below.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
