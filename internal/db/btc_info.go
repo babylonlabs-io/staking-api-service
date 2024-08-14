@@ -28,14 +28,14 @@ func (db *Database) UpsertLatestBtcInfo(
 			return nil, findErr
 		}
 
-		btcInfo := &model.BtcInfo{
-			ID:             model.LatestBtcInfoId,
-			BtcHeight:      height,
-			ConfirmedTvl:   confirmedTvl,
-			UnconfirmedTvl: unconfirmedTvl,
-		}
 		if findErr == mongo.ErrNoDocuments {
 			// If no document exists, insert a new one
+			btcInfo := &model.BtcInfo{
+				ID:             model.LatestBtcInfoId,
+				BtcHeight:      height,
+				ConfirmedTvl:   confirmedTvl,
+				UnconfirmedTvl: unconfirmedTvl,
+			}
 			_, insertErr := client.InsertOne(sessCtx, btcInfo)
 			if insertErr != nil {
 				return nil, insertErr
@@ -45,9 +45,15 @@ func (db *Database) UpsertLatestBtcInfo(
 
 		// If document exists and the incoming height is greater, update the document
 		if existingInfo.BtcHeight < height {
+			update := bson.M{
+				"$set": bson.M{
+					"btc_height":      height,
+					"confirmed_tvl":   confirmedTvl,
+					"unconfirmed_tvl": unconfirmedTvl,
+				},
+			}
 			_, updateErr := client.UpdateOne(
-				sessCtx, bson.M{"_id": model.LatestBtcInfoId},
-				bson.M{"$set": btcInfo},
+				sessCtx, bson.M{"_id": model.LatestBtcInfoId}, update,
 			)
 			if updateErr != nil {
 				return nil, updateErr
