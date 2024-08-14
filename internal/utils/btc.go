@@ -18,6 +18,8 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
+const PublickKeyWithNoCoordinatesSize = 32
+
 type publicKeyWithCoordinates struct {
 	odd  *btcec.PublicKey
 	even *btcec.PublicKey
@@ -226,34 +228,6 @@ func GetBtcNetParamesFromString(net string) (*chaincfg.Params, error) {
 	return &netParams, nil
 }
 
-// GetPkWithCoordinatesBytes returns the public key with possible coordinates in bytes
-func GetPkWithCoordinatesBytes(pkHex string, netParams *chaincfg.Params) (*publicKeyWithCoordinates, error) {
-	pkBytes, err := hex.DecodeString(pkHex)
-	if err != nil {
-		return nil, err
-	}
-	if len(pkBytes) != 32 {
-		return nil, fmt.Errorf("invalid public key length, expected 32 bytes")
-	}
-	// Odd
-	pkBytesOdd := append([]byte{0x03}, pkBytes...)
-	// Even
-	pkBytesEven := append([]byte{0x02}, pkBytes...)
-
-	pkOdd, err := btcec.ParsePubKey(pkBytesOdd)
-	if err != nil {
-		return nil, err
-	}
-	pkEven, err := btcec.ParsePubKey(pkBytesEven)
-	if err != nil {
-		return nil, err
-	}
-	return &publicKeyWithCoordinates{
-		odd:  pkOdd,
-		even: pkEven,
-	}, nil
-}
-
 // GetAddressesFromPk returns the all babylon supported addresses from the given public key
 func DeriveAddressesFromNoCoordPk(pkHex string, netParams *chaincfg.Params) (*supportedAddress, error) {
 	pk, err := GetSchnorrPkFromHex(pkHex)
@@ -266,7 +240,7 @@ func DeriveAddressesFromNoCoordPk(pkHex string, netParams *chaincfg.Params) (*su
 		return nil, err
 	}
 	// Generate the Native SegWit addresses for both even and odd public keys
-	pkWithCoordinates, err := GetPkWithCoordinatesBytes(pkHex, netParams)
+	pkWithCoordinates, err := getPkWithCoordinatesBytes(pkHex)
 	if err != nil {
 		return nil, err
 	}
@@ -286,5 +260,33 @@ func DeriveAddressesFromNoCoordPk(pkHex string, netParams *chaincfg.Params) (*su
 		Taproot:          taprootAddress.EncodeAddress(),
 		NativeSegwitEven: nativeSegwitEven.EncodeAddress(),
 		NativeSegwitOdd:  nativeSegwitOdd.EncodeAddress(),
+	}, nil
+}
+
+// getPkWithCoordinatesBytes returns the public key with possible coordinates in bytes
+func getPkWithCoordinatesBytes(pkHex string) (*publicKeyWithCoordinates, error) {
+	pkBytes, err := hex.DecodeString(pkHex)
+	if err != nil {
+		return nil, err
+	}
+	if len(pkBytes) != PublickKeyWithNoCoordinatesSize {
+		return nil, fmt.Errorf("invalid public key length, expected 32 bytes")
+	}
+	// Odd
+	pkBytesOdd := append([]byte{0x03}, pkBytes...)
+	// Even
+	pkBytesEven := append([]byte{0x02}, pkBytes...)
+
+	pkOdd, err := btcec.ParsePubKey(pkBytesOdd)
+	if err != nil {
+		return nil, err
+	}
+	pkEven, err := btcec.ParsePubKey(pkBytesEven)
+	if err != nil {
+		return nil, err
+	}
+	return &publicKeyWithCoordinates{
+		odd:  pkOdd,
+		even: pkEven,
 	}, nil
 }

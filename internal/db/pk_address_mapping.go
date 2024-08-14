@@ -18,11 +18,7 @@ func (db *Database) InsertPkAddressMappings(
 		NativeSegwitEven: nativeSigwitEven,
 	}
 	_, err := client.InsertOne(ctx, addressMapping)
-	if err != nil {
-		// If the document already exists, ignore the error
-		if mongo.IsDuplicateKeyError(err) {
-			return nil
-		}
+	if err != nil && !mongo.IsDuplicateKeyError(err) {
 		return err
 	}
 	return nil
