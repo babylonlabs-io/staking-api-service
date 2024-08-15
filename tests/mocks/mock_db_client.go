@@ -388,6 +388,24 @@ func (_m *DBClient) IncrementStakerStats(ctx context.Context, stakingTxHashHex s
 	return r0
 }
 
+// InsertPkAddressMappings provides a mock function with given fields: ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven
+func (_m *DBClient) InsertPkAddressMappings(ctx context.Context, stakerPkHex string, taproot string, nativeSigwitOdd string, nativeSigwitEven string) error {
+	ret := _m.Called(ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InsertPkAddressMappings")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string) error); ok {
+		r0 = rf(ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Ping provides a mock function with given fields: ctx
 func (_m *DBClient) Ping(ctx context.Context) error {
 	ret := _m.Called(ctx)

@@ -466,13 +466,13 @@ func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size i
 	if err != nil {
 		t.Fatalf("Failed to generate random pk: %v", err)
 	}
-	address, err := utils.GetTaprootAddressFromPk(pk, netParam)
+	addresses, err := utils.DeriveAddressesFromNoCoordPk(pk, netParam)
 	if err != nil {
 		t.Fatalf("Failed to generate taproot address from pk: %v", err)
 	}
 	return handlers.VerifyUTXOsRequestPayload{
 		UTXOs:   utxos,
-		Address: address,
+		Address: addresses.Taproot,
 	}
 }
 

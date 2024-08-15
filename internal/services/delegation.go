@@ -83,7 +83,7 @@ func (s *Services) SaveActiveStakingDelegation(
 	value, startHeight uint64, stakingTimestamp int64, timeLock, stakingOutputIndex uint64,
 	stakingTxHex string, isOverflow bool,
 ) *types.Error {
-	taprootAddress, err := utils.GetTaprootAddressFromPk(stakerPkHex, s.cfg.Server.BTCNetParam)
+	addresses, err := utils.DeriveAddressesFromNoCoordPk(stakerPkHex, s.cfg.Server.BTCNetParam)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get taproot address from staker pk")
 		return types.NewErrorWithMsg(
@@ -92,7 +92,7 @@ func (s *Services) SaveActiveStakingDelegation(
 	}
 	err = s.DbClient.SaveActiveStakingDelegation(
 		ctx, txHashHex, stakerPkHex, finalityProviderPkHex, stakingTxHex,
-		value, startHeight, timeLock, stakingOutputIndex, stakingTimestamp, isOverflow, taprootAddress,
+		value, startHeight, timeLock, stakingOutputIndex, stakingTimestamp, isOverflow, addresses.Taproot,
 	)
 	if err != nil {
 		if ok := db.IsDuplicateKeyError(err); ok {
