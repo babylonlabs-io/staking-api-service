@@ -184,6 +184,66 @@ func (_m *DBClient) FindFinalityProviderStatsByFinalityProviderPkHex(ctx context
 	return r0, r1
 }
 
+// FindPkMappingsByNativeSegwitAddress provides a mock function with given fields: ctx, nativeSegwitAddresses
+func (_m *DBClient) FindPkMappingsByNativeSegwitAddress(ctx context.Context, nativeSegwitAddresses []string) ([]*model.PkAddressMapping, error) {
+	ret := _m.Called(ctx, nativeSegwitAddresses)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindPkMappingsByNativeSegwitAddress")
+	}
+
+	var r0 []*model.PkAddressMapping
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*model.PkAddressMapping, error)); ok {
+		return rf(ctx, nativeSegwitAddresses)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*model.PkAddressMapping); ok {
+		r0 = rf(ctx, nativeSegwitAddresses)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.PkAddressMapping)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, nativeSegwitAddresses)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FindPkMappingsByTaprootAddress provides a mock function with given fields: ctx, taprootAddresses
+func (_m *DBClient) FindPkMappingsByTaprootAddress(ctx context.Context, taprootAddresses []string) ([]*model.PkAddressMapping, error) {
+	ret := _m.Called(ctx, taprootAddresses)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindPkMappingsByTaprootAddress")
+	}
+
+	var r0 []*model.PkAddressMapping
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*model.PkAddressMapping, error)); ok {
+		return rf(ctx, taprootAddresses)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*model.PkAddressMapping); ok {
+		r0 = rf(ctx, taprootAddresses)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.PkAddressMapping)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, taprootAddresses)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindTopStakersByTvl provides a mock function with given fields: ctx, paginationToken
 func (_m *DBClient) FindTopStakersByTvl(ctx context.Context, paginationToken string) (*db.DbResultMap[*model.StakerStatsDocument], error) {
 	ret := _m.Called(ctx, paginationToken)

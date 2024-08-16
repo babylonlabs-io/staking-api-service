@@ -36,7 +36,7 @@ func parseRequestPayload(request *http.Request, maxUTXOs uint32, netParam *chain
 		}
 	}
 
-	if err := utils.IsValidBtcAddress(payload.Address, netParam); err != nil {
+	if _, err := utils.CheckBtcAddressType(payload.Address, netParam); err != nil {
 		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, err.Error())
 	}
 	return &payload, nil
