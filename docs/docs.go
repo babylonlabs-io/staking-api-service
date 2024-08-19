@@ -194,7 +194,7 @@ const docTemplate = `{
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "List of BTC addresses to look up (up to 10), currently only supports Taproot and Native Segwit addresses",
                         "name": "address",
                         "in": "query",
