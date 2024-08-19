@@ -20,7 +20,7 @@ const (
 )
 
 func FuzzTestPkAddressesMapping(f *testing.F) {
-	attachRandomSeedsToFuzzer(f, 1)
+	attachRandomSeedsToFuzzer(f, 3)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
 		opts := &TestActiveEventGeneratorOpts{
@@ -44,7 +44,8 @@ func FuzzTestPkAddressesMapping(f *testing.F) {
 		for _, event := range activeStakingEvents {
 			pks = append(pks, event.StakerPkHex)
 		}
-		// randomly convert that into addresses wit different types
+		pks = uniqueStrings(pks)
+		// randomly convert that into addresses with different types
 		addresses := []string{}
 		for _, pk := range pks {
 			addr, err := utils.DeriveAddressesFromNoCoordPk(
@@ -205,4 +206,22 @@ func performLookupRequest(
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err)
 	return response.Data
+}
+
+func uniqueStrings(input []string) []string {
+	// Create a map to track unique strings
+	uniqueMap := make(map[string]struct{})
+
+	// Iterate over the input slice and add each string to the map
+	for _, str := range input {
+		uniqueMap[str] = struct{}{}
+	}
+
+	// Create a slice to hold the unique strings
+	var uniqueSlice []string
+	for str := range uniqueMap {
+		uniqueSlice = append(uniqueSlice, str)
+	}
+
+	return uniqueSlice
 }
