@@ -228,7 +228,16 @@ definitions:
     - UnprocessableEntity
     - RequestTimeout
 info:
-  contact: {}
+  contact:
+    email: contact@babylonlabs.io
+  description: |-
+    The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.
+    Your access and use is governed by the Terms of Service listed below.
+  license:
+    name: API Access License
+    url: https://docs.babylonlabs.io/assets/files/api-access-license.pdf
+  title: Babylon Staking API
+  version: "1.0"
 paths:
   /healthcheck:
     get:
