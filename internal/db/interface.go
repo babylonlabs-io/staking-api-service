@@ -71,6 +71,21 @@ type DBClient interface {
 	InsertPkAddressMappings(
 		ctx context.Context, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven string,
 	) error
+	// FindPkMappingsByTaprootAddress finds the PK address mappings by taproot address.
+	// The returned slice addressMapping will only contain documents for addresses
+	// that were found in the database. If some addresses do not have a matching
+	// document, those addresses will simply be absent from the result.
+	FindPkMappingsByTaprootAddress(
+		ctx context.Context, taprootAddresses []string,
+	) ([]*model.PkAddressMapping, error)
+	// FindPkMappingsByNativeSegwitAddress finds the PK address mappings by native
+	// segwit address. The returned slice addressMapping will only contain
+	// documents for addresses that were found in the database.
+	// If some addresses do not have a matching document, those addresses will
+	// simply be absent from the result.
+	FindPkMappingsByNativeSegwitAddress(
+		ctx context.Context, nativeSegwitAddresses []string,
+	) ([]*model.PkAddressMapping, error)
 }
 
 type DelegationFilter struct {

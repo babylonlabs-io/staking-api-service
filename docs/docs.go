@@ -182,6 +182,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/staker/pubkey-lookup": {
+            "get": {
+                "description": "Retrieves public keys for the given BTC addresses. This endpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "List of BTC addresses to look up (up to 10), currently only supports Taproot and Native Segwit addresses",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request: Invalid input parameters",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/stats": {
             "get": {
                 "description": "Fetches overall stats for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.",
@@ -509,6 +550,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "active_tvl": {
+                    "type": "integer"
+                },
+                "pending_tvl": {
                     "type": "integer"
                 },
                 "total_delegations": {

@@ -26,5 +26,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 		r.Post("/v1/ordinals/verify-utxos", registerHandler(handlers.VerifyUTXOs))
 	}
 
+	r.Get("/v1/staker/pubkey-lookup", registerHandler(handlers.GetPubKeys))
+
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 }

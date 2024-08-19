@@ -25,7 +25,7 @@ type publicKeyWithCoordinates struct {
 	even *btcec.PublicKey
 }
 
-type supportedAddress struct {
+type SupportedAddress struct {
 	Taproot          string `json:"taproot"`
 	NativeSegwitEven string `json:"native_segwit_even"`
 	NativeSegwitOdd  string `json:"native_segwit_odd"`
@@ -229,7 +229,9 @@ func GetBtcNetParamesFromString(net string) (*chaincfg.Params, error) {
 }
 
 // GetAddressesFromPk returns the all babylon supported addresses from the given public key
-func DeriveAddressesFromNoCoordPk(pkHex string, netParams *chaincfg.Params) (*supportedAddress, error) {
+func DeriveAddressesFromNoCoordPk(
+	pkHex string, netParams *chaincfg.Params,
+) (*SupportedAddress, error) {
 	pk, err := GetSchnorrPkFromHex(pkHex)
 	if err != nil {
 		return nil, err
@@ -256,7 +258,7 @@ func DeriveAddressesFromNoCoordPk(pkHex string, netParams *chaincfg.Params) (*su
 	if err != nil {
 		return nil, err
 	}
-	return &supportedAddress{
+	return &SupportedAddress{
 		Taproot:          taprootAddress.EncodeAddress(),
 		NativeSegwitEven: nativeSegwitEven.EncodeAddress(),
 		NativeSegwitOdd:  nativeSegwitOdd.EncodeAddress(),
@@ -289,4 +291,34 @@ func getPkWithCoordinatesBytes(pkHex string) (*publicKeyWithCoordinates, error) 
 		odd:  pkOdd,
 		even: pkEven,
 	}, nil
+}
+
+type SupportedBtcAddressType string
+
+const (
+	Taproot      SupportedBtcAddressType = "taproot"
+	NativeSegwit SupportedBtcAddressType = "native_segwit"
+)
+
+// CheckBtcAddressType checks if the given BTC address is either a
+// native SegWit (P2WPKH) or Taproot address
+func CheckBtcAddressType(
+	btcAddress string, params *chaincfg.Params,
+) (SupportedBtcAddressType, error) {
+	// Check if address has a valid format
+	decodedAddr, err := btcutil.DecodeAddress(btcAddress, params)
+	if err != nil {
+		return "", fmt.Errorf("can not decode btc address: %w", err)
+	}
+	// Check if it's either a native SegWit (P2WPKH) or Taproot address
+	switch decodedAddr.(type) {
+	case *btcutil.AddressWitnessPubKeyHash:
+		// Native SegWit (P2WPKH)
+		return NativeSegwit, nil
+	case *btcutil.AddressTaproot:
+		// Taproot address
+		return Taproot, nil
+	default:
+		return "", fmt.Errorf("unsupported btc address type")
+	}
 }
