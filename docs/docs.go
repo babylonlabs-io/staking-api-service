@@ -34,41 +34,28 @@ const docTemplate = `{
         },
         "/v1/delegation": {
             "get": {
-                "description": "Retrieves public keys for the given BTC addresses.",
+                "description": "Retrieves a delegation by a given transaction hash",
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Public Keys"
-                ],
                 "parameters": [
                     {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "multi",
-                        "description": "List of BTC addresses to look up, currently only supports Taproot and Native Segwit addresses",
-                        "name": "address",
+                        "type": "string",
+                        "description": "Staking transaction hash in hex format",
+                        "name": "staking_tx_hash_hex",
                         "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "A map of BTC addresses to their corresponding public keys",
+                        "description": "Delegation",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Result"
+                            "$ref": "#/definitions/handlers.PublicResponse-services_DelegationPublic"
                         }
                     },
                     "400": {
-                        "description": "Bad Request: Invalid input parameters",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                        "description": "Error: Bad Request",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
@@ -188,6 +175,47 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/staker/pubkey-lookup": {
+            "get": {
+                "description": "Retrieves public keys for the given BTC addresses. This endpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "List of BTC addresses to look up (up to 10), currently only supports Taproot and Native Segwit addresses",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request: Invalid input parameters",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }

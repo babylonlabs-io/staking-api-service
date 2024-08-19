@@ -18,7 +18,10 @@ const (
 )
 
 // GetPubKeys @Summary Get stakers' public keys
-// @Description Retrieves public keys for the given BTC addresses. This endpoint only returns public keys for addresses that have associated delegations in the system. If an address has no associated delegation, it will not be included in the response. Supports both Taproot and Native Segwit addresses.
+// @Description Retrieves public keys for the given BTC addresses. This endpoint
+// only returns public keys for addresses that have associated delegations in
+// the system. If an address has no associated delegation, it will not be
+// included in the response. Supports both Taproot and Native Segwit addresses.
 // @Produce json
 // @Param address query []string true "List of BTC addresses to look up (up to 10), currently only supports Taproot and Native Segwit addresses"
 // @Success 200 {object} Result[map[string]string] "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)"

@@ -243,34 +243,24 @@ paths:
       summary: Health check endpoint
   /v1/delegation:
     get:
-      description: Retrieves public keys for the given BTC addresses.
+      description: Retrieves a delegation by a given transaction hash
       parameters:
-      - collectionFormat: multi
-        description: List of BTC addresses to look up, currently only supports Taproot
-          and Native Segwit addresses
+      - description: Staking transaction hash in hex format
         in: query
-        items:
-          type: string
-        name: address
+        name: staking_tx_hash_hex
         required: true
-        type: array
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: A map of BTC addresses to their corresponding public keys
+          description: Delegation
           schema:
-            $ref: '#/definitions/handlers.Result'
+            $ref: '#/definitions/handlers.PublicResponse-services_DelegationPublic'
         "400":
-          description: 'Bad Request: Invalid input parameters'
+          description: 'Error: Bad Request'
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
-      tags:
-      - Public Keys
   /v1/finality-providers:
     get:
       description: Fetches details of all active finality providers sorted by their
@@ -352,6 +342,35 @@ paths:
             $ref: '#/definitions/handlers.PublicResponse-array_services_DelegationPublic'
         "400":
           description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
+  /v1/staker/pubkey-lookup:
+    get:
+      description: Retrieves public keys for the given BTC addresses. This endpoint
+      parameters:
+      - collectionFormat: csv
+        description: List of BTC addresses to look up (up to 10), currently only supports
+          Taproot and Native Segwit addresses
+        in: query
+        items:
+          type: string
+        name: address
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A map of BTC addresses to their corresponding public keys (only
+            addresses with delegations are returned)
+          schema:
+            $ref: '#/definitions/handlers.Result'
+        "400":
+          description: 'Bad Request: Invalid input parameters'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
   /v1/stats:
