@@ -1,7 +1,16 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "The Babylon Staking API offers information about the state of the BTC Staking ecosystem.\nYour access and use is governed by the Terms of Service listed below.",
+        "title": "Babylon Staking API",
+        "contact": {
+            "email": "contact@babylonlabs.io"
+        },
+        "license": {
+            "name": "API Access License",
+            "url": "https://docs.babylonlabs.io/assets/files/api-access-license.pdf"
+        },
+        "version": "1.0"
     },
     "paths": {
         "/healthcheck": {
