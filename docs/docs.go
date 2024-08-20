@@ -652,7 +652,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Babylon Staking API",
-	Description:      "The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.\nYour access and use is governed by the Terms of Service listed below.",
+	Description:      "The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.\nYour access and use is governed by the API Access License linked to below.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
