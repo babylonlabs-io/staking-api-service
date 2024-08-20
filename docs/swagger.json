@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.\nYour access and use is governed by the Terms of Service listed below.",
+        "description": "The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.\nYour access and use is governed by the API Access License linked to below.",
         "title": "Babylon Staking API",
         "contact": {
             "email": "contact@babylonlabs.io"
