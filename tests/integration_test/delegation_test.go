@@ -14,6 +14,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 )
 
 const (
@@ -22,11 +23,14 @@ const (
 
 func TestGetDelegationByTxHashHex(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	activeStakingEvent := generateRandomActiveStakingEvents(t, r, &TestActiveEventGeneratorOpts{
-		NumOfEvents:       1,
-		FinalityProviders: generatePks(t, 1),
-		Stakers:           generatePks(t, 1),
-	})
+	activeStakingEvent := testutils.GenerateRandomActiveStakingEvents(
+		r,
+		&testutils.TestActiveEventGeneratorOpts{
+			NumOfEvents:       1,
+			FinalityProviders: testutils.GeneratePks(1),
+			Stakers:           testutils.GeneratePks(1),
+		},
+	)
 
 	expiredStakingEvent := client.NewExpiredStakingEvent(activeStakingEvent[0].StakingTxHashHex, types.ActiveTxType.ToString())
 	testServer := setupTestServer(t, nil)

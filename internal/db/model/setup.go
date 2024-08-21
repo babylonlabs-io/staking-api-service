@@ -46,8 +46,8 @@ var collections = map[string][]index{
 	BtcInfoCollection:          {{Indexes: map[string]int{}}},
 	PkAddressMappingsCollection: {
 		{Indexes: map[string]int{"taproot": 1}, Unique: true},
-		{Indexes: map[string]int{"nativeSegwit_odd": 1}, Unique: true},
-		{Indexes: map[string]int{"nativeSegwit_even": 1}, Unique: true},
+		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
+		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
 	},
 }
 

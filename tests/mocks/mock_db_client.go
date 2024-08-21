@@ -556,6 +556,36 @@ func (_m *DBClient) SaveUnprocessableMessage(ctx context.Context, messageBody st
 	return r0
 }
 
+// ScanDelegationsPaginated provides a mock function with given fields: ctx, paginationToken
+func (_m *DBClient) ScanDelegationsPaginated(ctx context.Context, paginationToken string) (*db.DbResultMap[model.DelegationDocument], error) {
+	ret := _m.Called(ctx, paginationToken)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ScanDelegationsPaginated")
+	}
+
+	var r0 *db.DbResultMap[model.DelegationDocument]
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*db.DbResultMap[model.DelegationDocument], error)); ok {
+		return rf(ctx, paginationToken)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *db.DbResultMap[model.DelegationDocument]); ok {
+		r0 = rf(ctx, paginationToken)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*db.DbResultMap[model.DelegationDocument])
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, paginationToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SubtractFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHex, amount
 func (_m *DBClient) SubtractFinalityProviderStats(ctx context.Context, stakingTxHashHex string, fpPkHex string, amount uint64) error {
 	ret := _m.Called(ctx, stakingTxHashHex, fpPkHex, amount)

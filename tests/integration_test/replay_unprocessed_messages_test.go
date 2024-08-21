@@ -11,6 +11,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
 	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,10 +31,12 @@ func TestReplayUnprocessableMessages(t *testing.T) {
 
 	doc := string(data)
 
-	injectDbDocuments(t, model.UnprocessableMsgCollection, model.NewUnprocessableMessageDocument(doc, "receipt"))
-
-	db := directDbConnection(t)
-
+	testutils.InjectDbDocument(
+		testServer.Config,
+		model.UnprocessableMsgCollection,
+		model.NewUnprocessableMessageDocument(doc, "receipt"),
+	)
+	db := testutils.DirectDbConnection(testServer.Config)
 	scripts.ReplayUnprocessableMessages(ctx, testServer.Config, testServer.Queues, db)
 
 	time.Sleep(3 * time.Second)

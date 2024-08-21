@@ -16,6 +16,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	testmock "github.com/babylonlabs-io/staking-api-service/tests/mocks"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -184,14 +185,14 @@ func FuzzTestGetFinalityProviderWithPaginationResponse(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 3)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
-		opts := &TestActiveEventGeneratorOpts{
+		opts := &testutils.TestActiveEventGeneratorOpts{
 			NumOfEvents:       20,
-			FinalityProviders: generatePks(t, 20),
-			Stakers:           generatePks(t, 20),
+			FinalityProviders: testutils.GeneratePks(20),
+			Stakers:           testutils.GeneratePks(20),
 		}
 
-		activeStakingEvents := generateRandomActiveStakingEvents(t, r, opts)
-		cfg, err := config.New("./config/config-test.yml")
+		activeStakingEvents := testutils.GenerateRandomActiveStakingEvents(r, opts)
+		cfg, err := config.New("../config/config-test.yml")
 		if err != nil {
 			t.Fatalf("Failed to load test config: %v", err)
 		}
@@ -246,7 +247,7 @@ func FuzzGetFinalityProviderShouldNotReturnRegisteredFpWithoutStakingForPaginate
 			mock.Anything, mock.Anything,
 		).Return(registeredFpsStats, nil)
 
-		registeredWithoutStakeFpsStats := registeredFpsStats[:len(registeredFpsStats)-randomPositiveInt(r, len(registeredFpsStats))]
+		registeredWithoutStakeFpsStats := registeredFpsStats[:len(registeredFpsStats)-testutils.RandomPositiveInt(r, len(registeredFpsStats))]
 
 		mockedFinalityProviderStats := &db.DbResultMap[*model.FinalityProviderStatsDocument]{
 			Data:            append(registeredWithoutStakeFpsStats, notRegisteredFpsStats...),
@@ -295,14 +296,14 @@ func FuzzShouldNotReturnDefaultFpFromParamsWhenPageTokenIsPresent(f *testing.F) 
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
 		opts := &SetupFpStatsDataSetOpts{
-			NumOfRegisterFps:      randomPositiveInt(r, 10),
-			NumOfNotRegisteredFps: randomPositiveInt(r, 10),
+			NumOfRegisterFps:      testutils.RandomPositiveInt(r, 10),
+			NumOfNotRegisteredFps: testutils.RandomPositiveInt(r, 10),
 		}
 		fpParams, registeredFpsStats, _ := setUpFinalityProvidersStatsDataSet(t, r, opts)
 
 		mockDB := new(testmock.DBClient)
 		// Mock the response for the registered finality providers
-		numOfFpNotHaveStats := randomPositiveInt(r, int(opts.NumOfRegisterFps))
+		numOfFpNotHaveStats := testutils.RandomPositiveInt(r, int(opts.NumOfRegisterFps))
 		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
 			mock.Anything, mock.Anything,
 		).Return(registeredFpsStats[:len(registeredFpsStats)-numOfFpNotHaveStats], nil)
@@ -333,8 +334,8 @@ func FuzzShouldNotReturnDefaultFpFromParamsWhenPageTokenIsPresent(f *testing.F) 
 func generateFinalityProviderStatsDocument(r *rand.Rand, pk string) *model.FinalityProviderStatsDocument {
 	return &model.FinalityProviderStatsDocument{
 		FinalityProviderPkHex: pk,
-		ActiveTvl:             randomAmount(r),
-		TotalTvl:              randomAmount(r),
+		ActiveTvl:             testutils.RandomAmount(r),
+		TotalTvl:              testutils.RandomAmount(r),
 		ActiveDelegations:     r.Int63n(100) + 1,
 		TotalDelegations:      r.Int63n(1000) + 1,
 	}
@@ -346,13 +347,13 @@ type SetupFpStatsDataSetOpts struct {
 }
 
 func setUpFinalityProvidersStatsDataSet(t *testing.T, r *rand.Rand, opts *SetupFpStatsDataSetOpts) ([]types.FinalityProviderDetails, []*model.FinalityProviderStatsDocument, []*model.FinalityProviderStatsDocument) {
-	numOfRegisterFps := randomPositiveInt(r, 10)
-	numOfNotRegisteredFps := randomPositiveInt(r, 10)
+	numOfRegisterFps := testutils.RandomPositiveInt(r, 10)
+	numOfNotRegisteredFps := testutils.RandomPositiveInt(r, 10)
 	if opts != nil {
 		numOfRegisterFps = opts.NumOfRegisterFps
 		numOfNotRegisteredFps = opts.NumOfNotRegisteredFps
 	}
-	fpParams := generateRandomFinalityProviderDetail(t, r, uint64(numOfRegisterFps))
+	fpParams := testutils.GenerateRandomFinalityProviderDetail(r, uint64(numOfRegisterFps))
 
 	// Generate a set of registered finality providers
 	var registeredFpsStats []*model.FinalityProviderStatsDocument
@@ -363,7 +364,7 @@ func setUpFinalityProvidersStatsDataSet(t *testing.T, r *rand.Rand, opts *SetupF
 
 	var notRegisteredFpsStats []*model.FinalityProviderStatsDocument
 	for i := 0; i < numOfNotRegisteredFps; i++ {
-		fpNotRegisteredPk, err := randomPk()
+		fpNotRegisteredPk, err := testutils.RandomPk()
 		assert.NoError(t, err, "generating random public key should not fail")
 
 		stats := generateFinalityProviderStatsDocument(r, fpNotRegisteredPk)
