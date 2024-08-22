@@ -123,6 +123,33 @@ func (db *Database) FindDelegationByTxHashHex(ctx context.Context, stakingTxHash
 	return &delegation, nil
 }
 
+func (db *Database) ScanDelegationsPaginated(
+	ctx context.Context,
+	paginationToken string,
+) (*DbResultMap[model.DelegationDocument], error) {
+	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+	filter := bson.M{}
+	options := options.Find()
+	options.SetSort(bson.M{"_id": 1})
+	// Decode the pagination token if it exists
+	if paginationToken != "" {
+		decodedToken, err :=
+			model.DecodePaginationToken[model.DelegationScanPagination](paginationToken)
+		if err != nil {
+			return nil, &InvalidPaginationTokenError{
+				Message: "Invalid pagination token",
+			}
+		}
+		filter["_id"] = bson.M{"$gt": decodedToken.StakingTxHashHex}
+	}
+
+	// Perform the paginated query and return the results
+	return findWithPagination(
+		ctx, client, filter, options, db.cfg.MaxPaginationLimit,
+		model.BuildDelegationScanPaginationToken,
+	)
+}
+
 // TransitionState updates the state of a staking transaction to a new state
 // It returns an NotFoundError if the staking transaction is not found or not in the eligible state to transition
 func (db *Database) transitionState(

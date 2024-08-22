@@ -86,6 +86,13 @@ type DBClient interface {
 	FindPkMappingsByNativeSegwitAddress(
 		ctx context.Context, nativeSegwitAddresses []string,
 	) ([]*model.PkAddressMapping, error)
+	// ScanDelegationsPaginated scans the delegation collection in a paginated way
+	// without applying any filters or sorting, ensuring that all existing items
+	// are eventually fetched.
+	ScanDelegationsPaginated(
+		ctx context.Context,
+		paginationToken string,
+	) (*DbResultMap[model.DelegationDocument], error)
 }
 
 type DelegationFilter struct {

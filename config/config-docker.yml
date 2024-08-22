@@ -20,7 +20,7 @@ db:
 queue:
   queue_user: user # can be replaced by values in .env file
   queue_password: password
-  url: "localhost:5672"
+  url: "rabbitmq:5672"
   processing_timeout: 30
   msg_max_retry_attempts: 10
   requeue_delay_time: 300 # delay failed message requeue time in seconds

@@ -77,12 +77,19 @@ func main() {
 	// Start the event queue processing
 	queues := queue.New(cfg.Queue, services)
 
-	// Check if the replay flag is set
+	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
 		log.Info().Msg("Replay flag is set. Starting replay of unprocessable messages.")
 		err := scripts.ReplayUnprocessableMessages(ctx, cfg, queues, services.DbClient)
 		if err != nil {
 			log.Fatal().Err(err).Msg("error while replaying unprocessable messages")
+		}
+		return
+	} else if cli.GetBackfillPubkeyAddressFlag() {
+		log.Info().Msg("Backfill pubkey address flag is set. Starting backfill of pubkey address mappings.")
+		err := scripts.BackfillPubkeyAddressesMappings(ctx, cfg)
+		if err != nil {
+			log.Fatal().Err(err).Msg("error while backfilling pubkey address mappings")
 		}
 		return
 	}
