@@ -76,10 +76,14 @@ func (db *Database) CheckDelegationExistByStakerTaprootAddress(
 	return true, nil
 }
 
-func (db *Database) FindDelegationsByStakerPk(ctx context.Context, stakerPk string, paginationToken string) (*DbResultMap[model.DelegationDocument], error) {
+func (db *Database) FindDelegationsByStakerPk(
+	ctx context.Context, stakerPk string,
+	extraFilter *DelegationFilter, paginationToken string,
+) (*DbResultMap[model.DelegationDocument], error) {
 	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
 
 	filter := bson.M{"staker_pk_hex": stakerPk}
+	filter = buildAdditionalDelegationFilter(filter, extraFilter)
 	options := options.Find().SetSort(bson.D{
 		{Key: "staking_tx.start_height", Value: -1},
 		{Key: "_id", Value: 1},
@@ -183,11 +187,13 @@ func buildAdditionalDelegationFilter(
 	baseFilter primitive.M,
 	filters *DelegationFilter,
 ) primitive.M {
-	if filters.States != nil {
-		baseFilter["state"] = bson.M{"$in": filters.States}
-	}
-	if filters.AfterTimestamp != 0 {
-		baseFilter["staking_tx.start_timestamp"] = bson.M{"$gte": filters.AfterTimestamp}
+	if filters != nil {
+		if filters.States != nil {
+			baseFilter["state"] = bson.M{"$in": filters.States}
+		}
+		if filters.AfterTimestamp != 0 {
+			baseFilter["staking_tx.start_timestamp"] = bson.M{"$gte": filters.AfterTimestamp}
+		}
 	}
 	return baseFilter
 }

@@ -90,6 +90,26 @@ func InspectDbDocuments[T any](
 	return results, nil
 }
 
+// UpdateDbDocument updates a document in the specified collection based on the
+// provided filter and update data.
+func UpdateDbDocument(
+	connection *db.Database, cfg *config.Config, collectionName string,
+	filter bson.M, update bson.M,
+) error {
+	collection := connection.Client.Database(connection.DbName).
+		Collection(collectionName)
+
+	// Perform the update operation
+	_, err := collection.UpdateOne(
+		context.Background(), filter, bson.M{"$set": update},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // PurgeAllCollections drops all collections in the specified database.
 func PurgeAllCollections(ctx context.Context, client *mongo.Client, databaseName string) error {
 	database := client.Database(databaseName)

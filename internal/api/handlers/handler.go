@@ -128,7 +128,9 @@ func parseBtcAddressesQuery(
 	// Check if the number of addresses exceeds the limit
 	if len(addresses) > limit {
 		return nil, types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, fmt.Sprintf("Maximum %d %s allowed", limit, queryName),
+			http.StatusBadRequest,
+			types.BadRequest,
+			fmt.Sprintf("Maximum %d %s allowed", limit, queryName),
 		)
 	}
 
@@ -143,4 +145,22 @@ func parseBtcAddressesQuery(
 	}
 
 	return addresses, nil
+}
+
+// parseStateFilterQuery parses the state filter query and returns the state enum
+// If the state is not provided, it returns an empty string
+func parseStateFilterQuery(
+	r *http.Request, queryName string,
+) (types.DelegationState, *types.Error) {
+	state := r.URL.Query().Get(queryName)
+	if state == "" {
+		return "", nil
+	}
+	stateEnum, err := types.FromStringToDelegationState(state)
+	if err != nil {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, err.Error(),
+		)
+	}
+	return stateEnum, nil
 }

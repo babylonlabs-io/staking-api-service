@@ -14,8 +14,15 @@ type DBClient interface {
 		stakingTxHex string, amount, startHeight, timelock, outputIndex uint64,
 		startTimestamp int64, isOverflow bool, stakerTaprootAddress string,
 	) error
+	// FindDelegationsByStakerPk finds all delegations by the staker's public key.
+	// The extraFilter parameter can be used to filter the results by the delegation's
+	// properties. The paginationToken parameter is used to fetch the next page of results.
+	// If the paginationToken is empty, the first page of results will be fetched.
+	// The returned DbResultMap will contain the next pagination token if there are more
+	// results to fetch.
 	FindDelegationsByStakerPk(
-		ctx context.Context, stakerPk string, paginationToken string,
+		ctx context.Context, stakerPk string,
+		extraFilter *DelegationFilter, paginationToken string,
 	) (*DbResultMap[model.DelegationDocument], error)
 	SaveUnbondingTx(
 		ctx context.Context, stakingTxHashHex, unbondingTxHashHex, txHex, signatureHex string,

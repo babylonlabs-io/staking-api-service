@@ -60,8 +60,18 @@ func FromDelegationDocument(d *model.DelegationDocument) DelegationPublic {
 	return delPublic
 }
 
-func (s *Services) DelegationsByStakerPk(ctx context.Context, stakerPk string, pageToken string) ([]DelegationPublic, string, *types.Error) {
-	resultMap, err := s.DbClient.FindDelegationsByStakerPk(ctx, stakerPk, pageToken)
+func (s *Services) DelegationsByStakerPk(
+	ctx context.Context, stakerPk string,
+	state types.DelegationState, pageToken string,
+) ([]DelegationPublic, string, *types.Error) {
+	filter := &db.DelegationFilter{}
+	if state != "" {
+		filter = &db.DelegationFilter{
+			States: []types.DelegationState{state},
+		}
+	}
+
+	resultMap, err := s.DbClient.FindDelegationsByStakerPk(ctx, stakerPk, filter, pageToken)
 	if err != nil {
 		if db.IsInvalidPaginationTokenError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching delegations by staker pk")

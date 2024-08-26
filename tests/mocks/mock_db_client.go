@@ -94,9 +94,9 @@ func (_m *DBClient) FindDelegationByTxHashHex(ctx context.Context, txHashHex str
 	return r0, r1
 }
 
-// FindDelegationsByStakerPk provides a mock function with given fields: ctx, stakerPk, paginationToken
-func (_m *DBClient) FindDelegationsByStakerPk(ctx context.Context, stakerPk string, paginationToken string) (*db.DbResultMap[model.DelegationDocument], error) {
-	ret := _m.Called(ctx, stakerPk, paginationToken)
+// FindDelegationsByStakerPk provides a mock function with given fields: ctx, stakerPk, extraFilter, paginationToken
+func (_m *DBClient) FindDelegationsByStakerPk(ctx context.Context, stakerPk string, extraFilter *db.DelegationFilter, paginationToken string) (*db.DbResultMap[model.DelegationDocument], error) {
+	ret := _m.Called(ctx, stakerPk, extraFilter, paginationToken)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindDelegationsByStakerPk")
@@ -104,19 +104,19 @@ func (_m *DBClient) FindDelegationsByStakerPk(ctx context.Context, stakerPk stri
 
 	var r0 *db.DbResultMap[model.DelegationDocument]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*db.DbResultMap[model.DelegationDocument], error)); ok {
-		return rf(ctx, stakerPk, paginationToken)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *db.DelegationFilter, string) (*db.DbResultMap[model.DelegationDocument], error)); ok {
+		return rf(ctx, stakerPk, extraFilter, paginationToken)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) *db.DbResultMap[model.DelegationDocument]); ok {
-		r0 = rf(ctx, stakerPk, paginationToken)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *db.DelegationFilter, string) *db.DbResultMap[model.DelegationDocument]); ok {
+		r0 = rf(ctx, stakerPk, extraFilter, paginationToken)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*db.DbResultMap[model.DelegationDocument])
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, stakerPk, paginationToken)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *db.DelegationFilter, string) error); ok {
+		r1 = rf(ctx, stakerPk, extraFilter, paginationToken)
 	} else {
 		r1 = ret.Error(1)
 	}
