@@ -80,7 +80,10 @@ func (db *Database) FindDelegationsByStakerPk(ctx context.Context, stakerPk stri
 	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
 
 	filter := bson.M{"staker_pk_hex": stakerPk}
-	options := options.Find().SetSort(bson.M{"staking_tx.start_height": -1}) // Sorting in descending order
+	options := options.Find().SetSort(bson.D{
+		{Key: "staking_tx.start_height", Value: -1},
+		{Key: "_id", Value: 1},
+	})
 
 	// Decode the pagination token first if it exist
 	if paginationToken != "" {

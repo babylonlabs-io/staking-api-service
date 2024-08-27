@@ -25,18 +25,24 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 3)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
-		activeStakingEventsByStaker1 := generateRandomActiveStakingEvents(t, r, &TestActiveEventGeneratorOpts{
-			NumOfEvents:       11,
-			FinalityProviders: generatePks(t, 11),
-			Stakers:           generatePks(t, 1),
-		})
-		activeStakingEventsByStaker2 := generateRandomActiveStakingEvents(t, r, &TestActiveEventGeneratorOpts{
-			NumOfEvents:       11,
-			FinalityProviders: generatePks(t, 11),
-			Stakers:           generatePks(t, 1),
-		})
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
+		numOfStaker1Events := int(testServer.Config.Db.MaxPaginationLimit) + r.Intn(100)
+		activeStakingEventsByStaker1 := generateRandomActiveStakingEvents(t, r, &TestActiveEventGeneratorOpts{
+			NumOfEvents: numOfStaker1Events,
+			Stakers:     generatePks(t, 1),
+		})
+		activeStakingEventsByStaker2 := generateRandomActiveStakingEvents(t, r, &TestActiveEventGeneratorOpts{
+			NumOfEvents: int(testServer.Config.Db.MaxPaginationLimit) + 1,
+			Stakers:     generatePks(t, 1),
+		})
+
+		// Modify the height to simulate all events are processed at the same btc height
+		btcHeight := randomBtcHeight(r, 0)
+		for i := range activeStakingEventsByStaker1 {
+			activeStakingEventsByStaker1[i].StakingStartHeight = btcHeight
+		}
+
 		sendTestMessage(
 			testServer.Queues.ActiveStakingQueueClient,
 			append(activeStakingEventsByStaker1, activeStakingEventsByStaker2...),
@@ -48,7 +54,6 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 		url := testServer.Server.URL + stakerDelegations + "?staker_btc_pk=" + stakerPk
 		var paginationKey string
 		var allDataCollected []services.DelegationPublic
-		var atLeastOnePage bool
 		for {
 			resp, err := http.Get(url + "&pagination_key=" + paginationKey)
 			assert.NoError(t, err, "making GET request to delegations by staker pk should not fail")
@@ -67,14 +72,12 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 			allDataCollected = append(allDataCollected, response.Data...)
 			if response.Pagination.NextKey != "" {
 				paginationKey = response.Pagination.NextKey
-				atLeastOnePage = true
 			} else {
 				break
 			}
 		}
 
-		assert.True(t, atLeastOnePage, "expected at least one page of data")
-		assert.Equal(t, 11, len(allDataCollected), "expected 11 items in total")
+		assert.Equal(t, numOfStaker1Events, len(allDataCollected))
 		for _, events := range activeStakingEventsByStaker1 {
 			found := false
 			for _, d := range allDataCollected {
