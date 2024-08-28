@@ -26,24 +26,30 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 3)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
+		testServer := setupTestServer(t, nil)
+		defer testServer.Close()
+		numOfStaker1Events := int(testServer.Config.Db.MaxPaginationLimit) + r.Intn(100)
 		activeStakingEventsByStaker1 := testutils.GenerateRandomActiveStakingEvents(
 			r,
 			&testutils.TestActiveEventGeneratorOpts{
-				NumOfEvents:       11,
-				FinalityProviders: testutils.GeneratePks(11),
-				Stakers:           testutils.GeneratePks(1),
+				NumOfEvents: numOfStaker1Events,
+				Stakers:     testutils.GeneratePks(1),
 			},
 		)
 		activeStakingEventsByStaker2 := testutils.GenerateRandomActiveStakingEvents(
 			r,
 			&testutils.TestActiveEventGeneratorOpts{
-				NumOfEvents:       11,
-				FinalityProviders: testutils.GeneratePks(11),
-				Stakers:           testutils.GeneratePks(1),
+				NumOfEvents: int(testServer.Config.Db.MaxPaginationLimit) + 1,
+				Stakers:     testutils.GeneratePks(1),
 			},
 		)
-		testServer := setupTestServer(t, nil)
-		defer testServer.Close()
+
+		// Modify the height to simulate all events are processed at the same btc height
+		btcHeight := uint64(testutils.RandomPositiveInt(r, 100000))
+		for i := range activeStakingEventsByStaker1 {
+			activeStakingEventsByStaker1[i].StakingStartHeight = btcHeight
+		}
+
 		sendTestMessage(
 			testServer.Queues.ActiveStakingQueueClient,
 			append(activeStakingEventsByStaker1, activeStakingEventsByStaker2...),
@@ -52,49 +58,15 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 
 		// Test the API
 		stakerPk := activeStakingEventsByStaker1[0].StakerPkHex
-		url := testServer.Server.URL + stakerDelegations + "?staker_btc_pk=" + stakerPk
-		var paginationKey string
-		var allDataCollected []services.DelegationPublic
-		var atLeastOnePage bool
-		for {
-			resp, err := http.Get(url + "&pagination_key=" + paginationKey)
-			assert.NoError(t, err, "making GET request to delegations by staker pk should not fail")
-			assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
-			bodyBytes, err := io.ReadAll(resp.Body)
-			assert.NoError(t, err, "reading response body should not fail")
-			var response handlers.PublicResponse[[]services.DelegationPublic]
-			err = json.Unmarshal(bodyBytes, &response)
-			assert.NoError(t, err, "unmarshalling response body should not fail")
+		fetchPaginatedStakerDelegations(
+			testServer, t, stakerPk, numOfStaker1Events, activeStakingEventsByStaker1,
+		)
 
-			// Check that the response body is as expected
-			assert.NotEmptyf(t, response.Data, "expected response body to have data")
-			for _, d := range response.Data {
-				assert.Equal(t, stakerPk, d.StakerPkHex, "expected response body to match")
-			}
-			allDataCollected = append(allDataCollected, response.Data...)
-			if response.Pagination.NextKey != "" {
-				paginationKey = response.Pagination.NextKey
-				atLeastOnePage = true
-			} else {
-				break
-			}
-		}
-
-		assert.True(t, atLeastOnePage, "expected at least one page of data")
-		assert.Equal(t, 11, len(allDataCollected), "expected 11 items in total")
-		for _, events := range activeStakingEventsByStaker1 {
-			found := false
-			for _, d := range allDataCollected {
-				if d.StakingTxHashHex == events.StakingTxHashHex {
-					found = true
-					break
-				}
-			}
-			assert.True(t, found, "expected to find the staking tx in the response")
-		}
-		for i := 0; i < len(allDataCollected)-1; i++ {
-			assert.True(t, allDataCollected[i].StakingTx.StartHeight >= allDataCollected[i+1].StakingTx.StartHeight, "expected collected data to be sorted by start height")
-		}
+		stakerPk2 := activeStakingEventsByStaker2[0].StakerPkHex
+		fetchPaginatedStakerDelegations(
+			testServer, t, stakerPk2, len(activeStakingEventsByStaker2),
+			activeStakingEventsByStaker2,
+		)
 	})
 }
 
@@ -313,4 +285,51 @@ func fetchCheckStakerActiveDelegations(
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
 	return response.Data
+}
+
+func fetchPaginatedStakerDelegations(
+	testServer *TestServer, t *testing.T, stakerPk string,
+	numOfStakerEvents int, activeStakingEventsByStaker []*client.ActiveStakingEvent,
+) {
+	url := testServer.Server.URL + stakerDelegations + "?staker_btc_pk=" + stakerPk
+	var paginationKey string
+	var allDataCollected []services.DelegationPublic
+	for {
+		resp, err := http.Get(url + "&pagination_key=" + paginationKey)
+		assert.NoError(t, err, "making GET request to delegations by staker pk should not fail")
+		assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
+		bodyBytes, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err, "reading response body should not fail")
+		var response handlers.PublicResponse[[]services.DelegationPublic]
+		err = json.Unmarshal(bodyBytes, &response)
+		assert.NoError(t, err, "unmarshalling response body should not fail")
+
+		// Check that the response body is as expected
+		assert.NotEmptyf(t, response.Data, "expected response body to have data")
+		for _, d := range response.Data {
+			assert.Equal(t, stakerPk, d.StakerPkHex, "expected response body to match")
+		}
+		allDataCollected = append(allDataCollected, response.Data...)
+		if response.Pagination.NextKey != "" {
+			paginationKey = response.Pagination.NextKey
+		} else {
+			break
+		}
+	}
+
+	assert.Equal(t, numOfStakerEvents, len(allDataCollected))
+	for _, events := range activeStakingEventsByStaker {
+		found := false
+		for _, d := range allDataCollected {
+			if d.StakingTxHashHex == events.StakingTxHashHex {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "expected to find the staking tx in the response")
+	}
+	for i := 0; i < len(allDataCollected)-1; i++ {
+		assert.True(t, allDataCollected[i].StakingTx.StartHeight >=
+			allDataCollected[i+1].StakingTx.StartHeight)
+	}
 }

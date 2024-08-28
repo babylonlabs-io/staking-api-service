@@ -31,6 +31,8 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 )
 
+var setUpDbIndex = false
+
 type TestServerDependency struct {
 	ConfigOverrides         *config.Config
 	MockDbClient            db.DBClient

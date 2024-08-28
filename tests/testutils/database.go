@@ -6,10 +6,13 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var setUpDbIndex = false
 
 func DirectDbConnection(cfg *config.Config) *db.Database {
 	client, err := mongo.Connect(
@@ -29,6 +32,14 @@ func SetupTestDB(cfg config.Config) *db.Database {
 	// Connect to MongoDB
 	db := DirectDbConnection(&cfg)
 	// Purge all collections in the test database
+	// Setup the db index only once for all tests
+	if !setUpDbIndex {
+		err := model.Setup(context.Background(), &cfg)
+		if err != nil {
+			log.Fatal("Failed to setup database:", err)
+		}
+		setUpDbIndex = true
+	}
 	if err := PurgeAllCollections(context.TODO(), db.Client, cfg.Db.DbName); err != nil {
 		log.Fatal("Failed to purge database:", err)
 	}
