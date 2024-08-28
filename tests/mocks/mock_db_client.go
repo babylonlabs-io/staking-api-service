@@ -184,6 +184,66 @@ func (_m *DBClient) FindFinalityProviderStatsByFinalityProviderPkHex(ctx context
 	return r0, r1
 }
 
+// FindPkMappingsByNativeSegwitAddress provides a mock function with given fields: ctx, nativeSegwitAddresses
+func (_m *DBClient) FindPkMappingsByNativeSegwitAddress(ctx context.Context, nativeSegwitAddresses []string) ([]*model.PkAddressMapping, error) {
+	ret := _m.Called(ctx, nativeSegwitAddresses)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindPkMappingsByNativeSegwitAddress")
+	}
+
+	var r0 []*model.PkAddressMapping
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*model.PkAddressMapping, error)); ok {
+		return rf(ctx, nativeSegwitAddresses)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*model.PkAddressMapping); ok {
+		r0 = rf(ctx, nativeSegwitAddresses)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.PkAddressMapping)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, nativeSegwitAddresses)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FindPkMappingsByTaprootAddress provides a mock function with given fields: ctx, taprootAddresses
+func (_m *DBClient) FindPkMappingsByTaprootAddress(ctx context.Context, taprootAddresses []string) ([]*model.PkAddressMapping, error) {
+	ret := _m.Called(ctx, taprootAddresses)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindPkMappingsByTaprootAddress")
+	}
+
+	var r0 []*model.PkAddressMapping
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*model.PkAddressMapping, error)); ok {
+		return rf(ctx, taprootAddresses)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*model.PkAddressMapping); ok {
+		r0 = rf(ctx, taprootAddresses)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.PkAddressMapping)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, taprootAddresses)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindTopStakersByTvl provides a mock function with given fields: ctx, paginationToken
 func (_m *DBClient) FindTopStakersByTvl(ctx context.Context, paginationToken string) (*db.DbResultMap[*model.StakerStatsDocument], error) {
 	ret := _m.Called(ctx, paginationToken)
@@ -388,6 +448,24 @@ func (_m *DBClient) IncrementStakerStats(ctx context.Context, stakingTxHashHex s
 	return r0
 }
 
+// InsertPkAddressMappings provides a mock function with given fields: ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven
+func (_m *DBClient) InsertPkAddressMappings(ctx context.Context, stakerPkHex string, taproot string, nativeSigwitOdd string, nativeSigwitEven string) error {
+	ret := _m.Called(ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InsertPkAddressMappings")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string) error); ok {
+		r0 = rf(ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Ping provides a mock function with given fields: ctx
 func (_m *DBClient) Ping(ctx context.Context) error {
 	ret := _m.Called(ctx)
@@ -476,6 +554,36 @@ func (_m *DBClient) SaveUnprocessableMessage(ctx context.Context, messageBody st
 	}
 
 	return r0
+}
+
+// ScanDelegationsPaginated provides a mock function with given fields: ctx, paginationToken
+func (_m *DBClient) ScanDelegationsPaginated(ctx context.Context, paginationToken string) (*db.DbResultMap[model.DelegationDocument], error) {
+	ret := _m.Called(ctx, paginationToken)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ScanDelegationsPaginated")
+	}
+
+	var r0 *db.DbResultMap[model.DelegationDocument]
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*db.DbResultMap[model.DelegationDocument], error)); ok {
+		return rf(ctx, paginationToken)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *db.DbResultMap[model.DelegationDocument]); ok {
+		r0 = rf(ctx, paginationToken)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*db.DbResultMap[model.DelegationDocument])
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, paginationToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // SubtractFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHex, amount

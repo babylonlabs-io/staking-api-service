@@ -14,6 +14,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,7 +48,9 @@ func TestStatsShouldBeShardedInDb(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// directly read from the db to check that we have more than 2 records in the overall stats collection
-	results, err := inspectDbDocuments[model.OverallStatsDocument](t, model.OverallStatsCollection)
+	results, err := testutils.InspectDbDocuments[model.OverallStatsDocument](
+		testServer.Config, model.OverallStatsCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -93,7 +96,7 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 	defer resp.Body.Close()
 
 	// Let's inspect what's stored in the database
-	results, err := inspectDbDocuments[model.UnbondingDocument](t, model.UnbondingCollection)
+	results, err := testutils.InspectDbDocuments[model.UnbondingDocument](testServer.Config, model.UnbondingCollection)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
 	assert.Equal(t, 1, len(results), "expected 1 document in the DB")
@@ -116,7 +119,9 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// directly read from the db to check that we only have 1 shard in the overall stats collection
-	stats, err := inspectDbDocuments[model.OverallStatsDocument](t, model.OverallStatsCollection)
+	stats, err := testutils.InspectDbDocuments[model.OverallStatsDocument](
+		testServer.Config, model.OverallStatsCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -146,8 +151,11 @@ func TestShouldNotPerformStatsCalculationForUnbondingTxWhenDelegationIsOverflowe
 	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, unbondingEvents)
 	time.Sleep(2 * time.Second)
 
-	// directly read from the db to check that we have more than 2 records in the overall stats collection
-	results, err := inspectDbDocuments[model.OverallStatsDocument](t, model.OverallStatsCollection)
+	// directly read from the db to check that we have more than 2 records in the
+	// overall stats collection
+	results, err := testutils.InspectDbDocuments[model.OverallStatsDocument](
+		testServer.Config, model.OverallStatsCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -204,13 +212,14 @@ func TestStatsEndpoints(t *testing.T) {
 
 	// Test the overall stats endpoint
 	overallStats := fetchOverallStatsEndpoint(t, testServer)
-	assert.Equal(t, int64(activeStakingEvent.StakingValue), overallStats.ActiveTvl)
 	assert.Equal(t, int64(activeStakingEvent.StakingValue), overallStats.TotalTvl)
 	assert.Equal(t, int64(1), overallStats.ActiveDelegations)
 	assert.Equal(t, int64(1), overallStats.TotalDelegations)
 	assert.Equal(t, uint64(1), overallStats.TotalStakers)
-	// We have not yet sent any UnconfirmedInfoEvent, hence no recrod in db
+	// We have not yet sent any ConfirmedInfoEvent and UnconfirmedInfoEvent, hence no recrod in db
+	assert.Equal(t, int64(0), overallStats.ActiveTvl)
 	assert.Equal(t, uint64(0), overallStats.UnconfirmedTvl)
+	assert.Equal(t, uint64(0), overallStats.PendingTvl)
 
 	// Test the top staker stats endpoint
 	stakerStats, _ := fetchStakerStatsEndpoint(t, testServer)
@@ -283,7 +292,6 @@ func TestStatsEndpoints(t *testing.T) {
 
 	expectedTvl := int64(activeEvents[0].StakingValue + activeEvents[1].StakingValue)
 	expectedTotalTvl := int64(expectedTvl) + int64(activeStakingEvent.StakingValue)
-	assert.Equal(t, expectedTvl, overallStats.ActiveTvl)
 	assert.Equal(t, expectedTotalTvl, overallStats.TotalTvl)
 	assert.Equal(t, int64(2), overallStats.ActiveDelegations)
 	assert.Equal(t, int64(3), overallStats.TotalDelegations)
@@ -310,6 +318,7 @@ func TestStatsEndpoints(t *testing.T) {
 
 	overallStats = fetchOverallStatsEndpoint(t, testServer)
 	assert.Equal(t, uint64(100), overallStats.UnconfirmedTvl)
+	assert.Equal(t, int64(90), overallStats.ActiveTvl)
 }
 
 func FuzzStatsEndpointReturnHighestUnconfirmedTvlFromEvents(f *testing.F) {
@@ -330,12 +339,12 @@ func FuzzStatsEndpointReturnHighestUnconfirmedTvlFromEvents(f *testing.F) {
 		}
 		var messages []*client.BtcInfoEvent
 		for i := 0; i < 10; i++ {
-			confirmedTvl := uint64(randomAmount(r))
+			confirmedTvl := uint64(testutils.RandomAmount(r))
 			btcInfoEvent := &client.BtcInfoEvent{
 				EventType:      client.BtcInfoEventType,
-				Height:         randomBtcHeight(r, 0),
+				Height:         uint64(testutils.RandomPositiveInt(r, 1000000)),
 				ConfirmedTvl:   confirmedTvl,
-				UnconfirmedTvl: confirmedTvl + uint64(randomAmount(r)),
+				UnconfirmedTvl: confirmedTvl + uint64(testutils.RandomAmount(r)),
 			}
 			messages = append(messages, btcInfoEvent)
 			if btcInfoEvent.Height > highestHeightEvent.Height {
@@ -347,6 +356,8 @@ func FuzzStatsEndpointReturnHighestUnconfirmedTvlFromEvents(f *testing.F) {
 
 		overallStats = fetchOverallStatsEndpoint(t, testServer)
 		assert.Equal(t, &highestHeightEvent.UnconfirmedTvl, &overallStats.UnconfirmedTvl)
+		pendingTvl := highestHeightEvent.UnconfirmedTvl - highestHeightEvent.ConfirmedTvl
+		assert.Equal(t, pendingTvl, overallStats.PendingTvl)
 	})
 }
 
@@ -354,20 +365,21 @@ func FuzzTestTopStakersWithPaginationResponse(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 3)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
-		numOfStakers := randomPositiveInt(r, 10)
+		numOfStakers := testutils.RandomPositiveInt(r, 10)
 		// Pagination size shall alway be greater than 2
-		paginationSize := randomPositiveInt(r, 10) + 1
+		paginationSize := testutils.RandomPositiveInt(r, 10) + 1
 		var events []*client.ActiveStakingEvent
 		for i := 0; i < numOfStakers; i++ {
-			opts := &TestActiveEventGeneratorOpts{
-				NumOfEvents:        randomPositiveInt(r, 1),
-				Stakers:            generatePks(t, 1),
+			opts := &testutils.TestActiveEventGeneratorOpts{
+				NumOfEvents:        testutils.RandomPositiveInt(r, 1),
+				Stakers:            testutils.GeneratePks(1),
 				EnforceNotOverflow: true,
 			}
-			activeStakingEventsByStaker := generateRandomActiveStakingEvents(t, r, opts)
+			activeStakingEventsByStaker :=
+				testutils.GenerateRandomActiveStakingEvents(r, opts)
 			events = append(events, activeStakingEventsByStaker...)
 		}
-		cfg, err := config.New("./config/config-test.yml")
+		cfg, err := config.New("../config/config-test.yml")
 		if err != nil {
 			t.Fatalf("Failed to load test config: %v", err)
 		}

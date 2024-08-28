@@ -18,6 +18,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -26,7 +27,7 @@ import (
 const verifyUTXOsPath = "/v1/ordinals/verify-utxos"
 
 func TestVerifyUtxosEndpointNotAvailableIfAssetsConfigNotSet(t *testing.T) {
-	cfg, err := config.New("./config/config-test.yml")
+	cfg, err := config.New("../config/config-test.yml")
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
 	}
@@ -49,7 +50,7 @@ func FuzzSuccessfullyVerifyUTXOsAssetsViaOrdinalService(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 10)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
-		numOfUTXOs := randomPositiveInt(r, 100)
+		numOfUTXOs := testutils.RandomPositiveInt(r, 100)
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
 		assert.NoError(t, err, "failed to marshal payload")
@@ -118,11 +119,11 @@ func FuzzErrorWhenExceedMaxAllowedLength(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 10)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
-		cfg, err := config.New("./config/config-test.yml")
+		cfg, err := config.New("../config/config-test.yml")
 		if err != nil {
 			t.Fatalf("Failed to load test config: %v", err)
 		}
-		numOfUTXOs := randomPositiveInt(r, 100) + int(cfg.Assets.MaxUTXOs)
+		numOfUTXOs := testutils.RandomPositiveInt(r, 100) + int(cfg.Assets.MaxUTXOs)
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
 		assert.NoError(t, err)
@@ -155,15 +156,15 @@ func FuzzErrorWithInvalidTxid(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 10)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
-		cfg, err := config.New("./config/config-test.yml")
+		cfg, err := config.New("../config/config-test.yml")
 		if err != nil {
 			t.Fatalf("Failed to load test config: %v", err)
 		}
-		numOfUTXOs := randomPositiveInt(r, int(cfg.Assets.MaxUTXOs))
+		numOfUTXOs := testutils.RandomPositiveInt(r, int(cfg.Assets.MaxUTXOs))
 
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		// Create an invalid UTXO txid
-		payload.UTXOs[r.Intn(numOfUTXOs)].Txid = randomString(r, 64)
+		payload.UTXOs[r.Intn(numOfUTXOs)].Txid = testutils.RandomString(r, 64)
 		jsonPayload, err := json.Marshal(payload)
 		assert.NoError(t, err)
 
@@ -194,11 +195,11 @@ func FuzzFallbacktoUnisat(f *testing.F) {
 	attachRandomSeedsToFuzzer(f, 10)
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
-		cfg, err := config.New("./config/config-test.yml")
+		cfg, err := config.New("../config/config-test.yml")
 		if err != nil {
 			t.Fatalf("Failed to load test config: %v", err)
 		}
-		numOfUTXOs := randomPositiveInt(r, int(cfg.Assets.MaxUTXOs))
+		numOfUTXOs := testutils.RandomPositiveInt(r, int(cfg.Assets.MaxUTXOs))
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
 		assert.NoError(t, err)
@@ -294,7 +295,7 @@ func FuzzFallbacktoUnisat(f *testing.F) {
 
 func TestErrorFromUnisat(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
-	numOfUTXOs := randomPositiveInt(r, 50)
+	numOfUTXOs := testutils.RandomPositiveInt(r, 50)
 	payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 	jsonPayload, err := json.Marshal(payload)
 	assert.NoError(t, err)
@@ -354,7 +355,7 @@ func FuzzFallbackToUnisatIfOrderNotMaintainedByOrdinalService(f *testing.F) {
 	f.Fuzz(func(t *testing.T, seed int64) {
 		r := rand.New(rand.NewSource(seed))
 		// Make the number of UTXOs to be at least 10 so that it can be shuffled better
-		numOfUTXOs := randomPositiveInt(r, 40) + 10
+		numOfUTXOs := testutils.RandomPositiveInt(r, 40) + 10
 		payload := createPayload(t, r, &chaincfg.MainNetParams, numOfUTXOs)
 		jsonPayload, err := json.Marshal(payload)
 		assert.NoError(t, err)
@@ -427,7 +428,7 @@ func createOrdinalServiceResponse(t *testing.T, r *rand.Rand, utxos []types.UTXO
 			if r.Intn(2) == 0 {
 				responses = append(responses, ordinals.OrdinalsOutputResponse{
 					Transaction:  utxo.Txid,
-					Inscriptions: []string{randomString(r, r.Intn(100))},
+					Inscriptions: []string{testutils.RandomString(r, r.Intn(100))},
 					Runes:        json.RawMessage(`{}`),
 				})
 			} else {
@@ -452,7 +453,7 @@ func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size i
 	var utxos []types.UTXOIdentifier
 
 	for i := 0; i < size; i++ {
-		tx, _, err := generateRandomTx(r)
+		tx, _, err := testutils.GenerateRandomTx(r, nil)
 		if err != nil {
 			t.Fatalf("Failed to generate random tx: %v", err)
 		}
@@ -462,17 +463,17 @@ func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size i
 			Vout: uint32(r.Intn(10)),
 		})
 	}
-	pk, err := randomPk()
+	pk, err := testutils.RandomPk()
 	if err != nil {
 		t.Fatalf("Failed to generate random pk: %v", err)
 	}
-	address, err := utils.GetTaprootAddressFromPk(pk, netParam)
+	addresses, err := utils.DeriveAddressesFromNoCoordPk(pk, netParam)
 	if err != nil {
 		t.Fatalf("Failed to generate taproot address from pk: %v", err)
 	}
 	return handlers.VerifyUTXOsRequestPayload{
 		UTXOs:   utxos,
-		Address: address,
+		Address: addresses.Taproot,
 	}
 }
 
@@ -489,7 +490,7 @@ func mockUnisatServiceResponse(
 		var txid string
 		var vout uint32
 		if i >= len(inputUTXOs) {
-			tx, _, err := generateRandomTx(r)
+			tx, _, err := testutils.GenerateRandomTx(r, nil)
 			if err != nil {
 				t.Fatalf("Failed to generate random tx: %v", err)
 			}
@@ -506,7 +507,7 @@ func mockUnisatServiceResponse(
 		}
 		for j := 0; j < numInscriptions; j++ {
 			inscription := &unisat.UnisatInscriptions{
-				InscriptionId: randomString(r, 64),
+				InscriptionId: testutils.RandomString(r, 64),
 				Offset:        uint32(r.Intn(1000)),
 			}
 			utxo.Inscriptions = append(utxo.Inscriptions, inscription)

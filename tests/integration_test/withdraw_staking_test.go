@@ -9,6 +9,7 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +24,9 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
-	results, err := inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -44,7 +47,9 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin is in "unbonded" state
-	results, err = inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -64,7 +69,9 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, now it shall be "withdrawn" state
-	results, err = inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -85,7 +92,9 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
-	results, err := inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -131,7 +140,9 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin is in "unbonded" state
-	results, err = inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -151,7 +162,9 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, now it shall be "withdrawn" state
-	results, err = inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -172,7 +185,9 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
-	results, err := inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -192,7 +207,9 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, it should still be "active" state as the withdraw event will be requeued
-	results, err = inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -210,7 +227,9 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 	time.Sleep(10 * time.Second)
 
 	// Check the DB after a while, now it shall be "withdrawn" state
-	results, err = inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -249,7 +268,9 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB after a while, now it shall be "withdrawn" state
-	results, err := inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -264,7 +285,9 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, nothing should be changed.
-	results, err = inspectDbDocuments[model.DelegationDocument](t, model.DelegationCollection)
+	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+		testServer.Config, model.DelegationCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}

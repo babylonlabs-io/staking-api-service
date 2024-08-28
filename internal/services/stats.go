@@ -17,6 +17,7 @@ type OverallStatsPublic struct {
 	TotalDelegations  int64  `json:"total_delegations"`
 	TotalStakers      uint64 `json:"total_stakers"`
 	UnconfirmedTvl    uint64 `json:"unconfirmed_tvl"`
+	PendingTvl        uint64 `json:"pending_tvl"`
 }
 
 type StakerStatsPublic struct {
@@ -34,16 +35,21 @@ func (s *Services) ProcessStakingStatsCalculation(
 	state types.DelegationState, amount uint64,
 ) *types.Error {
 	// Fetch existing or initialize the stats lock document if not exist
-	statsLockDocument, err := s.DbClient.GetOrCreateStatsLock(ctx, stakingTxHashHex, state.ToString())
+	statsLockDocument, err := s.DbClient.GetOrCreateStatsLock(
+		ctx, stakingTxHashHex, state.ToString(),
+	)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).Msg("error while fetching stats lock document")
+		log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+			Msg("error while fetching stats lock document")
 		return types.NewInternalServiceError(err)
 	}
 	switch state {
 	case types.Active:
 		// Add to the finality stats
 		if !statsLockDocument.FinalityProviderStats {
-			err = s.DbClient.IncrementFinalityProviderStats(ctx, stakingTxHashHex, fpPkHex, amount)
+			err = s.DbClient.IncrementFinalityProviderStats(
+				ctx, stakingTxHashHex, fpPkHex, amount,
+			)
 			if err != nil {
 				if db.IsNotFoundError(err) {
 					return nil
@@ -54,7 +60,19 @@ func (s *Services) ProcessStakingStatsCalculation(
 			}
 		}
 		if !statsLockDocument.StakerStats {
-			err = s.DbClient.IncrementStakerStats(ctx, stakingTxHashHex, stakerPkHex, amount)
+			// Convert the staker public key to multiple BTC addresses and save
+			// them in the database.
+			if addressConversionErr := s.ProcessAndSaveBtcAddresses(
+				ctx, stakerPkHex,
+			); addressConversionErr != nil {
+				log.Ctx(ctx).Error().Err(addressConversionErr).
+					Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while processing and saving btc addresses")
+				return types.NewInternalServiceError(addressConversionErr)
+			}
+			err = s.DbClient.IncrementStakerStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
 			if err != nil {
 				if db.IsNotFoundError(err) {
 					return nil
@@ -65,9 +83,12 @@ func (s *Services) ProcessStakingStatsCalculation(
 			}
 		}
 		// Add to the overall stats
-		// The overall stats should be the last to be updated as it has dependency on staker stats.
+		// The overall stats should be the last to be updated as it has dependency
+		// on staker stats.
 		if !statsLockDocument.OverallStats {
-			err = s.DbClient.IncrementOverallStats(ctx, stakingTxHashHex, stakerPkHex, amount)
+			err = s.DbClient.IncrementOverallStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
 			if err != nil {
 				if db.IsNotFoundError(err) {
 					// This is a duplicate call, ignore it
@@ -81,7 +102,9 @@ func (s *Services) ProcessStakingStatsCalculation(
 	case types.Unbonded:
 		// Subtract from the finality stats
 		if !statsLockDocument.FinalityProviderStats {
-			err = s.DbClient.SubtractFinalityProviderStats(ctx, stakingTxHashHex, fpPkHex, amount)
+			err = s.DbClient.SubtractFinalityProviderStats(
+				ctx, stakingTxHashHex, fpPkHex, amount,
+			)
 			if err != nil {
 				if db.IsNotFoundError(err) {
 					return nil
@@ -92,7 +115,9 @@ func (s *Services) ProcessStakingStatsCalculation(
 			}
 		}
 		if !statsLockDocument.StakerStats {
-			err = s.DbClient.SubtractStakerStats(ctx, stakingTxHashHex, stakerPkHex, amount)
+			err = s.DbClient.SubtractStakerStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
 			if err != nil {
 				if db.IsNotFoundError(err) {
 					return nil
@@ -103,9 +128,12 @@ func (s *Services) ProcessStakingStatsCalculation(
 			}
 		}
 		// Subtract from the overall stats.
-		// The overall stats should be the last to be updated as it has dependency on staker stats.
+		// The overall stats should be the last to be updated as it has dependency
+		// on staker stats.
 		if !statsLockDocument.OverallStats {
-			err = s.DbClient.SubtractOverallStats(ctx, stakingTxHashHex, stakerPkHex, amount)
+			err = s.DbClient.SubtractOverallStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
 			if err != nil {
 				if db.IsNotFoundError(err) {
 					return nil
@@ -125,18 +153,25 @@ func (s *Services) ProcessStakingStatsCalculation(
 	return nil
 }
 
-func (s *Services) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
+func (s *Services) GetOverallStats(
+	ctx context.Context,
+) (*OverallStatsPublic, *types.Error) {
 	stats, err := s.DbClient.GetOverallStats(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
 		return nil, types.NewInternalServiceError(err)
 	}
+
 	unconfirmedTvl := uint64(0)
+	confirmedTvl := uint64(0)
+	pendingTvl := uint64(0)
+
 	btcInfo, err := s.DbClient.GetLatestBtcInfo(ctx)
 	if err != nil {
 		// Handle missing BTC information, which may occur during initial setup.
 		// Default the unconfirmed TVL to 0; this will be updated automatically
-		// after processing new BTC blocks, all subsequent requests will be served with the correct value.
+		// after processing new BTC blocks, all subsequent requests will be served
+		// with the correct value.
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Error().Err(err).Msg("latest btc info not found")
 		} else {
@@ -145,23 +180,29 @@ func (s *Services) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *t
 		}
 	} else {
 		unconfirmedTvl = btcInfo.UnconfirmedTvl
+		confirmedTvl = btcInfo.ConfirmedTvl
+		pendingTvl = unconfirmedTvl - confirmedTvl
 	}
 
 	return &OverallStatsPublic{
-		ActiveTvl:         stats.ActiveTvl,
+		ActiveTvl:         int64(confirmedTvl),
 		TotalTvl:          stats.TotalTvl,
 		ActiveDelegations: stats.ActiveDelegations,
 		TotalDelegations:  stats.TotalDelegations,
 		TotalStakers:      stats.TotalStakers,
 		UnconfirmedTvl:    unconfirmedTvl,
+		PendingTvl:        pendingTvl,
 	}, nil
 }
 
-func (s *Services) GetTopStakersByActiveTvl(ctx context.Context, pageToken string) ([]StakerStatsPublic, string, *types.Error) {
+func (s *Services) GetTopStakersByActiveTvl(
+	ctx context.Context, pageToken string,
+) ([]StakerStatsPublic, string, *types.Error) {
 	resultMap, err := s.DbClient.FindTopStakersByTvl(ctx, pageToken)
 	if err != nil {
 		if db.IsInvalidPaginationTokenError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("invalid pagination token while fetching top stakers by active tvl")
+			log.Ctx(ctx).Warn().Err(err).
+				Msg("invalid pagination token while fetching top stakers by active tvl")
 			return nil, "", types.NewError(http.StatusBadRequest, types.BadRequest, err)
 		}
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching top stakers by active tvl")

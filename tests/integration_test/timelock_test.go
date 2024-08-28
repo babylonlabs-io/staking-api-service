@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,7 +19,9 @@ func TestSaveTimelock(t *testing.T) {
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(2 * time.Second)
 	// Check from DB if the data is saved
-	results, err := inspectDbDocuments[model.TimeLockDocument](t, model.TimeLockCollection)
+	results, err := testutils.InspectDbDocuments[model.TimeLockDocument](
+		testServer.Config, model.TimeLockCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -43,7 +46,9 @@ func TestNotSaveExpireCheckIfAlreadyProcessed(t *testing.T) {
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(5 * time.Second)
 	// Check from DB if the data is saved
-	results, err := inspectDbDocuments[model.TimeLockDocument](t, model.TimeLockCollection)
+	results, err := testutils.InspectDbDocuments[model.TimeLockDocument](
+		testServer.Config, model.TimeLockCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}
@@ -60,7 +65,9 @@ func TestNotSaveExpireCheckIfAlreadyProcessed(t *testing.T) {
 	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, eventWithDifferentExpireHeight)
 	time.Sleep(2 * time.Second)
 
-	results, err = inspectDbDocuments[model.TimeLockDocument](t, model.TimeLockCollection)
+	results, err = testutils.InspectDbDocuments[model.TimeLockDocument](
+		testServer.Config, model.TimeLockCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}

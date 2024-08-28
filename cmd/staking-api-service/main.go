@@ -10,6 +10,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/observability/healthcheck"
 	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/queue"
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
@@ -76,7 +77,7 @@ func main() {
 	// Start the event queue processing
 	queues := queue.New(cfg.Queue, services)
 
-	// Check if the replay flag is set
+	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
 		log.Info().Msg("Replay flag is set. Starting replay of unprocessable messages.")
 		err := scripts.ReplayUnprocessableMessages(ctx, cfg, queues, services.DbClient)
@@ -84,9 +85,18 @@ func main() {
 			log.Fatal().Err(err).Msg("error while replaying unprocessable messages")
 		}
 		return
+	} else if cli.GetBackfillPubkeyAddressFlag() {
+		log.Info().Msg("Backfill pubkey address flag is set. Starting backfill of pubkey address mappings.")
+		err := scripts.BackfillPubkeyAddressesMappings(ctx, cfg)
+		if err != nil {
+			log.Fatal().Err(err).Msg("error while backfilling pubkey address mappings")
+		}
+		return
 	}
 
 	queues.StartReceivingMessages()
+
+	healthcheck.StartHealthCheckCron(ctx, queues, cfg.Server.HealthCheckInterval)
 
 	apiServer, err := api.New(ctx, cfg, services)
 	if err != nil {

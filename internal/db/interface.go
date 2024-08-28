@@ -66,6 +66,33 @@ type DBClient interface {
 	CheckDelegationExistByStakerTaprootAddress(
 		ctx context.Context, address string, extraFilter *DelegationFilter,
 	) (bool, error)
+	// InsertPkAddressMappings inserts the btc public key and
+	// its corresponding btc addresses into the database.
+	InsertPkAddressMappings(
+		ctx context.Context, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven string,
+	) error
+	// FindPkMappingsByTaprootAddress finds the PK address mappings by taproot address.
+	// The returned slice addressMapping will only contain documents for addresses
+	// that were found in the database. If some addresses do not have a matching
+	// document, those addresses will simply be absent from the result.
+	FindPkMappingsByTaprootAddress(
+		ctx context.Context, taprootAddresses []string,
+	) ([]*model.PkAddressMapping, error)
+	// FindPkMappingsByNativeSegwitAddress finds the PK address mappings by native
+	// segwit address. The returned slice addressMapping will only contain
+	// documents for addresses that were found in the database.
+	// If some addresses do not have a matching document, those addresses will
+	// simply be absent from the result.
+	FindPkMappingsByNativeSegwitAddress(
+		ctx context.Context, nativeSegwitAddresses []string,
+	) ([]*model.PkAddressMapping, error)
+	// ScanDelegationsPaginated scans the delegation collection in a paginated way
+	// without applying any filters or sorting, ensuring that all existing items
+	// are eventually fetched.
+	ScanDelegationsPaginated(
+		ctx context.Context,
+		paginationToken string,
+	) (*DbResultMap[model.DelegationDocument], error)
 }
 
 type DelegationFilter struct {

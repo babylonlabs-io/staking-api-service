@@ -43,23 +43,21 @@ func (h *QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBody 
 		return expireCheckErr
 	}
 
-	// We only emit the stats event for the staking tx that is not an overflow event
-	if !del.IsOverflow {
-		// Perform the async stats calculation by emit the stats event
-		// NOTE: We no longer perform the stats calculation for timelock expired event
-		// This is based on the assumption that phase 1 launch date + min timelock will be over the lauch of phase 2 date
-		statsError := h.EmitStatsEvent(ctx, queueClient.NewStatsEvent(
-			del.StakingTxHashHex,
-			del.StakerPkHex,
-			del.FinalityProviderPkHex,
-			del.StakingValue,
-			types.Unbonded.ToString(),
-		))
-		if statsError != nil {
-			log.Ctx(ctx).Error().Err(statsError).Str("stakingTxHashHex", del.StakingTxHashHex).
-				Msg("Failed to emit stats event for unbonding staking")
-			return statsError
-		}
+	// Perform the async stats calculation by emit the stats event
+	// NOTE: We no longer perform the stats calculation for timelock expired event
+	// This is based on the assumption that phase 1 launch date + min timelock will be over the lauch of phase 2 date
+	statsError := h.EmitStatsEvent(ctx, queueClient.NewStatsEvent(
+		del.StakingTxHashHex,
+		del.StakerPkHex,
+		del.FinalityProviderPkHex,
+		del.StakingValue,
+		types.Unbonded.ToString(),
+		del.IsOverflow,
+	))
+	if statsError != nil {
+		log.Ctx(ctx).Error().Err(statsError).Str("stakingTxHashHex", del.StakingTxHashHex).
+			Msg("Failed to emit stats event for unbonding staking")
+		return statsError
 	}
 
 	// Save the unbonding staking delegation. This is the final step in the unbonding staking event processing

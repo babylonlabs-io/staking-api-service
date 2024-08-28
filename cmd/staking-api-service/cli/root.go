@@ -15,11 +15,12 @@ const (
 )
 
 var (
-	cfgPath               string
-	globalParamsPath      string
-	finalityProvidersPath string
-	replayFlag            bool
-	rootCmd               = &cobra.Command{
+	cfgPath                   string
+	globalParamsPath          string
+	finalityProvidersPath     string
+	replayFlag                bool
+	backfillPubkeyAddressFlag bool
+	rootCmd                   = &cobra.Command{
 		Use: "start-server",
 	}
 )
@@ -58,6 +59,12 @@ func Setup() error {
 		false,
 		"Replay unprocessable messages",
 	)
+	rootCmd.PersistentFlags().BoolVar(
+		&backfillPubkeyAddressFlag,
+		"backfill-pubkey-address",
+		false,
+		"Backfill pubkey address mappings",
+	)
 	if err := rootCmd.Execute(); err != nil {
 		return err
 	}
@@ -83,4 +90,8 @@ func GetFinalityProvidersPath() string {
 
 func GetReplayFlag() bool {
 	return replayFlag
+}
+
+func GetBackfillPubkeyAddressFlag() bool {
+	return backfillPubkeyAddressFlag
 }

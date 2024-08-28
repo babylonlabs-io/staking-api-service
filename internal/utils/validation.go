@@ -3,36 +3,12 @@ package utils
 import (
 	"encoding/base64"
 	"encoding/hex"
-	"fmt"
 	"regexp"
 
 	bbntypes "github.com/babylonlabs-io/babylon/types"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
-	"github.com/btcsuite/btcd/btcutil"
-	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 )
-
-// IsValidBtcAddress checks if the provided address is a valid BTC address
-// We only support Taproot addresses and native SegWit addresses
-func IsValidBtcAddress(btcAddress string, params *chaincfg.Params) error {
-	// Check if address has a valid format
-	decodedAddr, err := btcutil.DecodeAddress(btcAddress, params)
-	if err != nil {
-		return fmt.Errorf("can not decode btc address: %w", err)
-	}
-	// Check if it's either a native SegWit (P2WPKH) or Taproot address
-	switch decodedAddr.(type) {
-	case *btcutil.AddressWitnessPubKeyHash:
-		// Native SegWit (P2WPKH)
-		return nil
-	case *btcutil.AddressTaproot:
-		// Taproot address
-		return nil
-	default:
-		return fmt.Errorf("unsupported btc address type")
-	}
-}
 
 // IsValidTxHash checks if the given string is a valid BTC transaction hash
 // Note: it does not check the actual content of the hash.
