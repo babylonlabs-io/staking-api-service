@@ -48,6 +48,7 @@ type TestServer struct {
 	Conn    *amqp091.Connection
 	channel *amqp091.Channel
 	Config  *config.Config
+	Db      *db.Database
 }
 
 func (ts *TestServer) Close() {
@@ -55,6 +56,7 @@ func (ts *TestServer) Close() {
 	ts.Queues.StopReceivingMessages()
 	ts.Conn.Close()
 	ts.channel.Close()
+	ts.Db.Client.Disconnect(context.Background())
 }
 
 func loadTestConfig(t *testing.T) *config.Config {
@@ -136,12 +138,16 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 	// Create an httptest server
 	server := httptest.NewServer(r)
 
+	// setup direct db connection
+	dbConnection := testutils.DirectDbConnection(cfg)
+
 	return &TestServer{
 		Server:  server,
 		Queues:  queues,
 		Conn:    conn,
 		channel: ch,
 		Config:  cfg,
+		Db:      dbConnection,
 	}
 }
 

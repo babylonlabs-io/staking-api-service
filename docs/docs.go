@@ -166,6 +166,19 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "enum": [
+                            "active",
+                            "unbonding_requested",
+                            "unbonding",
+                            "unbonded",
+                            "withdrawn"
+                        ],
+                        "type": "string",
+                        "description": "Filter by state",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "Pagination key to fetch the next page of delegations",
                         "name": "pagination_key",

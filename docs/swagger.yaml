@@ -338,6 +338,16 @@ paths:
         name: staker_btc_pk
         required: true
         type: string
+      - description: Filter by state
+        enum:
+        - active
+        - unbonding_requested
+        - unbonding
+        - unbonded
+        - withdrawn
+        in: query
+        name: state
+        type: string
       - description: Pagination key to fetch the next page of delegations
         in: query
         name: pagination_key
