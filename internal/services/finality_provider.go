@@ -63,6 +63,75 @@ func (s *Services) GetFinalityProvidersFromGlobalParams() []*FpParamsPublic {
 	return fpDetails
 }
 
+func (s *Services) GetFinalityProvider(
+	ctx context.Context, fpPkHex string,
+) (*FpDetailsPublic, *types.Error) {
+	fpStatsByPks, err :=
+		s.DbClient.FindFinalityProviderStatsByFinalityProviderPkHex(
+			ctx, []string{fpPkHex},
+		)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).
+			Msg("Error while fetching finality provider from DB")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	fpParams := s.GetFinalityProvidersFromGlobalParams()
+	// Found nothing in the DB, we will try get the FP from global params
+	if len(fpStatsByPks) == 0 {
+		for _, fp := range fpParams {
+			if fp.BtcPk == fpPkHex {
+				return &FpDetailsPublic{
+					Description:       fp.Description,
+					Commission:        fp.Commission,
+					BtcPk:             fp.BtcPk,
+					ActiveTvl:         0,
+					TotalTvl:          0,
+					ActiveDelegations: 0,
+					TotalDelegations:  0,
+				}, nil
+			}
+		}
+		// Return nil as nothing was found
+		return nil, nil
+	}
+	if len(fpStatsByPks) > 1 {
+		log.Ctx(ctx).Error().
+			Str("fpPkHex", fpPkHex).
+			Int("numFinalityProviders", len(fpStatsByPks)).
+			Msg("Found more than one finality provider with the same pk")
+		return nil, types.NewErrorWithMsg(
+			http.StatusInternalServerError, types.InternalServiceError,
+			"Found more than one finality provider with the same pk",
+		)
+	}
+	fpStat := fpStatsByPks[0]
+
+	var fpParamsPublic *FpParamsPublic
+	for _, fp := range fpParams {
+		if fp.BtcPk == fpStat.FinalityProviderPkHex {
+			fpParamsPublic = fp
+			break
+		}
+	}
+	if fpParamsPublic == nil {
+		fpParamsPublic = &FpParamsPublic{
+			Description: emptyFpDescriptionPublic,
+			Commission:  "",
+			BtcPk:       fpStat.FinalityProviderPkHex,
+		}
+	}
+	return &FpDetailsPublic{
+		Description:       fpParamsPublic.Description,
+		Commission:        fpParamsPublic.Commission,
+		BtcPk:             fpStat.FinalityProviderPkHex,
+		ActiveTvl:         fpStat.ActiveTvl,
+		TotalTvl:          fpStat.TotalTvl,
+		ActiveDelegations: fpStat.ActiveDelegations,
+		TotalDelegations:  fpStat.TotalDelegations,
+	}, nil
+}
+
 func (s *Services) GetFinalityProviders(ctx context.Context, page string) ([]*FpDetailsPublic, string, *types.Error) {
 	fpParams := s.GetFinalityProvidersFromGlobalParams()
 	if len(fpParams) == 0 {

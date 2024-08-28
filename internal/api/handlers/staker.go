@@ -17,7 +17,7 @@ import (
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v1/staker/delegations [get]
 func (h *Handler) GetStakerDelegations(request *http.Request) (*Result, *types.Error) {
-	stakerBtcPk, err := parsePublicKeyQuery(request, "staker_btc_pk")
+	stakerBtcPk, err := parsePublicKeyQuery(request, "staker_btc_pk", false)
 	if err != nil {
 		return nil, err
 	}

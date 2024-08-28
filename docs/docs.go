@@ -79,6 +79,12 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Public key of the finality provider to fetch",
+                        "name": "fp_btc_pk",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Pagination key to fetch the next page of finality providers",
                         "name": "pagination_key",
                         "in": "query"
