@@ -26,11 +26,14 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/queue"
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
+
+var setUpDbIndex = false
 
 type TestServerDependency struct {
 	ConfigOverrides         *config.Config
@@ -168,6 +171,14 @@ func setupTestDB(cfg config.Config) *mongo.Client {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.Db.Address))
 	if err != nil {
 		log.Fatal(err)
+	}
+	// Setup the db index only once for all tests
+	if !setUpDbIndex {
+		err = model.Setup(context.Background(), &cfg)
+		if err != nil {
+			log.Fatal("Failed to setup database:", err)
+		}
+		setUpDbIndex = true
 	}
 
 	// Purge all collections in the test database
