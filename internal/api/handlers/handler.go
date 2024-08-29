@@ -64,9 +64,12 @@ func parsePaginationQuery(r *http.Request) (string, *types.Error) {
 	return pageKey, nil
 }
 
-func parsePublicKeyQuery(r *http.Request, queryName string) (string, *types.Error) {
+func parsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
 	pkHex := r.URL.Query().Get(queryName)
 	if pkHex == "" {
+		if isOptional {
+			return "", nil
+		}
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, queryName+" is required",
 		)

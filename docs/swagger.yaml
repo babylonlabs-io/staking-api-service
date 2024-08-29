@@ -275,6 +275,10 @@ paths:
       description: Fetches details of all active finality providers sorted by their
         active total value locked (ActiveTvl) in descending order.
       parameters:
+      - description: Public key of the finality provider to fetch
+        in: query
+        name: fp_btc_pk
+        type: string
       - description: Pagination key to fetch the next page of finality providers
         in: query
         name: pagination_key

@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -15,11 +17,13 @@ import (
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/go-chi/chi"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	queueConfig "github.com/babylonlabs-io/staking-queue-client/config"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/api/middlewares"
 	"github.com/babylonlabs-io/staking-api-service/internal/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
@@ -262,4 +266,23 @@ func buildActiveStakingEvent(t *testing.T, numOfEvenet int) []*client.ActiveStak
 
 func attachRandomSeedsToFuzzer(f *testing.F, numOfSeeds int) {
 	bbndatagen.AddRandomSeedsToFuzzer(f, uint(numOfSeeds))
+}
+
+func fetchSuccessfulResponse[T any](t *testing.T, url string) handlers.PublicResponse[T] {
+	// Make a GET request to the finality providers endpoint
+	resp, err := http.Get(url)
+	assert.NoError(t, err)
+	defer resp.Body.Close()
+
+	// Check that the status code is HTTP 200 OK
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
+
+	// Read the response body
+	bodyBytes, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err, "reading response body should not fail")
+
+	var responseBody handlers.PublicResponse[T]
+	err = json.Unmarshal(bodyBytes, &responseBody)
+	assert.NoError(t, err, "unmarshalling response body should not fail")
+	return responseBody
 }

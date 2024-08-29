@@ -28,22 +28,8 @@ const (
 func shouldGetFinalityProvidersSuccessfully(t *testing.T, testServer *TestServer) {
 	url := testServer.Server.URL + finalityProvidersPath
 	defer testServer.Close()
-	// Make a GET request to the finality providers endpoint
-	resp, err := http.Get(url)
-	assert.NoError(t, err, "making GET request to finality providers endpoint should not fail")
-	defer resp.Body.Close()
 
-	// Check that the status code is HTTP 200 OK
-	assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
-
-	// Read the response body
-	bodyBytes, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err, "reading response body should not fail")
-
-	var responseBody handlers.PublicResponse[[]services.FpDetailsPublic]
-	err = json.Unmarshal(bodyBytes, &responseBody)
-	assert.NoError(t, err, "unmarshalling response body should not fail")
-
+	responseBody := fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
 	result := responseBody.Data
 	assert.Equal(t, "Babylon Foundation 2", result[2].Description.Moniker)
 	assert.Equal(t, "0.060000000000000000", result[1].Commission)
@@ -93,6 +79,18 @@ func TestGetFinalityProviderReturn4xxErrorIfPageTokenInvalid(t *testing.T) {
 	// Make a GET request to the finality providers endpoint
 	resp, err := http.Get(url)
 	assert.NoError(t, err, "making GET request to finality providers endpoint should not fail")
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+func TestGetFinalityProviderReturn4xxErrorIfPkInvalid(t *testing.T) {
+	testServer := setupTestServer(t, nil)
+	url := testServer.Server.URL + finalityProvidersPath + "?fp_btc_pk=invalid"
+	defer testServer.Close()
+	// Make a GET request to the finality providers endpoint
+	resp, err := http.Get(url)
+	assert.NoError(t, err)
 	defer resp.Body.Close()
 
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
@@ -328,6 +326,70 @@ func FuzzShouldNotReturnDefaultFpFromParamsWhenPageTokenIsPresent(f *testing.F) 
 		err = json.Unmarshal(bodyBytes, &response)
 		assert.NoError(t, err, "unmarshalling response body should not fail")
 		assert.Equal(t, numOfFpNotHaveStats, len(response.Data))
+	})
+}
+
+func FuzzGetFinalityProvider(f *testing.F) {
+	attachRandomSeedsToFuzzer(f, 3)
+	f.Fuzz(func(t *testing.T, seed int64) {
+		r := rand.New(rand.NewSource(seed))
+		fpParams, registeredFpsStats, notRegisteredFpsStats := setUpFinalityProvidersStatsDataSet(t, r, nil)
+		// Manually force a single value for the finality provider to be used in db mocking
+		fpStats := []*model.FinalityProviderStatsDocument{registeredFpsStats[0]}
+
+		mockDB := new(testmock.DBClient)
+		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
+			mock.Anything, mock.Anything,
+		).Return(fpStats, nil)
+
+		testServer := setupTestServer(t, &TestServerDependency{MockDbClient: mockDB, MockedFinalityProviders: fpParams})
+		url := testServer.Server.URL + finalityProvidersPath + "?fp_btc_pk=" + fpParams[0].BtcPk
+		// Make a GET request to the finality providers endpoint
+		respBody := fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
+		result := respBody.Data
+		assert.Equal(t, 1, len(result))
+		assert.Equal(t, fpParams[0].Description.Moniker, result[0].Description.Moniker)
+		assert.Equal(t, fpParams[0].Commission, result[0].Commission)
+		assert.Equal(t, fpParams[0].BtcPk, result[0].BtcPk)
+		assert.Equal(t, registeredFpsStats[0].ActiveTvl, result[0].ActiveTvl)
+		assert.Equal(t, registeredFpsStats[0].TotalTvl, result[0].TotalTvl)
+		assert.Equal(t, registeredFpsStats[0].ActiveDelegations, result[0].ActiveDelegations)
+		assert.Equal(t, registeredFpsStats[0].TotalDelegations, result[0].TotalDelegations)
+		testServer.Close()
+
+		// Test the API with a non-existent finality provider from notRegisteredFpsStats
+		fpStats = []*model.FinalityProviderStatsDocument{notRegisteredFpsStats[0]}
+		mockDB = new(testmock.DBClient)
+		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
+			mock.Anything, mock.Anything,
+		).Return(fpStats, nil)
+		testServer = setupTestServer(t, &TestServerDependency{
+			MockDbClient: mockDB, MockedFinalityProviders: fpParams,
+		})
+		notRegisteredFp := notRegisteredFpsStats[0]
+		url = testServer.Server.URL +
+			finalityProvidersPath +
+			"?fp_btc_pk=" + notRegisteredFp.FinalityProviderPkHex
+		respBody = fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
+		result = respBody.Data
+		assert.Equal(t, 1, len(result))
+		assert.Equal(t, "", result[0].Description.Moniker)
+		assert.Equal(t, "", result[0].Commission)
+		assert.Equal(t, notRegisteredFp.FinalityProviderPkHex, result[0].BtcPk)
+		assert.Equal(t, notRegisteredFp.ActiveTvl, result[0].ActiveTvl)
+		testServer.Close()
+
+		// Test the API with a non-existent finality provider PK
+		randomPk, err := testutils.RandomPk()
+		testServer = setupTestServer(t, &TestServerDependency{
+			MockedFinalityProviders: fpParams,
+		})
+		defer testServer.Close()
+		assert.NoError(t, err, "generating random public key should not fail")
+		url = testServer.Server.URL + finalityProvidersPath + "?fp_btc_pk=" + randomPk
+		respBody = fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
+		result = respBody.Data
+		assert.Equal(t, 0, len(result))
 	})
 }
 
