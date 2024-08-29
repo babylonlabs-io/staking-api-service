@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 
@@ -411,4 +412,24 @@ func (db *Database) FindTopStakersByTvl(ctx context.Context, paginationToken str
 		ctx, client, filter, opts, db.cfg.MaxPaginationLimit,
 		model.BuildStakerStatsByStakerPaginationToken,
 	)
+}
+
+func (db *Database) GetStakerStats(
+	ctx context.Context, stakerPkHex string,
+) (*model.StakerStatsDocument, error) {
+	client := db.Client.Database(db.DbName).Collection(model.StakerStatsCollection)
+	filter := bson.M{"_id": stakerPkHex}
+	var result model.StakerStatsDocument
+	err := client.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		// If the document is not found, return nil
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, &NotFoundError{
+				Key:     stakerPkHex,
+				Message: "Staker stats not found",
+			}
+		}
+		return nil, err
+	}
+	return &result, nil
 }

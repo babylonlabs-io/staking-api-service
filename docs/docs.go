@@ -267,12 +267,18 @@ const docTemplate = `{
         },
         "/v1/stats/staker": {
             "get": {
-                "description": "Fetches details of top stakers by their active total value locked (ActiveTvl) in descending order.",
+                "description": "Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations.\nIf staker_btc_pk query parameter is provided, it will return stats for the specific staker.\nOtherwise, it will return the top stakers ranked by active tvl.",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get Top Staker Stats by Active TVL",
+                "summary": "Get Staker Stats",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Public key of the staker to fetch",
+                        "name": "staker_btc_pk",
+                        "in": "query"
+                    },
                     {
                         "type": "string",
                         "description": "Pagination key to fetch the next page of top stakers",
