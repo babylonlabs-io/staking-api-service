@@ -222,7 +222,7 @@ func TestStatsEndpoints(t *testing.T) {
 	assert.Equal(t, uint64(0), overallStats.PendingTvl)
 
 	// Test the top staker stats endpoint
-	stakerStats, _ := fetchStakerStatsEndpoint(t, testServer)
+	stakerStats := fetchStakerStatsEndpoint(t, testServer, "")
 	assert.Equal(t, 1, len(stakerStats))
 	assert.Equal(t, activeStakingEvent.StakerPkHex, stakerStats[0].StakerPkHex)
 	assert.Equal(t, int64(activeStakingEvent.StakingValue), stakerStats[0].ActiveTvl)
@@ -267,7 +267,7 @@ func TestStatsEndpoints(t *testing.T) {
 	assert.Equal(t, int64(1), overallStats.TotalDelegations)
 	assert.Equal(t, uint64(1), overallStats.TotalStakers)
 
-	stakerStats, _ = fetchStakerStatsEndpoint(t, testServer)
+	stakerStats = fetchStakerStatsEndpoint(t, testServer, "")
 	assert.Equal(t, 1, len(stakerStats))
 	assert.Equal(t, activeStakingEvent.StakerPkHex, stakerStats[0].StakerPkHex)
 	assert.Equal(t, int64(0), stakerStats[0].ActiveTvl)
@@ -297,7 +297,7 @@ func TestStatsEndpoints(t *testing.T) {
 	assert.Equal(t, int64(3), overallStats.TotalDelegations)
 	assert.Equal(t, uint64(2), overallStats.TotalStakers, "expected 2 stakers as the last 2 belong to same staker")
 
-	stakerStats, _ = fetchStakerStatsEndpoint(t, testServer)
+	stakerStats = fetchStakerStatsEndpoint(t, testServer, "")
 	assert.Equal(t, 2, len(stakerStats))
 
 	// Also make sure the returned data is sorted by active TVL
@@ -319,6 +319,46 @@ func TestStatsEndpoints(t *testing.T) {
 	overallStats = fetchOverallStatsEndpoint(t, testServer)
 	assert.Equal(t, uint64(100), overallStats.UnconfirmedTvl)
 	assert.Equal(t, int64(90), overallStats.ActiveTvl)
+}
+
+func TestReturnEmptyArrayWhenNoStakerStatsFound(t *testing.T) {
+	testServer := setupTestServer(t, nil)
+	defer testServer.Close()
+	stakerPk, err := testutils.RandomPk()
+	require.NoError(t, err)
+	stakerStats := fetchStakerStatsEndpoint(t, testServer, stakerPk)
+	assert.Equal(t, 0, len(stakerStats))
+}
+
+func FuzzReturnStakerStatsByStakerPk(f *testing.F) {
+	attachRandomSeedsToFuzzer(f, 3)
+	f.Fuzz(func(t *testing.T, seed int64) {
+		testServer := setupTestServer(t, nil)
+		defer testServer.Close()
+		r := rand.New(rand.NewSource(seed))
+		events := testutils.GenerateRandomActiveStakingEvents(r, &testutils.TestActiveEventGeneratorOpts{
+			NumOfEvents:        testutils.RandomPositiveInt(r, 10),
+			Stakers:            testutils.GeneratePks(10),
+			EnforceNotOverflow: true,
+		})
+		sendTestMessage(testServer.Queues.ActiveStakingQueueClient, events)
+		time.Sleep(10 * time.Second)
+
+		// Find the unique staker pks
+		var stakerPks []string
+		for _, e := range events {
+			// append into stakerPks if it's not already there
+			if !testutils.Contains(stakerPks, e.StakerPkHex) {
+				stakerPks = append(stakerPks, e.StakerPkHex)
+			}
+		}
+
+		// Fetch the staker stats for each staker
+		for _, stakerPk := range stakerPks {
+			stakerStats := fetchStakerStatsEndpoint(t, testServer, stakerPk)
+			assert.Equal(t, 1, len(stakerStats))
+		}
+	})
 }
 
 func FuzzStatsEndpointReturnHighestUnconfirmedTvlFromEvents(f *testing.F) {
@@ -468,8 +508,11 @@ func fetchOverallStatsEndpoint(t *testing.T, testServer *TestServer) services.Ov
 	return responseBody.Data
 }
 
-func fetchStakerStatsEndpoint(t *testing.T, testServer *TestServer) ([]services.StakerStatsPublic, string) {
+func fetchStakerStatsEndpoint(t *testing.T, testServer *TestServer, stakerPk string) []services.StakerStatsPublic {
 	url := testServer.Server.URL + topStakerStatsPath
+	if stakerPk != "" {
+		url += "?staker_btc_pk=" + stakerPk
+	}
 	resp, err := http.Get(url)
 	assert.NoError(t, err, "making GET request to staker stats endpoint should not fail")
 	defer resp.Body.Close()
@@ -484,5 +527,5 @@ func fetchStakerStatsEndpoint(t *testing.T, testServer *TestServer) ([]services.
 	err = json.Unmarshal(bodyBytes, &responseBody)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
-	return responseBody.Data, responseBody.Pagination.NextKey
+	return responseBody.Data
 }

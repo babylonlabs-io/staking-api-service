@@ -195,6 +195,28 @@ func (s *Services) GetOverallStats(
 	}, nil
 }
 
+func (s *Services) GetStakerStats(
+	ctx context.Context, stakerPkHex string,
+) (*StakerStatsPublic, *types.Error) {
+	stats, err := s.DbClient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		// Not found error is not an error, return nil
+		if db.IsNotFoundError(err) {
+			return nil, nil
+		}
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching staker stats")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	return &StakerStatsPublic{
+		StakerPkHex:       stakerPkHex,
+		ActiveTvl:         stats.ActiveTvl,
+		TotalTvl:          stats.TotalTvl,
+		ActiveDelegations: stats.ActiveDelegations,
+		TotalDelegations:  stats.TotalDelegations,
+	}, nil
+}
+
 func (s *Services) GetTopStakersByActiveTvl(
 	ctx context.Context, pageToken string,
 ) ([]StakerStatsPublic, string, *types.Error) {

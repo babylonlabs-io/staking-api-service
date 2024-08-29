@@ -394,6 +394,36 @@ func (_m *DBClient) GetOverallStats(ctx context.Context) (*model.OverallStatsDoc
 	return r0, r1
 }
 
+// GetStakerStats provides a mock function with given fields: ctx, stakerPkHex
+func (_m *DBClient) GetStakerStats(ctx context.Context, stakerPkHex string) (*model.StakerStatsDocument, error) {
+	ret := _m.Called(ctx, stakerPkHex)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStakerStats")
+	}
+
+	var r0 *model.StakerStatsDocument
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*model.StakerStatsDocument, error)); ok {
+		return rf(ctx, stakerPkHex)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *model.StakerStatsDocument); ok {
+		r0 = rf(ctx, stakerPkHex)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.StakerStatsDocument)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, stakerPkHex)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // IncrementFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHex, amount
 func (_m *DBClient) IncrementFinalityProviderStats(ctx context.Context, stakingTxHashHex string, fpPkHex string, amount uint64) error {
 	ret := _m.Called(ctx, stakingTxHashHex, fpPkHex, amount)

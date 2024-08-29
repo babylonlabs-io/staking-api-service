@@ -66,6 +66,10 @@ type DBClient interface {
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
 	FindTopStakersByTvl(ctx context.Context, paginationToken string) (*DbResultMap[*model.StakerStatsDocument], error)
+	// GetStakerStats fetches the staker stats by the staker's public key.
+	GetStakerStats(
+		ctx context.Context, stakerPkHex string,
+	) (*model.StakerStatsDocument, error)
 	UpsertLatestBtcInfo(
 		ctx context.Context, height uint64, confirmedTvl uint64, unconfirmedTvl uint64,
 	) error

@@ -410,9 +410,15 @@ paths:
       summary: Get Overall Stats
   /v1/stats/staker:
     get:
-      description: Fetches details of top stakers by their active total value locked
-        (ActiveTvl) in descending order.
+      description: |-
+        Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations.
+        If staker_btc_pk query parameter is provided, it will return stats for the specific staker.
+        Otherwise, it will return the top stakers ranked by active tvl.
       parameters:
+      - description: Public key of the staker to fetch
+        in: query
+        name: staker_btc_pk
+        type: string
       - description: Pagination key to fetch the next page of top stakers
         in: query
         name: pagination_key
@@ -428,7 +434,7 @@ paths:
           description: 'Error: Bad Request'
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
-      summary: Get Top Staker Stats by Active TVL
+      summary: Get Staker Stats
   /v1/unbonding:
     post:
       consumes:
