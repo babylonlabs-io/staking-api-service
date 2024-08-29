@@ -33,7 +33,10 @@ func (s *Services) UnbondDelegation(
 	}
 
 	if delegationDoc.State != types.Active {
-		log.Ctx(ctx).Warn().Msg("delegation state is not active, hence not eligible for unbonding")
+		log.Ctx(ctx).Warn().
+			Str("stakingTxHashHex", stakingTxHashHex).
+			Str("state", delegationDoc.State.ToString()).
+			Msg("delegation state is not active, hence not eligible for unbonding")
 		return types.NewErrorWithMsg(http.StatusForbidden, types.Forbidden, "delegation state is not active")
 	}
 
