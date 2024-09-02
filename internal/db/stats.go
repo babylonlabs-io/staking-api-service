@@ -2,8 +2,9 @@ package db
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
@@ -86,7 +87,11 @@ func (db *Database) IncrementOverallStats(
 			upsertUpdate["$inc"].(bson.M)["total_stakers"] = 1
 		}
 
-		upsertFilter := bson.M{"_id": db.generateOverallStatsId()}
+		shardNumber, err := db.generateOverallStatsId()
+		if err != nil {
+			return nil, err
+		}
+		upsertFilter := bson.M{"_id": shardNumber}
 
 		_, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
 		if err != nil {
@@ -132,7 +137,11 @@ func (db *Database) SubtractOverallStats(
 			return nil, err
 		}
 
-		upsertFilter := bson.M{"_id": db.generateOverallStatsId()}
+		shardNumber, err := db.generateOverallStatsId()
+		if err != nil {
+			return nil, err
+		}
+		upsertFilter := bson.M{"_id": shardNumber}
 
 		_, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
 		if err != nil {
@@ -188,8 +197,15 @@ func (db *Database) GetOverallStats(ctx context.Context) (*model.OverallStatsDoc
 // Generate the id for the overall stats document. Id is a random number ranged from 0-LogicalShardCount-1
 // It's a logical shard to avoid locking the same field during concurrent writes
 // The sharding number should never be reduced after roll out
-func (db *Database) generateOverallStatsId() string {
-	return fmt.Sprint(rand.Intn(int(db.cfg.LogicalShardCount)))
+func (db *Database) generateOverallStatsId() (string, error) {
+	max := big.NewInt(int64(db.cfg.LogicalShardCount))
+	// Generate a secure random number within the range [0, max)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprint(n), nil
 }
 
 func (db *Database) updateStatsLockByFieldName(ctx context.Context, stakingTxHashHex, state string, fieldName string) error {
