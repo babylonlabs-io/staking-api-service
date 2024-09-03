@@ -15,8 +15,10 @@ import (
 type Outcome string
 
 const (
-	Success Outcome = "success"
-	Error   Outcome = "error"
+	Success                  Outcome       = "success"
+	Error                    Outcome       = "error"
+	MetricRequestTimeout     time.Duration = 5 * time.Second
+	MetricRequestIdleTimeout time.Duration = 10 * time.Second
 )
 
 func (O Outcome) String() string {
@@ -48,12 +50,21 @@ func initMetricsRouter(metricsPort int) {
 	metricsRouter.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		promhttp.Handler().ServeHTTP(w, r)
 	})
+	// Create a custom server with timeout settings
+	metricsAddr := fmt.Sprintf(":%d", metricsPort)
+	server := &http.Server{
+		Addr:         metricsAddr,
+		Handler:      metricsRouter,
+		ReadTimeout:  MetricRequestTimeout,
+		WriteTimeout: MetricRequestTimeout,
+		IdleTimeout:  MetricRequestIdleTimeout,
+	}
 
+	// Start the server in a separate goroutine
 	go func() {
-		metricsAddr := fmt.Sprintf(":%d", metricsPort)
-		err := http.ListenAndServe(metricsAddr, metricsRouter)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("error starting metrics server on %s", metricsAddr)
+		log.Printf("Starting metrics server on %s", metricsAddr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal().Err(err).Msgf("Error starting metrics server on %s", metricsAddr)
 		}
 	}()
 }
