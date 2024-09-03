@@ -22,16 +22,5 @@ db.createUser({
 });
 "
 
-# Create the necessary indexes
-mongosh --eval "
-db = db.getSiblingDB('staking-api-service');
-db.unbonding_queue.createIndex({'unbonding_tx_hash_hex': 1}, {unique: true});
-db.timelock_queue.createIndex({'expire_height': 1}, {unique: false});
-db.delegations.createIndex({'staker_pk_hex': 1, 'staking_tx.start_height': -1}, {unique: false});
-db.delegations.createIndex({'staker_btc_address.taproot_address': 1, 'staking_tx.start_timestamp': -1}, {unique: false});
-db.staker_stats.createIndex({'active_tvl': -1, '_id': 1}, {unique: false});
-db.finality_providers_stats.createIndex({'active_tvl': -1, '_id': 1}, {unique: false});
-"
-
 # Keep the container running
 tail -f /dev/null

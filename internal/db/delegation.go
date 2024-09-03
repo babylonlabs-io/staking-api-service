@@ -76,10 +76,14 @@ func (db *Database) CheckDelegationExistByStakerTaprootAddress(
 	return true, nil
 }
 
-func (db *Database) FindDelegationsByStakerPk(ctx context.Context, stakerPk string, paginationToken string) (*DbResultMap[model.DelegationDocument], error) {
+func (db *Database) FindDelegationsByStakerPk(
+	ctx context.Context, stakerPk string,
+	extraFilter *DelegationFilter, paginationToken string,
+) (*DbResultMap[model.DelegationDocument], error) {
 	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
 
 	filter := bson.M{"staker_pk_hex": stakerPk}
+	filter = buildAdditionalDelegationFilter(filter, extraFilter)
 	options := options.Find().SetSort(bson.D{
 		{Key: "staking_tx.start_height", Value: -1},
 		{Key: "_id", Value: 1},
@@ -126,6 +130,33 @@ func (db *Database) FindDelegationByTxHashHex(ctx context.Context, stakingTxHash
 	return &delegation, nil
 }
 
+func (db *Database) ScanDelegationsPaginated(
+	ctx context.Context,
+	paginationToken string,
+) (*DbResultMap[model.DelegationDocument], error) {
+	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+	filter := bson.M{}
+	options := options.Find()
+	options.SetSort(bson.M{"_id": 1})
+	// Decode the pagination token if it exists
+	if paginationToken != "" {
+		decodedToken, err :=
+			model.DecodePaginationToken[model.DelegationScanPagination](paginationToken)
+		if err != nil {
+			return nil, &InvalidPaginationTokenError{
+				Message: "Invalid pagination token",
+			}
+		}
+		filter["_id"] = bson.M{"$gt": decodedToken.StakingTxHashHex}
+	}
+
+	// Perform the paginated query and return the results
+	return findWithPagination(
+		ctx, client, filter, options, db.cfg.MaxPaginationLimit,
+		model.BuildDelegationScanPaginationToken,
+	)
+}
+
 // TransitionState updates the state of a staking transaction to a new state
 // It returns an NotFoundError if the staking transaction is not found or not in the eligible state to transition
 func (db *Database) transitionState(
@@ -156,11 +187,13 @@ func buildAdditionalDelegationFilter(
 	baseFilter primitive.M,
 	filters *DelegationFilter,
 ) primitive.M {
-	if filters.States != nil {
-		baseFilter["state"] = bson.M{"$in": filters.States}
-	}
-	if filters.AfterTimestamp != 0 {
-		baseFilter["staking_tx.start_timestamp"] = bson.M{"$gte": filters.AfterTimestamp}
+	if filters != nil {
+		if filters.States != nil {
+			baseFilter["state"] = bson.M{"$in": filters.States}
+		}
+		if filters.AfterTimestamp != 0 {
+			baseFilter["staking_tx.start_timestamp"] = bson.M{"$gte": filters.AfterTimestamp}
+		}
 	}
 	return baseFilter
 }

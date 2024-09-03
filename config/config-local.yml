@@ -8,6 +8,7 @@ server:
   log-level: debug
   btc-net: "signet"
   max-content-length: 4096
+  health-check-interval: 300 # 5 minutes interval
 db:
   username: root
   password: example

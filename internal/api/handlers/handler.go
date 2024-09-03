@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
@@ -63,9 +64,12 @@ func parsePaginationQuery(r *http.Request) (string, *types.Error) {
 	return pageKey, nil
 }
 
-func parsePublicKeyQuery(r *http.Request, queryName string) (string, *types.Error) {
+func parsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
 	pkHex := r.URL.Query().Get(queryName)
 	if pkHex == "" {
+		if isOptional {
+			return "", nil
+		}
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, queryName+" is required",
 		)
@@ -103,11 +107,63 @@ func parseBtcAddressQuery(
 			http.StatusBadRequest, types.BadRequest, queryName+" is required",
 		)
 	}
-	err := utils.IsValidBtcAddress(address, netParam)
+	_, err := utils.CheckBtcAddressType(address, netParam)
 	if err != nil {
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, err.Error(),
 		)
 	}
 	return address, nil
+}
+
+func parseBtcAddressesQuery(
+	r *http.Request, queryName string, netParam *chaincfg.Params, limit int,
+) ([]string, *types.Error) {
+	// Get all the values for the queryName
+	addresses := r.URL.Query()[queryName]
+	// Check if no addresses were provided
+	if len(addresses) == 0 {
+		return nil, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, queryName+" is required",
+		)
+	}
+
+	// Check if the number of addresses exceeds the limit
+	if len(addresses) > limit {
+		return nil, types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			fmt.Sprintf("Maximum %d %s allowed", limit, queryName),
+		)
+	}
+
+	// Validate each address
+	for _, address := range addresses {
+		_, err := utils.CheckBtcAddressType(address, netParam)
+		if err != nil {
+			return nil, types.NewErrorWithMsg(
+				http.StatusBadRequest, types.BadRequest, err.Error(),
+			)
+		}
+	}
+
+	return addresses, nil
+}
+
+// parseStateFilterQuery parses the state filter query and returns the state enum
+// If the state is not provided, it returns an empty string
+func parseStateFilterQuery(
+	r *http.Request, queryName string,
+) (types.DelegationState, *types.Error) {
+	state := r.URL.Query().Get(queryName)
+	if state == "" {
+		return "", nil
+	}
+	stateEnum, err := types.FromStringToDelegationState(state)
+	if err != nil {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, err.Error(),
+		)
+	}
+	return stateEnum, nil
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,9 @@ func TestUnprocessableMessageShouldBeStoredInDB(t *testing.T) {
 	time.Sleep(20 * time.Second)
 
 	// Fetch from DB and check
-	docs, err := inspectDbDocuments[model.UnprocessableMessageDocument](t, model.UnprocessableMsgCollection)
+	docs, err := testutils.InspectDbDocuments[model.UnprocessableMessageDocument](
+		testServer.Config, model.UnprocessableMsgCollection,
+	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
 	}

@@ -8,6 +8,7 @@ server:
   log-level: error
   btc-net: "signet"
   max-content-length: 40960
+  health-check-interval: 2
 db:
   username: root
   password: example

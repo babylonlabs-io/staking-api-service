@@ -23,6 +23,7 @@ const (
 	UnbondingCollection             = "unbonding_queue"
 	BtcInfoCollection               = "btc_info"
 	UnprocessableMsgCollection      = "unprocessable_messages"
+	PkAddressMappingsCollection     = "pk_address_mappings"
 )
 
 type index struct {
@@ -43,6 +44,11 @@ var collections = map[string][]index{
 	UnbondingCollection:        {{Indexes: map[string]int{"unbonding_tx_hash_hex": 1}, Unique: true}},
 	UnprocessableMsgCollection: {{Indexes: map[string]int{}}},
 	BtcInfoCollection:          {{Indexes: map[string]int{}}},
+	PkAddressMappingsCollection: {
+		{Indexes: map[string]int{"taproot": 1}, Unique: true},
+		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
+		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
+	},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {

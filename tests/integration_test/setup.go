@@ -4,33 +4,35 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
+	bbndatagen "github.com/babylonlabs-io/babylon/testutil/datagen"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/go-chi/chi"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	queueConfig "github.com/babylonlabs-io/staking-queue-client/config"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/api/middlewares"
 	"github.com/babylonlabs-io/staking-api-service/internal/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/queue"
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 )
 
 var setUpDbIndex = false
@@ -50,6 +52,7 @@ type TestServer struct {
 	Conn    *amqp091.Connection
 	channel *amqp091.Channel
 	Config  *config.Config
+	Db      *db.Database
 }
 
 func (ts *TestServer) Close() {
@@ -57,10 +60,11 @@ func (ts *TestServer) Close() {
 	ts.Queues.StopReceivingMessages()
 	ts.Conn.Close()
 	ts.channel.Close()
+	ts.Db.Client.Disconnect(context.Background())
 }
 
 func loadTestConfig(t *testing.T) *config.Config {
-	cfg, err := config.New("./config/config-test.yml")
+	cfg, err := config.New("../config/config-test.yml")
 	if err != nil {
 		t.Fatalf("Failed to load test config: %v", err)
 	}
@@ -73,7 +77,7 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 	if dep != nil && dep.ConfigOverrides != nil {
 		cfg = dep.ConfigOverrides
 	} else {
-		cfg = loadTestConfig(t)
+		cfg = testutils.LoadTestConfig()
 	}
 	metricsPort := cfg.Metrics.GetMetricsPort()
 	metrics.Init(metricsPort)
@@ -82,7 +86,7 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 	if dep != nil && dep.MockedGlobalParams != nil {
 		params = dep.MockedGlobalParams
 	} else {
-		params, err = types.NewGlobalParams("./config/global-params-test.json")
+		params, err = types.NewGlobalParams("../config/global-params-test.json")
 		if err != nil {
 			t.Fatalf("Failed to load global params: %v", err)
 		}
@@ -92,7 +96,7 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 	if dep != nil && dep.MockedFinalityProviders != nil {
 		fps = dep.MockedFinalityProviders
 	} else {
-		fps, err = types.NewFinalityProviders("./config/finality-providers-test.json")
+		fps, err = types.NewFinalityProviders("../config/finality-providers-test.json")
 		if err != nil {
 			t.Fatalf("Failed to load finality providers: %v", err)
 		}
@@ -114,7 +118,7 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 		services.DbClient = dep.MockDbClient
 	} else {
 		// This means we are using real database, we not mocking anything
-		setupTestDB(*cfg)
+		testutils.SetupTestDB(*cfg)
 	}
 
 	apiServer, err := api.New(context.Background(), cfg, services)
@@ -138,55 +142,17 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 	// Create an httptest server
 	server := httptest.NewServer(r)
 
+	// setup direct db connection
+	dbConnection := testutils.DirectDbConnection(cfg)
+
 	return &TestServer{
 		Server:  server,
 		Queues:  queues,
 		Conn:    conn,
 		channel: ch,
 		Config:  cfg,
+		Db:      dbConnection,
 	}
-}
-
-// PurgeAllCollections drops all collections in the specified database.
-func PurgeAllCollections(ctx context.Context, client *mongo.Client, databaseName string) error {
-	database := client.Database(databaseName)
-	collections, err := database.ListCollectionNames(ctx, bson.D{{}})
-	if err != nil {
-		return err
-	}
-
-	for _, collection := range collections {
-		// Use DeleteMany with an empty filter to delete all documents
-		_, err := database.Collection(collection).DeleteMany(ctx, bson.D{{}})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// setupTestDB connects to MongoDB and purges all collections.
-func setupTestDB(cfg config.Config) *mongo.Client {
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.Db.Address))
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Setup the db index only once for all tests
-	if !setUpDbIndex {
-		err = model.Setup(context.Background(), &cfg)
-		if err != nil {
-			log.Fatal("Failed to setup database:", err)
-		}
-		setUpDbIndex = true
-	}
-
-	// Purge all collections in the test database
-	if err := PurgeAllCollections(context.TODO(), client, cfg.Db.DbName); err != nil {
-		log.Fatal("Failed to purge database:", err)
-	}
-
-	return client
 }
 
 func setUpTestQueue(cfg *queueConfig.QueueConfig, service *services.Services) (*queue.Queues, *amqp091.Connection, *amqp091.Channel, error) {
@@ -272,59 +238,10 @@ func sendTestMessage[T any](client client.QueueClient, data []T) error {
 	return nil
 }
 
-func directDbConnection(t *testing.T) *db.Database {
-	cfg, err := config.New("./config/config-test.yml")
-	if err != nil {
-		t.Fatalf("Failed to load test config: %v", err)
-	}
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.Db.Address))
-	if err != nil {
-		log.Fatal(err)
-	}
-	return &db.Database{
-		DbName: cfg.Db.DbName,
-		Client: client,
-	}
-}
-
-func injectDbDocuments[T any](t *testing.T, collectionName string, doc T) {
-	connection := directDbConnection(t)
-	collection := connection.Client.Database(connection.DbName).Collection(collectionName)
-
-	_, err := collection.InsertOne(context.Background(), doc)
-	if err != nil {
-		t.Fatalf("Failed to insert document: %v", err)
-	}
-}
-
-// Inspect the items in the real database
-func inspectDbDocuments[T any](t *testing.T, collectionName string) ([]T, error) {
-	connection := directDbConnection(t)
-	collection := connection.Client.Database(connection.DbName).Collection(collectionName)
-
-	cursor, err := collection.Find(context.Background(), bson.D{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(context.Background())
-
-	var results []T
-	for cursor.Next(context.Background()) {
-		var result T
-		err := cursor.Decode(&result)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, result)
-	}
-
-	return results, nil
-}
-
+// TODO: To be removed and use the method from testutils
 func buildActiveStakingEvent(t *testing.T, numOfEvenet int) []*client.ActiveStakingEvent {
 	var activeStakingEvents []*client.ActiveStakingEvent
-	stakerPk, err := randomPk()
+	stakerPk, err := testutils.RandomPk()
 	require.NoError(t, err)
 	rand.New(rand.NewSource(time.Now().Unix()))
 
@@ -345,4 +262,27 @@ func buildActiveStakingEvent(t *testing.T, numOfEvenet int) []*client.ActiveStak
 		activeStakingEvents = append(activeStakingEvents, activeStakingEvent)
 	}
 	return activeStakingEvents
+}
+
+func attachRandomSeedsToFuzzer(f *testing.F, numOfSeeds int) {
+	bbndatagen.AddRandomSeedsToFuzzer(f, uint(numOfSeeds))
+}
+
+func fetchSuccessfulResponse[T any](t *testing.T, url string) handlers.PublicResponse[T] {
+	// Make a GET request to the finality providers endpoint
+	resp, err := http.Get(url)
+	assert.NoError(t, err)
+	defer resp.Body.Close()
+
+	// Check that the status code is HTTP 200 OK
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
+
+	// Read the response body
+	bodyBytes, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err, "reading response body should not fail")
+
+	var responseBody handlers.PublicResponse[T]
+	err = json.Unmarshal(bodyBytes, &responseBody)
+	assert.NoError(t, err, "unmarshalling response body should not fail")
+	return responseBody
 }

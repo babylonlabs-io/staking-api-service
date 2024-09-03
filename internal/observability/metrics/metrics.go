@@ -32,6 +32,7 @@ var (
 	queueOperationFailureCounter     *prometheus.CounterVec
 	httpResponseWriteFailureCounter  *prometheus.CounterVec
 	clientRequestDurationHistogram   *prometheus.HistogramVec
+	serviceCrashCounter              *prometheus.CounterVec
 )
 
 // Init initializes the metrics package.
@@ -113,6 +114,13 @@ func registerMetrics() {
 		},
 		[]string{"baseurl", "method", "path", "status"},
 	)
+	serviceCrashCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "service_crash_total",
+			Help: "",
+		},
+		[]string{"type"},
+	)
 
 	prometheus.MustRegister(
 		httpRequestDurationHistogram,
@@ -121,6 +129,7 @@ func registerMetrics() {
 		queueOperationFailureCounter,
 		httpResponseWriteFailureCounter,
 		clientRequestDurationHistogram,
+		serviceCrashCounter,
 	)
 }
 
@@ -176,4 +185,9 @@ func StartClientRequestDurationTimer(baseUrl, method, path string) func(statusCo
 			fmt.Sprintf("%d", statusCode),
 		).Observe(duration)
 	}
+}
+
+// RecordServiceCrash increments the service crash counter.
+func RecordServiceCrash(service string) {
+	serviceCrashCounter.WithLabelValues(service).Inc()
 }

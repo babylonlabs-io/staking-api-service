@@ -79,6 +79,12 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Public key of the finality provider to fetch",
+                        "name": "fp_btc_pk",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Pagination key to fetch the next page of finality providers",
                         "name": "pagination_key",
                         "in": "query"
@@ -166,6 +172,19 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "enum": [
+                            "active",
+                            "unbonding_requested",
+                            "unbonding",
+                            "unbonded",
+                            "withdrawn"
+                        ],
+                        "type": "string",
+                        "description": "Filter by state",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "Pagination key to fetch the next page of delegations",
                         "name": "pagination_key",
@@ -181,6 +200,47 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/staker/pubkey-lookup": {
+            "get": {
+                "description": "Retrieves public keys for the given BTC addresses. This endpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "List of BTC addresses to look up (up to 10), currently only supports Taproot and Native Segwit addresses",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request: Invalid input parameters",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
                         }
@@ -207,12 +267,18 @@ const docTemplate = `{
         },
         "/v1/stats/staker": {
             "get": {
-                "description": "Fetches details of top stakers by their active total value locked (ActiveTvl) in descending order.",
+                "description": "Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations.\nIf staker_btc_pk query parameter is provided, it will return stats for the specific staker.\nOtherwise, it will return the top stakers ranked by active tvl.",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get Top Staker Stats by Active TVL",
+                "summary": "Get Staker Stats",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Public key of the staker to fetch",
+                        "name": "staker_btc_pk",
+                        "in": "query"
+                    },
                     {
                         "type": "string",
                         "description": "Pagination key to fetch the next page of top stakers",
@@ -515,6 +581,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "active_tvl": {
+                    "type": "integer"
+                },
+                "pending_tvl": {
                     "type": "integer"
                 },
                 "total_delegations": {

@@ -11,12 +11,13 @@ import (
 // @Description Retrieves delegations for a given staker
 // @Produce json
 // @Param staker_btc_pk query string true "Staker BTC Public Key"
+// @Param state query types.DelegationState false "Filter by state"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
 // @Success 200 {object} PublicResponse[[]services.DelegationPublic]{array} "List of delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v1/staker/delegations [get]
 func (h *Handler) GetStakerDelegations(request *http.Request) (*Result, *types.Error) {
-	stakerBtcPk, err := parsePublicKeyQuery(request, "staker_btc_pk")
+	stakerBtcPk, err := parsePublicKeyQuery(request, "staker_btc_pk", false)
 	if err != nil {
 		return nil, err
 	}
@@ -24,8 +25,13 @@ func (h *Handler) GetStakerDelegations(request *http.Request) (*Result, *types.E
 	if err != nil {
 		return nil, err
 	}
-
-	delegations, newPaginationKey, err := h.services.DelegationsByStakerPk(request.Context(), stakerBtcPk, paginationKey)
+	stateFilter, err := parseStateFilterQuery(request, "state")
+	if err != nil {
+		return nil, err
+	}
+	delegations, newPaginationKey, err := h.services.DelegationsByStakerPk(
+		request.Context(), stakerBtcPk, stateFilter, paginationKey,
+	)
 	if err != nil {
 		return nil, err
 	}
