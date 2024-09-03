@@ -58,9 +58,15 @@ type TestServer struct {
 func (ts *TestServer) Close() {
 	ts.Server.Close()
 	ts.Queues.StopReceivingMessages()
-	ts.Conn.Close()
-	ts.channel.Close()
-	ts.Db.Client.Disconnect(context.Background())
+	if err := ts.Conn.Close(); err != nil {
+		log.Fatalf("failed to close connection in test: %v", err)
+	}
+	if err := ts.channel.Close(); err != nil {
+		log.Fatalf("failed to close channel in test: %v", err)
+	}
+	if err := ts.Db.Client.Disconnect(context.Background()); err != nil {
+		log.Fatalf("failed to close db connection in test: %v", err)
+	}
 }
 
 func loadTestConfig(t *testing.T) *config.Config {
