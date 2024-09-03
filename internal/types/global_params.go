@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	"github.com/babylonlabs-io/networks/parameters/parser"
 	"github.com/btcsuite/btcd/btcec/v2"
@@ -13,8 +14,8 @@ type VersionedGlobalParams = parser.VersionedGlobalParams
 
 type GlobalParams = parser.GlobalParams
 
-func NewGlobalParams(filePath string) (*GlobalParams, error) {
-	data, err := os.ReadFile(filePath)
+func NewGlobalParams(path string) (*GlobalParams, error) {
+	data, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}
