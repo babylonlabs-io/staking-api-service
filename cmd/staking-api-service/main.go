@@ -96,7 +96,10 @@ func main() {
 
 	queues.StartReceivingMessages()
 
-	healthcheck.StartHealthCheckCron(ctx, queues, cfg.Server.HealthCheckInterval)
+	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, queues, cfg.Server.HealthCheckInterval)
+	if healthcheckErr != nil {
+		log.Fatal().Err(healthcheckErr).Msg("error while starting health check cron")
+	}
 
 	apiServer, err := api.New(ctx, cfg, services)
 	if err != nil {
