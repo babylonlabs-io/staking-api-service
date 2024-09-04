@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 )
 
 type FinalityProviderDescription struct {
@@ -30,8 +31,8 @@ type FinalityProviders struct {
 	FinalityProviders []FinalityProviderFromFile `json:"finality_providers"`
 }
 
-func NewFinalityProviders(filePath string) ([]FinalityProviderDetails, error) {
-	data, err := os.ReadFile(filePath)
+func NewFinalityProviders(path string) ([]FinalityProviderDetails, error) {
+	data, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}
