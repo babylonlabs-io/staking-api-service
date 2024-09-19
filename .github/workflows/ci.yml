@@ -7,14 +7,17 @@ on:
 
 jobs:
   lint_test:
-    uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.2.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@hiep/add-gosec
     with:
      run-unit-tests: true
      run-integration-tests: false
      run-lint: false
+     run-build: true
+     run-gosec: true
+     gosec-args: "-no-fail ./..."
      
   docker_pipeline:
-    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.2.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@hiep/add-gosec
     secrets: inherit
     with:
       publish: false
