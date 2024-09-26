@@ -40,11 +40,11 @@ func (h *Handler) GetStakerDelegations(request *http.Request) (*Result, *types.E
 }
 
 // CheckStakerDelegationExist @Summary Check if a staker has an active delegation
-// @Description Check if a staker has an active delegation by the staker BTC address (Taproot only)
+// @Description Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)
 // @Description Optionally, you can provide a timeframe to check if the delegation is active within the provided timeframe
 // @Description The available timeframe is "today" which checks after UTC 12AM of the current day
 // @Produce json
-// @Param address query string true "Staker BTC address in Taproot format"
+// @Param address query string true "Staker BTC address in Taproot/Native Segwit format"
 // @Param timeframe query string false "Check if the delegation is active within the provided timeframe" Enums(today)
 // @Success 200 {object} Result "Result"
 // @Failure 400 {object} types.Error "Error: Bad Request"
@@ -60,8 +60,16 @@ func (h *Handler) CheckStakerDelegationExist(request *http.Request) (*Result, *t
 		return nil, err
 	}
 
-	exist, err := h.services.CheckStakerHasActiveDelegationByAddress(
-		request.Context(), address, afterTimestamp,
+	addressToPkMapping, err := h.services.GetStakerPublicKeysByAddresses(request.Context(), []string{address})
+	if err != nil {
+		return nil, err
+	}
+	if _, exist := addressToPkMapping[address]; !exist {
+		return NewResult(false), nil
+	}
+
+	exist, err := h.services.CheckStakerHasActiveDelegationByPk(
+		request.Context(), addressToPkMapping[address], afterTimestamp,
 	)
 	if err != nil {
 		return nil, err

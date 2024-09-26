@@ -307,11 +307,11 @@ paths:
   /v1/staker/delegation/check:
     get:
       description: |-
-        Check if a staker has an active delegation by the staker BTC address (Taproot only)
+        Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)
         Optionally, you can provide a timeframe to check if the delegation is active within the provided timeframe
         The available timeframe is "today" which checks after UTC 12AM of the current day
       parameters:
-      - description: Staker BTC address in Taproot format
+      - description: Staker BTC address in Taproot/Native Segwit format
         in: query
         name: address
         required: true

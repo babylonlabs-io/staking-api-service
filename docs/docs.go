@@ -119,14 +119,14 @@ const docTemplate = `{
         },
         "/v1/staker/delegation/check": {
             "get": {
-                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot only)\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day",
+                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day",
                 "produces": [
                     "application/json"
                 ],
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Staker BTC address in Taproot format",
+                        "description": "Staker BTC address in Taproot/Native Segwit format",
                         "name": "address",
                         "in": "query",
                         "required": true

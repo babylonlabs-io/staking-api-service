@@ -12,7 +12,7 @@ type DBClient interface {
 	SaveActiveStakingDelegation(
 		ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string,
 		stakingTxHex string, amount, startHeight, timelock, outputIndex uint64,
-		startTimestamp int64, isOverflow bool, stakerTaprootAddress string,
+		startTimestamp int64, isOverflow bool,
 	) error
 	// FindDelegationsByStakerPk finds all delegations by the staker's public key.
 	// The extraFilter parameter can be used to filter the results by the delegation's
@@ -74,7 +74,7 @@ type DBClient interface {
 		ctx context.Context, height uint64, confirmedTvl uint64, unconfirmedTvl uint64,
 	) error
 	GetLatestBtcInfo(ctx context.Context) (*model.BtcInfo, error)
-	CheckDelegationExistByStakerTaprootAddress(
+	CheckDelegationExistByStakerPk(
 		ctx context.Context, address string, extraFilter *DelegationFilter,
 	) (bool, error)
 	// InsertPkAddressMappings inserts the btc public key and
