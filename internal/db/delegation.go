@@ -16,7 +16,7 @@ import (
 func (db *Database) SaveActiveStakingDelegation(
 	ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string,
 	stakingTxHex string, amount, startHeight, timelock, outputIndex uint64,
-	startTimestamp int64, isOverflow bool, stakerTaprootAddress string,
+	startTimestamp int64, isOverflow bool,
 ) error {
 	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
 	document := model.DelegationDocument{
@@ -33,9 +33,6 @@ func (db *Database) SaveActiveStakingDelegation(
 			TimeLock:       timelock,
 		},
 		IsOverflow: isOverflow,
-		StakerBtcAddress: &model.StakerBtcAddress{
-			TaprootAddress: stakerTaprootAddress,
-		},
 	}
 	_, err := client.InsertOne(ctx, document)
 	if err != nil {
@@ -56,14 +53,14 @@ func (db *Database) SaveActiveStakingDelegation(
 	return nil
 }
 
-// CheckDelegationExistByStakerTaprootAddress checks if a staker has any
-// delegation in the specified states by the staker's BTC address in taproot format.
-func (db *Database) CheckDelegationExistByStakerTaprootAddress(
-	ctx context.Context, address string, extraFilter *DelegationFilter,
+// CheckDelegationExistByStakerPk checks if a staker has any
+// delegation in the specified states by the staker's public key
+func (db *Database) CheckDelegationExistByStakerPk(
+	ctx context.Context, stakerPk string, extraFilter *DelegationFilter,
 ) (bool, error) {
 	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
 	filter := buildAdditionalDelegationFilter(
-		bson.M{"staker_btc_address.taproot_address": address}, extraFilter,
+		bson.M{"staker_pk_hex": stakerPk}, extraFilter,
 	)
 	var delegation model.DelegationDocument
 	err := client.FindOne(ctx, filter).Decode(&delegation)

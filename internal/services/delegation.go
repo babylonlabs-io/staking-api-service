@@ -93,16 +93,9 @@ func (s *Services) SaveActiveStakingDelegation(
 	value, startHeight uint64, stakingTimestamp int64, timeLock, stakingOutputIndex uint64,
 	stakingTxHex string, isOverflow bool,
 ) *types.Error {
-	addresses, err := utils.DeriveAddressesFromNoCoordPk(stakerPkHex, s.cfg.Server.BTCNetParam)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Failed to get taproot address from staker pk")
-		return types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, "failed to get taproot address from staker pk",
-		)
-	}
-	err = s.DbClient.SaveActiveStakingDelegation(
+	err := s.DbClient.SaveActiveStakingDelegation(
 		ctx, txHashHex, stakerPkHex, finalityProviderPkHex, stakingTxHex,
-		value, startHeight, timeLock, stakingOutputIndex, stakingTimestamp, isOverflow, addresses.Taproot,
+		value, startHeight, timeLock, stakingOutputIndex, stakingTimestamp, isOverflow,
 	)
 	if err != nil {
 		if ok := db.IsDuplicateKeyError(err); ok {
@@ -144,15 +137,15 @@ func (s *Services) GetDelegation(ctx context.Context, txHashHex string) (*model.
 	return delegation, nil
 }
 
-func (s *Services) CheckStakerHasActiveDelegationByAddress(
-	ctx context.Context, btcAddress string, afterTimestamp int64,
+func (s *Services) CheckStakerHasActiveDelegationByPk(
+	ctx context.Context, stakerPk string, afterTimestamp int64,
 ) (bool, *types.Error) {
 	filter := &db.DelegationFilter{
 		States:         []types.DelegationState{types.Active},
 		AfterTimestamp: afterTimestamp,
 	}
-	hasDelegation, err := s.DbClient.CheckDelegationExistByStakerTaprootAddress(
-		ctx, btcAddress, filter,
+	hasDelegation, err := s.DbClient.CheckDelegationExistByStakerPk(
+		ctx, stakerPk, filter,
 	)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to check if staker has active delegation")

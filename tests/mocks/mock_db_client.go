@@ -18,12 +18,12 @@ type DBClient struct {
 	mock.Mock
 }
 
-// CheckDelegationExistByStakerTaprootAddress provides a mock function with given fields: ctx, address, extraFilter
-func (_m *DBClient) CheckDelegationExistByStakerTaprootAddress(ctx context.Context, address string, extraFilter *db.DelegationFilter) (bool, error) {
+// CheckDelegationExistByStakerPk provides a mock function with given fields: ctx, address, extraFilter
+func (_m *DBClient) CheckDelegationExistByStakerPk(ctx context.Context, address string, extraFilter *db.DelegationFilter) (bool, error) {
 	ret := _m.Called(ctx, address, extraFilter)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CheckDelegationExistByStakerTaprootAddress")
+		panic("no return value specified for CheckDelegationExistByStakerPk")
 	}
 
 	var r0 bool
@@ -514,17 +514,17 @@ func (_m *DBClient) Ping(ctx context.Context) error {
 	return r0
 }
 
-// SaveActiveStakingDelegation provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, fpPkHex, stakingTxHex, amount, startHeight, timelock, outputIndex, startTimestamp, isOverflow, stakerTaprootAddress
-func (_m *DBClient) SaveActiveStakingDelegation(ctx context.Context, stakingTxHashHex string, stakerPkHex string, fpPkHex string, stakingTxHex string, amount uint64, startHeight uint64, timelock uint64, outputIndex uint64, startTimestamp int64, isOverflow bool, stakerTaprootAddress string) error {
-	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, fpPkHex, stakingTxHex, amount, startHeight, timelock, outputIndex, startTimestamp, isOverflow, stakerTaprootAddress)
+// SaveActiveStakingDelegation provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, fpPkHex, stakingTxHex, amount, startHeight, timelock, outputIndex, startTimestamp, isOverflow
+func (_m *DBClient) SaveActiveStakingDelegation(ctx context.Context, stakingTxHashHex string, stakerPkHex string, fpPkHex string, stakingTxHex string, amount uint64, startHeight uint64, timelock uint64, outputIndex uint64, startTimestamp int64, isOverflow bool) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, fpPkHex, stakingTxHex, amount, startHeight, timelock, outputIndex, startTimestamp, isOverflow)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SaveActiveStakingDelegation")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string, uint64, uint64, uint64, uint64, int64, bool, string) error); ok {
-		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, fpPkHex, stakingTxHex, amount, startHeight, timelock, outputIndex, startTimestamp, isOverflow, stakerTaprootAddress)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string, uint64, uint64, uint64, uint64, int64, bool) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, fpPkHex, stakingTxHex, amount, startHeight, timelock, outputIndex, startTimestamp, isOverflow)
 	} else {
 		r0 = ret.Error(0)
 	}
