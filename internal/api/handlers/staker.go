@@ -7,6 +7,11 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 )
 
+type DelegationCheckPublicResponse struct {
+	Data bool `json:"data"`
+	Code int  `json:"code"`
+}
+
 // GetStakerDelegations @Summary Get staker delegations
 // @Description Retrieves delegations for a given staker
 // @Produce json
@@ -43,10 +48,11 @@ func (h *Handler) GetStakerDelegations(request *http.Request) (*Result, *types.E
 // @Description Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)
 // @Description Optionally, you can provide a timeframe to check if the delegation is active within the provided timeframe
 // @Description The available timeframe is "today" which checks after UTC 12AM of the current day
+// @Description Note: This endpoint is designed to work with Galxe-specific headers
 // @Produce json
 // @Param address query string true "Staker BTC address in Taproot/Native Segwit format"
 // @Param timeframe query string false "Check if the delegation is active within the provided timeframe" Enums(today)
-// @Success 200 {object} Result "Result"
+// @Success 200 {object} PublicResponse[bool] "The data field will contain a boolean value indicating if the staker has an active delegation"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v1/staker/delegation/check [get]
 func (h *Handler) CheckStakerDelegationExist(request *http.Request) (*Result, *types.Error) {
@@ -76,6 +82,47 @@ func (h *Handler) CheckStakerDelegationExist(request *http.Request) (*Result, *t
 	}
 
 	return NewResult(exist), nil
+}
+
+// CheckStakerDelegationExistByAddress @Summary Check if a staker has an active delegation by address
+// @Description Check if a staker has an active delegation using the staker's BTC address (Taproot or Native Segwit format).
+// @Description This endpoint is similar to /v1/staker/delegation/check but returns a different response format and does not use Galxe-specific headers.
+// @Produce json
+// @Param address query string true "Staker BTC address in Taproot or Native Segwit format"
+// @Success 200 {object} DelegationCheckPublicResponse "The 'data' field contains a boolean value indicating whether the staker has an active delegation."
+// @Failure 400 {object} types.Error "Error: Bad Request"
+// @Router /v1/staker/delegation/address-check [get]
+func (h *Handler) CheckStakerDelegationExistByAddress(request *http.Request) (*Result, *types.Error) {
+	address, err := parseBtcAddressQuery(request, "address", h.config.Server.BTCNetParam)
+	if err != nil {
+		return nil, err
+	}
+
+	addressToPkMapping, err := h.services.GetStakerPublicKeysByAddresses(request.Context(), []string{address})
+	if err != nil {
+		return nil, err
+	}
+	if _, exist := addressToPkMapping[address]; !exist {
+		return buildDelegationCheckResponse(false), nil
+	}
+
+	exist, err := h.services.CheckStakerHasActiveDelegationByPk(
+		request.Context(), addressToPkMapping[address], 0,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return buildDelegationCheckResponse(exist), nil
+}
+
+func buildDelegationCheckResponse(exist bool) *Result {
+	return &Result{
+		Data: &DelegationCheckPublicResponse{
+			Data: exist, Code: 0,
+		},
+		Status: http.StatusOK,
+	}
 }
 
 func parseTimeframeToAfterTimestamp(timeframe string) (int64, *types.Error) {

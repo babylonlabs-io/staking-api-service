@@ -18,6 +18,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v1/stats", registerHandler(handlers.GetOverallStats))
 	r.Get("/v1/stats/staker", registerHandler(handlers.GetStakersStats))
 	r.Get("/v1/staker/delegation/check", registerHandler(handlers.CheckStakerDelegationExist))
+	r.Get("/v1/staker/delegation/address-check", registerHandler(handlers.CheckStakerDelegationExistByAddress))
 	r.Get("/v1/delegation", registerHandler(handlers.GetDelegationByTxHash))
 
 	// Only register these routes if the asset has been configured

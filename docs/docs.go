@@ -117,9 +117,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/staker/delegation/address-check": {
+            "get": {
+                "description": "Check if a staker has an active delegation using the staker's BTC address (Taproot or Native Segwit format).\nThis endpoint is similar to /v1/staker/delegation/check but returns a different response format and does not use Galxe-specific headers.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Staker BTC address in Taproot or Native Segwit format",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The 'data' field contains a boolean value indicating whether the staker has an active delegation.",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.DelegationCheckPublicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/staker/delegation/check": {
             "get": {
-                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day",
+                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day\nNote: This endpoint is designed to work with Galxe-specific headers",
                 "produces": [
                     "application/json"
                 ],
@@ -143,9 +174,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Result",
+                        "description": "The data field will contain a boolean value indicating if the staker has an active delegation",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Result"
+                            "$ref": "#/definitions/handlers.PublicResponse-bool"
                         }
                     },
                     "400": {
@@ -379,6 +410,17 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.DelegationCheckPublicResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "boolean"
+                }
+            }
+        },
         "handlers.PublicResponse-array_services_DelegationPublic": {
             "type": "object",
             "properties": {
@@ -415,6 +457,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/services.StakerStatsPublic"
                     }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handlers.paginationResponse"
+                }
+            }
+        },
+        "handlers.PublicResponse-bool": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "boolean"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handlers.paginationResponse"

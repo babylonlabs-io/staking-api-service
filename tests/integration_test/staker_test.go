@@ -22,7 +22,8 @@ import (
 )
 
 const (
-	checkStakerDelegationUrl = "/v1/staker/delegation/check"
+	checkStakerDelegationUrl          = "/v1/staker/delegation/check"
+	checkStakerDelegationByAddressUrl = "/v1/staker/delegation/address-check"
 )
 
 func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
@@ -182,9 +183,11 @@ func FuzzCheckStakerActiveDelegations(f *testing.F) {
 		addresses, err := utils.DeriveAddressesFromNoCoordPk(
 			stakerPk, testServer.Config.Server.BTCNetParam,
 		)
-		assert.NoError(t, err, "failed to get taproot address from staker pk")
-		isExist := fetchCheckStakerActiveDelegations(t, testServer, addresses.Taproot, "")
+		assert.NoError(t, err, "failed to get addresses from staker pk")
+		isExist := fetchCheckStakerActiveDelegations(t, testServer, selectRandomAddress(addresses, r), "")
 
+		assert.True(t, isExist, "expected staker to have active delegation")
+		isExist = fetchCheckStakerActiveDelegationByAddress(t, testServer, selectRandomAddress(addresses, r))
 		assert.True(t, isExist, "expected staker to have active delegation")
 
 		// Test the API with a staker PK that never had any active delegation
@@ -195,10 +198,12 @@ func FuzzCheckStakerActiveDelegations(f *testing.F) {
 		addressWithNoDelegation, err := utils.DeriveAddressesFromNoCoordPk(
 			stakerPkWithoutDelegation, testServer.Config.Server.BTCNetParam,
 		)
-		assert.NoError(t, err, "failed to get taproot address from staker pk")
+		assert.NoError(t, err, "failed to get addresses from staker pk")
 		isExist = fetchCheckStakerActiveDelegations(
-			t, testServer, addressWithNoDelegation.Taproot, "",
+			t, testServer, selectRandomAddress(addressWithNoDelegation, r), "",
 		)
+		assert.False(t, isExist, "expected staker to not have active delegation")
+		isExist = fetchCheckStakerActiveDelegationByAddress(t, testServer, selectRandomAddress(addressWithNoDelegation, r))
 		assert.False(t, isExist, "expected staker to not have active delegation")
 
 		// Update the staker to have its delegations in a different state
@@ -218,7 +223,9 @@ func FuzzCheckStakerActiveDelegations(f *testing.F) {
 		sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, unbondingEvents)
 		time.Sleep(5 * time.Second)
 
-		isExist = fetchCheckStakerActiveDelegations(t, testServer, addresses.Taproot, "")
+		isExist = fetchCheckStakerActiveDelegations(t, testServer, selectRandomAddress(addresses, r), "")
+		assert.False(t, isExist, "expected staker to not have active delegation")
+		isExist = fetchCheckStakerActiveDelegationByAddress(t, testServer, selectRandomAddress(addresses, r))
 		assert.False(t, isExist, "expected staker to not have active delegation")
 	})
 }
@@ -247,12 +254,12 @@ func FuzzCheckStakerActiveDelegationsForToday(f *testing.F) {
 			stakerPk[0], testServer.Config.Server.BTCNetParam,
 		)
 		assert.NoError(t, err, "failed to get taproot address from staker pk")
-		isExist := fetchCheckStakerActiveDelegations(t, testServer, addresses.Taproot, "")
+		isExist := fetchCheckStakerActiveDelegations(t, testServer, selectRandomAddress(addresses, r), "")
 
 		assert.True(t, isExist, "expected staker to have active delegation")
 
 		// Test with the is_active_today query parameter
-		isExist = fetchCheckStakerActiveDelegations(t, testServer, addresses.Taproot, "today")
+		isExist = fetchCheckStakerActiveDelegations(t, testServer, selectRandomAddress(addresses, r), "today")
 		assert.False(t, isExist, "expected staker to not have active delegation")
 
 		opts = &testutils.TestActiveEventGeneratorOpts{
@@ -267,7 +274,7 @@ func FuzzCheckStakerActiveDelegationsForToday(f *testing.F) {
 		)
 		time.Sleep(3 * time.Second)
 
-		isExist = fetchCheckStakerActiveDelegations(t, testServer, addresses.Taproot, "today")
+		isExist = fetchCheckStakerActiveDelegations(t, testServer, selectRandomAddress(addresses, r), "today")
 		assert.True(t, isExist, "expected staker to have active delegation")
 	})
 }
@@ -368,6 +375,19 @@ func TestReturnErrorWhenInvalidStatePassed(t *testing.T) {
 	assert.Equal(t, "invalid delegation state: invalid_state", response.Message)
 }
 
+func selectRandomAddress(addresses *utils.SupportedAddress, r *rand.Rand) string {
+	// randomly select taproot or native segwit address
+	btcAddress := addresses.Taproot
+	if r.Intn(2) == 1 {
+		btcAddress = addresses.NativeSegwitEven
+		// or can be the odd
+		if r.Intn(2) == 1 {
+			btcAddress = addresses.NativeSegwitOdd
+		}
+	}
+	return btcAddress
+}
+
 func fetchCheckStakerActiveDelegations(
 	t *testing.T, testServer *TestServer, btcAddress string, timeframe string,
 ) bool {
@@ -375,6 +395,28 @@ func fetchCheckStakerActiveDelegations(
 	if timeframe != "" {
 		url += "&timeframe=" + timeframe
 	}
+	resp, err := http.Get(url)
+	assert.NoError(t, err)
+
+	// Check that the status code is HTTP 200 OK
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err, "reading response body should not fail")
+
+	var response handlers.PublicResponse[bool]
+	err = json.Unmarshal(bodyBytes, &response)
+	assert.NoError(t, err, "unmarshalling response body should not fail")
+
+	return response.Data
+}
+
+// This is the new endpoint `/v1/staker/delegation/address-check` which perform
+// the same operation as `/v1/staker/delegation/check` but return a different response format
+func fetchCheckStakerActiveDelegationByAddress(
+	t *testing.T, testServer *TestServer, btcAddress string,
+) bool {
+	url := testServer.Server.URL + checkStakerDelegationByAddressUrl + "?address=" + btcAddress
 	resp, err := http.Get(url)
 	assert.NoError(t, err)
 
