@@ -10,7 +10,7 @@ import (
 const (
 	maxAge                    = 300
 	stakerDelegationCheckPath = "/v1/staker/delegation/check"
-	galxeOrigin               = "https://app.galxe.com"
+	dashboardGalxeOrigin      = "https://dashboard.galxe.com"
 )
 
 func CorsMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
@@ -21,7 +21,7 @@ func CorsMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 			if r.URL.Path == stakerDelegationCheckPath {
 				// Return CORS options specific to this route
 				return cors.Options{
-					AllowedOrigins: []string{galxeOrigin},
+					AllowedOrigins: []string{dashboardGalxeOrigin},
 					AllowedMethods: []string{"GET", "OPTIONS", "POST"},
 					MaxAge:         maxAge,
 					// Below is a workaround to allow the custom CORS header to be set.
@@ -44,9 +44,10 @@ func CorsMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 			cors := cors.New(options)
 			corsHandler := cors.Handler(next)
 
-			// Set the custom cors header for the special route for GET requests
-			if r.URL.Path == stakerDelegationCheckPath {
-				w.Header().Set("Access-Control-Allow-Origin", galxeOrigin)
+			origin := r.Header.Get("Origin")
+			// Set the custom cors header for the special route for GET requests from Galxe
+			if r.URL.Path == stakerDelegationCheckPath && origin == dashboardGalxeOrigin {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
 				w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS, POST")
 				if r.Method == http.MethodOptions {
 					// This is a preflight request, respond with 204 immediately

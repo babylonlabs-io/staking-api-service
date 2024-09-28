@@ -135,7 +135,7 @@ func TestActiveStakingFetchedByStakerPkWithInvalidPaginationKey(t *testing.T) {
 	assert.Equal(t, "invalid pagination key format", response.Message)
 }
 
-func TestCheckStakerDelegationAllowOptionRequest(t *testing.T) {
+func TestCheckStakerDelegationAllowOptionRequestForGalxe(t *testing.T) {
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
 
@@ -144,7 +144,7 @@ func TestCheckStakerDelegationAllowOptionRequest(t *testing.T) {
 	req, err := http.NewRequest("OPTIONS", url, nil)
 	assert.NoError(t, err)
 	req.Header.Add("Access-Control-Request-Method", "GET")
-	req.Header.Add("Origin", "https://app.galxe.com")
+	req.Header.Add("Origin", "https://dashboard.galxe.com")
 	req.Header.Add("Access-Control-Request-Headers", "Content-Type")
 
 	// Send the request
@@ -154,8 +154,15 @@ func TestCheckStakerDelegationAllowOptionRequest(t *testing.T) {
 
 	// Check that the status code is HTTP 204
 	assert.Equal(t, http.StatusNoContent, resp.StatusCode, "expected HTTP 204")
-	assert.Equal(t, "https://app.galxe.com", resp.Header.Get("Access-Control-Allow-Origin"), "expected Access-Control-Allow-Origin to be https://app.galxe.com")
+	assert.Equal(t, "https://dashboard.galxe.com", resp.Header.Get("Access-Control-Allow-Origin"), "expected Access-Control-Allow-Origin to be https://dashboard.galxe.com")
 	assert.Equal(t, "GET, OPTIONS, POST", resp.Header.Get("Access-Control-Allow-Methods"), "expected Access-Control-Allow-Methods to be GET and OPTIONS")
+
+	// Try with a different origin
+	req.Header.Add("Origin", "https://dashboard.galxe.com")
+	resp, err = client.Do(req)
+	assert.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusNoContent, resp.StatusCode, "expected HTTP 204")
 }
 
 func FuzzCheckStakerActiveDelegations(f *testing.F) {
@@ -384,9 +391,11 @@ func fetchCheckStakerActiveDelegations(
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var response handlers.PublicResponse[bool]
+	var response handlers.DelegationCheckPublicResponse
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
+
+	assert.Equal(t, response.Code, 0, "expected response code to be 0")
 
 	return response.Data
 }

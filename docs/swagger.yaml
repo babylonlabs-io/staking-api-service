@@ -7,6 +7,13 @@ definitions:
       statusCode:
         type: integer
     type: object
+  handlers.DelegationCheckPublicResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        type: boolean
+    type: object
   handlers.PublicResponse-array_services_DelegationPublic:
     properties:
       data:
@@ -326,9 +333,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Result
+          description: Delegation check result
           schema:
-            $ref: '#/definitions/handlers.Result'
+            $ref: '#/definitions/handlers.DelegationCheckPublicResponse'
         "400":
           description: 'Error: Bad Request'
           schema:

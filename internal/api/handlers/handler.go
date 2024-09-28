@@ -17,6 +17,10 @@ type Handler struct {
 	services *services.Services
 }
 
+type ResultOptions struct {
+	Code int
+}
+
 type paginationResponse struct {
 	NextKey string `json:"next_key"`
 }
