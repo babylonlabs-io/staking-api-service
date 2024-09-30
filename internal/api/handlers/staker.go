@@ -7,6 +7,11 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 )
 
+type DelegationCheckPublicResponse struct {
+	Data bool `json:"data"`
+	Code int  `json:"code"`
+}
+
 // GetStakerDelegations @Summary Get staker delegations
 // @Description Retrieves delegations for a given staker
 // @Produce json
@@ -46,7 +51,7 @@ func (h *Handler) GetStakerDelegations(request *http.Request) (*Result, *types.E
 // @Produce json
 // @Param address query string true "Staker BTC address in Taproot/Native Segwit format"
 // @Param timeframe query string false "Check if the delegation is active within the provided timeframe" Enums(today)
-// @Success 200 {object} Result "Result"
+// @Success 200 {object} DelegationCheckPublicResponse "Delegation check result"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v1/staker/delegation/check [get]
 func (h *Handler) CheckStakerDelegationExist(request *http.Request) (*Result, *types.Error) {
@@ -65,7 +70,7 @@ func (h *Handler) CheckStakerDelegationExist(request *http.Request) (*Result, *t
 		return nil, err
 	}
 	if _, exist := addressToPkMapping[address]; !exist {
-		return NewResult(false), nil
+		return buildDelegationCheckResponse(false), nil
 	}
 
 	exist, err := h.services.CheckStakerHasActiveDelegationByPk(
@@ -75,7 +80,16 @@ func (h *Handler) CheckStakerDelegationExist(request *http.Request) (*Result, *t
 		return nil, err
 	}
 
-	return NewResult(exist), nil
+	return buildDelegationCheckResponse(exist), nil
+}
+
+func buildDelegationCheckResponse(exist bool) *Result {
+	return &Result{
+		Data: &DelegationCheckPublicResponse{
+			Data: exist, Code: 0,
+		},
+		Status: http.StatusOK,
+	}
 }
 
 func parseTimeframeToAfterTimestamp(timeframe string) (int64, *types.Error) {

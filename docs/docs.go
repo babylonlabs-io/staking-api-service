@@ -143,9 +143,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Result",
+                        "description": "Delegation check result",
                         "schema": {
-                            "$ref": "#/definitions/handlers.Result"
+                            "$ref": "#/definitions/handlers.DelegationCheckPublicResponse"
                         }
                     },
                     "400": {
@@ -376,6 +376,17 @@ const docTemplate = `{
                 },
                 "statusCode": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.DelegationCheckPublicResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "boolean"
                 }
             }
         },
