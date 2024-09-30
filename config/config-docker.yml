@@ -34,8 +34,3 @@ assets:
     host: "http://ord-poc.devnet.babylonchain.io"
     port: 8888
     timeout: 1000
-  unisat:
-    host: "https://open-api.unisat.io"
-    limit: 100
-    timeout: 1000
-    token: "add your token as ASSETS_UNISAT_TOKEN in environment variables"
