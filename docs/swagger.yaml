@@ -376,7 +376,10 @@ paths:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
   /v1/staker/pubkey-lookup:
     get:
-      description: Retrieves public keys for the given BTC addresses.
+      description: |-
+        Retrieves public keys for the given BTC addresses.
+        This endpoint only returns public keys for addresses that have associated delegations in the system.
+        If an address has no associated delegation, it will not be included in the response. Supports both Taproot and Native Segwit addresses.
       parameters:
       - collectionFormat: multi
         description: List of BTC addresses to look up (up to 10), currently only supports

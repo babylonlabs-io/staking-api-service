@@ -209,7 +209,7 @@ const docTemplate = `{
         },
         "/v1/staker/pubkey-lookup": {
             "get": {
-                "description": "Retrieves public keys for the given BTC addresses. This endpoint",
+                "description": "Retrieves public keys for the given BTC addresses.\nThis endpoint only returns public keys for addresses that have associated delegations in the system.\nIf an address has no associated delegation, it will not be included in the response. Supports both Taproot and Native Segwit addresses.",
                 "produces": [
                     "application/json"
                 ],
