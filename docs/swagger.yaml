@@ -376,7 +376,7 @@ paths:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
   /v1/staker/pubkey-lookup:
     get:
-      description: Retrieves public keys for the given BTC addresses. This endpoint
+      description: Retrieves public keys for the given BTC addresses.
       parameters:
       - collectionFormat: multi
         description: List of BTC addresses to look up (up to 10), currently only supports
