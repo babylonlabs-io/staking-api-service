@@ -32,7 +32,7 @@ func (s *Services) ProcessAndSaveBtcAddresses(
 	}
 
 	// Try to save the btc addresses, ignore if they already exist
-	err = s.DbClient.InsertPkAddressMappings(
+	err = s.DbClients.V1DBClient.InsertPkAddressMappings(
 		ctx, stakerPkHex, addresses.Taproot,
 		addresses.NativeSegwitOdd, addresses.NativeSegwitEven,
 	)
@@ -75,7 +75,7 @@ func (s *Services) GetStakerPublicKeysByAddresses(
 	addressPkMapping := make(map[string]string)
 	// Get the public keys from the db by taproot addresses
 	if len(taprootAddresses) > 0 {
-		mappings, err := s.DbClient.FindPkMappingsByTaprootAddress(
+		mappings, err := s.DbClients.V1DBClient.FindPkMappingsByTaprootAddress(
 			ctx, taprootAddresses,
 		)
 		if err != nil {
@@ -89,7 +89,7 @@ func (s *Services) GetStakerPublicKeysByAddresses(
 	}
 	// Get the public keys from the db by native segwit addresses
 	if len(nativeSegwitAddresses) > 0 {
-		mappings, err := s.DbClient.FindPkMappingsByNativeSegwitAddress(
+		mappings, err := s.DbClients.V1DBClient.FindPkMappingsByNativeSegwitAddress(
 			ctx, nativeSegwitAddresses,
 		)
 		if err != nil {

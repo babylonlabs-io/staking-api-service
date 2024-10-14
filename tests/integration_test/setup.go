@@ -39,7 +39,7 @@ var setUpDbIndex = false
 
 type TestServerDependency struct {
 	ConfigOverrides         *config.Config
-	MockDbClient            db.DBClient
+	MockDbClients           services.DbClients
 	PreInjectEventsHandler  func(queueClient client.QueueClient) error
 	MockedFinalityProviders []types.FinalityProviderDetails
 	MockedGlobalParams      *types.GlobalParams
@@ -120,8 +120,8 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 		t.Fatalf("Failed to initialize services: %v", err)
 	}
 
-	if dep != nil && dep.MockDbClient != nil {
-		services.DbClient = dep.MockDbClient
+	if dep != nil && dep.MockDbClients.V1DBClient != nil {
+		services.DbClients = dep.MockDbClients
 	} else {
 		// This means we are using real database, we not mocking anything
 		testutils.SetupTestDB(*cfg)

@@ -1,6 +1,7 @@
-package model
+package v1model
 
 import (
+	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
@@ -33,7 +34,7 @@ func BuildDelegationByStakerPaginationToken(d DelegationDocument) (string, error
 		StakingTxHashHex:   d.StakingTxHashHex,
 		StakingStartHeight: d.StakingTx.StartHeight,
 	}
-	token, err := GetPaginationToken(page)
+	token, err := model.GetPaginationToken(page)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +49,7 @@ func BuildDelegationScanPaginationToken(d DelegationDocument) (string, error) {
 	page := &DelegationScanPagination{
 		StakingTxHashHex: d.StakingTxHashHex,
 	}
-	token, err := GetPaginationToken(page)
+	token, err := model.GetPaginationToken(page)
 	if err != nil {
 		return "", err
 	}

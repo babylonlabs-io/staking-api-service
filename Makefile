@@ -57,7 +57,9 @@ run-unprocessed-events-replay-local:
 		--replay
 
 generate-mock-interface:
-	cd internal/db && mockery --name=DBClient --output=../../tests/mocks --outpkg=mocks --filename=mock_db_client.go
+	cd internal/db && mockery --name=BaseDBClient --output=../../tests/mocks --outpkg=mocks --filename=mock_base_db_client.go
+	cd internal/db/v1 && mockery --name=V1DBClient --output=../../../tests/mocks --outpkg=mocks --filename=mock_v1_db_client.go
+	cd internal/db/v2 && mockery --name=V2DBClient --output=../../../tests/mocks --outpkg=mocks --filename=mock_v2_db_client.go
 	cd internal/clients/ordinals && mockery --name=OrdinalsClientInterface --output=../../../tests/mocks --outpkg=mocks --filename=mock_ordinal_client.go
 
 test:

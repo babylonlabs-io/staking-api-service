@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/db"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/rs/zerolog/log"
 )
@@ -67,7 +67,7 @@ func (s *Services) GetFinalityProvider(
 	ctx context.Context, fpPkHex string,
 ) (*FpDetailsPublic, *types.Error) {
 	fpStatsByPks, err :=
-		s.DbClient.FindFinalityProviderStatsByFinalityProviderPkHex(
+		s.DbClients.V1DBClient.FindFinalityProviderStatsByFinalityProviderPkHex(
 			ctx, []string{fpPkHex},
 		)
 	if err != nil {
@@ -144,7 +144,7 @@ func (s *Services) GetFinalityProviders(ctx context.Context, page string) ([]*Fp
 		fpParamsMap[fp.BtcPk] = fp
 	}
 
-	resultMap, err := s.DbClient.FindFinalityProviderStats(ctx, page)
+	resultMap, err := s.DbClients.V1DBClient.FindFinalityProviderStats(ctx, page)
 	if err != nil {
 		if db.IsInvalidPaginationTokenError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching finality providers")
@@ -213,11 +213,11 @@ func (s *Services) findRegisteredFinalityProvidersNotInUse(
 	for _, fp := range fpParams {
 		finalityProvidersPkHex = append(finalityProvidersPkHex, fp.BtcPk)
 	}
-	fpStatsByPks, err := s.DbClient.FindFinalityProviderStatsByFinalityProviderPkHex(ctx, finalityProvidersPkHex)
+	fpStatsByPks, err := s.DbClients.V1DBClient.FindFinalityProviderStatsByFinalityProviderPkHex(ctx, finalityProvidersPkHex)
 	if err != nil {
 		return nil, err
 	}
-	fpStatsByPksMap := make(map[string]*model.FinalityProviderStatsDocument)
+	fpStatsByPksMap := make(map[string]*v1model.FinalityProviderStatsDocument)
 	for _, fpStat := range fpStatsByPks {
 		fpStatsByPksMap[fpStat.FinalityProviderPkHex] = fpStat
 	}

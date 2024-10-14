@@ -13,6 +13,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
@@ -48,7 +49,7 @@ func TestStatsShouldBeShardedInDb(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// directly read from the db to check that we have more than 2 records in the overall stats collection
-	results, err := testutils.InspectDbDocuments[model.OverallStatsDocument](
+	results, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
 		testServer.Config, model.OverallStatsCollection,
 	)
 	if err != nil {
@@ -96,7 +97,7 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 	defer resp.Body.Close()
 
 	// Let's inspect what's stored in the database
-	results, err := testutils.InspectDbDocuments[model.UnbondingDocument](testServer.Config, model.UnbondingCollection)
+	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](testServer.Config, model.UnbondingCollection)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
 	assert.Equal(t, 1, len(results), "expected 1 document in the DB")
@@ -119,7 +120,7 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// directly read from the db to check that we only have 1 shard in the overall stats collection
-	stats, err := testutils.InspectDbDocuments[model.OverallStatsDocument](
+	stats, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
 		testServer.Config, model.OverallStatsCollection,
 	)
 	if err != nil {
@@ -153,7 +154,7 @@ func TestShouldNotPerformStatsCalculationForUnbondingTxWhenDelegationIsOverflowe
 
 	// directly read from the db to check that we have more than 2 records in the
 	// overall stats collection
-	results, err := testutils.InspectDbDocuments[model.OverallStatsDocument](
+	results, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
 		testServer.Config, model.OverallStatsCollection,
 	)
 	if err != nil {

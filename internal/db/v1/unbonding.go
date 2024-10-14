@@ -1,24 +1,26 @@
-package db
+package v1db
 
 import (
 	"context"
 	"errors"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (db *Database) SaveUnbondingTx(
+func (v1db *V1Database) SaveUnbondingTx(
 	ctx context.Context, stakingTxHashHex, txHashHex, txHex, signatureHex string,
 ) error {
-	delegationClient := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
-	unbondingClient := db.Client.Database(db.DbName).Collection(model.UnbondingCollection)
+	delegationClient := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	unbondingClient := v1db.Client.Database(v1db.DbName).Collection(model.UnbondingCollection)
 
 	// Start a session
-	session, err := db.Client.StartSession()
+	session, err := v1db.Client.StartSession()
 	if err != nil {
 		return err
 	}
@@ -31,11 +33,11 @@ func (db *Database) SaveUnbondingTx(
 			"_id":   stakingTxHashHex,
 			"state": types.Active,
 		}
-		var delegationDocument model.DelegationDocument
+		var delegationDocument v1model.DelegationDocument
 		err = delegationClient.FindOne(sessCtx, delegationFilter).Decode(&delegationDocument)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
-				return nil, &NotFoundError{
+				return nil, &db.NotFoundError{
 					Key:     stakingTxHashHex,
 					Message: "no active delegation found for unbonding request",
 				}
@@ -50,18 +52,18 @@ func (db *Database) SaveUnbondingTx(
 		}
 
 		if result.MatchedCount == 0 {
-			return nil, &NotFoundError{
+			return nil, &db.NotFoundError{
 				Key:     stakingTxHashHex,
 				Message: "delegation not found or not eligible for unbonding",
 			}
 		}
 
 		// Insert the unbonding transaction document
-		unbondingDocument := model.UnbondingDocument{
+		unbondingDocument := v1model.UnbondingDocument{
 			StakerPkHex:        delegationDocument.StakerPkHex,
 			FinalityPkHex:      delegationDocument.FinalityProviderPkHex,
 			UnbondingTxSigHex:  signatureHex,
-			State:              model.UnbondingInitialState,
+			State:              v1model.UnbondingInitialState,
 			UnbondingTxHashHex: txHashHex,
 			UnbondingTxHex:     txHex,
 			StakingTxHex:       delegationDocument.StakingTx.TxHex,
@@ -76,7 +78,7 @@ func (db *Database) SaveUnbondingTx(
 			if errors.As(err, &writeErr) {
 				for _, e := range writeErr.WriteErrors {
 					if mongo.IsDuplicateKeyError(e) {
-						return nil, &DuplicateKeyError{
+						return nil, &db.DuplicateKeyError{
 							Key:     txHashHex,
 							Message: "unbonding transaction already exists",
 						}
@@ -100,11 +102,11 @@ func (db *Database) SaveUnbondingTx(
 
 // Change the state to `unbonding` and save the unbondingTx data
 // Return not found error if the stakingTxHashHex is not found or the existing state is not eligible for unbonding
-func (db *Database) TransitionToUnbondingState(
+func (v1db *V1Database) TransitionToUnbondingState(
 	ctx context.Context, txHashHex string, startHeight, timelock, outputIndex uint64, txHex string, startTimestamp int64,
 ) error {
 	unbondingTxMap := make(map[string]interface{})
-	unbondingTxMap["unbonding_tx"] = model.TimelockTransaction{
+	unbondingTxMap["unbonding_tx"] = v1model.TimelockTransaction{
 		TxHex:          txHex,
 		OutputIndex:    outputIndex,
 		StartTimestamp: startTimestamp,
@@ -112,7 +114,7 @@ func (db *Database) TransitionToUnbondingState(
 		TimeLock:       timelock,
 	}
 
-	err := db.transitionState(
+	err := v1db.transitionState(
 		ctx, txHashHex, types.Unbonding.ToString(),
 		utils.QualifiedStatesToUnbonding(), unbondingTxMap,
 	)

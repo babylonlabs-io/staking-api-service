@@ -17,7 +17,7 @@ func (s *Services) ProcessExpireCheck(
 	startHeight, timelock uint64, txType types.StakingTxType,
 ) *types.Error {
 	expireHeight := startHeight + timelock
-	err := s.DbClient.SaveTimeLockExpireCheck(
+	err := s.DbClients.V1DBClient.SaveTimeLockExpireCheck(
 		ctx, stakingTxHashHex, expireHeight, txType.ToString(),
 	)
 	if err != nil {
@@ -32,7 +32,7 @@ func (s *Services) ProcessExpireCheck(
 func (s *Services) TransitionToUnbondedState(
 	ctx context.Context, stakingType types.StakingTxType, stakingTxHashHex string,
 ) *types.Error {
-	err := s.DbClient.TransitionToUnbondedState(ctx, stakingTxHashHex, utils.QualifiedStatesToUnbonded(stakingType))
+	err := s.DbClients.V1DBClient.TransitionToUnbondedState(ctx, stakingTxHashHex, utils.QualifiedStatesToUnbonded(stakingType))
 	if err != nil {
 		// If the delegation is not found, we can ignore the error, it just means the delegation is not in a state that we can transition to unbonded
 		if db.IsNotFoundError(err) {
