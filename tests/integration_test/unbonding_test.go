@@ -575,7 +575,7 @@ func TestUnbondingRequestValidation(t *testing.T) {
 	err = json.Unmarshal(bodyBytes, &unbondingResponse)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 	assert.Equal(t, types.ValidationError.String(), unbondingResponse.ErrorCode)
-	assert.Equal(t, "invalid unbonding tx hex: the unbonding tx is not a simple transfer: simple transfer tx must not be replacable", unbondingResponse.Message)
+	assert.Equal(t, "invalid unbonding tx hex: the unbonding tx is not a valid pre-signed unbonding tx: pre-signed tx must not be replaceable", unbondingResponse.Message)
 }
 
 func TestContentLength(t *testing.T) {
