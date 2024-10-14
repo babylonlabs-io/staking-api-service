@@ -112,7 +112,7 @@ func GenerateRandomTx(
 					Hash:  chainhash.HashH(bbndatagen.GenRandomByteArray(r, 10)),
 					Index: r.Uint32(),
 				},
-				SignatureScript: bbndatagen.GenRandomByteArray(r, 10),
+				SignatureScript: []byte{},
 				Sequence:        sequence,
 			},
 		},
