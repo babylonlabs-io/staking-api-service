@@ -9,7 +9,7 @@ import (
 )
 
 func (db *Database) SaveUnprocessableMessage(ctx context.Context, messageBody, receipt string) error {
-	unprocessableMsgClient := db.Client.Database(db.DbName).Collection(model.UnprocessableMsgCollection)
+	unprocessableMsgClient := db.Client.Database(db.DbName).Collection(model.V1UnprocessableMsgCollection)
 
 	_, err := unprocessableMsgClient.InsertOne(ctx, model.NewUnprocessableMessageDocument(messageBody, receipt))
 	if err != nil {
@@ -20,7 +20,7 @@ func (db *Database) SaveUnprocessableMessage(ctx context.Context, messageBody, r
 }
 
 func (db *Database) FindUnprocessableMessages(ctx context.Context) ([]model.UnprocessableMessageDocument, error) {
-	client := db.Client.Database(db.DbName).Collection(model.UnprocessableMsgCollection)
+	client := db.Client.Database(db.DbName).Collection(model.V1UnprocessableMsgCollection)
 	filter := bson.M{}
 	options := options.FindOptions{}
 
@@ -39,7 +39,7 @@ func (db *Database) FindUnprocessableMessages(ctx context.Context) ([]model.Unpr
 }
 
 func (db *Database) DeleteUnprocessableMessage(ctx context.Context, Receipt interface{}) error {
-	unprocessableMsgClient := db.Client.Database(db.DbName).Collection(model.UnprocessableMsgCollection)
+	unprocessableMsgClient := db.Client.Database(db.DbName).Collection(model.V1UnprocessableMsgCollection)
 	filter := bson.M{"receipt": Receipt}
 	_, err := unprocessableMsgClient.DeleteOne(ctx, filter)
 	return err

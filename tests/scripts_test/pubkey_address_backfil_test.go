@@ -56,7 +56,7 @@ func TestBackfillAddressesBasedOnPubKeys(t *testing.T) {
 	for _, doc := range docs {
 		testutils.InjectDbDocument(
 			cfg,
-			model.DelegationCollection,
+			model.V1DelegationCollection,
 			doc,
 		)
 	}
@@ -68,7 +68,7 @@ func TestBackfillAddressesBasedOnPubKeys(t *testing.T) {
 	// check if the data is inserted
 	results, err := testutils.InspectDbDocuments[model.PkAddressMapping](
 		cfg,
-		model.PkAddressMappingsCollection,
+		model.V1PkAddressMappingsCollection,
 	)
 	assert.Nil(t, err)
 	// find the num of unique staker pks from the docs
@@ -97,7 +97,7 @@ func TestBackfillAddressesBasedOnPubKeys(t *testing.T) {
 	assert.Nil(t, err)
 	results2, err := testutils.InspectDbDocuments[model.PkAddressMapping](
 		cfg,
-		model.PkAddressMappingsCollection,
+		model.V1PkAddressMappingsCollection,
 	)
 	assert.Nil(t, err)
 	assert.Equal(t, len(results), len(results2))

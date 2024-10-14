@@ -16,8 +16,8 @@ import (
 func (v1db *V1Database) SaveUnbondingTx(
 	ctx context.Context, stakingTxHashHex, txHashHex, txHex, signatureHex string,
 ) error {
-	delegationClient := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
-	unbondingClient := v1db.Client.Database(v1db.DbName).Collection(model.UnbondingCollection)
+	delegationClient := v1db.Client.Database(v1db.DbName).Collection(model.V1DelegationCollection)
+	unbondingClient := v1db.Client.Database(v1db.DbName).Collection(model.V1UnbondingCollection)
 
 	// Start a session
 	session, err := v1db.Client.StartSession()

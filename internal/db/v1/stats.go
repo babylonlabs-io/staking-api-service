@@ -23,7 +23,7 @@ import (
 func (db *V1Database) GetOrCreateStatsLock(
 	ctx context.Context, stakingTxHashHex string, txType string,
 ) (*v1model.StatsLockDocument, error) {
-	client := db.Client.Database(db.DbName).Collection(model.StatsLockCollection)
+	client := db.Client.Database(db.DbName).Collection(model.V1StatsLockCollection)
 	id := constructStatsLockId(stakingTxHashHex, txType)
 	filter := bson.M{"_id": id}
 	// Define the default document to be inserted if not found
@@ -52,8 +52,8 @@ func (db *V1Database) GetOrCreateStatsLock(
 func (v1db *V1Database) IncrementOverallStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
-	overallStatsClient := v1db.Client.Database(v1db.DbName).Collection(model.OverallStatsCollection)
-	stakerStatsClient := v1db.Client.Database(v1db.DbName).Collection(model.StakerStatsCollection)
+	overallStatsClient := v1db.Client.Database(v1db.DbName).Collection(model.V1OverallStatsCollection)
+	stakerStatsClient := v1db.Client.Database(v1db.DbName).Collection(model.V1StakerStatsCollection)
 
 	// Start a session
 	session, sessionErr := v1db.Client.StartSession()
@@ -124,7 +124,7 @@ func (v1db *V1Database) SubtractOverallStats(
 			"active_delegations": -1,
 		},
 	}
-	overallStatsClient := v1db.Client.Database(v1db.DbName).Collection(model.OverallStatsCollection)
+	overallStatsClient := v1db.Client.Database(v1db.DbName).Collection(model.V1OverallStatsCollection)
 
 	// Start a session
 	session, sessionErr := v1db.Client.StartSession()
@@ -171,7 +171,7 @@ func (v1db *V1Database) GetOverallStats(ctx context.Context) (*v1model.OverallSt
 		shardsId = append(shardsId, fmt.Sprintf("%d", i))
 	}
 
-	client := v1db.Client.Database(v1db.DbName).Collection(model.OverallStatsCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1OverallStatsCollection)
 	filter := bson.M{"_id": bson.M{"$in": shardsId}}
 	cursor, err := client.Find(ctx, filter)
 	if err != nil {
@@ -212,7 +212,7 @@ func (v1db *V1Database) generateOverallStatsId() (string, error) {
 }
 
 func (v1db *V1Database) updateStatsLockByFieldName(ctx context.Context, stakingTxHashHex, state string, fieldName string) error {
-	statsLockClient := v1db.Client.Database(v1db.DbName).Collection(model.StatsLockCollection)
+	statsLockClient := v1db.Client.Database(v1db.DbName).Collection(model.V1StatsLockCollection)
 	filter := bson.M{"_id": constructStatsLockId(stakingTxHashHex, state), fieldName: false}
 	update := bson.M{"$set": bson.M{fieldName: true}}
 	result, err := statsLockClient.UpdateOne(ctx, filter, update)
@@ -245,7 +245,7 @@ func (v1db *V1Database) IncrementFinalityProviderStats(
 			"active_delegations": 1,
 			"total_delegations":  1,
 		},
-	}                    
+	}
 	return v1db.updateFinalityProviderStats(ctx, types.Active.ToString(), stakingTxHashHex, fpPkHex, upsertUpdate)
 }
 
@@ -266,7 +266,7 @@ func (v1db *V1Database) SubtractFinalityProviderStats(
 
 // FindFinalityProviderStats fetches the finality provider stats from the database
 func (v1db *V1Database) FindFinalityProviderStats(ctx context.Context, paginationToken string) (*db.DbResultMap[*v1model.FinalityProviderStatsDocument], error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.FinalityProviderStatsCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1FinalityProviderStatsCollection)
 	options := options.Find().SetSort(bson.D{{Key: "active_tvl", Value: -1}}) // Sorting in descending order
 	var filter bson.M
 
@@ -295,7 +295,7 @@ func (v1db *V1Database) FindFinalityProviderStats(ctx context.Context, paginatio
 func (v1db *V1Database) FindFinalityProviderStatsByFinalityProviderPkHex(
 	ctx context.Context, finalityProviderPkHex []string,
 ) ([]*v1model.FinalityProviderStatsDocument, error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.FinalityProviderStatsCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1FinalityProviderStatsCollection)
 	filter := bson.M{"_id": bson.M{"$in": finalityProviderPkHex}}
 	cursor, err := client.Find(ctx, filter)
 	if err != nil {
@@ -312,7 +312,7 @@ func (v1db *V1Database) FindFinalityProviderStatsByFinalityProviderPkHex(
 }
 
 func (v1db *V1Database) updateFinalityProviderStats(ctx context.Context, state, stakingTxHashHex, fpPkHex string, upsertUpdate primitive.M) error {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.FinalityProviderStatsCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1FinalityProviderStatsCollection)
 
 	// Start a session
 	session, sessionErr := v1db.Client.StartSession()
@@ -376,7 +376,7 @@ func (v1db *V1Database) SubtractStakerStats(
 }
 
 func (v1db *V1Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.StakerStatsCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1StakerStatsCollection)
 
 	// Start a session
 	session, sessionErr := v1db.Client.StartSession()
@@ -406,7 +406,7 @@ func (v1db *V1Database) updateStakerStats(ctx context.Context, state, stakingTxH
 }
 
 func (v1db *V1Database) FindTopStakersByTvl(ctx context.Context, paginationToken string) (*db.DbResultMap[*v1model.StakerStatsDocument], error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.StakerStatsCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1StakerStatsCollection)
 
 	opts := options.Find().SetSort(bson.D{{Key: "active_tvl", Value: -1}})
 	var filter bson.M
@@ -435,7 +435,7 @@ func (v1db *V1Database) FindTopStakersByTvl(ctx context.Context, paginationToken
 func (v1db *V1Database) GetStakerStats(
 	ctx context.Context, stakerPkHex string,
 ) (*v1model.StakerStatsDocument, error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.StakerStatsCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1StakerStatsCollection)
 	filter := bson.M{"_id": stakerPkHex}
 	var result v1model.StakerStatsDocument
 	err := client.FindOne(ctx, filter).Decode(&result)

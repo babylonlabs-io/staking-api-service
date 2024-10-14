@@ -20,7 +20,7 @@ func (v1db *V1Database) SaveActiveStakingDelegation(
 	stakingTxHex string, amount, startHeight, timelock, outputIndex uint64,
 	startTimestamp int64, isOverflow bool,
 ) error {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1DelegationCollection)
 	document := v1model.DelegationDocument{
 		StakingTxHashHex:      stakingTxHashHex, // Primary key of db collection
 		StakerPkHex:           stakerPkHex,
@@ -60,7 +60,7 @@ func (v1db *V1Database) SaveActiveStakingDelegation(
 func (v1db *V1Database) CheckDelegationExistByStakerPk(
 	ctx context.Context, stakerPk string, extraFilter *DelegationFilter,
 ) (bool, error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1DelegationCollection)
 	filter := buildAdditionalDelegationFilter(
 		bson.M{"staker_pk_hex": stakerPk}, extraFilter,
 	)
@@ -79,7 +79,7 @@ func (v1db *V1Database) FindDelegationsByStakerPk(
 	ctx context.Context, stakerPk string,
 	extraFilter *DelegationFilter, paginationToken string,
 ) (*db.DbResultMap[v1model.DelegationDocument], error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1DelegationCollection)
 
 	filter := bson.M{"staker_pk_hex": stakerPk}
 	filter = buildAdditionalDelegationFilter(filter, extraFilter)
@@ -113,7 +113,7 @@ func (v1db *V1Database) FindDelegationsByStakerPk(
 // SaveUnbondingTx saves the unbonding transaction details for a staking transaction
 // It returns an NotFoundError if the staking transaction is not found
 func (v1db *V1Database) FindDelegationByTxHashHex(ctx context.Context, stakingTxHashHex string) (*v1model.DelegationDocument, error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1DelegationCollection)
 	filter := bson.M{"_id": stakingTxHashHex}
 	var delegation v1model.DelegationDocument
 	err := client.FindOne(ctx, filter).Decode(&delegation)
@@ -133,7 +133,7 @@ func (v1db *V1Database) ScanDelegationsPaginated(
 	ctx context.Context,
 	paginationToken string,
 ) (*db.DbResultMap[v1model.DelegationDocument], error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1DelegationCollection)
 	filter := bson.M{}
 	options := options.Find()
 	options.SetSort(bson.M{"_id": 1})
@@ -162,7 +162,7 @@ func (v1db *V1Database) transitionState(
 	ctx context.Context, stakingTxHashHex, newState string,
 	eligiblePreviousState []types.DelegationState, additionalUpdates map[string]interface{},
 ) error {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1DelegationCollection)
 	filter := bson.M{"_id": stakingTxHashHex, "state": bson.M{"$in": eligiblePreviousState}}
 	update := bson.M{"$set": bson.M{"state": newState}}
 	for field, value := range additionalUpdates {

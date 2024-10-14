@@ -150,7 +150,7 @@ func TestPkAddressMappingWorksForOlderStatsEventVersion(t *testing.T) {
 		State:                 string(del.State),
 	}
 	testutils.InjectDbDocument(
-		testServer.Config, model.DelegationCollection, del,
+		testServer.Config, model.V1DelegationCollection, del,
 	)
 	sendTestMessage(
 		testServer.Queues.StatsQueueClient, []event{*oldStatsMsg},
@@ -159,7 +159,7 @@ func TestPkAddressMappingWorksForOlderStatsEventVersion(t *testing.T) {
 
 	// inspect the items in the database
 	pkAddresses, err := testutils.InspectDbDocuments[model.PkAddressMapping](
-		testServer.Config, model.PkAddressMappingsCollection,
+		testServer.Config, model.V1PkAddressMappingsCollection,
 	)
 	assert.NoError(t, err, "failed to inspect the items in the database")
 	assert.Equal(t, 1, len(pkAddresses), "expected only one item in the database")

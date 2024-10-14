@@ -33,7 +33,7 @@ func TestReplayUnprocessableMessages(t *testing.T) {
 
 	testutils.InjectDbDocument(
 		testServer.Config,
-		model.UnprocessableMsgCollection,
+		model.V1UnprocessableMsgCollection,
 		model.NewUnprocessableMessageDocument(doc, "receipt"),
 	)
 	db := testutils.DirectDbConnection(testServer.Config)
