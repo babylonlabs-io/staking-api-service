@@ -9,28 +9,29 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
-func createNewDelegationDocuments(cfg *config.Config, numOfDocs int) []*model.DelegationDocument {
+func createNewDelegationDocuments(cfg *config.Config, numOfDocs int) []*v1model.DelegationDocument {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	var delegationDocuments []*model.DelegationDocument
+	var delegationDocuments []*v1model.DelegationDocument
 	opts := &testutils.TestActiveEventGeneratorOpts{
 		NumOfEvents: 1, // a single event to make sure it's always unique
 	}
 	for i := 0; i < numOfDocs; i++ {
 		activeStakingEvenets := testutils.GenerateRandomActiveStakingEvents(r, opts)
 		for _, event := range activeStakingEvenets {
-			doc := &model.DelegationDocument{
+			doc := &v1model.DelegationDocument{
 				StakingTxHashHex:      event.StakingTxHashHex,
 				StakerPkHex:           event.StakerPkHex,
 				FinalityProviderPkHex: event.FinalityProviderPkHex,
 				StakingValue:          event.StakingValue,
 				State:                 types.Active,
-				StakingTx: &model.TimelockTransaction{
+				StakingTx: &v1model.TimelockTransaction{
 					TxHex:          event.StakingTxHex,
 					OutputIndex:    event.StakingOutputIndex,
 					StartTimestamp: event.StakingStartTimestamp,

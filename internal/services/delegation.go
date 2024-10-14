@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/db"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
+	v1db "github.com/babylonlabs-io/staking-api-service/internal/db/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 	"github.com/rs/zerolog/log"
@@ -30,7 +31,7 @@ type DelegationPublic struct {
 	IsOverflow            bool               `json:"is_overflow"`
 }
 
-func FromDelegationDocument(d *model.DelegationDocument) DelegationPublic {
+func FromDelegationDocument(d *v1model.DelegationDocument) DelegationPublic {
 	delPublic := DelegationPublic{
 		StakingTxHashHex:      d.StakingTxHashHex,
 		StakerPkHex:           d.StakerPkHex,
@@ -64,14 +65,14 @@ func (s *Services) DelegationsByStakerPk(
 	ctx context.Context, stakerPk string,
 	state types.DelegationState, pageToken string,
 ) ([]DelegationPublic, string, *types.Error) {
-	filter := &db.DelegationFilter{}
+	filter := &v1db.DelegationFilter{}
 	if state != "" {
-		filter = &db.DelegationFilter{
+		filter = &v1db.DelegationFilter{
 			States: []types.DelegationState{state},
 		}
 	}
 
-	resultMap, err := s.DbClient.FindDelegationsByStakerPk(ctx, stakerPk, filter, pageToken)
+	resultMap, err := s.DbClients.V1DBClient.FindDelegationsByStakerPk(ctx, stakerPk, filter, pageToken)
 	if err != nil {
 		if db.IsInvalidPaginationTokenError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching delegations by staker pk")
@@ -93,7 +94,7 @@ func (s *Services) SaveActiveStakingDelegation(
 	value, startHeight uint64, stakingTimestamp int64, timeLock, stakingOutputIndex uint64,
 	stakingTxHex string, isOverflow bool,
 ) *types.Error {
-	err := s.DbClient.SaveActiveStakingDelegation(
+	err := s.DbClients.V1DBClient.SaveActiveStakingDelegation(
 		ctx, txHashHex, stakerPkHex, finalityProviderPkHex, stakingTxHex,
 		value, startHeight, timeLock, stakingOutputIndex, stakingTimestamp, isOverflow,
 	)
@@ -109,7 +110,7 @@ func (s *Services) SaveActiveStakingDelegation(
 }
 
 func (s *Services) IsDelegationPresent(ctx context.Context, txHashHex string) (bool, *types.Error) {
-	delegation, err := s.DbClient.FindDelegationByTxHashHex(ctx, txHashHex)
+	delegation, err := s.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, txHashHex)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			return false, nil
@@ -124,8 +125,8 @@ func (s *Services) IsDelegationPresent(ctx context.Context, txHashHex string) (b
 	return false, nil
 }
 
-func (s *Services) GetDelegation(ctx context.Context, txHashHex string) (*model.DelegationDocument, *types.Error) {
-	delegation, err := s.DbClient.FindDelegationByTxHashHex(ctx, txHashHex)
+func (s *Services) GetDelegation(ctx context.Context, txHashHex string) (*v1model.DelegationDocument, *types.Error) {
+	delegation, err := s.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, txHashHex)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHash", txHashHex).Msg("Staking delegation not found")
@@ -140,11 +141,11 @@ func (s *Services) GetDelegation(ctx context.Context, txHashHex string) (*model.
 func (s *Services) CheckStakerHasActiveDelegationByPk(
 	ctx context.Context, stakerPk string, afterTimestamp int64,
 ) (bool, *types.Error) {
-	filter := &db.DelegationFilter{
+	filter := &v1db.DelegationFilter{
 		States:         []types.DelegationState{types.Active},
 		AfterTimestamp: afterTimestamp,
 	}
-	hasDelegation, err := s.DbClient.CheckDelegationExistByStakerPk(
+	hasDelegation, err := s.DbClients.V1DBClient.CheckDelegationExistByStakerPk(
 		ctx, stakerPk, filter,
 	)
 	if err != nil {

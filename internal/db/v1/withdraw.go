@@ -1,4 +1,4 @@
-package db
+package v1db
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 )
 
-func (db *Database) TransitionToWithdrawnState(ctx context.Context, txHashHex string) error {
-	err := db.transitionState(
+func (v1db *V1Database) TransitionToWithdrawnState(ctx context.Context, txHashHex string) error {
+	err := v1db.transitionState(
 		ctx, txHashHex, types.Withdrawn.ToString(),
 		utils.QualifiedStatesToWithdraw(), nil,
 	)

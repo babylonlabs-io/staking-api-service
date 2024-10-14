@@ -10,6 +10,7 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
@@ -125,13 +126,13 @@ func TestPkAddressMappingWorksForOlderStatsEventVersion(t *testing.T) {
 	assert.NoError(t, err, "failed to generate random public key")
 	fpPk, err := testutils.RandomPk()
 	assert.NoError(t, err, "failed to generate random public key")
-	del := &model.DelegationDocument{
+	del := &v1model.DelegationDocument{
 		StakingTxHashHex:      txHash,
 		StakerPkHex:           stakerPk,
 		FinalityProviderPkHex: fpPk,
 		StakingValue:          uint64(testutils.RandomAmount(r)),
 		State:                 types.Active,
-		StakingTx: &model.TimelockTransaction{
+		StakingTx: &v1model.TimelockTransaction{
 			TxHex:          tx.TxHash().String(),
 			OutputIndex:    uint64(tx.TxOut[0].Value),
 			StartTimestamp: time.Now().Unix(),

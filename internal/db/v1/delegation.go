@@ -1,4 +1,4 @@
-package db
+package v1db
 
 import (
 	"context"
@@ -9,23 +9,25 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
-func (db *Database) SaveActiveStakingDelegation(
+func (v1db *V1Database) SaveActiveStakingDelegation(
 	ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string,
 	stakingTxHex string, amount, startHeight, timelock, outputIndex uint64,
 	startTimestamp int64, isOverflow bool,
 ) error {
-	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
-	document := model.DelegationDocument{
+	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
+	document := v1model.DelegationDocument{
 		StakingTxHashHex:      stakingTxHashHex, // Primary key of db collection
 		StakerPkHex:           stakerPkHex,
 		FinalityProviderPkHex: fpPkHex,
 		StakingValue:          amount,
 		State:                 types.Active,
-		StakingTx: &model.TimelockTransaction{
+		StakingTx: &v1model.TimelockTransaction{
 			TxHex:          stakingTxHex,
 			OutputIndex:    outputIndex,
 			StartTimestamp: startTimestamp,
@@ -41,7 +43,7 @@ func (db *Database) SaveActiveStakingDelegation(
 			for _, e := range writeErr.WriteErrors {
 				if mongo.IsDuplicateKeyError(e) {
 					// Return the custom error type so that we can return 4xx errors to client
-					return &DuplicateKeyError{
+					return &db.DuplicateKeyError{
 						Key:     stakingTxHashHex,
 						Message: "Delegation already exists",
 					}
@@ -55,14 +57,14 @@ func (db *Database) SaveActiveStakingDelegation(
 
 // CheckDelegationExistByStakerPk checks if a staker has any
 // delegation in the specified states by the staker's public key
-func (db *Database) CheckDelegationExistByStakerPk(
+func (v1db *V1Database) CheckDelegationExistByStakerPk(
 	ctx context.Context, stakerPk string, extraFilter *DelegationFilter,
 ) (bool, error) {
-	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
 	filter := buildAdditionalDelegationFilter(
 		bson.M{"staker_pk_hex": stakerPk}, extraFilter,
 	)
-	var delegation model.DelegationDocument
+	var delegation v1model.DelegationDocument
 	err := client.FindOne(ctx, filter).Decode(&delegation)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -73,11 +75,11 @@ func (db *Database) CheckDelegationExistByStakerPk(
 	return true, nil
 }
 
-func (db *Database) FindDelegationsByStakerPk(
+func (v1db *V1Database) FindDelegationsByStakerPk(
 	ctx context.Context, stakerPk string,
 	extraFilter *DelegationFilter, paginationToken string,
-) (*DbResultMap[model.DelegationDocument], error) {
-	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+) (*db.DbResultMap[v1model.DelegationDocument], error) {
+	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
 
 	filter := bson.M{"staker_pk_hex": stakerPk}
 	filter = buildAdditionalDelegationFilter(filter, extraFilter)
@@ -88,9 +90,9 @@ func (db *Database) FindDelegationsByStakerPk(
 
 	// Decode the pagination token first if it exist
 	if paginationToken != "" {
-		decodedToken, err := model.DecodePaginationToken[model.DelegationByStakerPagination](paginationToken)
+		decodedToken, err := model.DecodePaginationToken[v1model.DelegationByStakerPagination](paginationToken)
 		if err != nil {
-			return nil, &InvalidPaginationTokenError{
+			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",
 			}
 		}
@@ -102,22 +104,22 @@ func (db *Database) FindDelegationsByStakerPk(
 		}
 	}
 
-	return findWithPagination(
-		ctx, client, filter, options, db.cfg.MaxPaginationLimit,
-		model.BuildDelegationByStakerPaginationToken,
+	return db.FindWithPagination(
+		ctx, client, filter, options, v1db.Cfg.MaxPaginationLimit,
+		v1model.BuildDelegationByStakerPaginationToken,
 	)
 }
 
 // SaveUnbondingTx saves the unbonding transaction details for a staking transaction
 // It returns an NotFoundError if the staking transaction is not found
-func (db *Database) FindDelegationByTxHashHex(ctx context.Context, stakingTxHashHex string) (*model.DelegationDocument, error) {
-	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+func (v1db *V1Database) FindDelegationByTxHashHex(ctx context.Context, stakingTxHashHex string) (*v1model.DelegationDocument, error) {
+	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
 	filter := bson.M{"_id": stakingTxHashHex}
-	var delegation model.DelegationDocument
+	var delegation v1model.DelegationDocument
 	err := client.FindOne(ctx, filter).Decode(&delegation)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, &NotFoundError{
+			return nil, &db.NotFoundError{
 				Key:     stakingTxHashHex,
 				Message: "Delegation not found",
 			}
@@ -127,20 +129,20 @@ func (db *Database) FindDelegationByTxHashHex(ctx context.Context, stakingTxHash
 	return &delegation, nil
 }
 
-func (db *Database) ScanDelegationsPaginated(
+func (v1db *V1Database) ScanDelegationsPaginated(
 	ctx context.Context,
 	paginationToken string,
-) (*DbResultMap[model.DelegationDocument], error) {
-	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+) (*db.DbResultMap[v1model.DelegationDocument], error) {
+	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
 	filter := bson.M{}
 	options := options.Find()
 	options.SetSort(bson.M{"_id": 1})
 	// Decode the pagination token if it exists
 	if paginationToken != "" {
 		decodedToken, err :=
-			model.DecodePaginationToken[model.DelegationScanPagination](paginationToken)
+			model.DecodePaginationToken[v1model.DelegationScanPagination](paginationToken)
 		if err != nil {
-			return nil, &InvalidPaginationTokenError{
+			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",
 			}
 		}
@@ -148,19 +150,19 @@ func (db *Database) ScanDelegationsPaginated(
 	}
 
 	// Perform the paginated query and return the results
-	return findWithPagination(
-		ctx, client, filter, options, db.cfg.MaxPaginationLimit,
-		model.BuildDelegationScanPaginationToken,
+	return db.FindWithPagination(
+		ctx, client, filter, options, v1db.Cfg.MaxPaginationLimit,
+		v1model.BuildDelegationScanPaginationToken,
 	)
 }
 
 // TransitionState updates the state of a staking transaction to a new state
 // It returns an NotFoundError if the staking transaction is not found or not in the eligible state to transition
-func (db *Database) transitionState(
+func (v1db *V1Database) transitionState(
 	ctx context.Context, stakingTxHashHex, newState string,
 	eligiblePreviousState []types.DelegationState, additionalUpdates map[string]interface{},
 ) error {
-	client := db.Client.Database(db.DbName).Collection(model.DelegationCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.DelegationCollection)
 	filter := bson.M{"_id": stakingTxHashHex, "state": bson.M{"$in": eligiblePreviousState}}
 	update := bson.M{"$set": bson.M{"state": newState}}
 	for field, value := range additionalUpdates {
@@ -170,7 +172,7 @@ func (db *Database) transitionState(
 	_, err := client.UpdateOne(ctx, filter, update)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return &NotFoundError{
+			return &db.NotFoundError{
 				Key:     stakingTxHashHex,
 				Message: "Delegation not found or not in eligible state to transition",
 			}

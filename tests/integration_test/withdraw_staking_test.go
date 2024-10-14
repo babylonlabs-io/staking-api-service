@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
@@ -24,7 +25,7 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
-	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -47,7 +48,7 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin is in "unbonded" state
-	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -69,7 +70,7 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, now it shall be "withdrawn" state
-	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -92,7 +93,7 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
-	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -140,7 +141,7 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin is in "unbonded" state
-	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -162,7 +163,7 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, now it shall be "withdrawn" state
-	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -185,7 +186,7 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
-	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -207,7 +208,7 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, it should still be "active" state as the withdraw event will be requeued
-	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -227,7 +228,7 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 	time.Sleep(10 * time.Second)
 
 	// Check the DB after a while, now it shall be "withdrawn" state
-	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -268,7 +269,7 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB after a while, now it shall be "withdrawn" state
-	results, err := testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
@@ -285,7 +286,7 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, nothing should be changed.
-	results, err = testutils.InspectDbDocuments[model.DelegationDocument](
+	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
 		testServer.Config, model.DelegationCollection,
 	)
 	if err != nil {
