@@ -21,7 +21,7 @@ func TestSaveTimelock(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	// Check from DB if the data is saved
 	results, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -48,7 +48,7 @@ func TestNotSaveExpireCheckIfAlreadyProcessed(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	// Check from DB if the data is saved
 	results, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -67,7 +67,7 @@ func TestNotSaveExpireCheckIfAlreadyProcessed(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	results, err = testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)

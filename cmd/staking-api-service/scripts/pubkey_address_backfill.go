@@ -5,13 +5,18 @@ import (
 	"fmt"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/db"
 	v1db "github.com/babylonlabs-io/staking-api-service/internal/db/v1"
 	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 	"github.com/rs/zerolog/log"
 )
 
 func BackfillPubkeyAddressesMappings(ctx context.Context, cfg *config.Config) error {
-	v1dbClient, err := v1db.New(ctx, cfg.Db)
+	client, err := db.NewMongoClient(ctx, cfg.Db)
+	if err != nil {
+		return fmt.Errorf("failed to create db client: %w", err)
+	}
+	v1dbClient, err := v1db.New(ctx, client, cfg.Db)
 	if err != nil {
 		return fmt.Errorf("failed to create db client: %w", err)
 	}

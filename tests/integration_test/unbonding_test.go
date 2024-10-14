@@ -117,7 +117,7 @@ func TestUnbondingRequest(t *testing.T) {
 
 	// Let's inspect what's stored in the database
 	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](
-		testServer.Config, model.UnbondingCollection,
+		testServer.Config, model.V1UnbondingCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -212,7 +212,7 @@ func TestProcessUnbondingStakingEvent(t *testing.T) {
 
 	// Let's inspect what's stored in the database
 	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](
-		testServer.Config, model.UnbondingCollection,
+		testServer.Config, model.V1UnbondingCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -264,7 +264,7 @@ func TestProcessUnbondingStakingEvent(t *testing.T) {
 
 	// Let's also fetch the DB to make sure the expired check is processed
 	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -333,7 +333,7 @@ func TestProcessUnbondingStakingEventDuringBootstrap(t *testing.T) {
 
 	// Let's also fetch the DB to make sure the expired check is processed
 	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -399,7 +399,7 @@ func TestShouldIgnoreOutdatedUnbondingEvent(t *testing.T) {
 
 	// Let's also fetch the DB to make sure the expired check is processed
 	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -418,7 +418,7 @@ func TestShouldIgnoreOutdatedUnbondingEvent(t *testing.T) {
 
 	// Fetch from the expire checker to make sure we only processed the unbonding event once
 	timeLockResults, err = testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -448,7 +448,7 @@ func TestProcessUnbondingStakingEventShouldTolerateEventMsgOutOfOrder(t *testing
 	time.Sleep(2 * time.Second)
 	// Check DB, there should be no unbonding document
 	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](
-		testServer.Config, model.UnbondingCollection,
+		testServer.Config, model.V1UnbondingCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 	assert.Empty(t, results, "expected no unbonding document in the DB")
@@ -485,7 +485,7 @@ func TestProcessUnbondingStakingEventShouldTolerateEventMsgOutOfOrder(t *testing
 
 	// Let's also fetch the DB to make sure the expired check is processed
 	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.TimeLockCollection,
+		testServer.Config, model.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 

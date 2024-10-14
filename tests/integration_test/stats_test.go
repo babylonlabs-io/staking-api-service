@@ -50,7 +50,7 @@ func TestStatsShouldBeShardedInDb(t *testing.T) {
 
 	// directly read from the db to check that we have more than 2 records in the overall stats collection
 	results, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
-		testServer.Config, model.OverallStatsCollection,
+		testServer.Config, model.V1OverallStatsCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -97,7 +97,7 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 	defer resp.Body.Close()
 
 	// Let's inspect what's stored in the database
-	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](testServer.Config, model.UnbondingCollection)
+	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](testServer.Config, model.V1UnbondingCollection)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
 	assert.Equal(t, 1, len(results), "expected 1 document in the DB")
@@ -121,7 +121,7 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 
 	// directly read from the db to check that we only have 1 shard in the overall stats collection
 	stats, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
-		testServer.Config, model.OverallStatsCollection,
+		testServer.Config, model.V1OverallStatsCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -155,7 +155,7 @@ func TestShouldNotPerformStatsCalculationForUnbondingTxWhenDelegationIsOverflowe
 	// directly read from the db to check that we have more than 2 records in the
 	// overall stats collection
 	results, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
-		testServer.Config, model.OverallStatsCollection,
+		testServer.Config, model.V1OverallStatsCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)

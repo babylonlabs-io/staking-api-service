@@ -14,7 +14,7 @@ import (
 func (v1db *V1Database) UpsertLatestBtcInfo(
 	ctx context.Context, height uint64, confirmedTvl, unconfirmedTvl uint64,
 ) error {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.BtcInfoCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1BtcInfoCollection)
 	// Start a session
 	session, sessionErr := v1db.Client.StartSession()
 	if sessionErr != nil {
@@ -64,7 +64,7 @@ func (v1db *V1Database) UpsertLatestBtcInfo(
 }
 
 func (v1db *V1Database) GetLatestBtcInfo(ctx context.Context) (*v1model.BtcInfo, error) {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.BtcInfoCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1BtcInfoCollection)
 	var btcInfo v1model.BtcInfo
 	err := client.FindOne(ctx, bson.M{"_id": v1model.LatestBtcInfoId}).Decode(&btcInfo)
 	if err != nil {

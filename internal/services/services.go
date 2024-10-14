@@ -8,13 +8,15 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/db"
 	v1db "github.com/babylonlabs-io/staking-api-service/internal/db/v1"
+	v2db "github.com/babylonlabs-io/staking-api-service/internal/db/v2"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
 )
 
 type DbClients struct {
 	V1DBClient v1db.V1DBClient
-	// V2DBClient v2db.V2DBClient
+	V2DBClient v2db.V2DBClient
 }
 
 // Service layer contains the business logic and is used to interact with
@@ -34,7 +36,12 @@ func New(
 	finalityProviders []types.FinalityProviderDetails,
 	clients *clients.Clients,
 ) (*Services, error) {
-	v1dbClient, err := v1db.New(ctx, cfg.Db)
+	client, err := db.NewMongoClient(ctx, cfg.Db)
+	if err != nil {
+		return nil, err
+	}
+	v1dbClient, err := v1db.New(ctx, client, cfg.Db)
+	v2dbClient, err := v2db.New(ctx, client, cfg.Db)
 	if err != nil {
 		log.Ctx(ctx).Fatal().Err(err).Msg("error while creating v1 db client")
 		return nil, err
@@ -42,7 +49,7 @@ func New(
 
 	dbClients := DbClients{
 		V1DBClient: v1dbClient,
-		// V2DBClient: dbClient,
+		V2DBClient: v2dbClient,
 	}
 
 	return &Services{

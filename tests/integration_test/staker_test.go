@@ -441,7 +441,7 @@ func updateDelegationState(
 	filter := bson.M{"_id": txId}
 	update := bson.M{"state": state.ToString()}
 	err := testutils.UpdateDbDocument(
-		testServer.Db, testServer.Config, model.DelegationCollection,
+		testServer.Db, testServer.Config, model.V1DelegationCollection,
 		filter, update,
 	)
 	assert.NoError(t, err)

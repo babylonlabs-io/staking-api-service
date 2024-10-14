@@ -29,4 +29,13 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v1/staker/pubkey-lookup", registerHandler(handlers.GetPubKeys))
 
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
+
+	// V2 API
+	// Add these new routes to the existing routes
+
+	// TODO: Implement the handlers for the V2 API
+	r.Get("/v2/stats", registerHandler(nil))
+	r.Get("/v2/finality-providers", registerHandler(nil))
+	r.Get("/v2/global-params", registerHandler(nil))
+	r.Get("/v2/staker/delegations", registerHandler(nil))
 }

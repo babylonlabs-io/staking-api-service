@@ -12,7 +12,7 @@ func (v1db *V1Database) SaveTimeLockExpireCheck(
 	ctx context.Context, stakingTxHashHex string,
 	expireHeight uint64, txType string,
 ) error {
-	client := v1db.Client.Database(v1db.DbName).Collection(model.TimeLockCollection)
+	client := v1db.Client.Database(v1db.DbName).Collection(model.V1TimeLockCollection)
 	document := v1model.NewTimeLockDocument(stakingTxHashHex, expireHeight, txType)
 	_, err := client.InsertOne(ctx, document)
 	if err != nil {
