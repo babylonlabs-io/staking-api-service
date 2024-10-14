@@ -12,7 +12,7 @@ import (
 func (s *Services) TransitionToWithdrawnState(
 	ctx context.Context, stakingTxHashHex string,
 ) *types.Error {
-	err := s.DbClient.TransitionToWithdrawnState(ctx, stakingTxHashHex)
+	err := s.DbClients.V1DBClient.TransitionToWithdrawnState(ctx, stakingTxHashHex)
 	if err != nil {
 		if ok := db.IsNotFoundError(err); ok {
 			log.Ctx(ctx).Warn().Str("stakingTxHashHex", stakingTxHashHex).Err(err).Msg("delegation not found or no longer eligible for withdraw")

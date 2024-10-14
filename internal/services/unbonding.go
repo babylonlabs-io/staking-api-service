@@ -22,7 +22,7 @@ func (s *Services) UnbondDelegation(
 	unbondingTxHex,
 	signatureHex string) *types.Error {
 	// 1. check the delegation is eligible for unbonding
-	delegationDoc, err := s.DbClient.FindDelegationByTxHashHex(ctx, stakingTxHashHex)
+	delegationDoc, err := s.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, stakingTxHashHex)
 	if err != nil {
 		if ok := db.IsNotFoundError(err); ok {
 			log.Warn().Err(err).Msg("delegation not found, hence not eligible for unbonding")
@@ -69,7 +69,7 @@ func (s *Services) UnbondDelegation(
 	}
 
 	// 3. save unbonding tx into DB
-	err = s.DbClient.SaveUnbondingTx(ctx, stakingTxHashHex, unbondingTxHashHex, unbondingTxHex, signatureHex)
+	err = s.DbClients.V1DBClient.SaveUnbondingTx(ctx, stakingTxHashHex, unbondingTxHashHex, unbondingTxHex, signatureHex)
 	if err != nil {
 		if ok := db.IsDuplicateKeyError(err); ok {
 			log.Ctx(ctx).Warn().Err(err).Msg("unbonding request already been submitted into the system")
@@ -85,7 +85,7 @@ func (s *Services) UnbondDelegation(
 }
 
 func (s *Services) IsEligibleForUnbondingRequest(ctx context.Context, stakingTxHashHex string) *types.Error {
-	delegationDoc, err := s.DbClient.FindDelegationByTxHashHex(ctx, stakingTxHashHex)
+	delegationDoc, err := s.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, stakingTxHashHex)
 	if err != nil {
 		if ok := db.IsNotFoundError(err); ok {
 			log.Ctx(ctx).Warn().Err(err).Msg("delegation not found, hence not eligible for unbonding")
@@ -109,7 +109,7 @@ func (s *Services) TransitionToUnbondingState(
 	unbondingStartHeight, unbondingTimelock, unbondingOutputIndex uint64,
 	unbondingTxHex string, unbondingStartTimestamp int64,
 ) *types.Error {
-	err := s.DbClient.TransitionToUnbondingState(ctx, stakingTxHashHex, unbondingStartHeight, unbondingTimelock, unbondingOutputIndex, unbondingTxHex, unbondingStartTimestamp)
+	err := s.DbClients.V1DBClient.TransitionToUnbondingState(ctx, stakingTxHashHex, unbondingStartHeight, unbondingTimelock, unbondingOutputIndex, unbondingTxHex, unbondingStartTimestamp)
 	if err != nil {
 		if ok := db.IsNotFoundError(err); ok {
 			log.Ctx(ctx).Warn().Str("stakingTxHashHex", stakingTxHashHex).Err(err).Msg("delegation not found or no longer eligible for unbonding")

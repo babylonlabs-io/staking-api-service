@@ -19,7 +19,7 @@ func TestUnprocessableMessageShouldBeStoredInDB(t *testing.T) {
 
 	// Fetch from DB and check
 	docs, err := testutils.InspectDbDocuments[model.UnprocessableMessageDocument](
-		testServer.Config, model.UnprocessableMsgCollection,
+		testServer.Config, model.V1UnprocessableMsgCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)

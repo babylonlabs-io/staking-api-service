@@ -17,7 +17,7 @@ type GenericEvent struct {
 	EventType queueClient.EventType `json:"event_type"`
 }
 
-func ReplayUnprocessableMessages(ctx context.Context, cfg *config.Config, queues *queue.Queues, db db.DBClient) (err error) {
+func ReplayUnprocessableMessages(ctx context.Context, cfg *config.Config, queues *queue.Queues, db db.BaseDBClient) (err error) {
 	fmt.Println("Starting to replay unprocessable messages...")
 
 	// Fetch unprocessable messages

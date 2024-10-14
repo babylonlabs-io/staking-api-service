@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/services"
 	testmock "github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -43,10 +44,12 @@ func TestHealthCheck(t *testing.T) {
 
 // Test the db connection error case
 func TestHealthCheckDBError(t *testing.T) {
-	mockDB := new(testmock.DBClient)
+	mockDB := new(testmock.V1DBClient)
 	mockDB.On("Ping", mock.Anything).Return(io.EOF) // Expect db error
 
-	testServer := setupTestServer(t, &TestServerDependency{MockDbClient: mockDB})
+	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
+		V1DBClient: mockDB,
+	}})
 
 	defer testServer.Close()
 

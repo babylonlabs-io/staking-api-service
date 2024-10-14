@@ -14,16 +14,20 @@ import (
 )
 
 const (
-	StatsLockCollection             = "stats_lock"
-	OverallStatsCollection          = "overall_stats"
-	FinalityProviderStatsCollection = "finality_providers_stats"
-	StakerStatsCollection           = "staker_stats"
-	DelegationCollection            = "delegations"
-	TimeLockCollection              = "timelock_queue"
-	UnbondingCollection             = "unbonding_queue"
-	BtcInfoCollection               = "btc_info"
-	UnprocessableMsgCollection      = "unprocessable_messages"
-	PkAddressMappingsCollection     = "pk_address_mappings"
+	// V1
+	V1StatsLockCollection             = "stats_lock"
+	V1OverallStatsCollection          = "overall_stats"
+	V1FinalityProviderStatsCollection = "finality_providers_stats"
+	V1StakerStatsCollection           = "staker_stats"
+	V1DelegationCollection            = "delegations"
+	V1TimeLockCollection              = "timelock_queue"
+	V1UnbondingCollection             = "unbonding_queue"
+	V1BtcInfoCollection               = "btc_info"
+	V1UnprocessableMsgCollection      = "unprocessable_messages"
+	V1PkAddressMappingsCollection     = "pk_address_mappings"
+	// V2
+	V2StakerCollection                = "stakers"
+	V2FinalityProviderCollection      = "finality_providers"
 )
 
 type index struct {
@@ -32,21 +36,25 @@ type index struct {
 }
 
 var collections = map[string][]index{
-	StatsLockCollection:             {{Indexes: map[string]int{}}},
-	OverallStatsCollection:          {{Indexes: map[string]int{}}},
-	FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
-	StakerStatsCollection:           {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
-	DelegationCollection: {
+	V1StatsLockCollection:             {{Indexes: map[string]int{}}},
+	V1OverallStatsCollection:          {{Indexes: map[string]int{}}},
+	V1FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
+	V1StakerStatsCollection:           {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
+	V1DelegationCollection: {
 		{Indexes: map[string]int{"staker_pk_hex": 1, "staking_tx.start_height": -1, "_id": 1}, Unique: false},
 	},
-	TimeLockCollection:         {{Indexes: map[string]int{"expire_height": 1}, Unique: false}},
-	UnbondingCollection:        {{Indexes: map[string]int{"unbonding_tx_hash_hex": 1}, Unique: true}},
-	UnprocessableMsgCollection: {{Indexes: map[string]int{}}},
-	BtcInfoCollection:          {{Indexes: map[string]int{}}},
-	PkAddressMappingsCollection: {
+	V1TimeLockCollection:         {{Indexes: map[string]int{"expire_height": 1}, Unique: false}},
+	V1UnbondingCollection:        {{Indexes: map[string]int{"unbonding_tx_hash_hex": 1}, Unique: true}},
+	V1UnprocessableMsgCollection: {{Indexes: map[string]int{}}},
+	V1BtcInfoCollection:          {{Indexes: map[string]int{}}},
+	V1PkAddressMappingsCollection: {
 		{Indexes: map[string]int{"taproot": 1}, Unique: true},
 		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
 		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
+	},
+	V2StakerCollection: {{Indexes: map[string]int{}}},
+	V2FinalityProviderCollection: {
+		{Indexes: map[string]int{"active_tvl": -1, "commission": 1}, Unique: false},
 	},
 }
 
