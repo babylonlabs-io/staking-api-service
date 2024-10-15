@@ -67,8 +67,8 @@ func parseUnbondingTxHex(unbondingTxHex string) (*wire.MsgTx, error) {
 		return nil, fmt.Errorf("failed to decode unbonding tx from hex: %w", err)
 	}
 
-	if err := btcstaking.IsSimpleTransfer(unbondingTx); err != nil {
-		return nil, fmt.Errorf("the unbonding tx is not a simple transfer: %w", err)
+	if err := btcstaking.CheckPreSignedUnbondingTxSanity(unbondingTx); err != nil {
+		return nil, fmt.Errorf("the unbonding tx is not a valid pre-signed unbonding tx: %w", err)
 	}
 
 	return unbondingTx, nil
