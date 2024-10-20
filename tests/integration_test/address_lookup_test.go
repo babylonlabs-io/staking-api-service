@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
-	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
-	"github.com/babylonlabs-io/staking-api-service/internal/utils"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
+	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +37,7 @@ func FuzzTestPkAddressesMapping(f *testing.F) {
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
 		sendTestMessage(
-			testServer.Queues.ActiveStakingQueueClient, activeStakingEvents,
+			testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvents,
 		)
 		time.Sleep(5 * time.Second)
 
@@ -126,13 +126,13 @@ func TestPkAddressMappingWorksForOlderStatsEventVersion(t *testing.T) {
 	assert.NoError(t, err, "failed to generate random public key")
 	fpPk, err := testutils.RandomPk()
 	assert.NoError(t, err, "failed to generate random public key")
-	del := &v1model.DelegationDocument{
+	del := &v1dbmodel.DelegationDocument{
 		StakingTxHashHex:      txHash,
 		StakerPkHex:           stakerPk,
 		FinalityProviderPkHex: fpPk,
 		StakingValue:          uint64(testutils.RandomAmount(r)),
 		State:                 types.Active,
-		StakingTx: &v1model.TimelockTransaction{
+		StakingTx: &v1dbmodel.TimelockTransaction{
 			TxHex:          tx.TxHash().String(),
 			OutputIndex:    uint64(tx.TxOut[0].Value),
 			StartTimestamp: time.Now().Unix(),
@@ -150,16 +150,16 @@ func TestPkAddressMappingWorksForOlderStatsEventVersion(t *testing.T) {
 		State:                 string(del.State),
 	}
 	testutils.InjectDbDocument(
-		testServer.Config, model.V1DelegationCollection, del,
+		testServer.Config, dbmodel.V1DelegationCollection, del,
 	)
 	sendTestMessage(
-		testServer.Queues.StatsQueueClient, []event{*oldStatsMsg},
+		testServer.Queues.V1QueueClient.StatsQueueClient, []event{*oldStatsMsg},
 	)
 	time.Sleep(5 * time.Second)
 
 	// inspect the items in the database
-	pkAddresses, err := testutils.InspectDbDocuments[model.PkAddressMapping](
-		testServer.Config, model.V1PkAddressMappingsCollection,
+	pkAddresses, err := testutils.InspectDbDocuments[dbmodel.PkAddressMapping](
+		testServer.Config, dbmodel.V1PkAddressMappingsCollection,
 	)
 	assert.NoError(t, err, "failed to inspect the items in the database")
 	assert.Equal(t, 1, len(pkAddresses), "expected only one item in the database")
@@ -206,7 +206,7 @@ func performLookupRequest(
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err)
 
-	var response handlers.PublicResponse[map[string]string]
+	var response handler.PublicResponse[map[string]string]
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err)
 	return response.Data

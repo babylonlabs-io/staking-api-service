@@ -11,9 +11,9 @@ import (
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 )
 
@@ -35,9 +35,9 @@ func TestGetDelegationByTxHashHex(t *testing.T) {
 	expiredStakingEvent := client.NewExpiredStakingEvent(activeStakingEvent[0].StakingTxHashHex, types.ActiveTxType.ToString())
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 	time.Sleep(2 * time.Second)
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Test the API
@@ -53,7 +53,7 @@ func TestGetDelegationByTxHashHex(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var response handlers.PublicResponse[services.DelegationPublic]
+	var response handler.PublicResponse[v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 

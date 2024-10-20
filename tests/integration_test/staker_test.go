@@ -9,12 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api"
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
-	"github.com/babylonlabs-io/staking-api-service/internal/utils"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
+	v1handlers "github.com/babylonlabs-io/staking-api-service/internal/v1/api/handlers"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
@@ -54,7 +55,7 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 		}
 
 		sendTestMessage(
-			testServer.Queues.ActiveStakingQueueClient,
+			testServer.Queues.V1QueueClient.ActiveStakingQueueClient,
 			append(activeStakingEventsByStaker1, activeStakingEventsByStaker2...),
 		)
 		time.Sleep(5 * time.Second)
@@ -111,7 +112,7 @@ func TestActiveStakingFetchedByStakerPkWithInvalidPaginationKey(t *testing.T) {
 	})
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(2 * time.Second)
 
@@ -180,7 +181,7 @@ func FuzzCheckStakerActiveDelegations(f *testing.F) {
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
 		sendTestMessage(
-			testServer.Queues.ActiveStakingQueueClient, activeStakingEvents,
+			testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvents,
 		)
 		time.Sleep(5 * time.Second)
 
@@ -222,7 +223,7 @@ func FuzzCheckStakerActiveDelegations(f *testing.F) {
 			)
 			unbondingEvents = append(unbondingEvents, unbondingEvent)
 		}
-		sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, unbondingEvents)
+		sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, unbondingEvents)
 		time.Sleep(5 * time.Second)
 
 		isExist = fetchCheckStakerActiveDelegations(t, testServer, addresses.Taproot, "")
@@ -245,7 +246,7 @@ func FuzzCheckStakerActiveDelegationsForToday(f *testing.F) {
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
 		sendTestMessage(
-			testServer.Queues.ActiveStakingQueueClient, activeStakingEvents,
+			testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvents,
 		)
 		time.Sleep(3 * time.Second)
 
@@ -270,7 +271,7 @@ func FuzzCheckStakerActiveDelegationsForToday(f *testing.F) {
 		}
 		activeStakingEvents = testutils.GenerateRandomActiveStakingEvents(r, opts)
 		sendTestMessage(
-			testServer.Queues.ActiveStakingQueueClient, activeStakingEvents,
+			testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvents,
 		)
 		time.Sleep(3 * time.Second)
 
@@ -295,7 +296,7 @@ func TestGetDelegationReturnEmptySliceWhenNoDelegation(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var response handlers.PublicResponse[[]services.DelegationPublic]
+	var response handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -320,7 +321,7 @@ func FuzzStakerDelegationsFilterByState(f *testing.F) {
 		)
 
 		sendTestMessage(
-			testServer.Queues.ActiveStakingQueueClient,
+			testServer.Queues.V1QueueClient.ActiveStakingQueueClient,
 			activeStakingEventsByStaker,
 		)
 		time.Sleep(5 * time.Second)
@@ -391,7 +392,7 @@ func fetchCheckStakerActiveDelegations(
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var response handlers.DelegationCheckPublicResponse
+	var response v1handlers.DelegationCheckPublicResponse
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -402,20 +403,20 @@ func fetchCheckStakerActiveDelegations(
 
 func fetchStakerDelegations(
 	t *testing.T, testServer *TestServer, stakerPk string, stateFilter types.DelegationState,
-) []services.DelegationPublic {
+) []v1service.DelegationPublic {
 	url := testServer.Server.URL + stakerDelegations + "?staker_btc_pk=" + stakerPk
 	if stateFilter != "" {
 		url += "&state=" + stateFilter.ToString()
 	}
 	var paginationKey string
-	var allDataCollected []services.DelegationPublic
+	var allDataCollected []v1service.DelegationPublic
 	for {
 		resp, err := http.Get(url + "&pagination_key=" + paginationKey)
 		assert.NoError(t, err, "making GET request to delegations by staker pk should not fail")
 		assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
 		bodyBytes, err := io.ReadAll(resp.Body)
 		assert.NoError(t, err, "reading response body should not fail")
-		var response handlers.PublicResponse[[]services.DelegationPublic]
+		var response handler.PublicResponse[[]v1service.DelegationPublic]
 		err = json.Unmarshal(bodyBytes, &response)
 		assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -441,7 +442,7 @@ func updateDelegationState(
 	filter := bson.M{"_id": txId}
 	update := bson.M{"state": state.ToString()}
 	err := testutils.UpdateDbDocument(
-		testServer.Db, testServer.Config, model.V1DelegationCollection,
+		testServer.Db, testServer.Config, dbmodel.V1DelegationCollection,
 		filter, update,
 	)
 	assert.NoError(t, err)

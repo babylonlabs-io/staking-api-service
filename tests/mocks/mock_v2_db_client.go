@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	model "github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -33,23 +33,23 @@ func (_m *V2DBClient) DeleteUnprocessableMessage(ctx context.Context, Receipt in
 }
 
 // FindPkMappingsByNativeSegwitAddress provides a mock function with given fields: ctx, nativeSegwitAddresses
-func (_m *V2DBClient) FindPkMappingsByNativeSegwitAddress(ctx context.Context, nativeSegwitAddresses []string) ([]*model.PkAddressMapping, error) {
+func (_m *V2DBClient) FindPkMappingsByNativeSegwitAddress(ctx context.Context, nativeSegwitAddresses []string) ([]*dbmodel.PkAddressMapping, error) {
 	ret := _m.Called(ctx, nativeSegwitAddresses)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindPkMappingsByNativeSegwitAddress")
 	}
 
-	var r0 []*model.PkAddressMapping
+	var r0 []*dbmodel.PkAddressMapping
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*model.PkAddressMapping, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*dbmodel.PkAddressMapping, error)); ok {
 		return rf(ctx, nativeSegwitAddresses)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, []string) []*model.PkAddressMapping); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*dbmodel.PkAddressMapping); ok {
 		r0 = rf(ctx, nativeSegwitAddresses)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.PkAddressMapping)
+			r0 = ret.Get(0).([]*dbmodel.PkAddressMapping)
 		}
 	}
 
@@ -63,23 +63,23 @@ func (_m *V2DBClient) FindPkMappingsByNativeSegwitAddress(ctx context.Context, n
 }
 
 // FindPkMappingsByTaprootAddress provides a mock function with given fields: ctx, taprootAddresses
-func (_m *V2DBClient) FindPkMappingsByTaprootAddress(ctx context.Context, taprootAddresses []string) ([]*model.PkAddressMapping, error) {
+func (_m *V2DBClient) FindPkMappingsByTaprootAddress(ctx context.Context, taprootAddresses []string) ([]*dbmodel.PkAddressMapping, error) {
 	ret := _m.Called(ctx, taprootAddresses)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindPkMappingsByTaprootAddress")
 	}
 
-	var r0 []*model.PkAddressMapping
+	var r0 []*dbmodel.PkAddressMapping
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*model.PkAddressMapping, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*dbmodel.PkAddressMapping, error)); ok {
 		return rf(ctx, taprootAddresses)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, []string) []*model.PkAddressMapping); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*dbmodel.PkAddressMapping); ok {
 		r0 = rf(ctx, taprootAddresses)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.PkAddressMapping)
+			r0 = ret.Get(0).([]*dbmodel.PkAddressMapping)
 		}
 	}
 
@@ -93,23 +93,23 @@ func (_m *V2DBClient) FindPkMappingsByTaprootAddress(ctx context.Context, taproo
 }
 
 // FindUnprocessableMessages provides a mock function with given fields: ctx
-func (_m *V2DBClient) FindUnprocessableMessages(ctx context.Context) ([]model.UnprocessableMessageDocument, error) {
+func (_m *V2DBClient) FindUnprocessableMessages(ctx context.Context) ([]dbmodel.UnprocessableMessageDocument, error) {
 	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindUnprocessableMessages")
 	}
 
-	var r0 []model.UnprocessableMessageDocument
+	var r0 []dbmodel.UnprocessableMessageDocument
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]model.UnprocessableMessageDocument, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) ([]dbmodel.UnprocessableMessageDocument, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []model.UnprocessableMessageDocument); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) []dbmodel.UnprocessableMessageDocument); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]model.UnprocessableMessageDocument)
+			r0 = ret.Get(0).([]dbmodel.UnprocessableMessageDocument)
 		}
 	}
 

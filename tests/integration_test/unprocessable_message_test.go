@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
@@ -13,13 +13,13 @@ import (
 func TestUnprocessableMessageShouldBeStoredInDB(t *testing.T) {
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage[string](testServer.Queues.ActiveStakingQueueClient, []string{"a rubbish message"})
+	sendTestMessage[string](testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []string{"a rubbish message"})
 	// In test, we retry 3 times. (config is 2, but counting start from 0)
 	time.Sleep(20 * time.Second)
 
 	// Fetch from DB and check
-	docs, err := testutils.InspectDbDocuments[model.UnprocessableMessageDocument](
-		testServer.Config, model.V1UnprocessableMsgCollection,
+	docs, err := testutils.InspectDbDocuments[dbmodel.UnprocessableMessageDocument](
+		testServer.Config, dbmodel.V1UnprocessableMsgCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)

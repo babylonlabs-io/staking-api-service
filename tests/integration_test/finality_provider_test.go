@@ -9,16 +9,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/db"
-	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
+	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
+	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 	testmock "github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -29,7 +31,7 @@ func shouldGetFinalityProvidersSuccessfully(t *testing.T, testServer *TestServer
 	url := testServer.Server.URL + finalityProvidersPath
 	defer testServer.Close()
 
-	responseBody := fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
+	responseBody := fetchSuccessfulResponse[[]v1service.FpDetailsPublic](t, url)
 	result := responseBody.Data
 	assert.Equal(t, "Babylon Foundation 2", result[2].Description.Moniker)
 	assert.Equal(t, "0.060000000000000000", result[1].Commission)
@@ -50,35 +52,40 @@ func TestGetFinalityProvidersSuccessfully(t *testing.T) {
 }
 
 func TestGetFinalityProviderShouldNotFailInCaseOfDbFailure(t *testing.T) {
-	mockDB := new(testmock.V1DBClient)
-	mockDB.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(nil, errors.New("just an error"))
-
-	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-		V1DBClient: mockDB,
+	mockV1DBClient := new(testmock.V1DBClient)
+	mockV1DBClient.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(nil, errors.New("just an error"))
+	mockMongoClient := &mongo.Client{}
+	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+		MongoClient: mockMongoClient,
+		V1DBClient:  mockV1DBClient,
 	}})
 	shouldGetFinalityProvidersSuccessfully(t, testServer)
 }
 
 func TestGetFinalityProviderShouldReturnFallbackToGlobalParams(t *testing.T) {
-	mockedResultMap := &db.DbResultMap[*v1model.FinalityProviderStatsDocument]{
-		Data:            []*v1model.FinalityProviderStatsDocument{},
+	mockedResultMap := &db.DbResultMap[*v1dbmodel.FinalityProviderStatsDocument]{
+		Data:            []*v1dbmodel.FinalityProviderStatsDocument{},
 		PaginationToken: "",
 	}
-	mockDB := new(testmock.V1DBClient)
-	mockDB.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedResultMap, nil)
+	mockV1DBClient := new(testmock.V1DBClient)
+	mockV1DBClient.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedResultMap, nil)
+	mockMongoClient := &mongo.Client{}
 
-	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-		V1DBClient: mockDB,
+	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+		MongoClient: mockMongoClient,
+		V1DBClient:  mockV1DBClient,
 	}})
 	shouldGetFinalityProvidersSuccessfully(t, testServer)
 }
 
 func TestGetFinalityProviderReturn4xxErrorIfPageTokenInvalid(t *testing.T) {
-	mockDB := new(testmock.V1DBClient)
-	mockDB.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(nil, &db.InvalidPaginationTokenError{})
+	mockV1DBClient := new(testmock.V1DBClient)
+	mockV1DBClient.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(nil, &db.InvalidPaginationTokenError{})
+	mockMongoClient := &mongo.Client{}
 
-	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-		V1DBClient: mockDB,
+	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+		MongoClient: mockMongoClient,
+		V1DBClient:  mockV1DBClient,
 	}})
 	url := testServer.Server.URL + finalityProvidersPath
 	defer testServer.Close()
@@ -108,19 +115,22 @@ func FuzzGetFinalityProviderShouldReturnAllRegisteredFps(f *testing.F) {
 		r := rand.New(rand.NewSource(seed))
 		fpParams, registeredFpsStats, notRegisteredFpsStats := setUpFinalityProvidersStatsDataSet(t, r, nil)
 
-		mockDB := new(testmock.V1DBClient)
-		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
+		mockV1DBClient := new(testmock.V1DBClient)
+		mockV1DBClient.On("FindFinalityProviderStatsByFinalityProviderPkHex",
 			mock.Anything, mock.Anything,
 		).Return(registeredFpsStats, nil)
 
-		mockedFinalityProviderStats := &db.DbResultMap[*v1model.FinalityProviderStatsDocument]{
+		mockedFinalityProviderStats := &db.DbResultMap[*v1dbmodel.FinalityProviderStatsDocument]{
 			Data:            append(registeredFpsStats, notRegisteredFpsStats...),
 			PaginationToken: "",
 		}
-		mockDB.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedFinalityProviderStats, nil)
+		mockV1DBClient.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedFinalityProviderStats, nil)
 
-		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-			V1DBClient: mockDB,
+		mockMongoClient := &mongo.Client{}
+
+		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+			MongoClient: mockMongoClient,
+			V1DBClient:  mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 
 		url := testServer.Server.URL + finalityProvidersPath
@@ -137,7 +147,7 @@ func FuzzGetFinalityProviderShouldReturnAllRegisteredFps(f *testing.F) {
 		bodyBytes, err := io.ReadAll(resp.Body)
 		assert.NoError(t, err, "reading response body should not fail")
 
-		var responseBody handlers.PublicResponse[[]services.FpDetailsPublic]
+		var responseBody handler.PublicResponse[[]v1service.FpDetailsPublic]
 		err = json.Unmarshal(bodyBytes, &responseBody)
 		assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -159,7 +169,7 @@ func FuzzGetFinalityProviderShouldReturnAllRegisteredFps(f *testing.F) {
 		}
 		assert.Equal(t, len(fpParams)+len(notRegisteredFpsStats), len(result))
 
-		resultMap := make(map[string]services.FpDetailsPublic)
+		resultMap := make(map[string]v1service.FpDetailsPublic)
 		for _, fp := range result {
 			resultMap[fp.BtcPk] = fp
 		}
@@ -206,11 +216,11 @@ func FuzzTestGetFinalityProviderWithPaginationResponse(f *testing.F) {
 
 		testServer := setupTestServer(t, &TestServerDependency{ConfigOverrides: cfg})
 		defer testServer.Close()
-		sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvents)
+		sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvents)
 		time.Sleep(10 * time.Second)
 
 		var paginationKey string
-		var allDataCollected []services.FpDetailsPublic
+		var allDataCollected []v1service.FpDetailsPublic
 		var atLeastOnePage bool
 		// Test the API
 		for {
@@ -220,7 +230,7 @@ func FuzzTestGetFinalityProviderWithPaginationResponse(f *testing.F) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
 			bodyBytes, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err, "reading response body should not fail")
-			var response handlers.PublicResponse[[]services.FpDetailsPublic]
+			var response handler.PublicResponse[[]v1service.FpDetailsPublic]
 			err = json.Unmarshal(bodyBytes, &response)
 			assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -248,21 +258,23 @@ func FuzzGetFinalityProviderShouldNotReturnRegisteredFpWithoutStakingForPaginate
 		r := rand.New(rand.NewSource(seed))
 		fpParams, registeredFpsStats, notRegisteredFpsStats := setUpFinalityProvidersStatsDataSet(t, r, nil)
 
-		mockDB := new(testmock.V1DBClient)
-		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
+		mockV1DBClient := new(testmock.V1DBClient)
+		mockV1DBClient.On("FindFinalityProviderStatsByFinalityProviderPkHex",
 			mock.Anything, mock.Anything,
 		).Return(registeredFpsStats, nil)
 
 		registeredWithoutStakeFpsStats := registeredFpsStats[:len(registeredFpsStats)-testutils.RandomPositiveInt(r, len(registeredFpsStats))]
 
-		mockedFinalityProviderStats := &db.DbResultMap[*v1model.FinalityProviderStatsDocument]{
+		mockedFinalityProviderStats := &db.DbResultMap[*v1dbmodel.FinalityProviderStatsDocument]{
 			Data:            append(registeredWithoutStakeFpsStats, notRegisteredFpsStats...),
 			PaginationToken: "abcd",
 		}
-		mockDB.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedFinalityProviderStats, nil)
+		mockV1DBClient.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedFinalityProviderStats, nil)
+		mockMongoClient := &mongo.Client{}
 
-		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-			V1DBClient: mockDB,
+		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+			MongoClient: mockMongoClient,
+			V1DBClient:  mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 
 		url := testServer.Server.URL + finalityProvidersPath
@@ -279,7 +291,7 @@ func FuzzGetFinalityProviderShouldNotReturnRegisteredFpWithoutStakingForPaginate
 		bodyBytes, err := io.ReadAll(resp.Body)
 		assert.NoError(t, err, "reading response body should not fail")
 
-		var responseBody handlers.PublicResponse[[]services.FpDetailsPublic]
+		var responseBody handler.PublicResponse[[]v1service.FpDetailsPublic]
 		err = json.Unmarshal(bodyBytes, &responseBody)
 		assert.NoError(t, err, "unmarshalling response body should not fail")
 		result := responseBody.Data
@@ -309,22 +321,24 @@ func FuzzShouldNotReturnDefaultFpFromParamsWhenPageTokenIsPresent(f *testing.F) 
 		}
 		fpParams, registeredFpsStats, _ := setUpFinalityProvidersStatsDataSet(t, r, opts)
 
-		mockDB := new(testmock.V1DBClient)
+		mockV1DBClient := new(testmock.V1DBClient)
 		// Mock the response for the registered finality providers
 		numOfFpNotHaveStats := testutils.RandomPositiveInt(r, int(opts.NumOfRegisterFps))
-		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
+		mockV1DBClient.On("FindFinalityProviderStatsByFinalityProviderPkHex",
 			mock.Anything, mock.Anything,
 		).Return(registeredFpsStats[:len(registeredFpsStats)-numOfFpNotHaveStats], nil)
 
 		// We are mocking the last page of the response where there is no more data to fetch
-		mockedFinalityProviderStats := &db.DbResultMap[*v1model.FinalityProviderStatsDocument]{
-			Data:            []*v1model.FinalityProviderStatsDocument{},
+		mockedFinalityProviderStats := &db.DbResultMap[*v1dbmodel.FinalityProviderStatsDocument]{
+			Data:            []*v1dbmodel.FinalityProviderStatsDocument{},
 			PaginationToken: "",
 		}
-		mockDB.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedFinalityProviderStats, nil)
+		mockV1DBClient.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(mockedFinalityProviderStats, nil)
 
-		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-			V1DBClient: mockDB,
+		mockMongoClient := &mongo.Client{}
+		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+			MongoClient: mockMongoClient,
+			V1DBClient:  mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 
 		url := testServer.Server.URL + finalityProvidersPath + "?pagination_key=abcd"
@@ -334,7 +348,7 @@ func FuzzShouldNotReturnDefaultFpFromParamsWhenPageTokenIsPresent(f *testing.F) 
 		assert.NoError(t, err, "making GET request to finality providers endpoint should not fail")
 		bodyBytes, err := io.ReadAll(resp.Body)
 		assert.NoError(t, err, "reading response body should not fail")
-		var response handlers.PublicResponse[[]services.FpDetailsPublic]
+		var response handler.PublicResponse[[]v1service.FpDetailsPublic]
 		err = json.Unmarshal(bodyBytes, &response)
 		assert.NoError(t, err, "unmarshalling response body should not fail")
 		assert.Equal(t, numOfFpNotHaveStats, len(response.Data))
@@ -347,19 +361,21 @@ func FuzzGetFinalityProvider(f *testing.F) {
 		r := rand.New(rand.NewSource(seed))
 		fpParams, registeredFpsStats, notRegisteredFpsStats := setUpFinalityProvidersStatsDataSet(t, r, nil)
 		// Manually force a single value for the finality provider to be used in db mocking
-		fpStats := []*v1model.FinalityProviderStatsDocument{registeredFpsStats[0]}
+		fpStats := []*v1dbmodel.FinalityProviderStatsDocument{registeredFpsStats[0]}
 
-		mockDB := new(testmock.V1DBClient)
-		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
+		mockV1DBClient := new(testmock.V1DBClient)
+		mockV1DBClient.On("FindFinalityProviderStatsByFinalityProviderPkHex",
 			mock.Anything, mock.Anything,
 		).Return(fpStats, nil)
+		mockMongoClient := &mongo.Client{}
 
-		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-			V1DBClient: mockDB,
+		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+			MongoClient: mockMongoClient,
+			V1DBClient:  mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 		url := testServer.Server.URL + finalityProvidersPath + "?fp_btc_pk=" + fpParams[0].BtcPk
 		// Make a GET request to the finality providers endpoint
-		respBody := fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
+		respBody := fetchSuccessfulResponse[[]v1service.FpDetailsPublic](t, url)
 		result := respBody.Data
 		assert.Equal(t, 1, len(result))
 		assert.Equal(t, fpParams[0].Description.Moniker, result[0].Description.Moniker)
@@ -372,14 +388,15 @@ func FuzzGetFinalityProvider(f *testing.F) {
 		testServer.Close()
 
 		// Test the API with a non-existent finality provider from notRegisteredFpsStats
-		fpStats = []*v1model.FinalityProviderStatsDocument{notRegisteredFpsStats[0]}
-		mockDB = new(testmock.V1DBClient)
-		mockDB.On("FindFinalityProviderStatsByFinalityProviderPkHex",
+		fpStats = []*v1dbmodel.FinalityProviderStatsDocument{notRegisteredFpsStats[0]}
+		mockV1DBClient = new(testmock.V1DBClient)
+		mockV1DBClient.On("FindFinalityProviderStatsByFinalityProviderPkHex",
 			mock.Anything, mock.Anything,
 		).Return(fpStats, nil)
 		testServer = setupTestServer(t, &TestServerDependency{
-			MockDbClients: services.DbClients{
-				V1DBClient: mockDB,
+			MockDbClients: dbclients.DbClients{
+				MongoClient: mockMongoClient,
+				V1DBClient:  mockV1DBClient,
 			},
 			MockedFinalityProviders: fpParams,
 		})
@@ -387,7 +404,7 @@ func FuzzGetFinalityProvider(f *testing.F) {
 		url = testServer.Server.URL +
 			finalityProvidersPath +
 			"?fp_btc_pk=" + notRegisteredFp.FinalityProviderPkHex
-		respBody = fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
+		respBody = fetchSuccessfulResponse[[]v1service.FpDetailsPublic](t, url)
 		result = respBody.Data
 		assert.Equal(t, 1, len(result))
 		assert.Equal(t, "", result[0].Description.Moniker)
@@ -404,14 +421,14 @@ func FuzzGetFinalityProvider(f *testing.F) {
 		defer testServer.Close()
 		assert.NoError(t, err, "generating random public key should not fail")
 		url = testServer.Server.URL + finalityProvidersPath + "?fp_btc_pk=" + randomPk
-		respBody = fetchSuccessfulResponse[[]services.FpDetailsPublic](t, url)
+		respBody = fetchSuccessfulResponse[[]v1service.FpDetailsPublic](t, url)
 		result = respBody.Data
 		assert.Equal(t, 0, len(result))
 	})
 }
 
-func generateFinalityProviderStatsDocument(r *rand.Rand, pk string) *v1model.FinalityProviderStatsDocument {
-	return &v1model.FinalityProviderStatsDocument{
+func generateFinalityProviderStatsDocument(r *rand.Rand, pk string) *v1dbmodel.FinalityProviderStatsDocument {
+	return &v1dbmodel.FinalityProviderStatsDocument{
 		FinalityProviderPkHex: pk,
 		ActiveTvl:             testutils.RandomAmount(r),
 		TotalTvl:              testutils.RandomAmount(r),
@@ -425,7 +442,7 @@ type SetupFpStatsDataSetOpts struct {
 	NumOfNotRegisteredFps int
 }
 
-func setUpFinalityProvidersStatsDataSet(t *testing.T, r *rand.Rand, opts *SetupFpStatsDataSetOpts) ([]types.FinalityProviderDetails, []*v1model.FinalityProviderStatsDocument, []*v1model.FinalityProviderStatsDocument) {
+func setUpFinalityProvidersStatsDataSet(t *testing.T, r *rand.Rand, opts *SetupFpStatsDataSetOpts) ([]types.FinalityProviderDetails, []*v1dbmodel.FinalityProviderStatsDocument, []*v1dbmodel.FinalityProviderStatsDocument) {
 	numOfRegisterFps := testutils.RandomPositiveInt(r, 10)
 	numOfNotRegisteredFps := testutils.RandomPositiveInt(r, 10)
 	if opts != nil {
@@ -435,13 +452,13 @@ func setUpFinalityProvidersStatsDataSet(t *testing.T, r *rand.Rand, opts *SetupF
 	fpParams := testutils.GenerateRandomFinalityProviderDetail(r, uint64(numOfRegisterFps))
 
 	// Generate a set of registered finality providers
-	var registeredFpsStats []*v1model.FinalityProviderStatsDocument
+	var registeredFpsStats []*v1dbmodel.FinalityProviderStatsDocument
 	for i := 0; i < numOfRegisterFps; i++ {
 		fpStats := generateFinalityProviderStatsDocument(r, fpParams[i].BtcPk)
 		registeredFpsStats = append(registeredFpsStats, fpStats)
 	}
 
-	var notRegisteredFpsStats []*v1model.FinalityProviderStatsDocument
+	var notRegisteredFpsStats []*v1dbmodel.FinalityProviderStatsDocument
 	for i := 0; i < numOfNotRegisteredFps; i++ {
 		fpNotRegisteredPk, err := testutils.RandomPk()
 		assert.NoError(t, err, "generating random public key should not fail")

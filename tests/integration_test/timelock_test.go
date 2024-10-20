@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
-	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,13 +15,13 @@ func TestSaveTimelock(t *testing.T) {
 	activeStakingEvent := buildActiveStakingEvent(t, 1)
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(2 * time.Second)
 	// Check from DB if the data is saved
 	results, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -40,15 +40,15 @@ func TestNotSaveExpireCheckIfAlreadyProcessed(t *testing.T) {
 	activeStakingEvent := buildActiveStakingEvent(t, 1)
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 	// Send again
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(5 * time.Second)
 	// Check from DB if the data is saved
 	results, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -63,11 +63,11 @@ func TestNotSaveExpireCheckIfAlreadyProcessed(t *testing.T) {
 	// Now, let's inject the same data but with different expireHeight
 	eventWithDifferentExpireHeight := buildActiveStakingEvent(t, 1)
 
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, eventWithDifferentExpireHeight)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, eventWithDifferentExpireHeight)
 	time.Sleep(2 * time.Second)
 
 	results, err = testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)

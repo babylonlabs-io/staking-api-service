@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
@@ -32,12 +33,15 @@ func TestReplayUnprocessableMessages(t *testing.T) {
 	doc := string(data)
 
 	testutils.InjectDbDocument(
-		testServer.Config,
-		model.V1UnprocessableMsgCollection,
-		model.NewUnprocessableMessageDocument(doc, "receipt"),
+		testServer.Config, dbmodel.V1UnprocessableMsgCollection,
+		dbmodel.NewUnprocessableMessageDocument(doc, "receipt"),
 	)
-	db := testutils.DirectDbConnection(testServer.Config)
-	scripts.ReplayUnprocessableMessages(ctx, testServer.Config, testServer.Queues, db)
+	dbClients, _ := testutils.DirectDbConnection(testServer.Config)
+	defer dbClients.MongoClient.Disconnect(ctx)
+	dbclient, err := dbclient.New(ctx, dbClients.MongoClient, testServer.Config.Db)
+	assert.NoError(t, err, "creating db client should not return an error")
+
+	scripts.ReplayUnprocessableMessages(ctx, testServer.Config, testServer.Queues, dbclient)
 
 	time.Sleep(3 * time.Second)
 
@@ -51,7 +55,7 @@ func TestReplayUnprocessableMessages(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var responseJSON handlers.PublicResponse[[]client.ActiveStakingEvent]
+	var responseJSON handler.PublicResponse[[]client.ActiveStakingEvent]
 	err = json.Unmarshal(body, &responseJSON)
 	assert.NoError(t, err, "unmarshal response JSON should not return an error")
 

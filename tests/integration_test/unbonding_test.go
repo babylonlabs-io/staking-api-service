@@ -9,20 +9,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v1handlers "github.com/babylonlabs-io/staking-api-service/internal/v1/api/handlers"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
+	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
+	testmock "github.com/babylonlabs-io/staking-api-service/tests/mocks"
+	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/babylonlabs-io/staking-api-service/internal/api"
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
-	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
-	testmock "github.com/babylonlabs-io/staking-api-service/tests/mocks"
-	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const (
@@ -35,7 +37,7 @@ func TestUnbondingRequest(t *testing.T) {
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
 
-	err := sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	err := sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 	require.NoError(t, err)
 
 	time.Sleep(2 * time.Second)
@@ -107,7 +109,7 @@ func TestUnbondingRequest(t *testing.T) {
 	bodyBytes, err = io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var getStakerDelegationResponse handlers.PublicResponse[[]services.DelegationPublic]
+	var getStakerDelegationResponse handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &getStakerDelegationResponse)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -116,8 +118,8 @@ func TestUnbondingRequest(t *testing.T) {
 	assert.Equal(t, types.UnbondingRequested.ToString(), getStakerDelegationResponse.Data[0].State, "state should be unbonding requested")
 
 	// Let's inspect what's stored in the database
-	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](
-		testServer.Config, model.V1UnbondingCollection,
+	results, err := testutils.InspectDbDocuments[v1dbmodel.UnbondingDocument](
+		testServer.Config, dbmodel.V1UnbondingCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -181,8 +183,8 @@ func getTestActiveStakingEvent() *client.ActiveStakingEvent {
 	}
 }
 
-func getTestUnbondDelegationRequestPayload(stakingTxHashHex string) handlers.UnbondDelegationRequestPayload {
-	return handlers.UnbondDelegationRequestPayload{
+func getTestUnbondDelegationRequestPayload(stakingTxHashHex string) v1handlers.UnbondDelegationRequestPayload {
+	return v1handlers.UnbondDelegationRequestPayload{
 		StakingTxHashHex:         stakingTxHashHex,
 		UnbondingTxHashHex:       "17aad3b01a9fa134f0e6374b9ad1b049376a9bdbd889afc369dcb8074bbdf1b3",
 		UnbondingTxHex:           "02000000000101378058b8745137ceb641141ef0609e75477960e5f6986455d3c59c7a7798cb060100000000ffffffff01905f010000000000225120ba296d88e83fd2faf5864ddda74ac8d0df6a7d76b39d5ef4c0751117a26cfd3104403c3d32c844ff751de59190ffc57427794450ba97b0d6ead43d53d865b34021abb52a6370382cfc46416f42f28d32704e504f84720d8458b5d51fee69d28cf94940728ab06ac8ab2f14b4c60cacb0e8932760f1559df93dd9053327e72cec53fc9749d5abaa4a96758b7f3588b3ad80e4c157233f1e689a37bea3ccaa9e50ba153ece2091fef91f0f00d010d6c918acb9197db6cd33d99ee617090fa8cb61fa2a31405aad2057349e985e742d5131e1e2b227b5170f6350ac2e2feb72254fcc25b3cee21a18ac2059d3532148a597a2d05c0395bf5f7176044b1cd312f37701a9b4d0aad70bc5a4ba20a5c60c2188e833d39d0fa798ab3f69aa12ed3dd2f3bad659effa252782de3c31ba20c8ccb03c379e452f10c81232b41a1ca8b63d0baf8387e57d302c987e5abb8527ba20ffeaec52a9b407b355ef6967a7ffc15fd6c3fe07de2844d61550475e7a5233e5ba539c61c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0957294d847c7353393803c6a2c03d6b777bb2cbb69aa4c85291d2d9bb981bb59cc2f4c8bba33b96629a6e942aad0c9815a4e5e7322f63e521e762371b71e3c1300000000",
@@ -195,7 +197,7 @@ func TestProcessUnbondingStakingEvent(t *testing.T) {
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
 
-	err := sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
+	err := sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
 	require.NoError(t, err)
 
 	time.Sleep(2 * time.Second)
@@ -211,8 +213,8 @@ func TestProcessUnbondingStakingEvent(t *testing.T) {
 	defer resp.Body.Close()
 
 	// Let's inspect what's stored in the database
-	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](
-		testServer.Config, model.V1UnbondingCollection,
+	results, err := testutils.InspectDbDocuments[v1dbmodel.UnbondingDocument](
+		testServer.Config, dbmodel.V1UnbondingCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -232,7 +234,7 @@ func TestProcessUnbondingStakingEvent(t *testing.T) {
 		UnbondingOutputIndex:    1,
 	}
 
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Let's GET the delegation from API
@@ -247,7 +249,7 @@ func TestProcessUnbondingStakingEvent(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var getStakerDelegationResponse handlers.PublicResponse[[]services.DelegationPublic]
+	var getStakerDelegationResponse handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &getStakerDelegationResponse)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -263,8 +265,8 @@ func TestProcessUnbondingStakingEvent(t *testing.T) {
 	assert.NoError(t, err, "expected timestamp to be in RFC3339 format")
 
 	// Let's also fetch the DB to make sure the expired check is processed
-	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+	timeLockResults, err := testutils.InspectDbDocuments[v1dbmodel.TimeLockDocument](
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -283,7 +285,7 @@ func TestProcessUnbondingStakingEventDuringBootstrap(t *testing.T) {
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
 
-	err := sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
+	err := sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
 	require.NoError(t, err)
 
 	time.Sleep(2 * time.Second)
@@ -303,7 +305,7 @@ func TestProcessUnbondingStakingEventDuringBootstrap(t *testing.T) {
 		UnbondingOutputIndex:    1,
 	}
 
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Let's GET the delegation from API
@@ -319,7 +321,7 @@ func TestProcessUnbondingStakingEventDuringBootstrap(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var getStakerDelegationResponse handlers.PublicResponse[[]services.DelegationPublic]
+	var getStakerDelegationResponse handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &getStakerDelegationResponse)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -332,8 +334,8 @@ func TestProcessUnbondingStakingEventDuringBootstrap(t *testing.T) {
 	assert.Equal(t, unbondingEvent.UnbondingTxHex, getStakerDelegationResponse.Data[0].UnbondingTx.TxHex, "expected unbonding tx to match")
 
 	// Let's also fetch the DB to make sure the expired check is processed
-	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+	timeLockResults, err := testutils.InspectDbDocuments[v1dbmodel.TimeLockDocument](
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -352,7 +354,7 @@ func TestShouldIgnoreOutdatedUnbondingEvent(t *testing.T) {
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
 
-	err := sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
+	err := sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
 	require.NoError(t, err)
 
 	time.Sleep(2 * time.Second)
@@ -369,7 +371,7 @@ func TestShouldIgnoreOutdatedUnbondingEvent(t *testing.T) {
 		UnbondingOutputIndex:    1,
 	}
 
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Let's GET the delegation from API
@@ -385,7 +387,7 @@ func TestShouldIgnoreOutdatedUnbondingEvent(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var getStakerDelegationResponse handlers.PublicResponse[[]services.DelegationPublic]
+	var getStakerDelegationResponse handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &getStakerDelegationResponse)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -398,8 +400,8 @@ func TestShouldIgnoreOutdatedUnbondingEvent(t *testing.T) {
 	assert.Equal(t, unbondingEvent.UnbondingTxHex, getStakerDelegationResponse.Data[0].UnbondingTx.TxHex, "expected unbonding tx to match")
 
 	// Let's also fetch the DB to make sure the expired check is processed
-	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+	timeLockResults, err := testutils.InspectDbDocuments[v1dbmodel.TimeLockDocument](
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -413,12 +415,12 @@ func TestShouldIgnoreOutdatedUnbondingEvent(t *testing.T) {
 	assert.Equal(t, types.UnbondingTxType.ToString(), timeLockResults[1].TxType)
 
 	// Let's send an outdated unbonding event
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Fetch from the expire checker to make sure we only processed the unbonding event once
-	timeLockResults, err = testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+	timeLockResults, err = testutils.InspectDbDocuments[v1dbmodel.TimeLockDocument](
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -444,17 +446,17 @@ func TestProcessUnbondingStakingEventShouldTolerateEventMsgOutOfOrder(t *testing
 		UnbondingOutputIndex:    1,
 	}
 
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 	// Check DB, there should be no unbonding document
-	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](
-		testServer.Config, model.V1UnbondingCollection,
+	results, err := testutils.InspectDbDocuments[v1dbmodel.UnbondingDocument](
+		testServer.Config, dbmodel.V1UnbondingCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 	assert.Empty(t, results, "expected no unbonding document in the DB")
 
 	// Send the active event
-	err = sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
+	err = sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []*client.ActiveStakingEvent{activeStakingEvent})
 	require.NoError(t, err)
 
 	time.Sleep(10 * time.Second)
@@ -472,7 +474,7 @@ func TestProcessUnbondingStakingEventShouldTolerateEventMsgOutOfOrder(t *testing
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var getStakerDelegationResponse handlers.PublicResponse[[]services.DelegationPublic]
+	var getStakerDelegationResponse handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &getStakerDelegationResponse)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -484,8 +486,8 @@ func TestProcessUnbondingStakingEventShouldTolerateEventMsgOutOfOrder(t *testing
 	assert.Equal(t, unbondingEvent.UnbondingTxHex, getStakerDelegationResponse.Data[0].UnbondingTx.TxHex, "expected unbonding tx to match")
 
 	// Let's also fetch the DB to make sure the expired check is processed
-	timeLockResults, err := testutils.InspectDbDocuments[v1model.TimeLockDocument](
-		testServer.Config, model.V1TimeLockCollection,
+	timeLockResults, err := testutils.InspectDbDocuments[v1dbmodel.TimeLockDocument](
+		testServer.Config, dbmodel.V1TimeLockCollection,
 	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
@@ -501,18 +503,20 @@ func TestProcessUnbondingStakingEventShouldTolerateEventMsgOutOfOrder(t *testing
 
 func TestUnbondingRequestValidation(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	mockDB := new(testmock.V1DBClient)
-	mockDB.On("FindDelegationByTxHashHex", mock.Anything, mock.Anything).Return(
-		&v1model.DelegationDocument{
+	mockV1DBClient := new(testmock.V1DBClient)
+	mockV1DBClient.On("FindDelegationByTxHashHex", mock.Anything, mock.Anything).Return(
+		&v1dbmodel.DelegationDocument{
 			State: "active",
-			StakingTx: &v1model.TimelockTransaction{
+			StakingTx: &v1dbmodel.TimelockTransaction{
 				StartHeight: 300,
 			},
 		},
 		nil,
 	)
-	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: services.DbClients{
-		V1DBClient: mockDB,
+	mockMongoClient := &mongo.Client{}
+	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
+		MongoClient: mockMongoClient,
+		V1DBClient:  mockV1DBClient,
 	}})
 	defer testServer.Close()
 	unbondingUrl := testServer.Server.URL + unbondingPath
@@ -527,7 +531,7 @@ func TestUnbondingRequestValidation(t *testing.T) {
 	)
 	_, fakeSig := testutils.RandomBytes(r, 64)
 
-	payload := handlers.UnbondDelegationRequestPayload{
+	payload := v1handlers.UnbondDelegationRequestPayload{
 		StakingTxHashHex: stakingTxHashHex,
 		// unbondingTxHashHex does not match the hash of unbondingTxHex as it is
 		// generated randomly
@@ -557,7 +561,7 @@ func TestUnbondingRequestValidation(t *testing.T) {
 	unbondingTxHashHex = unbondingTx.TxHash().String()
 	_, fakeSig = testutils.RandomBytes(r, 64)
 
-	payload = handlers.UnbondDelegationRequestPayload{
+	payload = v1handlers.UnbondDelegationRequestPayload{
 		StakingTxHashHex: stakingTxHashHex,
 		// unbondingTxHashHex does not match the hash of unbondingTxHex as it is
 		// generated randomly

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	bbndatagen "github.com/babylonlabs-io/babylon/testutil/datagen"
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"

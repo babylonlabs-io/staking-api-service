@@ -6,15 +6,16 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/cli"
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
-	"github.com/babylonlabs-io/staking-api-service/internal/api"
-	"github.com/babylonlabs-io/staking-api-service/internal/clients"
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
-	"github.com/babylonlabs-io/staking-api-service/internal/observability/healthcheck"
-	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
-	"github.com/babylonlabs-io/staking-api-service/internal/queue"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/services"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/healthcheck"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
+	queueclients "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
@@ -63,24 +64,32 @@ func main() {
 	metricsPort := cfg.Metrics.GetMetricsPort()
 	metrics.Init(metricsPort)
 
-	err = model.Setup(ctx, cfg)
+	err = dbmodel.Setup(ctx, cfg)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking db model")
 	}
 
 	// initialize clients package which is used to interact with external services
 	clients := clients.New(cfg)
-	services, err := services.New(ctx, cfg, params, finalityProviders, clients)
+
+	dbClients, err := dbclients.New(ctx, cfg)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error while setting up staking db clients")
+	}
+
+	services, err := services.New(ctx, cfg, params, finalityProviders, clients, dbClients)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking services layer")
 	}
+
 	// Start the event queue processing
-	queues := queue.New(cfg.Queue, services)
+	queueClients := queueclients.New(ctx, cfg.Queue, services)
 
 	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
 		log.Info().Msg("Replay flag is set. Starting replay of unprocessable messages.")
-		err := scripts.ReplayUnprocessableMessages(ctx, cfg, queues, services.DbClients.V1DBClient)
+
+		err := scripts.ReplayUnprocessableMessages(ctx, cfg, queueClients, dbClients.DBClient)
 		if err != nil {
 			log.Fatal().Err(err).Msg("error while replaying unprocessable messages")
 		}
@@ -94,9 +103,9 @@ func main() {
 		return
 	}
 
-	queues.StartReceivingMessages()
+	queueClients.StartReceivingMessages()
 
-	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, queues, cfg.Server.HealthCheckInterval)
+	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, queueClients, cfg.Server.HealthCheckInterval)
 	if healthcheckErr != nil {
 		log.Fatal().Err(healthcheckErr).Msg("error while starting health check cron")
 	}

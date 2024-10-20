@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
 )
 
 const (
@@ -26,9 +26,9 @@ func TestUnbondActiveStaking(t *testing.T) {
 	expiredStakingEvent := client.NewExpiredStakingEvent(activeStakingEvent[0].StakingTxHashHex, types.ActiveTxType.ToString())
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 	time.Sleep(2 * time.Second)
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Test the API
@@ -44,7 +44,7 @@ func TestUnbondActiveStaking(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var response handlers.PublicResponse[[]services.DelegationPublic]
+	var response handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -58,9 +58,9 @@ func TestUnbondActiveStakingShouldTolerateOutOfOrder(t *testing.T) {
 	expiredStakingEvent := client.NewExpiredStakingEvent(activeStakingEvent[0].StakingTxHashHex, types.ActiveTxType.ToString())
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
 	time.Sleep(2 * time.Second)
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 	time.Sleep(10 * time.Second)
 
 	// Test the API
@@ -76,7 +76,7 @@ func TestUnbondActiveStakingShouldTolerateOutOfOrder(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var response handlers.PublicResponse[[]services.DelegationPublic]
+	var response handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
@@ -90,7 +90,7 @@ func TestShouldNotUnbondIfNotActiveState(t *testing.T) {
 	expiredStakingEvent := client.NewExpiredStakingEvent(activeStakingEvent.StakingTxHashHex, types.ActiveTxType.ToString())
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	err := sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	err := sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 	require.NoError(t, err)
 	time.Sleep(2 * time.Second)
 
@@ -107,7 +107,7 @@ func TestShouldNotUnbondIfNotActiveState(t *testing.T) {
 	// Check that the status code is HTTP 202
 	assert.Equal(t, http.StatusAccepted, resp.StatusCode, "expected HTTP 202 Accepted status")
 
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredStakingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Test the API
@@ -123,7 +123,7 @@ func TestShouldNotUnbondIfNotActiveState(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var response handlers.PublicResponse[[]services.DelegationPublic]
+	var response handler.PublicResponse[[]v1service.DelegationPublic]
 	err = json.Unmarshal(bodyBytes, &response)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 

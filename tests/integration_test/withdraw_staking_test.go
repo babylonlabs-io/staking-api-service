@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
-	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v1model "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
@@ -19,14 +19,14 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 	activeStakingEvent := getTestActiveStakingEvent()
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
 	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -44,12 +44,12 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 		TxType:           types.ActiveTxType.ToString(),
 	}
 
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin is in "unbonded" state
 	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -66,12 +66,12 @@ func TestWithdrawFromActiveStaking(t *testing.T) {
 		StakingTxHashHex: activeStakingEvent.StakingTxHashHex,
 	}
 
-	sendTestMessage(testServer.Queues.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, now it shall be "withdrawn" state
 	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -87,14 +87,14 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 	activeStakingEvent := getTestActiveStakingEvent()
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
 	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -127,7 +127,7 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 		UnbondingOutputIndex:    1,
 	}
 
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Send the timelock expire event so that the state change to "unbonded"
@@ -137,12 +137,12 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 		TxType:           types.UnbondingTxType.ToString(),
 	}
 
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin is in "unbonded" state
 	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -159,12 +159,12 @@ func TestWithdrawFromStakingHasUnbondingRequested(t *testing.T) {
 		StakingTxHashHex: activeStakingEvent.StakingTxHashHex,
 	}
 
-	sendTestMessage(testServer.Queues.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, now it shall be "withdrawn" state
 	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -180,14 +180,14 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 	activeStakingEvent := getTestActiveStakingEvent()
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(2 * time.Second)
 
 	// Check from DB that this delegatin exist and has the state of active
 	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -204,12 +204,12 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 		StakingTxHashHex: activeStakingEvent.StakingTxHashHex,
 	}
 
-	sendTestMessage(testServer.Queues.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, it should still be "active" state as the withdraw event will be requeued
 	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -224,12 +224,12 @@ func TestProcessWithdrawStakingEventShouldTolerateEventMsgOutOfOrder(t *testing.
 		TxType:           types.ActiveTxType.ToString(),
 	}
 
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
 	time.Sleep(10 * time.Second)
 
 	// Check the DB after a while, now it shall be "withdrawn" state
 	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -245,7 +245,7 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 	activeStakingEvent := getTestActiveStakingEvent()
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 	// Wait for 2 seconds to make sure the message is processed
 	time.Sleep(2 * time.Second)
 
@@ -256,7 +256,7 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 		TxType:           types.ActiveTxType.ToString(),
 	}
 
-	sendTestMessage(testServer.Queues.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ExpiredStakingQueueClient, []client.ExpiredStakingEvent{expiredEvent})
 	time.Sleep(10 * time.Second)
 
 	// Send the withdraw event before timelock expire event which would change the state to unbonded
@@ -265,12 +265,12 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 		StakingTxHashHex: activeStakingEvent.StakingTxHashHex,
 	}
 
-	sendTestMessage(testServer.Queues.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
 	time.Sleep(2 * time.Second)
 
 	// Check the DB after a while, now it shall be "withdrawn" state
 	results, err := testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -282,12 +282,12 @@ func TestShouldIgnoreWithdrawnEventIfAlreadyWithdrawn(t *testing.T) {
 	assert.Equal(t, types.Withdrawn, results[0].State, "expected state to be unbonded")
 
 	// Send again the withdraw event, it should be ignored
-	sendTestMessage(testServer.Queues.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.WithdrawStakingQueueClient, []client.WithdrawStakingEvent{withdrawEvent})
 	time.Sleep(2 * time.Second)
 
 	// Check the DB, nothing should be changed.
 	results, err = testutils.InspectDbDocuments[v1model.DelegationDocument](
-		testServer.Config, model.V1DelegationCollection,
+		testServer.Config, dbmodel.V1DelegationCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)

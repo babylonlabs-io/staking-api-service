@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
-	v1model "github.com/babylonlabs-io/staking-api-service/internal/db/model/v1"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
+	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
@@ -43,14 +43,14 @@ func TestStatsShouldBeShardedInDb(t *testing.T) {
 	}
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 	time.Sleep(2 * time.Second)
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, unbondingEvents)
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, unbondingEvents)
 	time.Sleep(2 * time.Second)
 
 	// directly read from the db to check that we have more than 2 records in the overall stats collection
-	results, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
-		testServer.Config, model.V1OverallStatsCollection,
+	results, err := testutils.InspectDbDocuments[v1dbmodel.OverallStatsDocument](
+		testServer.Config, dbmodel.V1OverallStatsCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -81,7 +81,7 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
 
-	err := sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	err := sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 	require.NoError(t, err)
 
 	time.Sleep(2 * time.Second)
@@ -97,7 +97,9 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 	defer resp.Body.Close()
 
 	// Let's inspect what's stored in the database
-	results, err := testutils.InspectDbDocuments[v1model.UnbondingDocument](testServer.Config, model.V1UnbondingCollection)
+	results, err := testutils.InspectDbDocuments[v1dbmodel.UnbondingDocument](
+		testServer.Config, dbmodel.V1UnbondingCollection,
+	)
 	assert.NoError(t, err, "failed to inspect DB documents")
 
 	assert.Equal(t, 1, len(results), "expected 1 document in the DB")
@@ -116,12 +118,12 @@ func TestShouldSkipStatsCalculationForOverflowedStakingEvent(t *testing.T) {
 		UnbondingOutputIndex:    1,
 	}
 
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 
 	// directly read from the db to check that we only have 1 shard in the overall stats collection
-	stats, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
-		testServer.Config, model.V1OverallStatsCollection,
+	stats, err := testutils.InspectDbDocuments[v1dbmodel.OverallStatsDocument](
+		testServer.Config, dbmodel.V1OverallStatsCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -147,15 +149,15 @@ func TestShouldNotPerformStatsCalculationForUnbondingTxWhenDelegationIsOverflowe
 	))
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeStakingEvent)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeStakingEvent)
 	time.Sleep(2 * time.Second)
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, unbondingEvents)
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, unbondingEvents)
 	time.Sleep(2 * time.Second)
 
 	// directly read from the db to check that we have more than 2 records in the
 	// overall stats collection
-	results, err := testutils.InspectDbDocuments[v1model.OverallStatsDocument](
-		testServer.Config, model.V1OverallStatsCollection,
+	results, err := testutils.InspectDbDocuments[v1dbmodel.OverallStatsDocument](
+		testServer.Config, dbmodel.V1OverallStatsCollection,
 	)
 	if err != nil {
 		t.Fatalf("Failed to inspect DB documents: %v", err)
@@ -191,7 +193,7 @@ func TestStatsEndpoints(t *testing.T) {
 	activeStakingEvent := getTestActiveStakingEvent()
 	testServer := setupTestServer(t, nil)
 	defer testServer.Close()
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, []client.ActiveStakingEvent{*activeStakingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Test the finality endpoint first
@@ -241,7 +243,7 @@ func TestStatsEndpoints(t *testing.T) {
 		activeStakingEvent.StakingTxHex,     // mocked data, it doesn't matter in stats calculation
 		activeStakingEvent.StakingTxHashHex, // mocked data, it doesn't matter in stats calculation
 	)
-	sendTestMessage(testServer.Queues.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.UnbondingStakingQueueClient, []client.UnbondingStakingEvent{unbondingEvent})
 	time.Sleep(2 * time.Second)
 
 	// Make a GET request to the finality providers endpoint
@@ -278,7 +280,7 @@ func TestStatsEndpoints(t *testing.T) {
 
 	// Send two new active events, it will increment the stats
 	activeEvents := buildActiveStakingEvent(t, 2)
-	sendTestMessage(testServer.Queues.ActiveStakingQueueClient, activeEvents)
+	sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, activeEvents)
 	time.Sleep(2 * time.Second)
 
 	// Make a GET request to the finality providers endpoint
@@ -313,7 +315,7 @@ func TestStatsEndpoints(t *testing.T) {
 		ConfirmedTvl:   90,
 		UnconfirmedTvl: 100,
 	}
-	sendTestMessage(testServer.Queues.BtcInfoQueueClient, []*client.BtcInfoEvent{btcInfoEvent})
+	sendTestMessage(testServer.Queues.V1QueueClient.BtcInfoQueueClient, []*client.BtcInfoEvent{btcInfoEvent})
 
 	time.Sleep(2 * time.Second)
 
@@ -342,7 +344,7 @@ func FuzzReturnStakerStatsByStakerPk(f *testing.F) {
 			Stakers:            testutils.GeneratePks(10),
 			EnforceNotOverflow: true,
 		})
-		sendTestMessage(testServer.Queues.ActiveStakingQueueClient, events)
+		sendTestMessage(testServer.Queues.V1QueueClient.ActiveStakingQueueClient, events)
 		time.Sleep(10 * time.Second)
 
 		// Find the unique staker pks
@@ -392,7 +394,7 @@ func FuzzStatsEndpointReturnHighestUnconfirmedTvlFromEvents(f *testing.F) {
 				highestHeightEvent = btcInfoEvent
 			}
 		}
-		sendTestMessage(testServer.Queues.BtcInfoQueueClient, messages)
+		sendTestMessage(testServer.Queues.V1QueueClient.BtcInfoQueueClient, messages)
 		time.Sleep(5 * time.Second)
 
 		overallStats = fetchOverallStatsEndpoint(t, testServer)
@@ -429,14 +431,14 @@ func FuzzTestTopStakersWithPaginationResponse(f *testing.F) {
 		testServer := setupTestServer(t, &TestServerDependency{ConfigOverrides: cfg})
 		defer testServer.Close()
 		sendTestMessage(
-			testServer.Queues.ActiveStakingQueueClient,
+			testServer.Queues.V1QueueClient.ActiveStakingQueueClient,
 			events,
 		)
 		time.Sleep(5 * time.Second)
 		// Test the API
 		url := testServer.Server.URL + topStakerStatsPath
 		var paginationKey string
-		var allDataCollected []services.StakerStatsPublic
+		var allDataCollected []v1service.StakerStatsPublic
 		var numOfRequestsToFetchAllResults int
 		for {
 			numOfRequestsToFetchAllResults++
@@ -445,7 +447,7 @@ func FuzzTestTopStakersWithPaginationResponse(f *testing.F) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode, "expected HTTP 200 OK status")
 			bodyBytes, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err, "reading response body should not fail")
-			var response handlers.PublicResponse[[]services.StakerStatsPublic]
+			var response handler.PublicResponse[[]v1service.StakerStatsPublic]
 			err = json.Unmarshal(bodyBytes, &response)
 			assert.NoError(t, err, "unmarshalling response body should not fail")
 			// Check that the response body is as expected
@@ -467,7 +469,7 @@ func FuzzTestTopStakersWithPaginationResponse(f *testing.F) {
 	})
 }
 
-func fetchFinalityEndpoint(t *testing.T, testServer *TestServer) []services.FpDetailsPublic {
+func fetchFinalityEndpoint(t *testing.T, testServer *TestServer) []v1service.FpDetailsPublic {
 	url := testServer.Server.URL + finalityProvidersPath
 	// Make a GET request to the finality providers endpoint
 	resp, err := http.Get(url)
@@ -481,14 +483,14 @@ func fetchFinalityEndpoint(t *testing.T, testServer *TestServer) []services.FpDe
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var responseBody handlers.PublicResponse[[]services.FpDetailsPublic]
+	var responseBody handler.PublicResponse[[]v1service.FpDetailsPublic]
 	err = json.Unmarshal(bodyBytes, &responseBody)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
 	return responseBody.Data
 }
 
-func fetchOverallStatsEndpoint(t *testing.T, testServer *TestServer) services.OverallStatsPublic {
+func fetchOverallStatsEndpoint(t *testing.T, testServer *TestServer) v1service.OverallStatsPublic {
 	url := testServer.Server.URL + overallStatsEndpoint
 	// Make a GET request to the stats endpoint
 	resp, err := http.Get(url)
@@ -502,14 +504,14 @@ func fetchOverallStatsEndpoint(t *testing.T, testServer *TestServer) services.Ov
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var responseBody handlers.PublicResponse[services.OverallStatsPublic]
+	var responseBody handler.PublicResponse[v1service.OverallStatsPublic]
 	err = json.Unmarshal(bodyBytes, &responseBody)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
 	return responseBody.Data
 }
 
-func fetchStakerStatsEndpoint(t *testing.T, testServer *TestServer, stakerPk string) []services.StakerStatsPublic {
+func fetchStakerStatsEndpoint(t *testing.T, testServer *TestServer, stakerPk string) []v1service.StakerStatsPublic {
 	url := testServer.Server.URL + topStakerStatsPath
 	if stakerPk != "" {
 		url += "?staker_btc_pk=" + stakerPk
@@ -524,7 +526,7 @@ func fetchStakerStatsEndpoint(t *testing.T, testServer *TestServer, stakerPk str
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var responseBody handlers.PublicResponse[[]services.StakerStatsPublic]
+	var responseBody handler.PublicResponse[[]v1service.StakerStatsPublic]
 	err = json.Unmarshal(bodyBytes, &responseBody)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 

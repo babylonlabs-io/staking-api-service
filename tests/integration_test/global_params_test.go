@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"testing"
 
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
 )
 
 const (
@@ -34,7 +33,7 @@ func TestGlobalParams(t *testing.T) {
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var responseBody handlers.PublicResponse[services.GlobalParamsPublic]
+	var responseBody handler.PublicResponse[v1service.GlobalParamsPublic]
 	err = json.Unmarshal(bodyBytes, &responseBody)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 
