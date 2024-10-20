@@ -14,7 +14,9 @@ import (
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/stats [get]
 func (h *V2Handler) GetStats(request *http.Request) (*handler.Result, *types.Error) {
-	// TODO: Implement the logic to get overall stats
-	// mock data response
-	return handler.NewResult(map[string]string{"message": "V2 Get Stats"}), nil
+	stats, err := h.Service.GetOverallStats(request.Context())
+	if err != nil {
+		return nil, err
+	}
+	return handler.NewResult(stats), nil
 }

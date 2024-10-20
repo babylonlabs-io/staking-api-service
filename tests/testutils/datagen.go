@@ -183,6 +183,11 @@ func GenerateRandomFinalityProviderDetail(r *rand.Rand, numOfFps uint64) []types
 	return finalityProviders
 }
 
+func RandomFinalityProviderState(r *rand.Rand) types.FinalityProviderState {
+	states := []types.FinalityProviderState{types.FinalityProviderStateActive, types.FinalityProviderStateStandby}
+	return states[r.Intn(len(states))]
+}
+
 // GenerateRandomActiveStakingEvents generates a random number of active staking events
 // with random values for each field.
 // default to max 11 events, 11 finality providers, and 11 stakers
@@ -242,4 +247,44 @@ func GenerateRandomActiveStakingEvents(
 		activeStakingEvents = append(activeStakingEvents, activeStakingEvent)
 	}
 	return activeStakingEvents
+}
+
+func GenerateRandomBabylonParams(r *rand.Rand) types.BabylonParams {
+	return types.BabylonParams{
+		Version:                      r.Intn(10),
+		CovenantPKs:                  GeneratePks(r.Intn(10)),
+		CovenantQuorum:               r.Intn(10),
+		MaxStakingAmount:             int64(r.Intn(1000000000000000000)),
+		MinStakingAmount:             int64(r.Intn(1000000000000000000)),
+		MaxStakingTime:               int64(r.Intn(1000000000000000000)),
+		MinStakingTime:               int64(r.Intn(1000000000000000000)),
+		SlashingPKScript:             RandomString(r, 10),
+		MinSlashingTxFee:             int64(r.Intn(1000000000000000000)),
+		SlashingRate:                 RandomPostiveFloat64(r),
+		MinUnbondingTime:             int64(r.Intn(1000000000000000000)),
+		UnbondingFee:                 int64(r.Intn(1000000000000000000)),
+		MinCommissionRate:            RandomPostiveFloat64(r),
+		MaxActiveFinalityProviders:   r.Intn(10),
+		DelegationCreationBaseGasFee: int64(r.Intn(1000000000000000000)),
+	}
+}
+
+func GenerateRandomBTCParams(r *rand.Rand) types.BTCParams {
+	return types.BTCParams{
+		Version:              r.Intn(10),
+		BTCConfirmationDepth: r.Intn(10),
+	}
+}
+
+func RandomDelegationState(r *rand.Rand) types.DelegationState {
+	states := []types.DelegationState{types.Active, types.UnbondingRequested, types.Unbonding, types.Unbonded, types.Withdrawn}
+	return states[r.Intn(len(states))]
+}
+
+func RandomTransactionInfo(r *rand.Rand) types.TransactionInfo {
+	_, txHex, _ := GenerateRandomTx(r, nil)
+	return types.TransactionInfo{
+		TxHex:       txHex,
+		OutputIndex: r.Intn(100),
+	}
 }

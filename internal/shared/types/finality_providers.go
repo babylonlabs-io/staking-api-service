@@ -6,6 +6,12 @@ import (
 	"path/filepath"
 )
 
+type FinalityProviderState string
+
+const (
+	FinalityProviderStateActive  FinalityProviderState = "active"
+	FinalityProviderStateStandby FinalityProviderState = "standby"
+)
 
 type FinalityProviderDescription struct {
 	Moniker         string `json:"moniker"`

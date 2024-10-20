@@ -19,7 +19,13 @@ import (
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
-	// TODO: Implement the logic to get finality providers
-	// mock data response
-	return handler.NewResult(map[string]string{"message": "V2 Get Finality Providers"}), nil
+	paginationKey, err := handler.ParsePaginationQuery(request)
+	if err != nil {
+		return nil, err
+	}
+	providers, paginationToken, err := h.Service.GetFinalityProviders(request.Context(), paginationKey)
+	if err != nil {
+		return nil, err
+	}
+	return handler.NewResultWithPagination(providers, paginationToken), nil
 }

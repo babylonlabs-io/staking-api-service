@@ -17,9 +17,15 @@ import (
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/staker/delegations [get]
 func (h *V2Handler) GetStakerDelegations(request *http.Request) (*handler.Result, *types.Error) {
-	// TODO: Implement the logic to get staker delegations
-	// mock data response
-	return handler.NewResult(map[string]string{"message": "V2 Get Staker Delegations"}), nil
+	paginationKey, err := handler.ParsePaginationQuery(request)
+	if err != nil {
+		return nil, err
+	}
+	delegations, paginationToken, err := h.Service.GetStakerDelegations(request.Context(), paginationKey)
+	if err != nil {
+		return nil, err
+	}
+	return handler.NewResultWithPagination(delegations, paginationToken), nil
 }
 
 // GetStakerStats gets staker stats for babylon staking
@@ -29,7 +35,13 @@ func (h *V2Handler) GetStakerDelegations(request *http.Request) (*handler.Result
 // @Success 200 {object} PublicResponse[v2service.StakerStatsPublic] "Staker stats"
 // @Router /v2/staker/stats [get]
 func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *types.Error) {
-	// TODO: Implement the logic to get staker stats
-	// mock data response
-	return handler.NewResult(map[string]string{"message": "V2 Get Staker Stats"}), nil
+	stakerPKHex := request.URL.Query().Get("staker_pk_hex")
+	if stakerPKHex == "" {
+		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "staker_pk_hex is required")
+	}
+	stats, err := h.Service.GetStakerStats(request.Context(), stakerPKHex)
+	if err != nil {
+		return nil, err
+	}
+	return handler.NewResult(stats), nil
 }
