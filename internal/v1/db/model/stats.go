@@ -1,5 +1,7 @@
 package v1dbmodel
 
+import dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+
 // StatsLockDocument represents the document in the stats lock collection
 // It's used as a lock to prevent concurrent stats calculation for the same staking tx hash
 // As well as to prevent the same staking tx hash + txType to be processed multiple times
@@ -49,7 +51,7 @@ func BuildFinalityProviderStatsPaginationToken(d *FinalityProviderStatsDocument)
 		ActiveTvl:             d.ActiveTvl,
 		FinalityProviderPkHex: d.FinalityProviderPkHex,
 	}
-	token, err := GetPaginationToken(page)
+	token, err := dbmodel.GetPaginationToken(page)
 	if err != nil {
 		return "", err
 	}
@@ -76,7 +78,7 @@ func BuildStakerStatsByStakerPaginationToken(d *StakerStatsDocument) (string, er
 		StakerPkHex: d.StakerPkHex,
 		ActiveTvl:   d.ActiveTvl,
 	}
-	token, err := GetPaginationToken(page)
+	token, err := dbmodel.GetPaginationToken(page)
 	if err != nil {
 		return "", err
 	}

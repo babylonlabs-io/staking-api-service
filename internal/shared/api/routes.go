@@ -35,9 +35,9 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 
 	// V2 API
 	// TODO: Implement the handlers for the V2 API
-	r.Get("/v2/stats", registerHandler(nil))
-	r.Get("/v2/finality-providers", registerHandler(nil))
-	r.Get("/v2/global-params", registerHandler(nil))
-	r.Get("/v2/staker/delegations", registerHandler(nil))
-	r.Get("/v2/staker/stats", registerHandler(nil))
+	r.Get("/v2/stats", registerHandler(handlers.V2.GetStats))
+	r.Get("/v2/finality-providers", registerHandler(handlers.V2.GetFinalityProviders))
+	r.Get("/v2/global-params", registerHandler(handlers.V2.GetGlobalParams))
+	r.Get("/v2/staker/delegations", registerHandler(handlers.V2.GetStakerDelegations))
+	r.Get("/v2/staker/stats", registerHandler(handlers.V2.GetStakerStats))
 }

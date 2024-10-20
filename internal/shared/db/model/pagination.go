@@ -1,4 +1,4 @@
-package v1dbmodel
+package dbmodel
 
 import (
 	"encoding/base64"

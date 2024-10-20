@@ -2,6 +2,7 @@ package v1dbmodel
 
 import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 )
 
 type TimelockTransaction struct {
@@ -33,7 +34,7 @@ func BuildDelegationByStakerPaginationToken(d DelegationDocument) (string, error
 		StakingTxHashHex:   d.StakingTxHashHex,
 		StakingStartHeight: d.StakingTx.StartHeight,
 	}
-	token, err := GetPaginationToken(page)
+	token, err := dbmodel.GetPaginationToken(page)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +49,7 @@ func BuildDelegationScanPaginationToken(d DelegationDocument) (string, error) {
 	page := &DelegationScanPagination{
 		StakingTxHashHex: d.StakingTxHashHex,
 	}
-	token, err := GetPaginationToken(page)
+	token, err := dbmodel.GetPaginationToken(page)
 	if err != nil {
 		return "", err
 	}

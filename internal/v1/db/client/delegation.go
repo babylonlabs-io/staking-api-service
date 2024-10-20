@@ -90,7 +90,7 @@ func (v1dbclient *V1Database) FindDelegationsByStakerPk(
 
 	// Decode the pagination token first if it exist
 	if paginationToken != "" {
-		decodedToken, err := v1dbmodel.DecodePaginationToken[v1dbmodel.DelegationByStakerPagination](paginationToken)
+		decodedToken, err := dbmodel.DecodePaginationToken[v1dbmodel.DelegationByStakerPagination](paginationToken)
 		if err != nil {
 			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",
@@ -140,7 +140,7 @@ func (v1dbclient *V1Database) ScanDelegationsPaginated(
 	// Decode the pagination token if it exists
 	if paginationToken != "" {
 		decodedToken, err :=
-			v1dbmodel.DecodePaginationToken[v1dbmodel.DelegationScanPagination](paginationToken)
+			dbmodel.DecodePaginationToken[v1dbmodel.DelegationScanPagination](paginationToken)
 		if err != nil {
 			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",

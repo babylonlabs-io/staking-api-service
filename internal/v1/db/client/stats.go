@@ -272,7 +272,7 @@ func (v1dbclient *V1Database) FindFinalityProviderStats(ctx context.Context, pag
 
 	// Decode the pagination token first if it exist
 	if paginationToken != "" {
-		decodedToken, err := v1dbmodel.DecodePaginationToken[v1dbmodel.FinalityProviderStatsPagination](paginationToken)
+		decodedToken, err := dbmodel.DecodePaginationToken[v1dbmodel.FinalityProviderStatsPagination](paginationToken)
 		if err != nil {
 			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",
@@ -412,7 +412,7 @@ func (v1dbclient *V1Database) FindTopStakersByTvl(ctx context.Context, paginatio
 	var filter bson.M
 	// Decode the pagination token first if it exist
 	if paginationToken != "" {
-		decodedToken, err := v1dbmodel.DecodePaginationToken[v1dbmodel.StakerStatsByStakerPagination](paginationToken)
+		decodedToken, err := dbmodel.DecodePaginationToken[v1dbmodel.StakerStatsByStakerPagination](paginationToken)
 		if err != nil {
 			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",

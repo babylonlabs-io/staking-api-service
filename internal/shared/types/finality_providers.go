@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 )
 
+
 type FinalityProviderDescription struct {
 	Moniker         string `json:"moniker"`
 	Identity        string `json:"identity"`
