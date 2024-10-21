@@ -19,19 +19,20 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	queueConfig "github.com/babylonlabs-io/staking-queue-client/config"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api"
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/api/middlewares"
-	"github.com/babylonlabs-io/staking-api-service/internal/clients"
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/db"
-	"github.com/babylonlabs-io/staking-api-service/internal/observability/metrics"
-	"github.com/babylonlabs-io/staking-api-service/internal/queue"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/middlewares"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
+	queueclients "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 )
 
@@ -39,7 +40,7 @@ var setUpDbIndex = false
 
 type TestServerDependency struct {
 	ConfigOverrides         *config.Config
-	MockDbClient            db.DBClient
+	MockDbClients           dbclients.DbClients
 	PreInjectEventsHandler  func(queueClient client.QueueClient) error
 	MockedFinalityProviders []types.FinalityProviderDetails
 	MockedGlobalParams      *types.GlobalParams
@@ -48,23 +49,23 @@ type TestServerDependency struct {
 
 type TestServer struct {
 	Server  *httptest.Server
-	Queues  *queue.Queues
+	Queues  *queueclients.QueueClients
 	Conn    *amqp091.Connection
 	channel *amqp091.Channel
 	Config  *config.Config
-	Db      *db.Database
+	Db      *mongo.Client
 }
 
 func (ts *TestServer) Close() {
 	ts.Server.Close()
-	ts.Queues.StopReceivingMessages()
+	ts.Queues.V1QueueClient.StopReceivingMessages()
 	if err := ts.Conn.Close(); err != nil {
 		log.Fatalf("failed to close connection in test: %v", err)
 	}
 	if err := ts.channel.Close(); err != nil {
 		log.Fatalf("failed to close channel in test: %v", err)
 	}
-	if err := ts.Db.Client.Disconnect(context.Background()); err != nil {
+	if err := ts.Db.Disconnect(context.Background()); err != nil {
 		log.Fatalf("failed to close db connection in test: %v", err)
 	}
 }
@@ -115,16 +116,16 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 		c = clients.New(cfg)
 	}
 
-	services, err := services.New(context.Background(), cfg, params, fps, c)
-	if err != nil {
-		t.Fatalf("Failed to initialize services: %v", err)
+	// setup test db
+	dbClients := testutils.SetupTestDB(*cfg)
+
+	if dep != nil && (dep.MockDbClients.V1DBClient != nil || dep.MockDbClients.V2DBClient != nil || dep.MockDbClients.MongoClient != nil) {
+		dbClients = &dep.MockDbClients
 	}
 
-	if dep != nil && dep.MockDbClient != nil {
-		services.DbClient = dep.MockDbClient
-	} else {
-		// This means we are using real database, we not mocking anything
-		testutils.SetupTestDB(*cfg)
+	services, err := services.New(context.Background(), cfg, params, fps, c, dbClients)
+	if err != nil {
+		t.Fatalf("Failed to initialize services: %v", err)
 	}
 
 	apiServer, err := api.New(context.Background(), cfg, services)
@@ -148,20 +149,17 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 	// Create an httptest server
 	server := httptest.NewServer(r)
 
-	// setup direct db connection
-	dbConnection := testutils.DirectDbConnection(cfg)
-
 	return &TestServer{
 		Server:  server,
 		Queues:  queues,
 		Conn:    conn,
 		channel: ch,
 		Config:  cfg,
-		Db:      dbConnection,
+		Db:      dbClients.MongoClient,
 	}
 }
 
-func setUpTestQueue(cfg *queueConfig.QueueConfig, service *services.Services) (*queue.Queues, *amqp091.Connection, *amqp091.Channel, error) {
+func setUpTestQueue(cfg *queueConfig.QueueConfig, services *services.Services) (*queueclients.QueueClients, *amqp091.Connection, *amqp091.Channel, error) {
 	amqpURI := fmt.Sprintf("amqp://%s:%s@%s", cfg.QueueUser, cfg.QueuePassword, cfg.Url)
 	conn, err := amqp091.Dial(amqpURI)
 	if err != nil {
@@ -192,10 +190,10 @@ func setUpTestQueue(cfg *queueConfig.QueueConfig, service *services.Services) (*
 	}
 
 	// Start the actual queue processing in our codebase
-	queues := queue.New(cfg, service)
-	queues.StartReceivingMessages()
+	queueClients := queueclients.New(context.Background(), cfg, services)
+	queueClients.StartReceivingMessages()
 
-	return queues, conn, ch, nil
+	return queueClients, conn, ch, nil
 }
 
 // inspectQueueMessageCount inspects the number of messages in the given queue.
@@ -274,7 +272,7 @@ func attachRandomSeedsToFuzzer(f *testing.F, numOfSeeds int) {
 	bbndatagen.AddRandomSeedsToFuzzer(f, uint(numOfSeeds))
 }
 
-func fetchSuccessfulResponse[T any](t *testing.T, url string) handlers.PublicResponse[T] {
+func fetchSuccessfulResponse[T any](t *testing.T, url string) handler.PublicResponse[T] {
 	// Make a GET request to the finality providers endpoint
 	resp, err := http.Get(url)
 	assert.NoError(t, err)
@@ -287,7 +285,7 @@ func fetchSuccessfulResponse[T any](t *testing.T, url string) handlers.PublicRes
 	bodyBytes, err := io.ReadAll(resp.Body)
 	assert.NoError(t, err, "reading response body should not fail")
 
-	var responseBody handlers.PublicResponse[T]
+	var responseBody handler.PublicResponse[T]
 	err = json.Unmarshal(bodyBytes, &responseBody)
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 	return responseBody
