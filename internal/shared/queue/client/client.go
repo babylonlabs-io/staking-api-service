@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/tracing"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 
 	"github.com/babylonlabs-io/staking-queue-client/client"

@@ -3,7 +3,7 @@ package v1service
 import (
 	"context"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/service"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v1model "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 )

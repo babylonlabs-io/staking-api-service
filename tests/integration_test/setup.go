@@ -24,14 +24,14 @@ import (
 	queueConfig "github.com/babylonlabs-io/staking-queue-client/config"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/middlewares"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	queueclients "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 )

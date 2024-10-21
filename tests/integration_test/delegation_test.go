@@ -11,9 +11,9 @@ import (
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
 
-	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 )
 

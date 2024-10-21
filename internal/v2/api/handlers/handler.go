@@ -3,8 +3,8 @@ package v2handlers
 import (
 	"context"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
-	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/api/service"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
+	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/service"
 )
 
 type V2Handler struct {

@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
 )
 
 const (

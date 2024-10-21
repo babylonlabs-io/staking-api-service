@@ -5,7 +5,7 @@ import (
 
 	queuehandler "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
 )
 
 type V2QueueHandler struct {

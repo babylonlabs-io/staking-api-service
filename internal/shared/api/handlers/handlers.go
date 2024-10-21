@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/services"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	v1handler "github.com/babylonlabs-io/staking-api-service/internal/v1/api/handlers"
 	v2handler "github.com/babylonlabs-io/staking-api-service/internal/v2/api/handlers"
 )

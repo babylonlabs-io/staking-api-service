@@ -7,8 +7,8 @@ import (
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
-	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/api/service"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
+	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/service"
 )
 
 type Services struct {

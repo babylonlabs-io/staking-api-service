@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"

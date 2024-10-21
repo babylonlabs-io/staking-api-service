@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
-	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,16 +1,16 @@
-package v1service
+package v2service
 
 import (
 	"context"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/service"
+	service "github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
-type V1Service struct {
+type V2Service struct {
 	*service.Service
 }
 
@@ -21,13 +21,13 @@ func New(
 	finalityProviders []types.FinalityProviderDetails,
 	clients *clients.Clients,
 	dbClients *dbclients.DbClients,
-) (*V1Service, error) {
+) (*V2Service, error) {
 	service, err := service.New(ctx, cfg, globalParams, finalityProviders, clients, dbClients)
 	if err != nil {
 		return nil, err
 	}
 
-	return &V1Service{
+	return &V2Service{
 		service,
 	}, nil
 }

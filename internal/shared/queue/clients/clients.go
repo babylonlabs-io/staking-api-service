@@ -3,10 +3,10 @@ package queueclients
 import (
 	"context"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/services"
 	queueclient "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/client"
 	queuehandler "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/handler"
 	queuehandlers "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/handlers"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	v1queueclient "github.com/babylonlabs-io/staking-api-service/internal/v1/queue/client"
 	v2queueclient "github.com/babylonlabs-io/staking-api-service/internal/v2/queue/client"
 	queueConfig "github.com/babylonlabs-io/staking-queue-client/config"

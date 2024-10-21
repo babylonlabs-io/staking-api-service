@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/service"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/ordinals"

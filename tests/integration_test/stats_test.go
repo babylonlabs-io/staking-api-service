@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handler"
+	handler "github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
-	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/api/service"
 	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
+	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"

@@ -7,8 +7,8 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/middlewares"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/go-chi/chi"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
