@@ -11,9 +11,10 @@ import (
 // @Summary Get Staker Delegations
 // @Description Fetches staker delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.
 // @Produce json
+// @Tags v2
 // @Param staking_tx_hash_hex query string true "Staking transaction hash in hex format"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
-// @Success 200 {object} PublicResponse[[]v2service.StakerDelegationsPublic]{array} "List of staker delegations and pagination token"
+// @Success 200 {object} handler.PublicResponse[[]v2service.StakerDelegationPublic]{array} "List of staker delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/staker/delegations [get]
 func (h *V2Handler) GetStakerDelegations(request *http.Request) (*handler.Result, *types.Error) {
@@ -32,7 +33,8 @@ func (h *V2Handler) GetStakerDelegations(request *http.Request) (*handler.Result
 // @Summary Get Staker Stats
 // @Description Fetches staker stats for babylon staking including active tvl, total tvl, active delegations and total delegations.
 // @Produce json
-// @Success 200 {object} PublicResponse[v2service.StakerStatsPublic] "Staker stats"
+// @Tags v2
+// @Success 200 {object} handler.PublicResponse[v2service.StakerStatsPublic] "Staker stats"
 // @Router /v2/staker/stats [get]
 func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *types.Error) {
 	stakerPKHex := request.URL.Query().Get("staker_pk_hex")

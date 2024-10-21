@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -12,6 +14,11 @@ import (
 
 type Handler struct {
 	Config *config.Config
+	Service service.ServiceInterface
+}
+
+func New(ctx context.Context, config *config.Config, service service.ServiceInterface) (*Handler, error) {
+	return &Handler{Config: config, Service: service}, nil
 }
 
 type ResultOptions struct {

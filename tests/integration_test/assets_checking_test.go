@@ -9,13 +9,12 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/ordinals"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
-	v1handlers "github.com/babylonlabs-io/staking-api-service/internal/v1/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -227,7 +226,7 @@ func createOrdinalServiceResponse(t *testing.T, r *rand.Rand, utxos []types.UTXO
 	return responses
 }
 
-func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size int) v1handlers.VerifyUTXOsRequestPayload {
+func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size int) handler.VerifyUTXOsRequestPayload {
 	var utxos []types.UTXOIdentifier
 
 	for i := 0; i < size; i++ {
@@ -249,7 +248,7 @@ func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size i
 	if err != nil {
 		t.Fatalf("Failed to generate taproot address from pk: %v", err)
 	}
-	return v1handlers.VerifyUTXOsRequestPayload{
+	return handler.VerifyUTXOsRequestPayload{
 		UTXOs:   utxos,
 		Address: addresses.Taproot,
 	}

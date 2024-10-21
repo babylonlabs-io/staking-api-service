@@ -8,15 +8,15 @@ import (
 )
 
 type V1Handler struct {
-	handler handler.Handler
+	*handler.Handler
 	Service v1service.V1ServiceInterface
 }
 
 func New(
-	ctx context.Context, handler handler.Handler, v1Service v1service.V1ServiceInterface,
+	ctx context.Context, handler *handler.Handler, v1Service v1service.V1ServiceInterface,
 ) (*V1Handler, error) {
 	return &V1Handler{
-		handler: handler,
+		Handler: handler,
 		Service: v1Service,
 	}, nil
 }

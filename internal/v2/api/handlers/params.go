@@ -11,7 +11,8 @@ import (
 // @Summary Get Global Parameters
 // @Description Fetches global parameters for babylon chain and BTC chain
 // @Produce json
-// @Success 200 {object} PublicResponse[v2service.GlobalParamsPublic] "Global parameters"
+// @Tags v2
+// @Success 200 {object} handler.PublicResponse[v2service.GlobalParamsPublic] "Global parameters"
 // @Router /v2/global-params [get]
 func (h *V2Handler) GetGlobalParams(request *http.Request) (*handler.Result, *types.Error) {
 	params, err := h.Service.GetGlobalParams(request.Context())

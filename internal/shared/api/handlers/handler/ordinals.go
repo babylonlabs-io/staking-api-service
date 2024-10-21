@@ -1,10 +1,9 @@
-package v1handlers
+package handler
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -43,8 +42,8 @@ func parseRequestPayload(request *http.Request, maxUTXOs uint32, netParam *chain
 	return &payload, nil
 }
 
-func (h *V1Handler) VerifyUTXOs(request *http.Request) (*handler.Result, *types.Error) {
-	inputs, err := parseRequestPayload(request, h.handler.Config.Assets.MaxUTXOs, h.handler.Config.Server.BTCNetParam)
+func (h *Handler) VerifyUTXOs(request *http.Request) (*Result, *types.Error) {
+	inputs, err := parseRequestPayload(request, h.Config.Assets.MaxUTXOs, h.Config.Server.BTCNetParam)
 	if err != nil {
 		return nil, err
 	}
@@ -54,5 +53,5 @@ func (h *V1Handler) VerifyUTXOs(request *http.Request) (*handler.Result, *types.
 		return nil, err
 	}
 
-	return handler.NewResult(results), nil
+	return NewResult(results), nil
 }

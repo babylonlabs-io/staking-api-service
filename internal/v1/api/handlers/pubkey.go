@@ -24,14 +24,15 @@ const (
 // the system. If an address has no associated delegation, it will not be
 // included in the response. Supports both Taproot and Native Segwit addresses.
 // @Produce json
+// @Tags v1
 // @Param address query []string true "List of BTC addresses to look up (up to 10), currently only supports Taproot and Native Segwit addresses" collectionFormat(multi)
-// @Success 200 {object} Result[map[string]string] "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)"
+// @Success 200 {object} handler.Result[map[string]string] "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)"
 // @Failure 400 {object} types.Error "Bad Request: Invalid input parameters"
 // @Failure 500 {object} types.Error "Internal Server Error"
 // @Router /v1/staker/pubkey-lookup [get]
 func (h *V1Handler) GetPubKeys(request *http.Request) (*handler.Result, *types.Error) {
 	addresses, err := handler.ParseBtcAddressesQuery(
-		request, "address", h.handler.Config.Server.BTCNetParam, MAX_NUM_PK_LOOKUP_ADDRESSES,
+		request, "address", h.Handler.Config.Server.BTCNetParam, MAX_NUM_PK_LOOKUP_ADDRESSES,
 	)
 	if err != nil {
 		return nil, err

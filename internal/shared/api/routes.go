@@ -9,7 +9,7 @@ import (
 func (a *Server) SetupRoutes(r *chi.Mux) {
 	handlers := a.handlers
 	// Extend on the healthcheck endpoint here
-	r.Get("/healthcheck", registerHandler(handlers.V1.HealthCheck))
+	r.Get("/healthcheck", registerHandler(handlers.Shared.HealthCheck))
 
 	r.Get("/v1/staker/delegations", registerHandler(handlers.V1.GetStakerDelegations))
 	r.Post("/v1/unbonding", registerHandler(handlers.V1.UnbondDelegation))
@@ -25,7 +25,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	// The endpoints are used to check ordinals within the UTXOs
 	// Don't deprecate this endpoint
 	if a.cfg.Assets != nil {
-		r.Post("/v1/ordinals/verify-utxos", registerHandler(handlers.V1.VerifyUTXOs))
+		r.Post("/v1/ordinals/verify-utxos", registerHandler(handlers.Shared.VerifyUTXOs))
 	}
 
 	// Don't deprecate this endpoint

@@ -52,6 +52,7 @@ func parseUnbondDelegationRequestPayload(request *http.Request) (*UnbondDelegati
 // @Description Unbonds a delegation by processing the provided transaction details. This is an async operation.
 // @Accept json
 // @Produce json
+// @Tags v1
 // @Param payload body UnbondDelegationRequestPayload true "Unbonding Request Payload"
 // @Success 202 "Request accepted and will be processed asynchronously"
 // @Failure 400 {object} types.Error "Invalid request payload"
@@ -77,6 +78,7 @@ func (h *V1Handler) UnbondDelegation(request *http.Request) (*handler.Result, *t
 // @Summary Check unbonding eligibility
 // @Description Checks if a delegation identified by its staking transaction hash is eligible for unbonding.
 // @Produce json
+// @Tags v1
 // @Param staking_tx_hash_hex query string true "Staking Transaction Hash Hex"
 // @Success 200 "The delegation is eligible for unbonding"
 // @Failure 400 {object} types.Error "Missing or invalid 'staking_tx_hash_hex' query parameter"

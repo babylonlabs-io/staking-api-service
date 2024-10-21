@@ -68,4 +68,4 @@ test:
 
 
 build-swagger:
-	swag init --parseDependency --parseInternal -d cmd/staking-api-service,internal/api,internal/types
+	swag init --parseDependency --parseInternal -d cmd/staking-api-service,internal/shared/api,internal/shared/types,internal/v1/api/handlers,internal/v2/api/handlers
