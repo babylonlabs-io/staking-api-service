@@ -7,6 +7,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
+	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/indexer_db_client"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
 	v2dbclient "github.com/babylonlabs-io/staking-api-service/internal/v2/db/client"
@@ -18,30 +19,45 @@ import (
 var setUpDbIndex = false
 
 func DirectDbConnection(cfg *config.Config) (*dbclients.DbClients, string) {
-	mongoClient, err := mongo.Connect(
-		context.TODO(), options.Client().ApplyURI(cfg.Db.Address),
+	stakingMongoClient, err := mongo.Connect(
+		context.TODO(), options.Client().ApplyURI(cfg.StakingDb.Address),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbClient, err := dbclient.New(context.TODO(), mongoClient, cfg.Db)
+	dbClient, err := dbclient.New(context.TODO(), stakingMongoClient, cfg.StakingDb)
 	if err != nil {
 		log.Fatal(err)
 	}
-	v1dbClient, err := v1dbclient.New(context.TODO(), mongoClient, cfg.Db)
+	v1dbClient, err := v1dbclient.New(context.TODO(), stakingMongoClient, cfg.StakingDb)
 	if err != nil {
 		log.Fatal(err)
 	}
-	v2dbClient, err := v2dbclient.New(context.TODO(), mongoClient, cfg.Db)
+	v2dbClient, err := v2dbclient.New(context.TODO(), stakingMongoClient, cfg.StakingDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// IndexerDBClient
+	indexerMongoClient, err := mongo.Connect(
+		context.TODO(), options.Client().ApplyURI(cfg.IndexerDb.Address),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	indexerdbClient, err := indexerdbclient.New(context.TODO(), indexerMongoClient, cfg.IndexerDb)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return &dbclients.DbClients{
-		MongoClient:    mongoClient,
-		SharedDBClient: dbClient,
-		V1DBClient:     v1dbClient,
-		V2DBClient:     v2dbClient,
-	}, cfg.Db.DbName
+		StakingMongoClient: stakingMongoClient,
+		IndexerMongoClient: indexerMongoClient,
+		SharedDBClient:     dbClient,
+		V1DBClient:         v1dbClient,
+		V2DBClient:         v2dbClient,
+		IndexerDBClient:    indexerdbClient,
+	}, cfg.StakingDb.DbName
 }
 
 // SetupTestDB connects to MongoDB and purges all collections.
@@ -57,7 +73,7 @@ func SetupTestDB(cfg config.Config) *dbclients.DbClients {
 		}
 		setUpDbIndex = true
 	}
-	if err := PurgeAllCollections(context.TODO(), dbClients.MongoClient, dbName); err != nil {
+	if err := PurgeAllCollections(context.TODO(), dbClients.StakingMongoClient, dbName); err != nil {
 		log.Fatal("Failed to purge database:", err)
 	}
 
@@ -69,8 +85,8 @@ func InjectDbDocument[T any](
 	cfg *config.Config, collectionName string, doc T,
 ) {
 	connection, dbName := DirectDbConnection(cfg)
-	defer connection.MongoClient.Disconnect(context.Background())
-	collection := connection.MongoClient.Database(dbName).
+	defer connection.StakingMongoClient.Disconnect(context.Background())
+	collection := connection.StakingMongoClient.Database(dbName).
 		Collection(collectionName)
 
 	_, err := collection.InsertOne(context.Background(), doc)
@@ -84,7 +100,7 @@ func InspectDbDocuments[T any](
 	cfg *config.Config, collectionName string,
 ) ([]T, error) {
 	connection, dbName := DirectDbConnection(cfg)
-	collection := connection.MongoClient.Database(dbName).
+	collection := connection.StakingMongoClient.Database(dbName).
 		Collection(collectionName)
 
 	cursor, err := collection.Find(context.Background(), bson.D{})
@@ -92,7 +108,7 @@ func InspectDbDocuments[T any](
 		return nil, err
 	}
 	defer cursor.Close(context.Background())
-	defer connection.MongoClient.Disconnect(context.Background())
+	defer connection.StakingMongoClient.Disconnect(context.Background())
 
 	var results []T
 	for cursor.Next(context.Background()) {
@@ -113,7 +129,7 @@ func UpdateDbDocument(
 	connection *mongo.Client, cfg *config.Config, collectionName string,
 	filter bson.M, update bson.M,
 ) error {
-	collection := connection.Database(cfg.Db.DbName).
+	collection := connection.Database(cfg.StakingDb.DbName).
 		Collection(collectionName)
 
 	// Perform the update operation

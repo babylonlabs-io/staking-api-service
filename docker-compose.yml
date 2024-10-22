@@ -23,6 +23,18 @@ services:
     volumes:
       - ./bin/init-mongo.sh:/init-mongo.sh
     entrypoint: [ "/init-mongo.sh" ]
+  indexer-mongodb:
+    image: mongo:latest
+    container_name: indexer-mongodb
+    hostname: indexer-mongodb
+    ports:
+      - "27019:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - ./bin/init-mongo.sh:/init-mongo.sh
+    entrypoint: [ "/init-mongo.sh" ]
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq

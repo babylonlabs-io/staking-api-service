@@ -37,8 +37,8 @@ func TestReplayUnprocessableMessages(t *testing.T) {
 		dbmodel.NewUnprocessableMessageDocument(doc, "receipt"),
 	)
 	dbClients, _ := testutils.DirectDbConnection(testServer.Config)
-	defer dbClients.MongoClient.Disconnect(ctx)
-	dbclient, err := dbclient.New(ctx, dbClients.MongoClient, testServer.Config.Db)
+	defer dbClients.StakingMongoClient.Disconnect(ctx)
+	dbclient, err := dbclient.New(ctx, dbClients.StakingMongoClient, testServer.Config.StakingDb)
 	assert.NoError(t, err, "creating db client should not return an error")
 
 	scripts.ReplayUnprocessableMessages(ctx, testServer.Config, testServer.Queues, dbclient)
