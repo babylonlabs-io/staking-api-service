@@ -4,21 +4,26 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/db"
-	"github.com/babylonlabs-io/staking-api-service/internal/utils"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
+	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
 	"github.com/rs/zerolog/log"
 )
 
 func BackfillPubkeyAddressesMappings(ctx context.Context, cfg *config.Config) error {
-	dbClient, err := db.New(ctx, cfg.Db)
+	client, err := dbclient.NewMongoClient(ctx, cfg.Db)
+	if err != nil {
+		return fmt.Errorf("failed to create db client: %w", err)
+	}
+	v1dbClient, err := v1dbclient.New(ctx, client, cfg.Db)
 	if err != nil {
 		return fmt.Errorf("failed to create db client: %w", err)
 	}
 	pageToken := ""
 	var count int
 	for {
-		result, err := dbClient.ScanDelegationsPaginated(ctx, pageToken)
+		result, err := v1dbClient.ScanDelegationsPaginated(ctx, pageToken)
 		if err != nil {
 			return fmt.Errorf("failed to scan delegations: %w", err)
 		}
@@ -29,7 +34,7 @@ func BackfillPubkeyAddressesMappings(ctx context.Context, cfg *config.Config) er
 			if err != nil {
 				return fmt.Errorf("failed to derive btc addresses: %w", err)
 			}
-			if err := dbClient.InsertPkAddressMappings(
+			if err := v1dbClient.InsertPkAddressMappings(
 				ctx, delegation.StakerPkHex, addresses.Taproot,
 				addresses.NativeSegwitOdd, addresses.NativeSegwitEven,
 			); err != nil {

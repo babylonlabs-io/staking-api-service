@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/api"
-	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
-	"github.com/babylonlabs-io/staking-api-service/internal/clients"
-	"github.com/babylonlabs-io/staking-api-service/internal/clients/ordinals"
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/services"
-	"github.com/babylonlabs-io/staking-api-service/internal/types"
-	"github.com/babylonlabs-io/staking-api-service/internal/utils"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/ordinals"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -63,7 +63,7 @@ func FuzzSuccessfullyVerifyUTXOsAssetsViaOrdinalService(f *testing.F) {
 
 		mockedOrdinalResponse := createOrdinalServiceResponse(t, r, payload.UTXOs, txidsWithAsset)
 
-		mockOrdinal := new(mocks.OrdinalsClientInterface)
+		mockOrdinal := new(mocks.OrdinalsClient)
 		mockOrdinal.On("FetchUTXOInfos", mock.Anything, mock.Anything).Return(mockedOrdinalResponse, nil)
 		mockedClients := &clients.Clients{
 			Ordinals: mockOrdinal,
@@ -80,7 +80,7 @@ func FuzzSuccessfullyVerifyUTXOsAssetsViaOrdinalService(f *testing.F) {
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		// decode the response body
-		var response handlers.PublicResponse[[]services.SafeUTXOPublic]
+		var response handler.PublicResponse[[]service.SafeUTXOPublic]
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		if err != nil {
 			t.Fatalf("Failed to decode response body: %v", err)
@@ -226,7 +226,7 @@ func createOrdinalServiceResponse(t *testing.T, r *rand.Rand, utxos []types.UTXO
 	return responses
 }
 
-func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size int) handlers.VerifyUTXOsRequestPayload {
+func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size int) handler.VerifyUTXOsRequestPayload {
 	var utxos []types.UTXOIdentifier
 
 	for i := 0; i < size; i++ {
@@ -248,7 +248,7 @@ func createPayload(t *testing.T, r *rand.Rand, netParam *chaincfg.Params, size i
 	if err != nil {
 		t.Fatalf("Failed to generate taproot address from pk: %v", err)
 	}
-	return handlers.VerifyUTXOsRequestPayload{
+	return handler.VerifyUTXOsRequestPayload{
 		UTXOs:   utxos,
 		Address: addresses.Taproot,
 	}

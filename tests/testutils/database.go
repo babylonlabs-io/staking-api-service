@@ -4,9 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/db"
-	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
+	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
+	v2dbclient "github.com/babylonlabs-io/staking-api-service/internal/v2/db/client"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -14,46 +17,60 @@ import (
 
 var setUpDbIndex = false
 
-func DirectDbConnection(cfg *config.Config) *db.Database {
-	client, err := mongo.Connect(
+func DirectDbConnection(cfg *config.Config) (*dbclients.DbClients, string) {
+	mongoClient, err := mongo.Connect(
 		context.TODO(), options.Client().ApplyURI(cfg.Db.Address),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &db.Database{
-		DbName: cfg.Db.DbName,
-		Client: client,
+	dbClient, err := dbclient.New(context.TODO(), mongoClient, cfg.Db)
+	if err != nil {
+		log.Fatal(err)
 	}
+	v1dbClient, err := v1dbclient.New(context.TODO(), mongoClient, cfg.Db)
+	if err != nil {
+		log.Fatal(err)
+	}
+	v2dbClient, err := v2dbclient.New(context.TODO(), mongoClient, cfg.Db)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &dbclients.DbClients{
+		MongoClient:    mongoClient,
+		SharedDBClient: dbClient,
+		V1DBClient:     v1dbClient,
+		V2DBClient:     v2dbClient,
+	}, cfg.Db.DbName
 }
 
 // SetupTestDB connects to MongoDB and purges all collections.
-func SetupTestDB(cfg config.Config) *db.Database {
+func SetupTestDB(cfg config.Config) *dbclients.DbClients {
 	// Connect to MongoDB
-	db := DirectDbConnection(&cfg)
+	dbClients, dbName := DirectDbConnection(&cfg)
 	// Purge all collections in the test database
 	// Setup the db index only once for all tests
 	if !setUpDbIndex {
-		err := model.Setup(context.Background(), &cfg)
+		err := dbmodel.Setup(context.Background(), &cfg)
 		if err != nil {
 			log.Fatal("Failed to setup database:", err)
 		}
 		setUpDbIndex = true
 	}
-	if err := PurgeAllCollections(context.TODO(), db.Client, cfg.Db.DbName); err != nil {
+	if err := PurgeAllCollections(context.TODO(), dbClients.MongoClient, dbName); err != nil {
 		log.Fatal("Failed to purge database:", err)
 	}
 
-	return db
+	return dbClients
 }
 
 // InjectDbDocument inserts a single document into the specified collection.
 func InjectDbDocument[T any](
 	cfg *config.Config, collectionName string, doc T,
 ) {
-	connection := DirectDbConnection(cfg)
-	defer connection.Client.Disconnect(context.Background())
-	collection := connection.Client.Database(connection.DbName).
+	connection, dbName := DirectDbConnection(cfg)
+	defer connection.MongoClient.Disconnect(context.Background())
+	collection := connection.MongoClient.Database(dbName).
 		Collection(collectionName)
 
 	_, err := collection.InsertOne(context.Background(), doc)
@@ -66,8 +83,8 @@ func InjectDbDocument[T any](
 func InspectDbDocuments[T any](
 	cfg *config.Config, collectionName string,
 ) ([]T, error) {
-	connection := DirectDbConnection(cfg)
-	collection := connection.Client.Database(connection.DbName).
+	connection, dbName := DirectDbConnection(cfg)
+	collection := connection.MongoClient.Database(dbName).
 		Collection(collectionName)
 
 	cursor, err := collection.Find(context.Background(), bson.D{})
@@ -75,7 +92,7 @@ func InspectDbDocuments[T any](
 		return nil, err
 	}
 	defer cursor.Close(context.Background())
-	defer connection.Client.Disconnect(context.Background())
+	defer connection.MongoClient.Disconnect(context.Background())
 
 	var results []T
 	for cursor.Next(context.Background()) {
@@ -93,10 +110,10 @@ func InspectDbDocuments[T any](
 // UpdateDbDocument updates a document in the specified collection based on the
 // provided filter and update data.
 func UpdateDbDocument(
-	connection *db.Database, cfg *config.Config, collectionName string,
+	connection *mongo.Client, cfg *config.Config, collectionName string,
 	filter bson.M, update bson.M,
 ) error {
-	collection := connection.Client.Database(connection.DbName).
+	collection := connection.Database(cfg.Db.DbName).
 		Collection(collectionName)
 
 	// Perform the update operation

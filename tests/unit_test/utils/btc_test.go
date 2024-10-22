@@ -3,7 +3,7 @@ package utilstest
 import (
 	"testing"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/utils"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/assert"
 )
