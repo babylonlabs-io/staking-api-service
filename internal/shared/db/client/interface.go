@@ -6,7 +6,7 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 )
 
-type DBClient interface {
+type DBClientInterface interface {
 	Ping(ctx context.Context) error
 	// InsertPkAddressMappings inserts the btc public key and
 	// its corresponding btc addresses into the database.

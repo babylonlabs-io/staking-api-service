@@ -12,10 +12,10 @@ import (
 )
 
 type DbClients struct {
-	MongoClient *mongo.Client
-	DBClient    dbclient.DBClient
-	V1DBClient  v1dbclient.V1DBClient
-	V2DBClient  v2dbclient.V2DBClient
+	MongoClient    *mongo.Client
+	SharedDBClient dbclient.DBClientInterface
+	V1DBClient     v1dbclient.V1DBClientInterface
+	V2DBClient     v2dbclient.V2DBClientInterface
 }
 
 func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
@@ -41,10 +41,10 @@ func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
 	}
 
 	dbClients := DbClients{
-		MongoClient: mongoClient,
-		DBClient:    dbClient,
-		V1DBClient:  v1dbClient,
-		V2DBClient:  v2dbClient,
+		MongoClient:    mongoClient,
+		SharedDBClient: dbClient,
+		V1DBClient:     v1dbClient,
+		V2DBClient:     v2dbClient,
 	}
 
 	return &dbClients, nil

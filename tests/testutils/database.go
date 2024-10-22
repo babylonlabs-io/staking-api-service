@@ -37,10 +37,10 @@ func DirectDbConnection(cfg *config.Config) (*dbclients.DbClients, string) {
 		log.Fatal(err)
 	}
 	return &dbclients.DbClients{
-		MongoClient: mongoClient,
-		DBClient:    dbClient,
-		V1DBClient:  v1dbClient,
-		V2DBClient:  v2dbClient,
+		MongoClient:    mongoClient,
+		SharedDBClient: dbClient,
+		V1DBClient:     v1dbClient,
+		V2DBClient:     v2dbClient,
 	}, cfg.Db.DbName
 }
 

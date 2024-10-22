@@ -11,9 +11,9 @@ import (
 )
 
 type Handlers struct {
-	Shared *handler.Handler
-	V1     *v1handler.V1Handler
-	V2     *v2handler.V2Handler
+	SharedHandler *handler.Handler
+	V1Handler     *v1handler.V1Handler
+	V2Handler     *v2handler.V2Handler
 }
 
 func New(ctx context.Context, config *config.Config, services *services.Services) (*Handlers, error) {
@@ -31,8 +31,8 @@ func New(ctx context.Context, config *config.Config, services *services.Services
 	}
 
 	return &Handlers{
-		Shared: sharedHandler,
-		V1:     v1Handler,
-		V2:     v2Handler,
+		SharedHandler: sharedHandler,
+		V1Handler:     v1Handler,
+		V2Handler:     v2Handler,
 	}, nil
 }

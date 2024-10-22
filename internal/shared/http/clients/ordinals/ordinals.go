@@ -57,7 +57,7 @@ func (c *OrdinalsClient) FetchUTXOInfos(
 	ctx context.Context, utxos []types.UTXOIdentifier,
 ) ([]OrdinalsOutputResponse, *types.Error) {
 	path := "/outputs"
-	opts := &client.ClientOptions{
+	opts := &client.HttpClientOptions{
 		Path:         path,
 		TemplatePath: path,
 		Headers:      c.defaultHeaders,

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils/datagen"
 )
 
 type StakerDelegationPublic struct {
@@ -33,23 +33,23 @@ type StakerStatsPublic struct {
 func (s *V2Service) GetStakerDelegations(ctx context.Context, paginationKey string) ([]StakerDelegationPublic, string, *types.Error) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	// random positive int
-	numStakerDelegations := testutils.RandomPositiveInt(r, 10)
+	numStakerDelegations := datagen.RandomPositiveInt(r, 10)
 	stakerDelegationPublics := []StakerDelegationPublic{}
 	for i := 0; i < numStakerDelegations; i++ {
-		_, stakingTxHash, _ := testutils.GenerateRandomTx(r, nil)
-		stakerPkHex, _ := testutils.RandomPk()
-		fpPkHex, _ := testutils.RandomPk()
+		_, stakingTxHash, _ := datagen.GenerateRandomTx(r, nil)
+		stakerPkHex, _ := datagen.RandomPk()
+		fpPkHex, _ := datagen.RandomPk()
 		stakerDelegation := &StakerDelegationPublic{
 			StakingTxHashHex:      stakingTxHash,
 			StakerPKHex:           stakerPkHex,
 			FinalityProviderPKHex: fpPkHex,
-			StakingStartHeight:    int64(testutils.RandomPositiveInt(r, 1000000)),
-			UnbondingStartHeight:  int64(testutils.RandomPositiveInt(r, 1000000)),
-			Timelock:              int64(testutils.RandomPositiveInt(r, 1000000)),
-			StakingValue:          testutils.RandomAmount(r),
+			StakingStartHeight:    int64(datagen.RandomPositiveInt(r, 1000000)),
+			UnbondingStartHeight:  int64(datagen.RandomPositiveInt(r, 1000000)),
+			Timelock:              int64(datagen.RandomPositiveInt(r, 1000000)),
+			StakingValue:          datagen.RandomAmount(r),
 			State:                 types.Active.ToString(),
-			StakingTx:             testutils.RandomTransactionInfo(r),
-			UnbondingTx:           testutils.RandomTransactionInfo(r),
+			StakingTx:             datagen.RandomTransactionInfo(r),
+			UnbondingTx:           datagen.RandomTransactionInfo(r),
 		}
 		stakerDelegationPublics = append(stakerDelegationPublics, *stakerDelegation)
 	}
@@ -60,10 +60,10 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (Sta
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	stakerStats := StakerStatsPublic{
 		StakerPKHex:       stakerPKHex,
-		ActiveTVL:         int64(testutils.RandomPositiveInt(r, 1000000)),
-		TotalTVL:          int64(testutils.RandomPositiveInt(r, 1000000)),
-		ActiveDelegations: int64(testutils.RandomPositiveInt(r, 100)),
-		TotalDelegations:  int64(testutils.RandomPositiveInt(r, 100)),
+		ActiveTVL:         int64(datagen.RandomPositiveInt(r, 1000000)),
+		TotalTVL:          int64(datagen.RandomPositiveInt(r, 1000000)),
+		ActiveDelegations: int64(datagen.RandomPositiveInt(r, 100)),
+		TotalDelegations:  int64(datagen.RandomPositiveInt(r, 100)),
 	}
 	return stakerStats, nil
 }

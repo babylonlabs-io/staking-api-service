@@ -9,8 +9,8 @@ import (
 	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 )
 
-type V1DBClient interface {
-	dbclient.DBClient
+type V1DBClientInterface interface {
+	dbclient.DBClientInterface
 	SaveActiveStakingDelegation(
 		ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string,
 		stakingTxHex string, amount, startHeight, timelock, outputIndex uint64,

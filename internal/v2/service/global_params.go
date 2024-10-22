@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils/datagen"
 )
 
 type GlobalParamsPublic struct {
@@ -16,8 +16,8 @@ type GlobalParamsPublic struct {
 
 func (s *V2Service) GetGlobalParams(ctx context.Context) (GlobalParamsPublic, *types.Error) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	babylonParams := testutils.GenerateRandomBabylonParams(r)
-	btcParams := testutils.GenerateRandomBTCParams(r)
+	babylonParams := datagen.GenerateRandomBabylonParams(r)
+	btcParams := datagen.GenerateRandomBTCParams(r)
 	return GlobalParamsPublic{
 		Babylon: []types.BabylonParams{babylonParams},
 		BTC:     []types.BTCParams{btcParams},
