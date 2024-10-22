@@ -8,8 +8,8 @@ import (
 	v1model "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 )
 
-type V1ServiceInterface interface {
-	service.ServiceInterface
+type V1ServiceProvider interface {
+	service.SharedServiceProvider
 	// Delegation
 	DelegationsByStakerPk(ctx context.Context, stakerPk string, state types.DelegationState, pageToken string) ([]DelegationPublic, string, *types.Error)
 	SaveActiveStakingDelegation(ctx context.Context, txHashHex, stakerPkHex, finalityProviderPkHex string, value, startHeight uint64, stakingTimestamp int64, timeLock, stakingOutputIndex uint64, stakingTxHex string, isOverflow bool) *types.Error

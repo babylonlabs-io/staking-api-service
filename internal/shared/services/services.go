@@ -13,9 +13,9 @@ import (
 )
 
 type Services struct {
-	Service   service.ServiceInterface
-	V1Service v1service.V1ServiceInterface
-	V2Service v2service.V2ServiceInterface
+	SharedService service.SharedServiceProvider
+	V1Service     v1service.V1ServiceProvider
+	V2Service     v2service.V2ServiceProvider
 }
 
 func New(
@@ -40,9 +40,9 @@ func New(
 	}
 
 	services := Services{
-		Service:   service,
-		V1Service: v1Service,
-		V2Service: v2Service,
+		SharedService: service,
+		V1Service:     v1Service,
+		V2Service:     v2Service,
 	}
 
 	return &services, nil

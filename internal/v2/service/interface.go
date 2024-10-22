@@ -7,8 +7,8 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
-type V2ServiceInterface interface {
-	service.ServiceInterface
+type V2ServiceProvider interface {
+	service.SharedServiceProvider
 	GetFinalityProviders(ctx context.Context, paginationKey string) ([]FinalityProviderPublic, string, *types.Error)
 	GetGlobalParams(ctx context.Context) (GlobalParamsPublic, *types.Error)
 	GetOverallStats(ctx context.Context) (OverallStatsPublic, *types.Error)

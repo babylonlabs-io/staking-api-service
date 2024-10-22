@@ -14,13 +14,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type QueueClient struct {
+type Queue struct {
 	ProcessingTimeout time.Duration
 	MaxRetryAttempts  int32
 	StatsQueueClient  client.QueueClient
 }
 
-func New(ctx context.Context, cfg *queueConfig.QueueConfig, service *services.Services) *QueueClient {
+func New(ctx context.Context, cfg *queueConfig.QueueConfig, service *services.Services) *Queue {
 	statsQueueClient, err := client.NewQueueClient(
 		cfg, client.StakingStatsQueueName,
 	)
@@ -28,7 +28,7 @@ func New(ctx context.Context, cfg *queueConfig.QueueConfig, service *services.Se
 		log.Fatal().Err(err).Msg("error while creating StatsQueueClient")
 	}
 
-	return &QueueClient{
+	return &Queue{
 		ProcessingTimeout: time.Duration(cfg.QueueProcessingTimeout) * time.Second,
 		MaxRetryAttempts:  cfg.MsgMaxRetryAttempts,
 		StatsQueueClient:  statsQueueClient,

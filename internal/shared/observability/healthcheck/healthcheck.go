@@ -47,7 +47,7 @@ func StartHealthCheckCron(ctx context.Context, queueClients *queueclients.QueueC
 	return nil
 }
 
-func queueHealthCheck(queueClient queueclient.QueueClientInterface) {
+func queueHealthCheck(queueClient queueclient.QueueClient) {
 	if err := queueClient.IsConnectionHealthy(); err != nil {
 		logger.Error().Err(err).Msg("One or more queue connections are not healthy.")
 		// Record service unavailable in metrics

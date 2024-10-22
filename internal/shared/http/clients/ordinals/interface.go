@@ -7,7 +7,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
-type OrdinalsClientInterface interface {
+type OrdinalsClient interface {
 	GetBaseURL() string
 	GetDefaultRequestTimeout() int
 	GetHttpClient() *http.Client

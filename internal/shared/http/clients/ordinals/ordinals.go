@@ -17,13 +17,13 @@ type OrdinalsOutputResponse struct {
 	Runes        json.RawMessage `json:"runes"`
 }
 
-type OrdinalsClient struct {
+type Ordinals struct {
 	config         *config.OrdinalsConfig
 	defaultHeaders map[string]string
 	httpClient     *http.Client
 }
 
-func NewOrdinalsClient(config *config.OrdinalsConfig) *OrdinalsClient {
+func New(config *config.OrdinalsConfig) *Ordinals {
 	// Client is disabled if config is nil
 	if config == nil {
 		return nil
@@ -33,7 +33,7 @@ func NewOrdinalsClient(config *config.OrdinalsConfig) *OrdinalsClient {
 		"Content-Type": "application/json",
 		"Accept":       "application/json",
 	}
-	return &OrdinalsClient{
+	return &Ordinals{
 		config,
 		headers,
 		httpClient,
@@ -41,19 +41,19 @@ func NewOrdinalsClient(config *config.OrdinalsConfig) *OrdinalsClient {
 }
 
 // Necessary for the BaseClient interface
-func (c *OrdinalsClient) GetBaseURL() string {
+func (c *Ordinals) GetBaseURL() string {
 	return fmt.Sprintf("%s:%s", c.config.Host, c.config.Port)
 }
 
-func (c *OrdinalsClient) GetDefaultRequestTimeout() int {
+func (c *Ordinals) GetDefaultRequestTimeout() int {
 	return c.config.Timeout
 }
 
-func (c *OrdinalsClient) GetHttpClient() *http.Client {
+func (c *Ordinals) GetHttpClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *OrdinalsClient) FetchUTXOInfos(
+func (c *Ordinals) FetchUTXOInfos(
 	ctx context.Context, utxos []types.UTXOIdentifier,
 ) ([]OrdinalsOutputResponse, *types.Error) {
 	path := "/outputs"

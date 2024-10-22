@@ -63,7 +63,7 @@ func FuzzSuccessfullyVerifyUTXOsAssetsViaOrdinalService(f *testing.F) {
 
 		mockedOrdinalResponse := createOrdinalServiceResponse(t, r, payload.UTXOs, txidsWithAsset)
 
-		mockOrdinal := new(mocks.OrdinalsClientInterface)
+		mockOrdinal := new(mocks.OrdinalsClient)
 		mockOrdinal.On("FetchUTXOInfos", mock.Anything, mock.Anything).Return(mockedOrdinalResponse, nil)
 		mockedClients := &clients.Clients{
 			Ordinals: mockOrdinal,

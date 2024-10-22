@@ -1,6 +1,6 @@
 package queueclient
 
-type QueueClientInterface interface {
+type QueueClient interface {
 	StartReceivingMessages()
 	StopReceivingMessages()
 	IsConnectionHealthy() error

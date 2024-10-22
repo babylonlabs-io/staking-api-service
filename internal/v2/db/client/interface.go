@@ -4,6 +4,6 @@ import (
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
 )
 
-type V2DBClientInterface interface {
-	dbclient.DBClientInterface
+type V2DBClient interface {
+	dbclient.DBClient
 }

@@ -10,10 +10,10 @@ import (
 
 type V1QueueHandler struct {
 	*queuehandler.QueueHandler
-	Service v1service.V1ServiceInterface
+	Service v1service.V1ServiceProvider
 }
 
-func New(queueHandler *queuehandler.QueueHandler, service v1service.V1ServiceInterface) *V1QueueHandler {
+func New(queueHandler *queuehandler.QueueHandler, service v1service.V1ServiceProvider) *V1QueueHandler {
 	return &V1QueueHandler{
 		QueueHandler: queueHandler,
 		Service:      service,

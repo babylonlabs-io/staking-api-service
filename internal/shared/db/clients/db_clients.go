@@ -13,9 +13,9 @@ import (
 
 type DbClients struct {
 	MongoClient    *mongo.Client
-	SharedDBClient dbclient.DBClientInterface
-	V1DBClient     v1dbclient.V1DBClientInterface
-	V2DBClient     v2dbclient.V2DBClientInterface
+	SharedDBClient dbclient.DBClient
+	V1DBClient     v1dbclient.V1DBClient
+	V2DBClient     v2dbclient.V2DBClient
 }
 
 func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {

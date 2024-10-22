@@ -13,11 +13,11 @@ import (
 )
 
 type Handler struct {
-	Config *config.Config
-	Service service.ServiceInterface
+	Config  *config.Config
+	Service service.SharedServiceProvider
 }
 
-func New(ctx context.Context, config *config.Config, service service.ServiceInterface) (*Handler, error) {
+func New(ctx context.Context, config *config.Config, service service.SharedServiceProvider) (*Handler, error) {
 	return &Handler{Config: config, Service: service}, nil
 }
 

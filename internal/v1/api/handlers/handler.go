@@ -9,11 +9,11 @@ import (
 
 type V1Handler struct {
 	*handler.Handler
-	Service v1service.V1ServiceInterface
+	Service v1service.V1ServiceProvider
 }
 
 func New(
-	ctx context.Context, handler *handler.Handler, v1Service v1service.V1ServiceInterface,
+	ctx context.Context, handler *handler.Handler, v1Service v1service.V1ServiceProvider,
 ) (*V1Handler, error) {
 	return &V1Handler{
 		Handler: handler,

@@ -17,7 +17,7 @@ type Handlers struct {
 }
 
 func New(ctx context.Context, config *config.Config, services *services.Services) (*Handlers, error) {
-	sharedHandler, err := handler.New(ctx, config, services.Service)
+	sharedHandler, err := handler.New(ctx, config, services.SharedService)
 	if err != nil {
 		return nil, err
 	}

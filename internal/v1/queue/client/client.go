@@ -9,7 +9,7 @@ import (
 )
 
 type V1QueueClient struct {
-	*queueclient.QueueClient
+	*queueclient.Queue
 	Handler                     *v1queuehandler.V1QueueHandler
 	ActiveStakingQueueClient    client.QueueClient
 	ExpiredStakingQueueClient   client.QueueClient
@@ -18,7 +18,7 @@ type V1QueueClient struct {
 	BtcInfoQueueClient          client.QueueClient
 }
 
-func New(cfg *queueConfig.QueueConfig, handler *v1queuehandler.V1QueueHandler, queueClient *queueclient.QueueClient) *V1QueueClient {
+func New(cfg *queueConfig.QueueConfig, handler *v1queuehandler.V1QueueHandler, queueClient *queueclient.Queue) *V1QueueClient {
 	activeStakingQueueClient, err := client.NewQueueClient(
 		cfg, client.ActiveStakingQueueName,
 	)
@@ -52,7 +52,7 @@ func New(cfg *queueConfig.QueueConfig, handler *v1queuehandler.V1QueueHandler, q
 		log.Fatal().Err(err).Msg("error while creating BtcInfoQueueClient")
 	}
 	return &V1QueueClient{
-		QueueClient:                 queueClient,
+		Queue:                       queueClient,
 		Handler:                     handler,
 		ActiveStakingQueueClient:    activeStakingQueueClient,
 		ExpiredStakingQueueClient:   expiredStakingQueueClient,

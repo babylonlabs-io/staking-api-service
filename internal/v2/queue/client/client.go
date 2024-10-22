@@ -7,13 +7,13 @@ import (
 )
 
 type V2QueueClient struct {
-	*queueclient.QueueClient
+	*queueclient.Queue
 	Handler *v2queuehandler.V2QueueHandler
 }
 
-func New(cfg *queueConfig.QueueConfig, handler *v2queuehandler.V2QueueHandler, queueClient *queueclient.QueueClient) *V2QueueClient {
+func New(cfg *queueConfig.QueueConfig, handler *v2queuehandler.V2QueueHandler, queueClient *queueclient.Queue) *V2QueueClient {
 	return &V2QueueClient{
-		QueueClient: queueClient,
-		Handler:     handler,
+		Queue:   queueClient,
+		Handler: handler,
 	}
 }

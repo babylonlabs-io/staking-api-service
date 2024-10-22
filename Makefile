@@ -60,7 +60,7 @@ generate-mock-interface:
 	cd internal/shared/db/client && mockery --name=DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_db_client.go
 	cd internal/v1/db/client && mockery --name=V1DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_v1_db_client.go
 	cd internal/v2/db/client && mockery --name=V2DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_v2_db_client.go
-	cd internal/shared/http/clients/ordinals && mockery --name=OrdinalsClientInterface --output=../../../../../tests/mocks --outpkg=mocks --filename=mock_ordinal_client.go
+	cd internal/shared/http/clients/ordinals && mockery --name=OrdinalsClient --output=../../../../../tests/mocks --outpkg=mocks --filename=mock_ordinal_client.go
 
 test:
 	./bin/local-startup.sh;
