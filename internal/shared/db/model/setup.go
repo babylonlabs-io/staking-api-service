@@ -26,8 +26,8 @@ const (
 	V1UnprocessableMsgCollection      = "unprocessable_messages"
 	V1PkAddressMappingsCollection     = "pk_address_mappings"
 	// V2
-	V2StakerCollection           = "stakers"
-	V2FinalityProviderCollection = "finality_providers"
+	V2StakerStatsCollection           = "v2_staker_stats"
+	V2FinalityProviderStatsCollection = "v2_finality_providers_stats"
 )
 
 type index struct {
@@ -52,10 +52,8 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
 		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
 	},
-	V2StakerCollection: {{Indexes: map[string]int{}}},
-	V2FinalityProviderCollection: {
-		{Indexes: map[string]int{"active_tvl": -1, "commission": 1}, Unique: false},
-	},
+	V2StakerStatsCollection:           {{Indexes: map[string]int{}}},
+	V2FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {
