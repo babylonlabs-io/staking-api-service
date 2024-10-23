@@ -14,6 +14,8 @@ import (
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
+	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 )
@@ -138,6 +140,19 @@ func GenerateRandomTx(
 func RandomBytes(r *rand.Rand, n uint64) ([]byte, string) {
 	randomBytes := bbndatagen.GenRandomByteArray(r, n)
 	return randomBytes, hex.EncodeToString(randomBytes)
+}
+
+func RandomBtcAddress(r *rand.Rand, params *chaincfg.Params) (string, error) {
+	privKey, err := btcec.NewPrivateKey()
+	if err != nil {
+		return "", err
+	}
+	pubKey := privKey.PubKey()
+	addr, err := btcutil.NewAddressTaproot(schnorr.SerializePubKey(pubKey), params)
+	if err != nil {
+		return "", err
+	}
+	return addr.EncodeAddress(), nil
 }
 
 // GenerateRandomTimestamp generates a random timestamp before the specified timestamp.

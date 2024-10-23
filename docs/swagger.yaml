@@ -68,6 +68,16 @@ definitions:
       status:
         type: integer
     type: object
+  handlers.TermsAcceptancePublic:
+    properties:
+      status:
+        type: boolean
+    type: object
+  handlers.TermsAcceptanceRequest:
+    properties:
+      terms_accepted:
+        type: boolean
+    type: object
   handlers.UnbondDelegationRequestPayload:
     properties:
       staker_signed_signature_hex:
@@ -257,6 +267,32 @@ paths:
           schema:
             type: string
       summary: Health check endpoint
+  /terms-acceptance:
+    post:
+      description: Accept terms by the staker's BTC address (Taproot or Native Segwit)
+      parameters:
+      - description: Staker BTC address in Taproot/Native Segwit format
+        in: query
+        name: address
+        required: true
+        type: string
+      - description: Terms acceptance request
+        in: body
+        name: terms_accepted
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.TermsAcceptanceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Terms acceptance result
+          schema:
+            $ref: '#/definitions/handlers.TermsAcceptancePublic'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error'
   /v1/delegation:
     get:
       description: Retrieves a delegation by a given transaction hash
