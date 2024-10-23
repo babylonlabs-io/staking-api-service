@@ -119,7 +119,7 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 	// setup test db
 	dbClients := testutils.SetupTestDB(*cfg)
 
-	if dep != nil && (dep.MockDbClients.V1DBClient != nil || dep.MockDbClients.V2DBClient != nil || dep.MockDbClients.MongoClient != nil) {
+	if dep != nil && (dep.MockDbClients.V1DBClient != nil || dep.MockDbClients.V2DBClient != nil || dep.MockDbClients.StakingMongoClient != nil) {
 		dbClients = &dep.MockDbClients
 	}
 
@@ -155,7 +155,7 @@ func setupTestServer(t *testing.T, dep *TestServerDependency) *TestServer {
 		Conn:    conn,
 		channel: ch,
 		Config:  cfg,
-		Db:      dbClients.MongoClient,
+		Db:      dbClients.StakingMongoClient,
 	}
 }
 

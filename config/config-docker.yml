@@ -9,7 +9,7 @@ server:
   btc-net: "mainnet"
   max-content-length: 4096
   health-check-interval: 300 # 5 minutes interval
-db:
+staking-db:
   username: root
   password: example
   address: "mongodb://mongodb:27017"
@@ -17,6 +17,13 @@ db:
   max-pagination-limit: 10
   db-batch-size-limit: 100
   logical-shard-count: 10
+indexer-db:
+  username: root
+  password: example
+  address: "mongodb://indexer-mongodb:27019"
+  db-name: indexer-db
+  max-pagination-limit: 10
+  db-batch-size-limit: 100
 queue:
   queue_user: user # can be replaced by values in .env file
   queue_password: password

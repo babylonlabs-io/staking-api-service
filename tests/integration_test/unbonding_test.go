@@ -515,8 +515,8 @@ func TestUnbondingRequestValidation(t *testing.T) {
 	)
 	mockMongoClient := &mongo.Client{}
 	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-		MongoClient: mockMongoClient,
-		V1DBClient:  mockV1DBClient,
+		StakingMongoClient: mockMongoClient,
+		V1DBClient:         mockV1DBClient,
 	}})
 	defer testServer.Close()
 	unbondingUrl := testServer.Server.URL + unbondingPath

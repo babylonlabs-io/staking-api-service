@@ -12,11 +12,11 @@ import (
 )
 
 func BackfillPubkeyAddressesMappings(ctx context.Context, cfg *config.Config) error {
-	client, err := dbclient.NewMongoClient(ctx, cfg.Db)
+	client, err := dbclient.NewMongoClient(ctx, cfg.StakingDb)
 	if err != nil {
 		return fmt.Errorf("failed to create db client: %w", err)
 	}
-	v1dbClient, err := v1dbclient.New(ctx, client, cfg.Db)
+	v1dbClient, err := v1dbclient.New(ctx, client, cfg.StakingDb)
 	if err != nil {
 		return fmt.Errorf("failed to create db client: %w", err)
 	}

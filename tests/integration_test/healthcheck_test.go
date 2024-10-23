@@ -45,13 +45,15 @@ func TestHealthCheck(t *testing.T) {
 
 // Test the db connection error case
 func TestHealthCheckDBError(t *testing.T) {
-	mockV1DBClient := new(testmock.V1DBClient)
-	mockV1DBClient.On("Ping", mock.Anything).Return(io.EOF) // Expect db error
+	mockDbClients := new(testmock.DBClient)
+	mockDbClients.On("Ping", mock.Anything).Return(io.EOF) // Expect db error
 	mockMongoClient := &mongo.Client{}
+	mockIndexerDbClient := &mongo.Client{}
 
 	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-		MongoClient: mockMongoClient,
-		V1DBClient:  mockV1DBClient,
+		StakingMongoClient: mockMongoClient,
+		IndexerMongoClient: mockIndexerDbClient,
+		SharedDBClient:     mockDbClients,
 	}})
 
 	defer testServer.Close()

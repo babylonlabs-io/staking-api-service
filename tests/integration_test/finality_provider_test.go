@@ -56,8 +56,8 @@ func TestGetFinalityProviderShouldNotFailInCaseOfDbFailure(t *testing.T) {
 	mockV1DBClient.On("FindFinalityProviderStats", mock.Anything, mock.Anything).Return(nil, errors.New("just an error"))
 	mockMongoClient := &mongo.Client{}
 	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-		MongoClient: mockMongoClient,
-		V1DBClient:  mockV1DBClient,
+		StakingMongoClient: mockMongoClient,
+		V1DBClient:         mockV1DBClient,
 	}})
 	shouldGetFinalityProvidersSuccessfully(t, testServer)
 }
@@ -72,8 +72,8 @@ func TestGetFinalityProviderShouldReturnFallbackToGlobalParams(t *testing.T) {
 	mockMongoClient := &mongo.Client{}
 
 	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-		MongoClient: mockMongoClient,
-		V1DBClient:  mockV1DBClient,
+		StakingMongoClient: mockMongoClient,
+		V1DBClient:         mockV1DBClient,
 	}})
 	shouldGetFinalityProvidersSuccessfully(t, testServer)
 }
@@ -84,8 +84,8 @@ func TestGetFinalityProviderReturn4xxErrorIfPageTokenInvalid(t *testing.T) {
 	mockMongoClient := &mongo.Client{}
 
 	testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-		MongoClient: mockMongoClient,
-		V1DBClient:  mockV1DBClient,
+		StakingMongoClient: mockMongoClient,
+		V1DBClient:         mockV1DBClient,
 	}})
 	url := testServer.Server.URL + finalityProvidersPath
 	defer testServer.Close()
@@ -129,8 +129,8 @@ func FuzzGetFinalityProviderShouldReturnAllRegisteredFps(f *testing.F) {
 		mockMongoClient := &mongo.Client{}
 
 		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-			MongoClient: mockMongoClient,
-			V1DBClient:  mockV1DBClient,
+			StakingMongoClient: mockMongoClient,
+			V1DBClient:         mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 
 		url := testServer.Server.URL + finalityProvidersPath
@@ -212,7 +212,7 @@ func FuzzTestGetFinalityProviderWithPaginationResponse(f *testing.F) {
 		if err != nil {
 			t.Fatalf("Failed to load test config: %v", err)
 		}
-		cfg.Db.MaxPaginationLimit = 2
+		cfg.StakingDb.MaxPaginationLimit = 2
 
 		testServer := setupTestServer(t, &TestServerDependency{ConfigOverrides: cfg})
 		defer testServer.Close()
@@ -273,8 +273,8 @@ func FuzzGetFinalityProviderShouldNotReturnRegisteredFpWithoutStakingForPaginate
 		mockMongoClient := &mongo.Client{}
 
 		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-			MongoClient: mockMongoClient,
-			V1DBClient:  mockV1DBClient,
+			StakingMongoClient: mockMongoClient,
+			V1DBClient:         mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 
 		url := testServer.Server.URL + finalityProvidersPath
@@ -337,8 +337,8 @@ func FuzzShouldNotReturnDefaultFpFromParamsWhenPageTokenIsPresent(f *testing.F) 
 
 		mockMongoClient := &mongo.Client{}
 		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-			MongoClient: mockMongoClient,
-			V1DBClient:  mockV1DBClient,
+			StakingMongoClient: mockMongoClient,
+			V1DBClient:         mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 
 		url := testServer.Server.URL + finalityProvidersPath + "?pagination_key=abcd"
@@ -370,8 +370,8 @@ func FuzzGetFinalityProvider(f *testing.F) {
 		mockMongoClient := &mongo.Client{}
 
 		testServer := setupTestServer(t, &TestServerDependency{MockDbClients: dbclients.DbClients{
-			MongoClient: mockMongoClient,
-			V1DBClient:  mockV1DBClient,
+			StakingMongoClient: mockMongoClient,
+			V1DBClient:         mockV1DBClient,
 		}, MockedFinalityProviders: fpParams})
 		url := testServer.Server.URL + finalityProvidersPath + "?fp_btc_pk=" + fpParams[0].BtcPk
 		// Make a GET request to the finality providers endpoint
@@ -395,8 +395,8 @@ func FuzzGetFinalityProvider(f *testing.F) {
 		).Return(fpStats, nil)
 		testServer = setupTestServer(t, &TestServerDependency{
 			MockDbClients: dbclients.DbClients{
-				MongoClient: mockMongoClient,
-				V1DBClient:  mockV1DBClient,
+				StakingMongoClient: mockMongoClient,
+				V1DBClient:         mockV1DBClient,
 			},
 			MockedFinalityProviders: fpParams,
 		})

@@ -32,7 +32,7 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 		r := rand.New(rand.NewSource(seed))
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
-		numOfStaker1Events := int(testServer.Config.Db.MaxPaginationLimit) + r.Intn(100)
+		numOfStaker1Events := int(testServer.Config.StakingDb.MaxPaginationLimit) + r.Intn(100)
 		activeStakingEventsByStaker1 := testutils.GenerateRandomActiveStakingEvents(
 			r,
 			&testutils.TestActiveEventGeneratorOpts{
@@ -43,7 +43,7 @@ func FuzzTestStakerDelegationsWithPaginationResponse(f *testing.F) {
 		activeStakingEventsByStaker2 := testutils.GenerateRandomActiveStakingEvents(
 			r,
 			&testutils.TestActiveEventGeneratorOpts{
-				NumOfEvents: int(testServer.Config.Db.MaxPaginationLimit) + 1,
+				NumOfEvents: int(testServer.Config.StakingDb.MaxPaginationLimit) + 1,
 				Stakers:     testutils.GeneratePks(1),
 			},
 		)
@@ -310,7 +310,7 @@ func FuzzStakerDelegationsFilterByState(f *testing.F) {
 		r := rand.New(rand.NewSource(seed))
 		testServer := setupTestServer(t, nil)
 		defer testServer.Close()
-		numOfDelegations := int(testServer.Config.Db.MaxPaginationLimit) +
+		numOfDelegations := int(testServer.Config.StakingDb.MaxPaginationLimit) +
 			testutils.RandomPositiveInt(r, 10)
 		activeStakingEventsByStaker := testutils.GenerateRandomActiveStakingEvents(
 			r,
