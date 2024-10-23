@@ -24,6 +24,7 @@ const (
 	BtcInfoCollection               = "btc_info"
 	UnprocessableMsgCollection      = "unprocessable_messages"
 	PkAddressMappingsCollection     = "pk_address_mappings"
+	TermsAcceptanceCollection       = "terms_acceptance"
 )
 
 type index struct {
@@ -48,6 +49,7 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
 		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
 	},
+	TermsAcceptanceCollection: {{Indexes: map[string]int{"address": 1, "public_key": 1}, Unique: true}},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {
