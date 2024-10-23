@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -170,4 +171,28 @@ func parseStateFilterQuery(
 		)
 	}
 	return stateEnum, nil
+}
+
+// parseTermsAcceptanceQuery parses the terms acceptance query and returns the address, public key, and terms accepted
+func parseTermsAcceptanceQuery(request *http.Request, btcNetParam *chaincfg.Params) (string, string, bool, *types.Error) {
+	var req TermsAcceptanceRequest
+	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
+		return "", "", false, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Invalid request payload")
+	}
+
+	address, err := parseBtcAddressQuery(request, "address", btcNetParam)
+	if err != nil {
+		return "", "", false, err
+	}
+
+	publicKey, err := parsePublicKeyQuery(request, "public_key", false)
+	if err != nil {
+		return "", "", false, err
+	}
+
+	if address == "" || publicKey == "" {
+		return "", "", false, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Address and public key are required")
+	}
+
+	return address, publicKey, req.TermsAccepted, nil
 }
