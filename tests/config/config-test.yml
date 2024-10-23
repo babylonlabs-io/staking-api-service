@@ -9,7 +9,7 @@ server:
   btc-net: "signet"
   max-content-length: 40960
   health-check-interval: 2
-staking_db:
+staking-db:
   username: root
   password: example
   address: "mongodb://localhost:27017"
@@ -17,14 +17,13 @@ staking_db:
   max-pagination-limit: 10
   db-batch-size-limit: 100
   logical-shard-count: 2
-indexer_db:
+indexer-db:
   username: root
   password: example
   address: "mongodb://localhost:27019"
   db-name: indexer-db
   max-pagination-limit: 10
   db-batch-size-limit: 100
-  logical-shard-count: 2
 queue:
   queue_user: user
   queue_password: password

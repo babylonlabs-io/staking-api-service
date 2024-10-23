@@ -11,8 +11,8 @@ import (
 
 type Config struct {
 	Server    *ServerConfig      `mapstructure:"server"`
-	StakingDb *DbConfig          `mapstructure:"staking_db"`
-	IndexerDb *DbConfig          `mapstructure:"indexer_db"`
+	StakingDb *DbConfig          `mapstructure:"staking-db"`
+	IndexerDb *DbConfig          `mapstructure:"indexer-db"`
 	Queue     *queue.QueueConfig `mapstructure:"queue"`
 	Metrics   *MetricsConfig     `mapstructure:"metrics"`
 	Assets    *AssetsConfig      `mapstructure:"assets"`

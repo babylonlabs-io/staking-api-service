@@ -167,7 +167,7 @@ func (v1dbclient *V1Database) SubtractOverallStats(
 func (v1dbclient *V1Database) GetOverallStats(ctx context.Context) (*v1dbmodel.OverallStatsDocument, error) {
 	// The collection is sharded by the _id field, so we need to query all the shards
 	var shardsId []string
-	for i := 0; i < int(v1dbclient.Cfg.LogicalShardCount); i++ {
+	for i := 0; i < int(*v1dbclient.Cfg.LogicalShardCount); i++ {
 		shardsId = append(shardsId, fmt.Sprintf("%d", i))
 	}
 
@@ -201,7 +201,7 @@ func (v1dbclient *V1Database) GetOverallStats(ctx context.Context) (*v1dbmodel.O
 // It's a logical shard to avoid locking the same field during concurrent writes
 // The sharding number should never be reduced after roll out
 func (v1dbclient *V1Database) generateOverallStatsId() (string, error) {
-	max := big.NewInt(int64(v1dbclient.Cfg.LogicalShardCount))
+	max := big.NewInt(*v1dbclient.Cfg.LogicalShardCount)
 	// Generate a secure random number within the range [0, max)
 	n, err := rand.Int(rand.Reader, max)
 	if err != nil {

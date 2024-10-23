@@ -41,16 +41,10 @@ func New(
 
 // DoHealthCheck checks the health of the services by ping the database.
 func (s *Service) DoHealthCheck(ctx context.Context) error {
-	err := s.DbClients.SharedDBClient.Ping(ctx)
-	if err != nil {
+	if err := s.DbClients.SharedDBClient.Ping(ctx); err != nil {
 		return err
 	}
-
-	err = s.DbClients.IndexerDBClient.Ping(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
+	return s.DbClients.IndexerDBClient.Ping(ctx)
 }
 
 func (s *Service) SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error {
