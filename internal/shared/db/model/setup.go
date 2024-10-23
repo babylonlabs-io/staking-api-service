@@ -58,10 +58,10 @@ var collections = map[string][]index{
 
 func Setup(ctx context.Context, cfg *config.Config) error {
 	credential := options.Credential{
-		Username: cfg.Db.Username,
-		Password: cfg.Db.Password,
+		Username: cfg.StakingDb.Username,
+		Password: cfg.StakingDb.Password,
 	}
-	clientOps := options.Client().ApplyURI(cfg.Db.Address).SetAuth(credential)
+	clientOps := options.Client().ApplyURI(cfg.StakingDb.Address).SetAuth(credential)
 	client, err := mongo.Connect(ctx, clientOps)
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func Setup(ctx context.Context, cfg *config.Config) error {
 	defer cancel()
 
 	// Access a database and create collections.
-	database := client.Database(cfg.Db.DbName)
+	database := client.Database(cfg.StakingDb.DbName)
 
 	// Create collections.
 	for collection := range collections {

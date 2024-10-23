@@ -426,7 +426,7 @@ func FuzzTestTopStakersWithPaginationResponse(f *testing.F) {
 		if err != nil {
 			t.Fatalf("Failed to load test config: %v", err)
 		}
-		cfg.Db.MaxPaginationLimit = int64(paginationSize)
+		cfg.StakingDb.MaxPaginationLimit = int64(paginationSize)
 
 		testServer := setupTestServer(t, &TestServerDependency{ConfigOverrides: cfg})
 		defer testServer.Close()

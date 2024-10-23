@@ -52,7 +52,7 @@ func TestBackfillAddressesBasedOnPubKeys(t *testing.T) {
 	// Clean the database
 	testutils.SetupTestDB(*cfg)
 	// inject some data
-	docs := createNewDelegationDocuments(cfg, int(cfg.Db.MaxPaginationLimit)+1)
+	docs := createNewDelegationDocuments(cfg, int(cfg.StakingDb.MaxPaginationLimit)+1)
 	for _, doc := range docs {
 		testutils.InjectDbDocument(
 			cfg, dbmodel.V1DelegationCollection, doc,
