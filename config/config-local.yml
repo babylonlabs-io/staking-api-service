@@ -16,6 +16,7 @@ staking-db:
   db-name: staking-api-service
   max-pagination-limit: 10
   db-batch-size-limit: 100
+  logical-shard-count: 2
 indexer-db:
   username: root
   password: example
@@ -23,7 +24,6 @@ indexer-db:
   db-name: indexer-db
   max-pagination-limit: 10
   db-batch-size-limit: 100
-  logical-shard-count: 2
 queue:
   queue_user: user # can be replaced by values in .env file
   queue_password: password
