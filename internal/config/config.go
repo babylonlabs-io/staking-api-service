@@ -10,11 +10,12 @@ import (
 )
 
 type Config struct {
-	Server  *ServerConfig      `mapstructure:"server"`
-	Db      *DbConfig          `mapstructure:"db"`
-	Queue   *queue.QueueConfig `mapstructure:"queue"`
-	Metrics *MetricsConfig     `mapstructure:"metrics"`
-	Assets  *AssetsConfig      `mapstructure:"assets"`
+	Server                 *ServerConfig          `mapstructure:"server"`
+	Db                     *DbConfig              `mapstructure:"db"`
+	Queue                  *queue.QueueConfig     `mapstructure:"queue"`
+	Metrics                *MetricsConfig         `mapstructure:"metrics"`
+	Assets                 *AssetsConfig          `mapstructure:"assets"`
+	TermsAcceptanceLogging *TermsAcceptanceConfig `mapstructure:"terms_acceptance_logging"`
 }
 
 func (cfg *Config) Validate() error {

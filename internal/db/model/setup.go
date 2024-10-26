@@ -24,6 +24,7 @@ const (
 	BtcInfoCollection               = "btc_info"
 	UnprocessableMsgCollection      = "unprocessable_messages"
 	PkAddressMappingsCollection     = "pk_address_mappings"
+	TermsAcceptanceCollection       = "terms_acceptance"
 )
 
 type index struct {
