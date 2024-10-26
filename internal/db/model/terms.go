@@ -1,11 +1,11 @@
 package model
 
-import "time"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type TermsAcceptance struct {
-	Id            string    `bson:"_id"`
-	Address       string    `bson:"address"`
-	PublicKey     string    `bson:"public_key"`
-	TermsAccepted bool      `bson:"terms_accepted"`
-	UpdatedAt     time.Time `bson:"updated_at"`
+	Id            primitive.ObjectID `bson:"_id,omitempty"`
+	Address       string             `bson:"address"`
+	PublicKey     string             `bson:"public_key"`
 }

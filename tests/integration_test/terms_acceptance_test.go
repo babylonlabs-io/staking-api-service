@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	termsAcceptancePath = "/terms-acceptance"
+	termsAcceptancePath = "/log_terms_acceptance"
 )
 
 func TestTermsAcceptance(t *testing.T) {
@@ -26,12 +26,13 @@ func TestTermsAcceptance(t *testing.T) {
 	publicKey, _ := testutils.RandomPk()
 
 	// Prepare request body
-	requestBody := handlers.TermsAcceptanceRequest{
-		TermsAccepted: true,
+	requestBody := handlers.TermsAcceptanceLoggingRequest{
+		Address:   address,
+		PublicKey: publicKey,
 	}
 	bodyBytes, _ := json.Marshal(requestBody)
 
-	url := testServer.Server.URL + termsAcceptancePath + "?address=" + address + "&public_key=" + publicKey
+	url := testServer.Server.URL + termsAcceptancePath
 	resp, err := http.Post(url, "application/json", bytes.NewReader(bodyBytes))
 	assert.NoError(t, err, "making POST request to terms acceptance endpoint should not fail")
 	defer resp.Body.Close()
@@ -52,9 +53,7 @@ func TestTermsAcceptanceInvalidAddress(t *testing.T) {
 	invalidAddress := "invalidaddress"
 	publicKey, _ := testutils.RandomPk()
 
-	requestBody := handlers.TermsAcceptanceRequest{
-		TermsAccepted: true,
-	}
+	requestBody := handlers.TermsAcceptanceLoggingRequest{}
 	bodyBytes, _ := json.Marshal(requestBody)
 
 	url := testServer.Server.URL + termsAcceptancePath + "?address=" + invalidAddress + "&public_key=" + publicKey

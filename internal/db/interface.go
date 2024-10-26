@@ -104,7 +104,7 @@ type DBClient interface {
 		ctx context.Context,
 		paginationToken string,
 	) (*DbResultMap[model.DelegationDocument], error)
-	// Accept terms saves the acceptance of the terms of service of the public key
+	// SaveTermsAcceptance saves the acceptance of the terms of service of the public key
 	SaveTermsAcceptance(ctx context.Context, termsAcceptance *model.TermsAcceptance) error
 }
 

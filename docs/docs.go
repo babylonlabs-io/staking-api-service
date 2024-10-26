@@ -38,46 +38,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/terms-acceptance": {
-            "post": {
-                "description": "Accept terms by the staker's BTC address (Taproot or Native Segwit)",
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Staker BTC address in Taproot/Native Segwit format",
-                        "name": "address",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "Terms acceptance request",
-                        "name": "terms_accepted",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.TermsAcceptanceRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Terms acceptance result",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.TermsAcceptancePublic"
-                        }
-                    },
-                    "400": {
-                        "description": "Error: Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_types.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/delegation": {
             "get": {
                 "description": "Retrieves a delegation by a given transaction hash",
@@ -511,22 +471,6 @@ const docTemplate = `{
                 "data": {},
                 "status": {
                     "type": "integer"
-                }
-            }
-        },
-        "handlers.TermsAcceptancePublic": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "handlers.TermsAcceptanceRequest": {
-            "type": "object",
-            "properties": {
-                "terms_accepted": {
-                    "type": "boolean"
                 }
             }
         },

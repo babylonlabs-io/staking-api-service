@@ -173,26 +173,26 @@ func parseStateFilterQuery(
 	return stateEnum, nil
 }
 
-// parseTermsAcceptanceQuery parses the terms acceptance query and returns the address, public key, and terms accepted
-func parseTermsAcceptanceQuery(request *http.Request, btcNetParam *chaincfg.Params) (string, string, bool, *types.Error) {
-	var req TermsAcceptanceRequest
+// parseTermsAcceptanceLoggingRequest parses the terms acceptance request bdoy and returns the address and public key
+func parseTermsAcceptanceLoggingRequest(request *http.Request, btcNetParam *chaincfg.Params) (string, string, *types.Error) {
+	var req TermsAcceptanceLoggingRequest
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
-		return "", "", false, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Invalid request payload")
+		return "", "", types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Invalid request payload")
 	}
 
-	address, err := parseBtcAddressQuery(request, "address", btcNetParam)
-	if err != nil {
-		return "", "", false, err
+	// Validate the Bitcoin address
+	if _, err := utils.CheckBtcAddressType(req.Address, btcNetParam); err != nil {
+		return "", "", types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Invalid Bitcoin address")
 	}
 
-	publicKey, err := parsePublicKeyQuery(request, "public_key", false)
-	if err != nil {
-		return "", "", false, err
+	// Validate the public key
+	if _, err := utils.GetSchnorrPkFromHex(req.PublicKey); err != nil {
+		return "", "", types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Invalid public key")
 	}
 
-	if address == "" || publicKey == "" {
-		return "", "", false, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Address and public key are required")
+	if req.Address == "" || req.PublicKey == "" {
+		return "", "", types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "Address and public key are required")
 	}
 
-	return address, publicKey, req.TermsAccepted, nil
+	return req.Address, req.PublicKey, nil
 }

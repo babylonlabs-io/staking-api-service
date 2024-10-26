@@ -10,8 +10,8 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	handlers := a.handlers
 	r.Get("/healthcheck", registerHandler(handlers.HealthCheck))
 
-	if a.cfg.TermsAcceptance.Enabled {
-		r.Post("/terms-acceptance", registerHandler(handlers.AcceptTerms))
+	if a.cfg.TermsAcceptanceLogging.Enabled {
+		r.Post("/log_terms_acceptance", registerHandler(handlers.LogTermsAcceptance))
 	}
 
 	r.Get("/v1/staker/delegations", registerHandler(handlers.GetStakerDelegations))

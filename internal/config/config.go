@@ -10,12 +10,12 @@ import (
 )
 
 type Config struct {
-	Server          *ServerConfig          `mapstructure:"server"`
-	Db              *DbConfig              `mapstructure:"db"`
-	Queue           *queue.QueueConfig     `mapstructure:"queue"`
-	Metrics         *MetricsConfig         `mapstructure:"metrics"`
-	Assets          *AssetsConfig          `mapstructure:"assets"`
-	TermsAcceptance *TermsAcceptanceConfig `mapstructure:"terms_acceptance"`
+	Server                 *ServerConfig          `mapstructure:"server"`
+	Db                     *DbConfig              `mapstructure:"db"`
+	Queue                  *queue.QueueConfig     `mapstructure:"queue"`
+	Metrics                *MetricsConfig         `mapstructure:"metrics"`
+	Assets                 *AssetsConfig          `mapstructure:"assets"`
+	TermsAcceptanceLogging *TermsAcceptanceConfig `mapstructure:"terms_acceptance_logging"`
 }
 
 func (cfg *Config) Validate() error {
@@ -40,10 +40,6 @@ func (cfg *Config) Validate() error {
 		if err := cfg.Assets.Validate(); err != nil {
 			return err
 		}
-	}
-
-	if err := cfg.TermsAcceptance.Validate(); err != nil {
-		return err
 	}
 
 	return nil
