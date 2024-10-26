@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	termsAcceptancePath = "/log_terms_acceptance"
+	termsAcceptancePath = "/log-terms-acceptance"
 )
 
 func TestTermsAcceptance(t *testing.T) {
