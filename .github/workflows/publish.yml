@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - 'v0.3.x'
+    - 'fix-publish-yml'
     tags:
     - '*'
 
