@@ -49,6 +49,7 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
 		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
 	},
+	TermsAcceptanceCollection: {{Indexes: map[string]int{}}},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {
