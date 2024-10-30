@@ -9,6 +9,7 @@ import (
 	"time"
 
 	bbndatagen "github.com/babylonlabs-io/babylon/testutil/datagen"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-queue-client/client"
@@ -249,30 +250,30 @@ func GenerateRandomActiveStakingEvents(
 	return activeStakingEvents
 }
 
-func GenerateRandomBabylonParams(r *rand.Rand) types.BabylonParams {
-	return types.BabylonParams{
-		Version:                      r.Intn(10),
-		CovenantPKs:                  GeneratePks(r.Intn(10)),
-		CovenantQuorum:               r.Intn(10),
-		MaxStakingAmount:             int64(r.Intn(1000000000000000000)),
-		MinStakingAmount:             int64(r.Intn(1000000000000000000)),
-		MaxStakingTime:               int64(r.Intn(1000000000000000000)),
-		MinStakingTime:               int64(r.Intn(1000000000000000000)),
-		SlashingPKScript:             RandomString(r, 10),
-		MinSlashingTxFee:             int64(r.Intn(1000000000000000000)),
-		SlashingRate:                 RandomPostiveFloat64(r),
-		MinUnbondingTime:             int64(r.Intn(1000000000000000000)),
-		UnbondingFee:                 int64(r.Intn(1000000000000000000)),
-		MinCommissionRate:            RandomPostiveFloat64(r),
-		MaxActiveFinalityProviders:   r.Intn(10),
-		DelegationCreationBaseGasFee: int64(r.Intn(1000000000000000000)),
+func GenerateRandomBabylonParams(r *rand.Rand) indexertypes.BbnStakingParams {
+	return indexertypes.BbnStakingParams{
+		Version:                      uint32(r.Intn(10)),
+		CovenantPks:                  GeneratePks(r.Intn(10)),
+		CovenantQuorum:               uint32(r.Intn(10)),
+		MinStakingValueSat:           int64(r.Intn(1000000000000000000)),
+		MaxStakingValueSat:           int64(r.Intn(1000000000000000000)),
+		MinStakingTimeBlocks:         uint32(r.Intn(1000000000000000000)),
+		MaxStakingTimeBlocks:         uint32(r.Intn(1000000000000000000)),
+		SlashingPkScript:             RandomString(r, 10),
+		MinSlashingTxFeeSat:          int64(r.Intn(1000000000000000000)),
+		SlashingRate:                 fmt.Sprintf("%f", RandomPostiveFloat64(r)),
+		MinUnbondingTimeBlocks:       uint32(r.Intn(1000000000000000000)),
+		UnbondingFeeSat:              int64(r.Intn(1000000000000000000)),
+		MinCommissionRate:            fmt.Sprintf("%f", RandomPostiveFloat64(r)),
+		MaxActiveFinalityProviders:   uint32(r.Intn(10)),
+		DelegationCreationBaseGasFee: uint64(r.Intn(1000000000000000000)),
 	}
 }
 
-func GenerateRandomBTCParams(r *rand.Rand) types.BTCParams {
-	return types.BTCParams{
-		Version:              r.Intn(10),
-		BTCConfirmationDepth: r.Intn(10),
+func GenerateRandomBTCParams(r *rand.Rand) indexertypes.BtcCheckpointParams {
+	return indexertypes.BtcCheckpointParams{
+		Version:              uint32(r.Intn(10)),
+		BtcConfirmationDepth: uint64(r.Intn(10)),
 	}
 }
 

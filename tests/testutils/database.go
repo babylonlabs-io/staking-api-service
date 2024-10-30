@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 
+	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
-	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/indexer_db_client"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
 	v2dbclient "github.com/babylonlabs-io/staking-api-service/internal/v2/db/client"
