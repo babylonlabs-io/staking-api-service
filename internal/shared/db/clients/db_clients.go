@@ -3,9 +3,9 @@ package dbclients
 import (
 	"context"
 
+	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
-	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/indexer_db_client"
 	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
 	v2dbclient "github.com/babylonlabs-io/staking-api-service/internal/v2/db/client"
 	"github.com/rs/zerolog/log"
