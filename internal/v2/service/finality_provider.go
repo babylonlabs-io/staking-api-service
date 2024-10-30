@@ -2,11 +2,9 @@ package v2service
 
 import (
 	"context"
-	"math/rand"
-	"time"
+	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils/datagen"
 )
 
 type FinalityProviderPublic struct {
@@ -24,24 +22,25 @@ type FinalityProvidersPublic struct {
 	FinalityProviders []FinalityProviderPublic `json:"finality_providers"`
 }
 
-func (s *V2Service) GetFinalityProviders(ctx context.Context, paginationKey string) ([]FinalityProviderPublic, string, *types.Error) {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	// random number of providers between 1 and 10
-	numProviders := datagen.RandomPositiveInt(r, 10)
-	providers := datagen.GenerateRandomFinalityProviderDetail(r, uint64(numProviders))
-	publicProviders := make([]FinalityProviderPublic, len(providers))
-	for i, provider := range providers {
-		publicProviders[i] = FinalityProviderPublic{
-			BtcPK:             datagen.GeneratePks(1)[0],
-			State:             datagen.RandomFinalityProviderState(r),
-			Description:       provider.Description,
-			Commission:        provider.Commission,
-			ActiveTVL:         int64(datagen.RandomPositiveInt(r, 1000000000000000000)),
-			TotalTVL:          int64(datagen.RandomPositiveInt(r, 1000000000000000000)),
-			ActiveDelegations: int64(datagen.RandomPositiveInt(r, 100)),
-			TotalDelegations:  int64(datagen.RandomPositiveInt(r, 100)),
-		}
+func (s *V2Service) GetFinalityProviders(ctx context.Context, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
+	resultMap, err := s.DbClients.IndexerDBClient.FindFinalityProviders(ctx, paginationKey)
+	if err != nil {
+		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get finality providers")
 	}
 
-	return publicProviders, "", nil
+	providersPublic := make([]*FinalityProviderPublic, 0, len(resultMap.Data))
+	for _, provider := range resultMap.Data {
+		providersPublic = append(providersPublic, &FinalityProviderPublic{
+			BtcPK:       provider.BtcPk,
+			State:       types.FinalityProviderState(provider.State),
+			Description: types.FinalityProviderDescription(provider.Description),
+			Commission:  provider.Commission,
+			// TODO: add active_tvl, total_tvl, active_delegations, total_delegations from statistic data field
+			ActiveTVL:         0,
+			TotalTVL:          0,
+			ActiveDelegations: 0,
+			TotalDelegations:  0,
+		})
+	}
+	return providersPublic, resultMap.PaginationToken, nil
 }

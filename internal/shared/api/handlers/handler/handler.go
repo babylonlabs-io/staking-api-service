@@ -55,6 +55,7 @@ func ParsePaginationQuery(r *http.Request) (string, *types.Error) {
 	if pageKey == "" {
 		return "", nil
 	}
+	fmt.Println("pageKey", pageKey)
 	if !utils.IsBase64Encoded(pageKey) {
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, "invalid pagination key format",
