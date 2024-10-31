@@ -22,8 +22,8 @@ type FinalityProvidersPublic struct {
 	FinalityProviders []FinalityProviderPublic `json:"finality_providers"`
 }
 
-func (s *V2Service) GetFinalityProviders(ctx context.Context, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
-	resultMap, err := s.DbClients.IndexerDBClient.FindFinalityProviders(ctx, paginationKey)
+func (s *V2Service) GetFinalityProviders(ctx context.Context, fpPk string, name string, searchQuery string, state types.FinalityProviderState, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
+	resultMap, err := s.DbClients.IndexerDBClient.FindFinalityProviders(ctx, fpPk, name, searchQuery, state, paginationKey)
 	if err != nil {
 		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get finality providers")
 	}

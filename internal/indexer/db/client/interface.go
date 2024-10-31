@@ -6,6 +6,7 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
 type IndexerDBClient interface {
@@ -14,5 +15,5 @@ type IndexerDBClient interface {
 	GetBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, error)
 	GetBtcCheckpointParams(ctx context.Context) ([]*indexertypes.BtcCheckpointParams, error)
 	// Finality Providers
-	FindFinalityProviders(ctx context.Context, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error)
+	FindFinalityProviders(ctx context.Context, fpPk string, name string, searchQuery string, state types.FinalityProviderState, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error)
 }

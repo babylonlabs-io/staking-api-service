@@ -2,16 +2,27 @@ package indexerdbmodel
 
 import (
 	"encoding/json"
+	"fmt"
 
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+)
+
+type IndexerFinalityProviderState string
+
+const (
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_INACTIVE IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_INACTIVE"
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE   IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_ACTIVE"
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_JAILED   IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_JAILED"
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED  IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_SLASHED"
 )
 
 type IndexerFinalityProviderDetails struct {
-	BtcPk          string      `bson:"_id"` // Primary key
-	BabylonAddress string      `bson:"babylon_address"`
-	Commission     string      `bson:"commission"`
-	State          string      `bson:"state"`
-	Description    Description `bson:"description"`
+	BtcPk          string                       `bson:"_id"` // Primary key
+	BabylonAddress string                       `bson:"babylon_address"`
+	Commission     string                       `bson:"commission"`
+	State          IndexerFinalityProviderState `bson:"state"`
+	Description    Description                  `bson:"description"`
 }
 
 // Description represents the nested description field
@@ -45,4 +56,15 @@ func DecodeFinalityProviderPaginationToken(token string) (*IndexerFinalityProvid
 	var pagination IndexerFinalityProviderPagination
 	err := json.Unmarshal([]byte(token), &pagination)
 	return &pagination, err
+}
+
+func FromStringToFinalityProviderState(s string) (types.FinalityProviderState, error) {
+	switch s {
+	case "active":
+		return types.FinalityProviderStateActive, nil
+	case "standby":
+		return types.FinalityProviderStateStandby, nil
+	default:
+		return "", fmt.Errorf("invalid finality provider state: %s", s)
+	}
 }

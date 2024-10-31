@@ -1,6 +1,7 @@
 package v2handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
@@ -20,11 +21,33 @@ import (
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
+	fpPk, err := handler.ParsePublicKeyQuery(request, "finality_provider_pk", true)
+	if err != nil {
+		return nil, err
+	}
+
+	name, err := handler.ParseStringQuery(request, "name", true)
+	if err != nil {
+		return nil, err
+	}
+
+	searchQuery, err := handler.ParseStringQuery(request, "search", true)
+	if err != nil {
+		return nil, err
+	}
+
+	state, err := handler.ParseFPStateQuery(request, "state", true)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("state", state)
+
 	paginationKey, err := handler.ParsePaginationQuery(request)
 	if err != nil {
 		return nil, err
 	}
-	providers, paginationToken, err := h.Service.GetFinalityProviders(request.Context(), paginationKey)
+	providers, paginationToken, err := h.Service.GetFinalityProviders(request.Context(), fpPk, name, searchQuery, state, paginationKey)
 	if err != nil {
 		return nil, err
 	}
