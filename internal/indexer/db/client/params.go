@@ -26,7 +26,7 @@ func (db *IndexerDatabase) GetBbnStakingParams(ctx context.Context) ([]*indexert
 			return nil, fmt.Errorf("failed to decode document: %w", err)
 		}
 
-		var stakingParams indexertypes.BbnStakingParams
+		var stakingParams indexerdbmodel.IndexerBbnStakingParamsDocument
 		bsonBytes, err := bson.Marshal(model.Params)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal params: %w", err)
@@ -35,9 +35,25 @@ func (db *IndexerDatabase) GetBbnStakingParams(ctx context.Context) ([]*indexert
 			return nil, fmt.Errorf("failed to unmarshal into staking params: %w", err)
 		}
 
-		stakingParams.Version = model.Version
+		bbnParams := &indexertypes.BbnStakingParams{
+			Version:                     model.Version,
+			CovenantPks:                stakingParams.CovenantPks,
+			CovenantQuorum:             stakingParams.CovenantQuorum,
+			MinStakingValueSat:         stakingParams.MinStakingValueSat,
+			MaxStakingValueSat:         stakingParams.MaxStakingValueSat,
+			MinStakingTimeBlocks:       stakingParams.MinStakingTimeBlocks,
+			MaxStakingTimeBlocks:       stakingParams.MaxStakingTimeBlocks,
+			SlashingPkScript:           stakingParams.SlashingPkScript,
+			MinSlashingTxFeeSat:        stakingParams.MinSlashingTxFeeSat,
+			SlashingRate:               stakingParams.SlashingRate,
+			MinUnbondingTimeBlocks:     stakingParams.MinUnbondingTimeBlocks,
+			UnbondingFeeSat:            stakingParams.UnbondingFeeSat,
+			MinCommissionRate:          stakingParams.MinCommissionRate,
+			MaxActiveFinalityProviders: stakingParams.MaxActiveFinalityProviders,
+			DelegationCreationBaseGasFee: stakingParams.DelegationCreationBaseGasFee,
+		}
 
-		params = append(params, &stakingParams)
+		params = append(params, bbnParams)
 	}
 
 	if err := cursor.Err(); err != nil {
@@ -64,19 +80,21 @@ func (db *IndexerDatabase) GetBtcCheckpointParams(ctx context.Context) ([]*index
 			return nil, fmt.Errorf("failed to decode document: %w", err)
 		}
 
-		var btcParams indexertypes.BtcCheckpointParams
-
+		var btcParamsDoc indexerdbmodel.IndexerBtcCheckpointParamsDocument
 		bsonBytes, err := bson.Marshal(model.Params)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal params: %w", err)
 		}
-		if err := bson.Unmarshal(bsonBytes, &btcParams); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal into staking params: %w", err)
+		if err := bson.Unmarshal(bsonBytes, &btcParamsDoc); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal into checkpoint params: %w", err)
 		}
 
-		btcParams.Version = model.Version
+		btcParams := &indexertypes.BtcCheckpointParams{
+			Version:              model.Version,
+			BtcConfirmationDepth: btcParamsDoc.BtcConfirmationDepth,
+		}
 
-		params = append(params, &btcParams)
+		params = append(params, btcParams)
 	}
 
 	if err := cursor.Err(); err != nil {
