@@ -12,16 +12,17 @@ import (
 )
 
 type ServerConfig struct {
-	Host                string        `mapstructure:"host"`
-	Port                int           `mapstructure:"port"`
-	WriteTimeout        time.Duration `mapstructure:"write-timeout"`
-	ReadTimeout         time.Duration `mapstructure:"read-timeout"`
-	IdleTimeout         time.Duration `mapstructure:"idle-timeout"`
-	AllowedOrigins      []string      `mapstructure:"allowed-origins"`
-	BTCNet              string        `mapstructure:"btc-net"`
-	LogLevel            string        `mapstructure:"log-level"`
-	MaxContentLength    int64         `mapstructure:"max-content-length"`
-	HealthCheckInterval int           `mapstructure:"health-check-interval"`
+	Host                 string        `mapstructure:"host"`
+	Port                 int           `mapstructure:"port"`
+	WriteTimeout         time.Duration `mapstructure:"write-timeout"`
+	ReadTimeout          time.Duration `mapstructure:"read-timeout"`
+	IdleTimeout          time.Duration `mapstructure:"idle-timeout"`
+	AllowedOrigins       []string      `mapstructure:"allowed-origins"`
+	BTCNet               string        `mapstructure:"btc-net"`
+	LogLevel             string        `mapstructure:"log-level"`
+	MaxContentLength     int64         `mapstructure:"max-content-length"`
+	MaxSearchQueryLength int           `mapstructure:"max-search-query-length"`
+	HealthCheckInterval  int           `mapstructure:"health-check-interval"`
 
 	BTCNetParam *chaincfg.Params
 }

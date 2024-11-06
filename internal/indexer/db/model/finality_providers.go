@@ -8,21 +8,21 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
-type IndexerFinalityProviderState string
+type FinalityProviderState string
 
 const (
-	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_INACTIVE IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_INACTIVE"
-	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE   IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_ACTIVE"
-	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_JAILED   IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_JAILED"
-	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED  IndexerFinalityProviderState = "FINALITY_PROVIDER_STATUS_SLASHED"
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_INACTIVE FinalityProviderState = "FINALITY_PROVIDER_STATUS_INACTIVE"
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE   FinalityProviderState = "FINALITY_PROVIDER_STATUS_ACTIVE"
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_JAILED   FinalityProviderState = "FINALITY_PROVIDER_STATUS_JAILED"
+	FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED  FinalityProviderState = "FINALITY_PROVIDER_STATUS_SLASHED"
 )
 
 type IndexerFinalityProviderDetails struct {
-	BtcPk          string                       `bson:"_id"` // Primary key
-	BabylonAddress string                       `bson:"babylon_address"`
-	Commission     string                       `bson:"commission"`
-	State          IndexerFinalityProviderState `bson:"state"`
-	Description    Description                  `bson:"description"`
+	BtcPk          string                `bson:"_id"` // Primary key
+	BabylonAddress string                `bson:"babylon_address"`
+	Commission     string                `bson:"commission"`
+	State          FinalityProviderState `bson:"state"`
+	Description    Description           `bson:"description"`
 }
 
 // Description represents the nested description field

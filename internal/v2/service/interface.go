@@ -9,7 +9,8 @@ import (
 
 type V2ServiceProvider interface {
 	service.SharedServiceProvider
-	GetFinalityProviders(ctx context.Context, fpPk string, name string, searchQuery string, state types.FinalityProviderState, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error)
+	GetFinalityProviders(ctx context.Context, state types.FinalityProviderState, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error)
+	SearchFinalityProviders(ctx context.Context, searchQuery string, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error)
 	GetGlobalParams(ctx context.Context) (*GlobalParamsPublic, *types.Error)
 	GetOverallStats(ctx context.Context) (OverallStatsPublic, *types.Error)
 	GetStakerDelegations(ctx context.Context, paginationKey string) ([]StakerDelegationPublic, string, *types.Error)

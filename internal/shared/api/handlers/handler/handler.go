@@ -56,7 +56,6 @@ func ParsePaginationQuery(r *http.Request) (string, *types.Error) {
 	if pageKey == "" {
 		return "", nil
 	}
-	fmt.Println("pageKey", pageKey)
 	if !utils.IsBase64Encoded(pageKey) {
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, "invalid pagination key format",
@@ -169,17 +168,36 @@ func ParseStateFilterQuery(
 	return stateEnum, nil
 }
 
-func ParseStringQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
-	string := r.URL.Query().Get(queryName)
-	if string == "" {
+func (h *Handler) ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
+	str := r.URL.Query().Get(queryName)
+	if str == "" {
 		if isOptional {
 			return "", nil
 		}
 		return "", types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, queryName+" is required",
+			http.StatusBadRequest, types.BadRequest, queryName + " is required",
 		)
 	}
-	return string, nil
+
+	if len(str) < 1 || len(str) > h.Config.Server.MaxSearchQueryLength {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			fmt.Sprintf("search query must be between 1 and %d characters", h.Config.Server.MaxSearchQueryLength),
+		)
+	}
+
+	for _, char := range str {
+		if char < 32 || char > 126 {
+			return "", types.NewErrorWithMsg(
+				http.StatusBadRequest,
+				types.BadRequest, 
+				fmt.Sprintf("%s contains invalid characters", queryName),
+			)
+		}
+	}
+
+	return str, nil
 }
 
 func ParseFPStateQuery(r *http.Request, queryName string, isOptional bool) (types.FinalityProviderState, *types.Error) {

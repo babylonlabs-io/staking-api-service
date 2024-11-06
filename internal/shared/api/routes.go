@@ -34,7 +34,6 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	// V2 API
-	// TODO: Implement the handlers for the V2 API
 	r.Get("/v2/stats", registerHandler(handlers.V2Handler.GetStats))
 	r.Get("/v2/finality-providers", registerHandler(handlers.V2Handler.GetFinalityProviders))
 	r.Get("/v2/global-params", registerHandler(handlers.V2Handler.GetGlobalParams))

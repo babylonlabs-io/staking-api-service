@@ -2,7 +2,6 @@ package indexerdbclient
 
 import (
 	"context"
-	"fmt"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
@@ -12,23 +11,41 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (indexerdbclient *IndexerDatabase) FindFinalityProviders(
-	ctx context.Context, fpPk string, name string, searchQuery string, state types.FinalityProviderState, paginationToken string,
+// GetFinalityProviderByPk retrieves a single finality provider by their primary key
+func (indexerdbclient *IndexerDatabase) GetFinalityProviderByPk(
+	ctx context.Context,
+	fpPk string,
+) (*indexerdbmodel.IndexerFinalityProviderDetails, error) {
+	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
+
+	filter := bson.M{}
+	filter = indexerdbclient.applyFpPkFilter(filter, fpPk)
+
+	var result indexerdbmodel.IndexerFinalityProviderDetails
+	err := client.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// GetFinalityProviders retrieves finality providers filtered by state
+func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
+	ctx context.Context,
+	state types.FinalityProviderState,
+	paginationToken string,
 ) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
 
 	filter := bson.M{}
-	filter = indexerdbclient.applyExactMatchFilters(filter, fpPk, name)
 	filter = indexerdbclient.applyStateFilter(filter, state)
-	filter = indexerdbclient.applySearchFilter(filter, searchQuery)
+	filter = indexerdbclient.applyPaginationFilter(filter, paginationToken)
 
-	// Default sort by commission, then by btc_pk for stable sorting
 	options := options.Find().SetSort(bson.D{
 		{Key: "commission", Value: 1},
 		{Key: "_id", Value: 1},
 	})
-
-	filter = indexerdbclient.applyPaginationFilter(filter, paginationToken)
 
 	return db.FindWithPagination(
 		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
@@ -36,12 +53,38 @@ func (indexerdbclient *IndexerDatabase) FindFinalityProviders(
 	)
 }
 
-func (indexerdbclient *IndexerDatabase) applyExactMatchFilters(filter bson.M, fpPk string, name string) bson.M {
+// SearchFinalityProviders performs a text search across finality providers
+func (indexerdbclient *IndexerDatabase) SearchFinalityProviders(
+	ctx context.Context,
+	searchQuery string,
+	paginationToken string,
+) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error) {
+	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
+
+	filter := indexerdbclient.applySearchFilter(bson.M{}, searchQuery)
+	filter = indexerdbclient.applyPaginationFilter(filter, paginationToken)
+
+	options := options.Find().SetSort(bson.D{
+		{Key: "commission", Value: 1},
+		{Key: "_id", Value: 1},
+	})
+
+	return db.FindWithPagination(
+		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
+		indexerdbmodel.BuildFinalityProviderPaginationToken,
+	)
+}
+
+func (indexerdbclient *IndexerDatabase) applyFpPkFilter(filter bson.M, fpPk string) bson.M {
 	if fpPk != "" {
 		filter["_id"] = fpPk
 	}
-	if name != "" {
-		filter["description.moniker"] = name
+	return filter
+}
+
+func (indexerdbclient *IndexerDatabase) applyMonikerFilters(filter bson.M, moniker string) bson.M {
+	if moniker != "" {
+		filter["description.moniker"] = moniker
 	}
 	return filter
 }
@@ -51,14 +94,13 @@ func (indexerdbclient *IndexerDatabase) applyStateFilter(filter bson.M, state ty
 		filter["state"] = indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE
 	} else if state == types.FinalityProviderStateStandby {
 		filter["state"] = bson.M{
-			"$in": []indexerdbmodel.IndexerFinalityProviderState{
+			"$in": []indexerdbmodel.FinalityProviderState{
 				indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_INACTIVE,
 				indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_JAILED,
 				indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED,
 			},
 		}
 	}
-	fmt.Println("filter", filter)
 	return filter
 }
 

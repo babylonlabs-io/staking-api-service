@@ -1,37 +1,26 @@
 package v2handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/service"
 )
 
-// GetFinalityProviders gets finality providers
-// @Summary Get Finality Providers
-// @Description Fetches finality providers including their public keys, active tvl, total tvl, descriptions, commission, active delegations and total delegations etc
+// GetFinalityProviders gets a list of finality providers with optional filters
+// @Summary List Finality Providers
+// @Description Fetches finality providers with optional filtering and pagination
 // @Produce json
 // @Tags v2
-// @Param pagination_key query string false "Pagination key to fetch the next page of finality providers"
-// @Param finality_provider_pk query string false "Filter by finality provider public key"
-// @Param sort_by query string false "Sort by field" Enums(active_tvl, name, commission)
-// @Param order query string false "Order" Enums(asc, desc)
+// @Param pagination_key query string false "Pagination key to fetch the next page"
+// @Param search query string false "Search by moniker, finality provider PK"
+// @Param state query string false "Filter by state" Enums(active, standby)
 // @Success 200 {object} handler.PublicResponse[[]v2service.FinalityProviderPublic]{array} "List of finality providers and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
-	fpPk, err := handler.ParsePublicKeyQuery(request, "finality_provider_pk", true)
-	if err != nil {
-		return nil, err
-	}
-
-	name, err := handler.ParseStringQuery(request, "name", true)
-	if err != nil {
-		return nil, err
-	}
-
-	searchQuery, err := handler.ParseStringQuery(request, "search", true)
+	searchQuery, err := h.ParseFPSearchQuery(request, "search", true)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +30,22 @@ func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result
 		return nil, err
 	}
 
-	fmt.Println("state", state)
-
 	paginationKey, err := handler.ParsePaginationQuery(request)
 	if err != nil {
 		return nil, err
 	}
-	providers, paginationToken, err := h.Service.GetFinalityProviders(request.Context(), fpPk, name, searchQuery, state, paginationKey)
+
+	var providers []*v2service.FinalityProviderPublic
+	var paginationToken string
+
+	if searchQuery != "" {
+		// Search by moniker or finality provider PK
+		providers, paginationToken, err = h.Service.SearchFinalityProviders(request.Context(), searchQuery, paginationKey)
+	} else {
+		// Get all finality providers with optional state filter
+		providers, paginationToken, err = h.Service.GetFinalityProviders(request.Context(), state, paginationKey)
+	}
+
 	if err != nil {
 		return nil, err
 	}
