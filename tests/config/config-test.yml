@@ -8,7 +8,6 @@ server:
   log-level: error
   btc-net: "signet"
   max-content-length: 40960
-  max-search-query-length: 56
   health-check-interval: 2
 staking-db:
   username: root

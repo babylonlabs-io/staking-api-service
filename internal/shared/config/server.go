@@ -21,7 +21,6 @@ type ServerConfig struct {
 	BTCNet               string        `mapstructure:"btc-net"`
 	LogLevel             string        `mapstructure:"log-level"`
 	MaxContentLength     int64         `mapstructure:"max-content-length"`
-	MaxSearchQueryLength int           `mapstructure:"max-search-query-length"`
 	HealthCheckInterval  int           `mapstructure:"health-check-interval"`
 
 	BTCNetParam *chaincfg.Params

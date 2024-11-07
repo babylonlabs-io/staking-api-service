@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
@@ -168,40 +169,41 @@ func ParseStateFilterQuery(
 	return stateEnum, nil
 }
 
-func (h *Handler) ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
+func ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
+	// max length of a public key in hex and the max length of a finality provider moniker is 64
+	const maxSearchQueryLength = 64
 	str := r.URL.Query().Get(queryName)
 	if str == "" {
 		if isOptional {
 			return "", nil
 		}
 		return "", types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, queryName + " is required",
+			http.StatusBadRequest, types.BadRequest, queryName+" is required",
 		)
 	}
 
-	if len(str) < 1 || len(str) > h.Config.Server.MaxSearchQueryLength {
+	if len(str) < 1 || len(str) > maxSearchQueryLength {
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest,
 			types.BadRequest,
-			fmt.Sprintf("search query must be between 1 and %d characters", h.Config.Server.MaxSearchQueryLength),
+			fmt.Sprintf("search query must be between 1 and %d characters", maxSearchQueryLength),
 		)
 	}
 
-	for _, char := range str {
-		if char < 32 || char > 126 {
-			return "", types.NewErrorWithMsg(
-				http.StatusBadRequest,
-				types.BadRequest, 
-				fmt.Sprintf("%s contains invalid characters", queryName),
-			)
-		}
+	// check if the search query contains only printable ASCII characters
+	if !regexp.MustCompile(`^[\x20-\x7E]+$`).MatchString(str) {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			fmt.Sprintf("%s contains invalid characters", queryName),
+		)
 	}
 
 	return str, nil
 }
 
-func ParseFPStateQuery(r *http.Request, queryName string, isOptional bool) (types.FinalityProviderState, *types.Error) {
-	state := r.URL.Query().Get(queryName)
+func ParseFPStateQuery(r *http.Request, isOptional bool) (types.FinalityProviderQueryingState, *types.Error) {
+	state := r.URL.Query().Get("state")
 	if state == "" {
 		if isOptional {
 			return "", nil

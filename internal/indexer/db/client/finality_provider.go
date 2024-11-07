@@ -33,7 +33,7 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviderByPk(
 // GetFinalityProviders retrieves finality providers filtered by state
 func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 	ctx context.Context,
-	state types.FinalityProviderState,
+	state types.FinalityProviderQueryingState,
 	paginationToken string,
 ) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
@@ -89,7 +89,7 @@ func (indexerdbclient *IndexerDatabase) applyMonikerFilters(filter bson.M, monik
 	return filter
 }
 
-func (indexerdbclient *IndexerDatabase) applyStateFilter(filter bson.M, state types.FinalityProviderState) bson.M {
+func (indexerdbclient *IndexerDatabase) applyStateFilter(filter bson.M, state types.FinalityProviderQueryingState) bson.M {
 	if state == types.FinalityProviderStateActive {
 		filter["state"] = indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE
 	} else if state == types.FinalityProviderStateStandby {

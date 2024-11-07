@@ -15,7 +15,7 @@ type IndexerDBClient interface {
 	GetBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, error)
 	GetBtcCheckpointParams(ctx context.Context) ([]*indexertypes.BtcCheckpointParams, error)
 	// Finality Providers
-	GetFinalityProviders(ctx context.Context, state types.FinalityProviderState, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error)
+	GetFinalityProviders(ctx context.Context, state types.FinalityProviderQueryingState, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error)
 	SearchFinalityProviders(ctx context.Context, searchQuery string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error)
 	GetFinalityProviderByPk(ctx context.Context, fpPk string) (*indexerdbmodel.IndexerFinalityProviderDetails, error)
 }

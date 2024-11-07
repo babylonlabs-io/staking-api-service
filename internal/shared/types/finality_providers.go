@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 )
 
-type FinalityProviderState string
+type FinalityProviderQueryingState string
 
 const (
-	FinalityProviderStateActive  FinalityProviderState = "active"
-	FinalityProviderStateStandby FinalityProviderState = "standby"
+	FinalityProviderStateActive  FinalityProviderQueryingState = "active"
+	FinalityProviderStateStandby FinalityProviderQueryingState = "standby"
 )
 
 type FinalityProviderDescription struct {

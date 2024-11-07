@@ -58,7 +58,7 @@ func DecodeFinalityProviderPaginationToken(token string) (*IndexerFinalityProvid
 	return &pagination, err
 }
 
-func FromStringToFinalityProviderState(s string) (types.FinalityProviderState, error) {
+func FromStringToFinalityProviderState(s string) (types.FinalityProviderQueryingState, error) {
 	switch s {
 	case "active":
 		return types.FinalityProviderStateActive, nil
