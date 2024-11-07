@@ -147,6 +147,24 @@ definitions:
       version:
         type: integer
     type: object
+  indexertypes.DelegationState:
+    enum:
+    - PENDING
+    - VERIFIED
+    - ACTIVE
+    - UNBONDING
+    - WITHDRAWABLE
+    - WITHDRAWN
+    - SLASHED
+    type: string
+    x-enum-varnames:
+    - StatePending
+    - StateVerified
+    - StateActive
+    - StateUnbonding
+    - StateWithdrawable
+    - StateWithdrawn
+    - StateSlashed
   types.ErrorCode:
     enum:
     - INTERNAL_SERVICE_ERROR
@@ -178,7 +196,7 @@ definitions:
       website:
         type: string
     type: object
-  types.FinalityProviderState:
+  types.FinalityProviderQueryingState:
     enum:
     - active
     - standby
@@ -186,13 +204,6 @@ definitions:
     x-enum-varnames:
     - FinalityProviderStateActive
     - FinalityProviderStateStandby
-  types.TransactionInfo:
-    properties:
-      output_index:
-        type: integer
-      tx_hex:
-        type: string
-    type: object
   v1handlers.DelegationCheckPublicResponse:
     properties:
       code:
@@ -356,7 +367,7 @@ definitions:
       description:
         $ref: '#/definitions/types.FinalityProviderDescription'
       state:
-        $ref: '#/definitions/types.FinalityProviderState'
+        $ref: '#/definitions/types.FinalityProviderQueryingState'
       total_delegations:
         type: integer
       total_tvl:
@@ -394,26 +405,30 @@ definitions:
     type: object
   v2service.StakerDelegationPublic:
     properties:
-      finality_provider_pk_hex:
-        type: string
-      staker_pk_hex:
-        type: string
-      staking_start_height:
+      end_height:
         type: integer
-      staking_tx:
-        $ref: '#/definitions/types.TransactionInfo'
+      finality_provider_btc_pks_hex:
+        items:
+          type: string
+        type: array
+      params_version:
+        type: string
+      staker_btc_pk_hex:
+        type: string
+      staking_amount:
+        type: string
+      staking_time:
+        type: string
       staking_tx_hash_hex:
         type: string
-      staking_value:
+      start_height:
         type: integer
       state:
+        $ref: '#/definitions/indexertypes.DelegationState'
+      unbonding_time:
         type: string
-      timelock:
-        type: integer
-      unbonding_start_height:
-        type: integer
       unbonding_tx:
-        $ref: '#/definitions/types.TransactionInfo'
+        type: string
     type: object
   v2service.StakerStatsPublic:
     properties:
@@ -710,10 +725,6 @@ paths:
         in: query
         name: pagination_key
         type: string
-      - description: Search by moniker, finality provider PK
-        in: query
-        name: search
-        type: string
       - description: Filter by state
         enum:
         - active
@@ -735,33 +746,6 @@ paths:
       summary: List Finality Providers
       tags:
       - v2
-  /v2/finality-providers/{pk}:
-    get:
-      description: Fetches a specific finality provider by their public key
-      parameters:
-      - description: Finality provider public key
-        in: path
-        name: pk
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Finality provider details
-          schema:
-            $ref: '#/definitions/v2service.FinalityProviderPublic'
-        "400":
-          description: 'Error: Bad Request'
-          schema:
-            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-        "404":
-          description: 'Error: Not Found'
-          schema:
-            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get Finality Provider by PK
-      tags:
-      - v2
   /v2/global-params:
     get:
       description: Fetches global parameters for babylon chain and BTC chain
@@ -780,9 +764,9 @@ paths:
       description: Fetches staker delegations for babylon staking including tvl, total
         delegations, active tvl, active delegations and total stakers.
       parameters:
-      - description: Staking transaction hash in hex format
+      - description: Staker public key in hex format
         in: query
-        name: staking_tx_hash_hex
+        name: staker_pk_hex
         required: true
         type: string
       - description: Pagination key to fetch the next page of delegations
