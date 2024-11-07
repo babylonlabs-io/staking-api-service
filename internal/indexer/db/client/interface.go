@@ -18,4 +18,6 @@ type IndexerDBClient interface {
 	GetFinalityProviders(ctx context.Context, state types.FinalityProviderQueryingState, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error)
 	SearchFinalityProviders(ctx context.Context, searchQuery string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerFinalityProviderDetails], error)
 	GetFinalityProviderByPk(ctx context.Context, fpPk string) (*indexerdbmodel.IndexerFinalityProviderDetails, error)
+	// Staker Delegations
+	GetStakerDelegations(ctx context.Context, stakerPKHex string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerStakerDelegationDetails], error)
 }

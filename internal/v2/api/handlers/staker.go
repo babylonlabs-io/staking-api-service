@@ -12,17 +12,22 @@ import (
 // @Description Fetches staker delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.
 // @Produce json
 // @Tags v2
-// @Param staking_tx_hash_hex query string true "Staking transaction hash in hex format"
+// @Param staker_pk_hex query string true "Staker public key in hex format"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
 // @Success 200 {object} handler.PublicResponse[[]v2service.StakerDelegationPublic]{array} "List of staker delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/staker/delegations [get]
 func (h *V2Handler) GetStakerDelegations(request *http.Request) (*handler.Result, *types.Error) {
+	const stakerPKHexKey string = "staker_pk_hex"
+	stakerPKHex, err := handler.ParsePublicKeyQuery(request, stakerPKHexKey, false)
+	if err != nil {
+		return nil, err
+	}
 	paginationKey, err := handler.ParsePaginationQuery(request)
 	if err != nil {
 		return nil, err
 	}
-	delegations, paginationToken, err := h.Service.GetStakerDelegations(request.Context(), paginationKey)
+	delegations, paginationToken, err := h.Service.GetStakerDelegations(request.Context(), stakerPKHex, paginationKey)
 	if err != nil {
 		return nil, err
 	}

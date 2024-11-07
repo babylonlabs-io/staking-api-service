@@ -417,12 +417,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "description": "Search by moniker, finality provider PK",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
                         "enum": [
                             "active",
                             "standby"
@@ -442,47 +436,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Error: Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/v2/finality-providers/{pk}": {
-            "get": {
-                "description": "Fetches a specific finality provider by their public key",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v2"
-                ],
-                "summary": "Get Finality Provider by PK",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Finality provider public key",
-                        "name": "pk",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Finality provider details",
-                        "schema": {
-                            "$ref": "#/definitions/v2service.FinalityProviderPublic"
-                        }
-                    },
-                    "400": {
-                        "description": "Error: Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Error: Not Found",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
@@ -523,8 +476,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Staking transaction hash in hex format",
-                        "name": "staking_tx_hash_hex",
+                        "description": "Staker public key in hex format",
+                        "name": "staker_pk_hex",
                         "in": "query",
                         "required": true
                     },
@@ -827,6 +780,27 @@ const docTemplate = `{
                 }
             }
         },
+        "indexertypes.DelegationState": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "VERIFIED",
+                "ACTIVE",
+                "UNBONDING",
+                "WITHDRAWABLE",
+                "WITHDRAWN",
+                "SLASHED"
+            ],
+            "x-enum-varnames": [
+                "StatePending",
+                "StateVerified",
+                "StateActive",
+                "StateUnbonding",
+                "StateWithdrawable",
+                "StateWithdrawn",
+                "StateSlashed"
+            ]
+        },
         "types.ErrorCode": {
             "type": "string",
             "enum": [
@@ -868,7 +842,7 @@ const docTemplate = `{
                 }
             }
         },
-        "types.FinalityProviderState": {
+        "types.FinalityProviderQueryingState": {
             "type": "string",
             "enum": [
                 "active",
@@ -878,17 +852,6 @@ const docTemplate = `{
                 "FinalityProviderStateActive",
                 "FinalityProviderStateStandby"
             ]
-        },
-        "types.TransactionInfo": {
-            "type": "object",
-            "properties": {
-                "output_index": {
-                    "type": "integer"
-                },
-                "tx_hex": {
-                    "type": "string"
-                }
-            }
         },
         "v1handlers.DelegationCheckPublicResponse": {
             "type": "object",
@@ -1139,7 +1102,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/types.FinalityProviderDescription"
                 },
                 "state": {
-                    "$ref": "#/definitions/types.FinalityProviderState"
+                    "$ref": "#/definitions/types.FinalityProviderQueryingState"
                 },
                 "total_delegations": {
                     "type": "integer"
@@ -1198,35 +1161,41 @@ const docTemplate = `{
         "v2service.StakerDelegationPublic": {
             "type": "object",
             "properties": {
-                "finality_provider_pk_hex": {
-                    "type": "string"
-                },
-                "staker_pk_hex": {
-                    "type": "string"
-                },
-                "staking_start_height": {
+                "end_height": {
                     "type": "integer"
                 },
-                "staking_tx": {
-                    "$ref": "#/definitions/types.TransactionInfo"
+                "finality_provider_btc_pks_hex": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "params_version": {
+                    "type": "string"
+                },
+                "staker_btc_pk_hex": {
+                    "type": "string"
+                },
+                "staking_amount": {
+                    "type": "string"
+                },
+                "staking_time": {
+                    "type": "string"
                 },
                 "staking_tx_hash_hex": {
                     "type": "string"
                 },
-                "staking_value": {
+                "start_height": {
                     "type": "integer"
                 },
                 "state": {
+                    "$ref": "#/definitions/indexertypes.DelegationState"
+                },
+                "unbonding_time": {
                     "type": "string"
                 },
-                "timelock": {
-                    "type": "integer"
-                },
-                "unbonding_start_height": {
-                    "type": "integer"
-                },
                 "unbonding_tx": {
-                    "$ref": "#/definitions/types.TransactionInfo"
+                    "type": "string"
                 }
             }
         },
