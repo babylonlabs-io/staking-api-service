@@ -170,8 +170,8 @@ func GenerateRandomFinalityProviderDetail(r *rand.Rand, numOfFps uint64) []types
 	return finalityProviders
 }
 
-func RandomFinalityProviderState(r *rand.Rand) types.FinalityProviderState {
-	states := []types.FinalityProviderState{types.FinalityProviderStateActive, types.FinalityProviderStateStandby}
+func RandomFinalityProviderState(r *rand.Rand) types.FinalityProviderQueryingState {
+	states := []types.FinalityProviderQueryingState{types.FinalityProviderStateActive, types.FinalityProviderStateStandby}
 	return states[r.Intn(len(states))]
 }
 

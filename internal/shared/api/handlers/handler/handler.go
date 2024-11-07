@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -159,6 +161,55 @@ func ParseStateFilterQuery(
 		return "", nil
 	}
 	stateEnum, err := types.FromStringToDelegationState(state)
+	if err != nil {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, err.Error(),
+		)
+	}
+	return stateEnum, nil
+}
+
+func ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
+	// max length of a public key in hex and the max length of a finality provider moniker is 64
+	const maxSearchQueryLength = 64
+	str := r.URL.Query().Get(queryName)
+	if str == "" {
+		if isOptional {
+			return "", nil
+		}
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, queryName+" is required",
+		)
+	}
+
+	if len(str) < 1 || len(str) > maxSearchQueryLength {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			fmt.Sprintf("search query must be between 1 and %d characters", maxSearchQueryLength),
+		)
+	}
+
+	// check if the search query contains only printable ASCII characters
+	if !regexp.MustCompile(`^[\x20-\x7E]+$`).MatchString(str) {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			fmt.Sprintf("%s contains invalid characters", queryName),
+		)
+	}
+
+	return str, nil
+}
+
+func ParseFPStateQuery(r *http.Request, isOptional bool) (types.FinalityProviderQueryingState, *types.Error) {
+	state := r.URL.Query().Get("state")
+	if state == "" {
+		if isOptional {
+			return "", nil
+		}
+	}
+	stateEnum, err := indexerdbmodel.FromStringToFinalityProviderState(state)
 	if err != nil {
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, err.Error(),

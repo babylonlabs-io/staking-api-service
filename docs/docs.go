@@ -181,6 +181,7 @@ const docTemplate = `{
                 "tags": [
                     "v1"
                 ],
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -400,46 +401,35 @@ const docTemplate = `{
         },
         "/v2/finality-providers": {
             "get": {
-                "description": "Fetches finality providers including their public keys, active tvl, total tvl, descriptions, commission, active delegations and total delegations etc",
+                "description": "Fetches finality providers with optional filtering and pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v2"
                 ],
-                "summary": "Get Finality Providers",
+                "summary": "List Finality Providers",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Pagination key to fetch the next page of finality providers",
+                        "description": "Pagination key to fetch the next page",
                         "name": "pagination_key",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by finality provider public key",
-                        "name": "finality_provider_pk",
+                        "description": "Search by moniker, finality provider PK",
+                        "name": "search",
                         "in": "query"
                     },
                     {
                         "enum": [
-                            "active_tvl",
-                            "name",
-                            "commission"
+                            "active",
+                            "standby"
                         ],
                         "type": "string",
-                        "description": "Sort by field",
-                        "name": "sort_by",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "asc",
-                            "desc"
-                        ],
-                        "type": "string",
-                        "description": "Order",
-                        "name": "order",
+                        "description": "Filter by state",
+                        "name": "state",
                         "in": "query"
                     }
                 ],
@@ -452,6 +442,47 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/finality-providers/{pk}": {
+            "get": {
+                "description": "Fetches a specific finality provider by their public key",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Get Finality Provider by PK",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Finality provider public key",
+                        "name": "pk",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Finality provider details",
+                        "schema": {
+                            "$ref": "#/definitions/v2service.FinalityProviderPublic"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
@@ -576,17 +607,6 @@ const docTemplate = `{
                 },
                 "statusCode": {
                     "type": "integer"
-                }
-            }
-        },
-        "github_com_babylonlabs-io_staking-api-service_internal_shared_types.TransactionInfo": {
-            "type": "object",
-            "properties": {
-                "output_index": {
-                    "type": "integer"
-                },
-                "tx_hex": {
-                    "type": "string"
                 }
             }
         },
@@ -743,18 +763,7 @@ const docTemplate = `{
                 }
             }
         },
-        "types.BTCParams": {
-            "type": "object",
-            "properties": {
-                "btc_confirmation_depth": {
-                    "type": "integer"
-                },
-                "version": {
-                    "type": "integer"
-                }
-            }
-        },
-        "types.BabylonParams": {
+        "indexertypes.BbnStakingParams": {
             "type": "object",
             "properties": {
                 "covenant_pks": {
@@ -772,34 +781,45 @@ const docTemplate = `{
                 "max_active_finality_providers": {
                     "type": "integer"
                 },
-                "max_staking_amount": {
+                "max_staking_time_blocks": {
                     "type": "integer"
                 },
-                "max_staking_time": {
+                "max_staking_value_sat": {
                     "type": "integer"
                 },
                 "min_commission_rate": {
-                    "type": "number"
+                    "type": "string"
                 },
-                "min_slashing_tx_fee": {
+                "min_slashing_tx_fee_sat": {
                     "type": "integer"
                 },
-                "min_staking_amount": {
+                "min_staking_time_blocks": {
                     "type": "integer"
                 },
-                "min_staking_time": {
+                "min_staking_value_sat": {
                     "type": "integer"
                 },
-                "min_unbonding_time": {
+                "min_unbonding_time_blocks": {
                     "type": "integer"
                 },
                 "slashing_pk_script": {
                     "type": "string"
                 },
                 "slashing_rate": {
-                    "type": "number"
+                    "type": "string"
                 },
-                "unbonding_fee": {
+                "unbonding_fee_sat": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "indexertypes.BtcCheckpointParams": {
+            "type": "object",
+            "properties": {
+                "btc_confirmation_depth": {
                     "type": "integer"
                 },
                 "version": {
@@ -858,6 +878,17 @@ const docTemplate = `{
                 "FinalityProviderStateActive",
                 "FinalityProviderStateStandby"
             ]
+        },
+        "types.TransactionInfo": {
+            "type": "object",
+            "properties": {
+                "output_index": {
+                    "type": "integer"
+                },
+                "tx_hex": {
+                    "type": "string"
+                }
+            }
         },
         "v1handlers.DelegationCheckPublicResponse": {
             "type": "object",
@@ -1121,16 +1152,16 @@ const docTemplate = `{
         "v2service.GlobalParamsPublic": {
             "type": "object",
             "properties": {
-                "babylon": {
+                "bbn": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.BabylonParams"
+                        "$ref": "#/definitions/indexertypes.BbnStakingParams"
                     }
                 },
                 "btc": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/types.BTCParams"
+                        "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
                     }
                 }
             }
@@ -1177,7 +1208,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "staking_tx": {
-                    "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.TransactionInfo"
+                    "$ref": "#/definitions/types.TransactionInfo"
                 },
                 "staking_tx_hash_hex": {
                     "type": "string"
@@ -1195,7 +1226,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "unbonding_tx": {
-                    "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.TransactionInfo"
+                    "$ref": "#/definitions/types.TransactionInfo"
                 }
             }
         },

@@ -7,13 +7,6 @@ definitions:
       statusCode:
         type: integer
     type: object
-  github_com_babylonlabs-io_staking-api-service_internal_shared_types.TransactionInfo:
-    properties:
-      output_index:
-        type: integer
-      tx_hex:
-        type: string
-    type: object
   handler.PublicResponse-array_v1service_DelegationPublic:
     properties:
       data:
@@ -112,14 +105,7 @@ definitions:
       next_key:
         type: string
     type: object
-  types.BTCParams:
-    properties:
-      btc_confirmation_depth:
-        type: integer
-      version:
-        type: integer
-    type: object
-  types.BabylonParams:
+  indexertypes.BbnStakingParams:
     properties:
       covenant_pks:
         items:
@@ -131,25 +117,32 @@ definitions:
         type: integer
       max_active_finality_providers:
         type: integer
-      max_staking_amount:
+      max_staking_time_blocks:
         type: integer
-      max_staking_time:
+      max_staking_value_sat:
         type: integer
       min_commission_rate:
-        type: number
-      min_slashing_tx_fee:
+        type: string
+      min_slashing_tx_fee_sat:
         type: integer
-      min_staking_amount:
+      min_staking_time_blocks:
         type: integer
-      min_staking_time:
+      min_staking_value_sat:
         type: integer
-      min_unbonding_time:
+      min_unbonding_time_blocks:
         type: integer
       slashing_pk_script:
         type: string
       slashing_rate:
-        type: number
-      unbonding_fee:
+        type: string
+      unbonding_fee_sat:
+        type: integer
+      version:
+        type: integer
+    type: object
+  indexertypes.BtcCheckpointParams:
+    properties:
+      btc_confirmation_depth:
         type: integer
       version:
         type: integer
@@ -193,6 +186,13 @@ definitions:
     x-enum-varnames:
     - FinalityProviderStateActive
     - FinalityProviderStateStandby
+  types.TransactionInfo:
+    properties:
+      output_index:
+        type: integer
+      tx_hex:
+        type: string
+    type: object
   v1handlers.DelegationCheckPublicResponse:
     properties:
       code:
@@ -364,13 +364,13 @@ definitions:
     type: object
   v2service.GlobalParamsPublic:
     properties:
-      babylon:
+      bbn:
         items:
-          $ref: '#/definitions/types.BabylonParams'
+          $ref: '#/definitions/indexertypes.BbnStakingParams'
         type: array
       btc:
         items:
-          $ref: '#/definitions/types.BTCParams'
+          $ref: '#/definitions/indexertypes.BtcCheckpointParams'
         type: array
     type: object
   v2service.OverallStatsPublic:
@@ -401,7 +401,7 @@ definitions:
       staking_start_height:
         type: integer
       staking_tx:
-        $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.TransactionInfo'
+        $ref: '#/definitions/types.TransactionInfo'
       staking_tx_hash_hex:
         type: string
       staking_value:
@@ -413,7 +413,7 @@ definitions:
       unbonding_start_height:
         type: integer
       unbonding_tx:
-        $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.TransactionInfo'
+        $ref: '#/definitions/types.TransactionInfo'
     type: object
   v2service.StakerStatsPublic:
     properties:
@@ -546,6 +546,7 @@ paths:
       - v1
   /v1/staker/delegations:
     get:
+      deprecated: true
       description: Retrieves delegations for a given staker
       parameters:
       - description: Staker BTC Public Key
@@ -703,32 +704,22 @@ paths:
       - v1
   /v2/finality-providers:
     get:
-      description: Fetches finality providers including their public keys, active
-        tvl, total tvl, descriptions, commission, active delegations and total delegations
-        etc
+      description: Fetches finality providers with optional filtering and pagination
       parameters:
-      - description: Pagination key to fetch the next page of finality providers
+      - description: Pagination key to fetch the next page
         in: query
         name: pagination_key
         type: string
-      - description: Filter by finality provider public key
+      - description: Search by moniker, finality provider PK
         in: query
-        name: finality_provider_pk
+        name: search
         type: string
-      - description: Sort by field
+      - description: Filter by state
         enum:
-        - active_tvl
-        - name
-        - commission
+        - active
+        - standby
         in: query
-        name: sort_by
-        type: string
-      - description: Order
-        enum:
-        - asc
-        - desc
-        in: query
-        name: order
+        name: state
         type: string
       produces:
       - application/json
@@ -741,7 +732,34 @@ paths:
           description: 'Error: Bad Request'
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get Finality Providers
+      summary: List Finality Providers
+      tags:
+      - v2
+  /v2/finality-providers/{pk}:
+    get:
+      description: Fetches a specific finality provider by their public key
+      parameters:
+      - description: Finality provider public key
+        in: path
+        name: pk
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Finality provider details
+          schema:
+            $ref: '#/definitions/v2service.FinalityProviderPublic'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+        "404":
+          description: 'Error: Not Found'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get Finality Provider by PK
       tags:
       - v2
   /v2/global-params:

@@ -2,46 +2,65 @@ package v2service
 
 import (
 	"context"
-	"math/rand"
-	"time"
+	"net/http"
 
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils/datagen"
 )
 
 type FinalityProviderPublic struct {
-	BtcPK             string                            `json:"btc_pk"`
-	State             types.FinalityProviderState       `json:"state"`
-	Description       types.FinalityProviderDescription `json:"description"`
-	Commission        string                            `json:"commission"`
-	ActiveTVL         int64                             `json:"active_tvl"`
-	TotalTVL          int64                             `json:"total_tvl"`
-	ActiveDelegations int64                             `json:"active_delegations"`
-	TotalDelegations  int64                             `json:"total_delegations"`
+	BtcPK             string                              `json:"btc_pk"`
+	State             types.FinalityProviderQueryingState `json:"state"`
+	Description       types.FinalityProviderDescription   `json:"description"`
+	Commission        string                              `json:"commission"`
+	ActiveTVL         int64                               `json:"active_tvl"`
+	TotalTVL          int64                               `json:"total_tvl"`
+	ActiveDelegations int64                               `json:"active_delegations"`
+	TotalDelegations  int64                               `json:"total_delegations"`
 }
 
 type FinalityProvidersPublic struct {
 	FinalityProviders []FinalityProviderPublic `json:"finality_providers"`
 }
 
-func (s *V2Service) GetFinalityProviders(ctx context.Context, paginationKey string) ([]FinalityProviderPublic, string, *types.Error) {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	// random number of providers between 1 and 10
-	numProviders := datagen.RandomPositiveInt(r, 10)
-	providers := datagen.GenerateRandomFinalityProviderDetail(r, uint64(numProviders))
-	publicProviders := make([]FinalityProviderPublic, len(providers))
-	for i, provider := range providers {
-		publicProviders[i] = FinalityProviderPublic{
-			BtcPK:             datagen.GeneratePks(1)[0],
-			State:             datagen.RandomFinalityProviderState(r),
-			Description:       provider.Description,
-			Commission:        provider.Commission,
-			ActiveTVL:         int64(datagen.RandomPositiveInt(r, 1000000000000000000)),
-			TotalTVL:          int64(datagen.RandomPositiveInt(r, 1000000000000000000)),
-			ActiveDelegations: int64(datagen.RandomPositiveInt(r, 100)),
-			TotalDelegations:  int64(datagen.RandomPositiveInt(r, 100)),
-		}
+func mapToFinalityProviderPublic(provider indexerdbmodel.IndexerFinalityProviderDetails) *FinalityProviderPublic {
+	return &FinalityProviderPublic{
+		BtcPK:       provider.BtcPk,
+		State:       types.FinalityProviderQueryingState(provider.State),
+		Description: types.FinalityProviderDescription(provider.Description),
+		Commission:  provider.Commission,
+		// TODO: add active_tvl, total_tvl, active_delegations, total_delegations from statistic data field
+		ActiveTVL:         0,
+		TotalTVL:          0,
+		ActiveDelegations: 0,
+		TotalDelegations:  0,
+	}
+}
+
+// GetFinalityProviders gets a list of finality providers with optional filters
+func (s *V2Service) GetFinalityProviders(ctx context.Context, state types.FinalityProviderQueryingState, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
+	resultMap, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx, state, paginationKey)
+	if err != nil {
+		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get finality providers")
 	}
 
-	return publicProviders, "", nil
+	providersPublic := make([]*FinalityProviderPublic, 0, len(resultMap.Data))
+	for _, provider := range resultMap.Data {
+		providersPublic = append(providersPublic, mapToFinalityProviderPublic(provider))
+	}
+	return providersPublic, resultMap.PaginationToken, nil
+}
+
+// SearchFinalityProviders searches for finality providers with optional filters
+func (s *V2Service) SearchFinalityProviders(ctx context.Context, searchQuery string, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
+	resultMap, err := s.DbClients.IndexerDBClient.SearchFinalityProviders(ctx, searchQuery, paginationKey)
+	if err != nil {
+		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to search finality providers")
+	}
+
+	providersPublic := make([]*FinalityProviderPublic, 0, len(resultMap.Data))
+	for _, provider := range resultMap.Data {
+		providersPublic = append(providersPublic, mapToFinalityProviderPublic(provider))
+	}
+	return providersPublic, resultMap.PaginationToken, nil
 }
