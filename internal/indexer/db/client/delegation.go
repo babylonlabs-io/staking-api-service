@@ -2,13 +2,32 @@ package indexerdbclient
 
 import (
 	"context"
+	"errors"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+func (indexerdbclient *IndexerDatabase) GetStakerDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerStakerDelegationDetails, error) {
+	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
+	filter := bson.M{"_id": stakingTxHashHex}
+	var delegation indexerdbmodel.IndexerStakerDelegationDetails
+	err := client.FindOne(ctx, filter).Decode(&delegation)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, &db.NotFoundError{
+				Key:     stakingTxHashHex,
+				Message: "Delegation not found",
+			}
+		}
+		return nil, err
+	}
+	return &delegation, nil
+}
 
 func (indexerdbclient *IndexerDatabase) GetStakerDelegations(
 	ctx context.Context, stakerPKHex string, paginationToken string,

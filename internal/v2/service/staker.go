@@ -41,6 +41,28 @@ type StakerStatsPublic struct {
 	TotalDelegations  int64  `json:"total_delegations"`
 }
 
+func (s *V2Service) GetStakerDelegation(ctx context.Context, stakingTxHashHex string) (*StakerDelegationPublic, *types.Error) {
+	delegation, err := s.DbClients.IndexerDBClient.GetStakerDelegation(ctx, stakingTxHashHex)
+	if err != nil {
+		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
+	}
+
+	delegationPublic := &StakerDelegationPublic{
+		StakingTxHashHex:          delegation.StakingTxHashHex,
+		ParamsVersion:             delegation.ParamsVersion,
+		FinalityProviderBtcPksHex: delegation.FinalityProviderBtcPksHex,
+		StakerBtcPkHex:            delegation.StakerBtcPkHex,
+		StakingTime:               delegation.StakingTime,
+		StakingAmount:             delegation.StakingAmount,
+		UnbondingTime:             delegation.UnbondingTime,
+		UnbondingTx:               delegation.UnbondingTx,
+		State:                     delegation.State,
+		StartHeight:               delegation.StartHeight,
+		EndHeight:                 delegation.EndHeight,
+	}
+	return delegationPublic, nil
+}
+
 func (s *V2Service) GetStakerDelegations(ctx context.Context, stakingTxHashHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error) {
 	resultMap, err := s.DbClients.IndexerDBClient.GetStakerDelegations(ctx, stakingTxHashHex, paginationKey)
 	if err != nil {

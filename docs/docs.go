@@ -463,6 +463,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/staker/delegation": {
+            "get": {
+                "description": "Retrieves a staker delegation by a given transaction hash",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Staking transaction hash in hex format",
+                        "name": "staking_tx_hash_hex",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Staker delegation",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-v2service_StakerDelegationPublic"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v2/staker/delegations": {
             "get": {
                 "description": "Fetches staker delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.",
@@ -682,6 +716,17 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/v2service.OverallStatsPublic"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-v2service_StakerDelegationPublic": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/v2service.StakerDelegationPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
