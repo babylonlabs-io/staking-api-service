@@ -17,8 +17,12 @@ jobs:
      
   docker_pipeline:
     needs: ["lint_test"]
-    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.6.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.10.2
     secrets: inherit
     with:
       publish: true
       dockerfile: ./contrib/images/staking-api-service/Dockerfile
+      docker_scan: true
+    permissions:
+        security-events: write
+        packages: read
