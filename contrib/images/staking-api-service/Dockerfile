@@ -1,4 +1,4 @@
-FROM golang:1.22.3-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 ARG VERSION="HEAD"
 # hadolint ignore=DL3018
@@ -31,7 +31,7 @@ RUN LDFLAGS='-extldflags "-static" -v' \
     make build
 
 # Final minimal image with binary only
-FROM alpine:3.16 as run
+FROM alpine:3.20 as run
 
 RUN addgroup --gid 1138 -S staking-api-service && adduser --uid 1138 -S staking-api-service -G staking-api-service
 # hadolint ignore=DL3018
