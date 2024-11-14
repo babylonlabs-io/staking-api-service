@@ -1086,11 +1086,20 @@ const docTemplate = `{
         "v2service.DelegationStaking": {
             "type": "object",
             "properties": {
+                "end_height": {
+                    "type": "integer"
+                },
                 "staking_amount": {
                     "type": "string"
                 },
                 "staking_time": {
                     "type": "string"
+                },
+                "staking_tx_hash_hex": {
+                    "type": "string"
+                },
+                "start_height": {
+                    "type": "integer"
                 }
             }
         },
@@ -1189,9 +1198,6 @@ const docTemplate = `{
                 "delegation_unbonding": {
                     "$ref": "#/definitions/v2service.DelegationUnbonding"
                 },
-                "end_height": {
-                    "type": "integer"
-                },
                 "finality_provider_btc_pks_hex": {
                     "type": "array",
                     "items": {
@@ -1203,12 +1209,6 @@ const docTemplate = `{
                 },
                 "staker_btc_pk_hex": {
                     "type": "string"
-                },
-                "staking_tx_hash_hex": {
-                    "type": "string"
-                },
-                "start_height": {
-                    "type": "integer"
                 },
                 "state": {
                     "$ref": "#/definitions/indexertypes.DelegationState"

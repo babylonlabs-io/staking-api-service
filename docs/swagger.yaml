@@ -356,10 +356,16 @@ definitions:
     type: object
   v2service.DelegationStaking:
     properties:
+      end_height:
+        type: integer
       staking_amount:
         type: string
       staking_time:
         type: string
+      staking_tx_hash_hex:
+        type: string
+      start_height:
+        type: integer
     type: object
   v2service.DelegationUnbonding:
     properties:
@@ -423,8 +429,6 @@ definitions:
         $ref: '#/definitions/v2service.DelegationStaking'
       delegation_unbonding:
         $ref: '#/definitions/v2service.DelegationUnbonding'
-      end_height:
-        type: integer
       finality_provider_btc_pks_hex:
         items:
           type: string
@@ -433,10 +437,6 @@ definitions:
         type: string
       staker_btc_pk_hex:
         type: string
-      staking_tx_hash_hex:
-        type: string
-      start_height:
-        type: integer
       state:
         $ref: '#/definitions/indexertypes.DelegationState'
     type: object
