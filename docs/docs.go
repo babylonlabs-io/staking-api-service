@@ -399,6 +399,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/delegation": {
+            "get": {
+                "description": "Retrieves a delegation by a given transaction hash",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Get a delegation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Staking transaction hash in hex format",
+                        "name": "staking_tx_hash_hex",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Staker delegation",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-v2service_StakerDelegationPublic"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/v2/delegations": {
+            "get": {
+                "description": "Fetches delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Get Delegations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Staker public key in hex format",
+                        "name": "staker_pk_hex",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Pagination key to fetch the next page of delegations",
+                        "name": "pagination_key",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of staker delegations and pagination token",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v2/finality-providers": {
             "get": {
                 "description": "Fetches finality providers with optional filtering and pagination",
@@ -458,47 +534,6 @@ const docTemplate = `{
                         "description": "Global parameters",
                         "schema": {
                             "$ref": "#/definitions/handler.PublicResponse-v2service_GlobalParamsPublic"
-                        }
-                    }
-                }
-            }
-        },
-        "/v2/staker/delegations": {
-            "get": {
-                "description": "Fetches staker delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v2"
-                ],
-                "summary": "Get Staker Delegations",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Staker public key in hex format",
-                        "name": "staker_pk_hex",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Pagination key to fetch the next page of delegations",
-                        "name": "pagination_key",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of staker delegations and pagination token",
-                        "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic"
-                        }
-                    },
-                    "400": {
-                        "description": "Error: Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
                     }
                 }
@@ -682,6 +717,17 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/v2service.OverallStatsPublic"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-v2service_StakerDelegationPublic": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/v2service.StakerDelegationPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"

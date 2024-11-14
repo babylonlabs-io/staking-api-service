@@ -2,17 +2,36 @@ package indexerdbclient
 
 import (
 	"context"
+	"errors"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (indexerdbclient *IndexerDatabase) GetStakerDelegations(
+func (indexerdbclient *IndexerDatabase) GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error) {
+	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
+	filter := bson.M{"_id": stakingTxHashHex}
+	var delegation indexerdbmodel.IndexerDelegationDetails
+	err := client.FindOne(ctx, filter).Decode(&delegation)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, &db.NotFoundError{
+				Key:     stakingTxHashHex,
+				Message: "Delegation not found",
+			}
+		}
+		return nil, err
+	}
+	return &delegation, nil
+}
+
+func (indexerdbclient *IndexerDatabase) GetDelegations(
 	ctx context.Context, stakerPKHex string, paginationToken string,
-) (*db.DbResultMap[indexerdbmodel.IndexerStakerDelegationDetails], error) {
+) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 
 	// Base filter with stakingTxHashHex
@@ -25,7 +44,7 @@ func (indexerdbclient *IndexerDatabase) GetStakerDelegations(
 
 	// Decode the pagination token if it exists
 	if paginationToken != "" {
-		decodedToken, err := dbmodel.DecodePaginationToken[indexerdbmodel.IndexerStakerDelegationPagination](paginationToken)
+		decodedToken, err := dbmodel.DecodePaginationToken[indexerdbmodel.IndexerDelegationPagination](paginationToken)
 		if err != nil {
 			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",
@@ -41,6 +60,6 @@ func (indexerdbclient *IndexerDatabase) GetStakerDelegations(
 
 	return db.FindWithPagination(
 		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
-		indexerdbmodel.BuildStakerDelegationPaginationToken,
+		indexerdbmodel.BuildDelegationPaginationToken,
 	)
 }

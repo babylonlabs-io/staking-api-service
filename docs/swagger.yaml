@@ -87,6 +87,13 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-v2service_StakerDelegationPublic:
+    properties:
+      data:
+        $ref: '#/definitions/v2service.StakerDelegationPublic'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-v2service_StakerStatsPublic:
     properties:
       data:
@@ -727,6 +734,57 @@ paths:
       summary: Check unbonding eligibility
       tags:
       - v1
+  /v2/delegation:
+    get:
+      description: Retrieves a delegation by a given transaction hash
+      parameters:
+      - description: Staking transaction hash in hex format
+        in: query
+        name: staking_tx_hash_hex
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Staker delegation
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-v2service_StakerDelegationPublic'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get a delegation
+      tags:
+      - v2
+  /v2/delegations:
+    get:
+      description: Fetches delegations for babylon staking including tvl, total delegations,
+        active tvl, active delegations and total stakers.
+      parameters:
+      - description: Staker public key in hex format
+        in: query
+        name: staker_pk_hex
+        required: true
+        type: string
+      - description: Pagination key to fetch the next page of delegations
+        in: query
+        name: pagination_key
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of staker delegations and pagination token
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get Delegations
+      tags:
+      - v2
   /v2/finality-providers:
     get:
       description: Fetches finality providers with optional filtering and pagination
@@ -767,34 +825,6 @@ paths:
           schema:
             $ref: '#/definitions/handler.PublicResponse-v2service_GlobalParamsPublic'
       summary: Get Global Parameters
-      tags:
-      - v2
-  /v2/staker/delegations:
-    get:
-      description: Fetches staker delegations for babylon staking including tvl, total
-        delegations, active tvl, active delegations and total stakers.
-      parameters:
-      - description: Staker public key in hex format
-        in: query
-        name: staker_pk_hex
-        required: true
-        type: string
-      - description: Pagination key to fetch the next page of delegations
-        in: query
-        name: pagination_key
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of staker delegations and pagination token
-          schema:
-            $ref: '#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic'
-        "400":
-          description: 'Error: Bad Request'
-          schema:
-            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get Staker Delegations
       tags:
       - v2
   /v2/staker/stats:

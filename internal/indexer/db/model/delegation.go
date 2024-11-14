@@ -5,12 +5,12 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 )
 
-type IndexerStakerDelegationPagination struct {
+type IndexerDelegationPagination struct {
 	StakingTxHashHex string `json:"staking_tx_hash_hex"`
 	StartHeight      uint32 `json:"start_height"`
 }
 
-type IndexerStakerDelegationDetails struct {
+type IndexerDelegationDetails struct {
 	StakingTxHashHex          string                       `bson:"_id"` // Primary key
 	ParamsVersion             string                       `bson:"params_version"`
 	FinalityProviderBtcPksHex []string                     `bson:"finality_provider_btc_pks_hex"`
@@ -24,8 +24,8 @@ type IndexerStakerDelegationDetails struct {
 	EndHeight                 uint32                       `bson:"end_height"`
 }
 
-func BuildStakerDelegationPaginationToken(d IndexerStakerDelegationDetails) (string, error) {
-	page := &IndexerStakerDelegationPagination{
+func BuildDelegationPaginationToken(d IndexerDelegationDetails) (string, error) {
+	page := &IndexerDelegationPagination{
 		StakingTxHashHex: d.StakingTxHashHex,
 		StartHeight:      d.StartHeight,
 	}
