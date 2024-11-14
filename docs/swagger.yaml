@@ -73,17 +73,17 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
-  handler.PublicResponse-v2service_GlobalParamsPublic:
-    properties:
-      data:
-        $ref: '#/definitions/v2service.GlobalParamsPublic'
-      pagination:
-        $ref: '#/definitions/handler.paginationResponse'
-    type: object
   handler.PublicResponse-v2service_OverallStatsPublic:
     properties:
       data:
         $ref: '#/definitions/v2service.OverallStatsPublic'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
+  handler.PublicResponse-v2service_ParamsPublic:
+    properties:
+      data:
+        $ref: '#/definitions/v2service.ParamsPublic'
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
@@ -400,17 +400,6 @@ definitions:
       total_tvl:
         type: integer
     type: object
-  v2service.GlobalParamsPublic:
-    properties:
-      bbn:
-        items:
-          $ref: '#/definitions/indexertypes.BbnStakingParams'
-        type: array
-      btc:
-        items:
-          $ref: '#/definitions/indexertypes.BtcCheckpointParams'
-        type: array
-    type: object
   v2service.OverallStatsPublic:
     properties:
       active_delegations:
@@ -429,6 +418,17 @@ definitions:
         type: integer
       total_tvl:
         type: integer
+    type: object
+  v2service.ParamsPublic:
+    properties:
+      bbn:
+        items:
+          $ref: '#/definitions/indexertypes.BbnStakingParams'
+        type: array
+      btc:
+        items:
+          $ref: '#/definitions/indexertypes.BtcCheckpointParams'
+        type: array
     type: object
   v2service.StakerDelegationPublic:
     properties:
@@ -814,17 +814,17 @@ paths:
       summary: List Finality Providers
       tags:
       - v2
-  /v2/global-params:
+  /v2/params:
     get:
-      description: Fetches global parameters for babylon chain and BTC chain
+      description: Fetches system parameters for babylon chain and BTC chain
       produces:
       - application/json
       responses:
         "200":
-          description: Global parameters
+          description: Parameters
           schema:
-            $ref: '#/definitions/handler.PublicResponse-v2service_GlobalParamsPublic'
-      summary: Get Global Parameters
+            $ref: '#/definitions/handler.PublicResponse-v2service_ParamsPublic'
+      summary: Get Parameters
       tags:
       - v2
   /v2/staker/stats:

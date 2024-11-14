@@ -519,21 +519,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/global-params": {
+        "/v2/params": {
             "get": {
-                "description": "Fetches global parameters for babylon chain and BTC chain",
+                "description": "Fetches system parameters for babylon chain and BTC chain",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v2"
                 ],
-                "summary": "Get Global Parameters",
+                "summary": "Get Parameters",
                 "responses": {
                     "200": {
-                        "description": "Global parameters",
+                        "description": "Parameters",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-v2service_GlobalParamsPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-v2service_ParamsPublic"
                         }
                     }
                 }
@@ -701,22 +701,22 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-v2service_GlobalParamsPublic": {
+        "handler.PublicResponse-v2service_OverallStatsPublic": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/v2service.GlobalParamsPublic"
+                    "$ref": "#/definitions/v2service.OverallStatsPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
                 }
             }
         },
-        "handler.PublicResponse-v2service_OverallStatsPublic": {
+        "handler.PublicResponse-v2service_ParamsPublic": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/v2service.OverallStatsPublic"
+                    "$ref": "#/definitions/v2service.ParamsPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -1189,23 +1189,6 @@ const docTemplate = `{
                 }
             }
         },
-        "v2service.GlobalParamsPublic": {
-            "type": "object",
-            "properties": {
-                "bbn": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/indexertypes.BbnStakingParams"
-                    }
-                },
-                "btc": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
-                    }
-                }
-            }
-        },
         "v2service.OverallStatsPublic": {
             "type": "object",
             "properties": {
@@ -1232,6 +1215,23 @@ const docTemplate = `{
                 },
                 "total_tvl": {
                     "type": "integer"
+                }
+            }
+        },
+        "v2service.ParamsPublic": {
+            "type": "object",
+            "properties": {
+                "bbn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/indexertypes.BbnStakingParams"
+                    }
+                },
+                "btc": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
+                    }
                 }
             }
         },

@@ -8,12 +8,12 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
-type GlobalParamsPublic struct {
+type ParamsPublic struct {
 	Bbn []*indexertypes.BbnStakingParams    `json:"bbn"`
 	Btc []*indexertypes.BtcCheckpointParams `json:"btc"`
 }
 
-func (s *V2Service) GetGlobalParams(ctx context.Context) (*GlobalParamsPublic, *types.Error) {
+func (s *V2Service) GetParams(ctx context.Context) (*ParamsPublic, *types.Error) {
 	babylonParams, err := s.getBbnStakingParams(ctx)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (s *V2Service) GetGlobalParams(ctx context.Context) (*GlobalParamsPublic, *
 	if err != nil {
 		return nil, err
 	}
-	return &GlobalParamsPublic{
+	return &ParamsPublic{
 		Bbn: babylonParams,
 		Btc: btcParams,
 	}, nil
