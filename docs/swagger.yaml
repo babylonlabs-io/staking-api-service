@@ -80,6 +80,13 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-v2service_ParamsPublic:
+    properties:
+      data:
+        $ref: '#/definitions/v2service.ParamsPublic'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-v2service_StakerDelegationPublic:
     properties:
       data:
@@ -809,7 +816,7 @@ paths:
       - v2
   /v2/params:
     get:
-      description: Fetches global parameters for babylon chain and BTC chain
+      description: Fetches system parameters for babylon chain and BTC chain
       produces:
       - application/json
       responses:

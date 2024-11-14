@@ -7,9 +7,9 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
-// GetParams gets global parameters
+// GetParams gets system parameters
 // @Summary Get Parameters
-// @Description Fetches global parameters for babylon chain and BTC chain
+// @Description Fetches system parameters for babylon chain and BTC chain
 // @Produce json
 // @Tags v2
 // @Success 200 {object} handler.PublicResponse[v2service.ParamsPublic] "Parameters"

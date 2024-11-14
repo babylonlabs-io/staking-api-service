@@ -521,7 +521,7 @@ const docTemplate = `{
         },
         "/v2/params": {
             "get": {
-                "description": "Fetches global parameters for babylon chain and BTC chain",
+                "description": "Fetches system parameters for babylon chain and BTC chain",
                 "produces": [
                     "application/json"
                 ],
