@@ -12,10 +12,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (indexerdbclient *IndexerDatabase) GetStakerDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerStakerDelegationDetails, error) {
+func (indexerdbclient *IndexerDatabase) GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 	filter := bson.M{"_id": stakingTxHashHex}
-	var delegation indexerdbmodel.IndexerStakerDelegationDetails
+	var delegation indexerdbmodel.IndexerDelegationDetails
 	err := client.FindOne(ctx, filter).Decode(&delegation)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -29,9 +29,9 @@ func (indexerdbclient *IndexerDatabase) GetStakerDelegation(ctx context.Context,
 	return &delegation, nil
 }
 
-func (indexerdbclient *IndexerDatabase) GetStakerDelegations(
+func (indexerdbclient *IndexerDatabase) GetDelegations(
 	ctx context.Context, stakerPKHex string, paginationToken string,
-) (*db.DbResultMap[indexerdbmodel.IndexerStakerDelegationDetails], error) {
+) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 
 	// Base filter with stakingTxHashHex
@@ -44,7 +44,7 @@ func (indexerdbclient *IndexerDatabase) GetStakerDelegations(
 
 	// Decode the pagination token if it exists
 	if paginationToken != "" {
-		decodedToken, err := dbmodel.DecodePaginationToken[indexerdbmodel.IndexerStakerDelegationPagination](paginationToken)
+		decodedToken, err := dbmodel.DecodePaginationToken[indexerdbmodel.IndexerDelegationPagination](paginationToken)
 		if err != nil {
 			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",
@@ -60,6 +60,6 @@ func (indexerdbclient *IndexerDatabase) GetStakerDelegations(
 
 	return db.FindWithPagination(
 		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
-		indexerdbmodel.BuildStakerDelegationPaginationToken,
+		indexerdbmodel.BuildDelegationPaginationToken,
 	)
 }
