@@ -1083,6 +1083,37 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.DelegationStaking": {
+            "type": "object",
+            "properties": {
+                "end_height": {
+                    "type": "integer"
+                },
+                "staking_amount": {
+                    "type": "string"
+                },
+                "staking_time": {
+                    "type": "string"
+                },
+                "staking_tx_hash_hex": {
+                    "type": "string"
+                },
+                "start_height": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v2service.DelegationUnbonding": {
+            "type": "object",
+            "properties": {
+                "unbonding_time": {
+                    "type": "string"
+                },
+                "unbonding_tx": {
+                    "type": "string"
+                }
+            }
+        },
         "v2service.FinalityProviderPublic": {
             "type": "object",
             "properties": {
@@ -1161,8 +1192,11 @@ const docTemplate = `{
         "v2service.StakerDelegationPublic": {
             "type": "object",
             "properties": {
-                "end_height": {
-                    "type": "integer"
+                "delegation_staking": {
+                    "$ref": "#/definitions/v2service.DelegationStaking"
+                },
+                "delegation_unbonding": {
+                    "$ref": "#/definitions/v2service.DelegationUnbonding"
                 },
                 "finality_provider_btc_pks_hex": {
                     "type": "array",
@@ -1176,26 +1210,8 @@ const docTemplate = `{
                 "staker_btc_pk_hex": {
                     "type": "string"
                 },
-                "staking_amount": {
-                    "type": "string"
-                },
-                "staking_time": {
-                    "type": "string"
-                },
-                "staking_tx_hash_hex": {
-                    "type": "string"
-                },
-                "start_height": {
-                    "type": "integer"
-                },
                 "state": {
                     "$ref": "#/definitions/indexertypes.DelegationState"
-                },
-                "unbonding_time": {
-                    "type": "string"
-                },
-                "unbonding_tx": {
-                    "type": "string"
                 }
             }
         },
