@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/rs/zerolog/log"
 )
 
 type FinalityProviderPublic struct {
@@ -41,6 +43,10 @@ func mapToFinalityProviderPublic(provider indexerdbmodel.IndexerFinalityProvider
 func (s *V2Service) GetFinalityProviders(ctx context.Context, state types.FinalityProviderQueryingState, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
 	resultMap, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx, state, paginationKey)
 	if err != nil {
+		if db.IsNotFoundError(err) {
+			log.Ctx(ctx).Warn().Err(err).Msg("Finality providers not found")
+			return nil, "", types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "finality providers not found, please retry")
+		}
 		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get finality providers")
 	}
 
@@ -55,6 +61,10 @@ func (s *V2Service) GetFinalityProviders(ctx context.Context, state types.Finali
 func (s *V2Service) SearchFinalityProviders(ctx context.Context, searchQuery string, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
 	resultMap, err := s.DbClients.IndexerDBClient.SearchFinalityProviders(ctx, searchQuery, paginationKey)
 	if err != nil {
+		if db.IsNotFoundError(err) {
+			log.Ctx(ctx).Warn().Err(err).Str("searchQuery", searchQuery).Msg("Finality providers not found")
+			return nil, "", types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "finality providers not found, please retry")
+		}
 		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to search finality providers")
 	}
 

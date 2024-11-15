@@ -16,6 +16,8 @@ import (
 // @Param state query string false "Filter by state" Enums(active, standby)
 // @Success 200 {object} handler.PublicResponse[[]v2service.FinalityProviderPublic]{array} "List of finality providers and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
+// @Failure 404 {object} types.Error "Error: Not Found"
+// @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
 	state, err := handler.ParseFPStateQuery(request, true)

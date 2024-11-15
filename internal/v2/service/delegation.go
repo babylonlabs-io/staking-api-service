@@ -2,11 +2,12 @@ package v2service
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/rs/zerolog/log"
 )
 
 type DelegationStaking struct {
@@ -34,6 +35,10 @@ type StakerDelegationPublic struct {
 func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*StakerDelegationPublic, *types.Error) {
 	delegation, err := s.DbClients.IndexerDBClient.GetDelegation(ctx, stakingTxHashHex)
 	if err != nil {
+		if db.IsNotFoundError(err) {
+			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHashHex", stakingTxHashHex).Msg("Staking delegation not found")
+			return nil, types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "staking delegation not found, please retry")
+		}
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
 
@@ -60,11 +65,11 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error) {
 	resultMap, err := s.DbClients.IndexerDBClient.GetDelegations(ctx, stakerPkHex, paginationKey)
 	if err != nil {
-		return nil, "", types.NewErrorWithMsg(
-			http.StatusInternalServerError,
-			types.InternalServiceError,
-			fmt.Sprintf("failed to get v2 staker delegations: %v", err),
-		)
+		if db.IsNotFoundError(err) {
+			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHashHex", stakerPkHex).Msg("Staking delegations not found")
+			return nil, "", types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "staking delegation not found, please retry")
+		}
+		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegations")
 	}
 
 	// Initialize result structure
