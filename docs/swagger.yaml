@@ -366,9 +366,9 @@ definitions:
       end_height:
         type: integer
       staking_amount:
-        type: string
+        type: integer
       staking_time:
-        type: string
+        type: integer
       staking_tx_hash_hex:
         type: string
       start_height:
@@ -377,7 +377,7 @@ definitions:
   v2service.DelegationUnbonding:
     properties:
       unbonding_time:
-        type: string
+        type: integer
       unbonding_tx:
         type: string
     type: object
@@ -441,7 +441,7 @@ definitions:
           type: string
         type: array
       params_version:
-        type: string
+        type: integer
       staker_btc_pk_hex:
         type: string
       state:

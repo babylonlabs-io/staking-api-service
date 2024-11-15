@@ -2,6 +2,7 @@ package v2service
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
@@ -10,19 +11,19 @@ import (
 
 type DelegationStaking struct {
 	StakingTxHashHex string `json:"staking_tx_hash_hex"`
-	StakingTime      string `json:"staking_time"`
-	StakingAmount    string `json:"staking_amount"`
+	StakingTime      uint32 `json:"staking_time"`
+	StakingAmount    uint64 `json:"staking_amount"`
 	StartHeight      uint32 `json:"start_height,omitempty"`
 	EndHeight        uint32 `json:"end_height,omitempty"`
 }
 
 type DelegationUnbonding struct {
-	UnbondingTime string `json:"unbonding_time"`
+	UnbondingTime uint32 `json:"unbonding_time"`
 	UnbondingTx   string `json:"unbonding_tx"`
 }
 
 type StakerDelegationPublic struct {
-	ParamsVersion             string                       `json:"params_version"`
+	ParamsVersion             uint32                       `json:"params_version"`
 	StakerBtcPkHex            string                       `json:"staker_btc_pk_hex"`
 	FinalityProviderBtcPksHex []string                     `json:"finality_provider_btc_pks_hex"`
 	DelegationStaking         DelegationStaking            `json:"delegation_staking"`
@@ -56,10 +57,14 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 	return delegationPublic, nil
 }
 
-func (s *V2Service) GetDelegations(ctx context.Context, stakingTxHashHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error) {
-	resultMap, err := s.DbClients.IndexerDBClient.GetDelegations(ctx, stakingTxHashHex, paginationKey)
+func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error) {
+	resultMap, err := s.DbClients.IndexerDBClient.GetDelegations(ctx, stakerPkHex, paginationKey)
 	if err != nil {
-		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegations")
+		return nil, "", types.NewErrorWithMsg(
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			fmt.Sprintf("failed to get v2 staker delegations: %v", err),
+		)
 	}
 
 	// Initialize result structure
