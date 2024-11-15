@@ -1136,10 +1136,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "staking_amount": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "staking_time": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "staking_tx_hash_hex": {
                     "type": "string"
@@ -1153,7 +1153,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "unbonding_time": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "unbonding_tx": {
                     "type": "string"
@@ -1251,7 +1251,7 @@ const docTemplate = `{
                     }
                 },
                 "params_version": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "staker_btc_pk_hex": {
                     "type": "string"
