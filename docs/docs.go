@@ -430,6 +430,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
                     }
                 }
             }
@@ -468,6 +480,18 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
@@ -515,6 +539,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
                     }
                 }
             }
@@ -535,6 +571,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/handler.PublicResponse-v2service_ParamsPublic"
                         }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
                     }
                 }
             }
@@ -554,6 +602,24 @@ const docTemplate = `{
                         "description": "Staker stats",
                         "schema": {
                             "$ref": "#/definitions/handler.PublicResponse-v2service_StakerStatsPublic"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
                     }
                 }

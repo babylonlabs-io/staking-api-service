@@ -13,6 +13,9 @@ import (
 // @Produce json
 // @Tags v2
 // @Success 200 {object} handler.PublicResponse[v2service.StakerStatsPublic] "Staker stats"
+// @Failure 400 {object} types.Error "Error: Bad Request"
+// @Failure 404 {object} types.Error "Error: Not Found"
+// @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/staker/stats [get]
 func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *types.Error) {
 	stakerPKHex := request.URL.Query().Get("staker_pk_hex")

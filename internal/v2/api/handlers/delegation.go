@@ -15,6 +15,8 @@ import (
 // @Param staking_tx_hash_hex query string true "Staking transaction hash in hex format"
 // @Success 200 {object} handler.PublicResponse[v2service.StakerDelegationPublic] "Staker delegation"
 // @Failure 400 {object} types.Error "Error: Bad Request"
+// @Failure 404 {object} types.Error "Error: Not Found"
+// @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/delegation [get]
 func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *types.Error) {
 	stakingTxHash, err := handler.ParseTxHashQuery(request, "staking_tx_hash_hex")
@@ -38,6 +40,8 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
 // @Success 200 {object} handler.PublicResponse[[]v2service.StakerDelegationPublic]{array} "List of staker delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
+// @Failure 404 {object} types.Error "Error: Not Found"
+// @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/delegations [get]
 func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *types.Error) {
 	const stakerPKHexKey string = "staker_pk_hex"
