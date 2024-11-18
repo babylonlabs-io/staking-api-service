@@ -15,5 +15,6 @@ type QueueHandlers struct {
 func New(services *services.Services, queueHandler *queuehandler.QueueHandler) (*QueueHandlers, error) {
 	return &QueueHandlers{
 		V1QueueHandler: v1queuehandler.New(queueHandler, services.V1Service),
+		V2QueueHandler: v2queuehandler.New(queueHandler, services.V2Service),
 	}, nil
 }
