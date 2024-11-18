@@ -159,7 +159,7 @@ func TestPkAddressMappingWorksForOlderStatsEventVersion(t *testing.T) {
 
 	// inspect the items in the database
 	pkAddresses, err := testutils.InspectDbDocuments[dbmodel.PkAddressMapping](
-		testServer.Config, dbmodel.V1PkAddressMappingsCollection,
+		testServer.Config, dbmodel.PkAddressMappingsCollection,
 	)
 	assert.NoError(t, err, "failed to inspect the items in the database")
 	assert.Equal(t, 1, len(pkAddresses), "expected only one item in the database")

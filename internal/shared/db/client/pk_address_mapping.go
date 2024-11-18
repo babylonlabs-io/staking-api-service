@@ -11,7 +11,7 @@ import (
 func (db *Database) InsertPkAddressMappings(
 	ctx context.Context, pkHex, taproot, nativeSigwitOdd, nativeSigwitEven string,
 ) error {
-	client := db.Client.Database(db.DbName).Collection(dbmodel.V1PkAddressMappingsCollection)
+	client := db.Client.Database(db.DbName).Collection(dbmodel.PkAddressMappingsCollection)
 	addressMapping := &dbmodel.PkAddressMapping{
 		PkHex:            pkHex,
 		Taproot:          taproot,
@@ -28,7 +28,7 @@ func (db *Database) InsertPkAddressMappings(
 func (db *Database) FindPkMappingsByTaprootAddress(
 	ctx context.Context, taprootAddresses []string,
 ) ([]*dbmodel.PkAddressMapping, error) {
-	client := db.Client.Database(db.DbName).Collection(dbmodel.V1PkAddressMappingsCollection)
+	client := db.Client.Database(db.DbName).Collection(dbmodel.PkAddressMappingsCollection)
 	filter := bson.M{"taproot": bson.M{"$in": taprootAddresses}}
 
 	addressMapping := []*dbmodel.PkAddressMapping{}
@@ -46,9 +46,7 @@ func (db *Database) FindPkMappingsByTaprootAddress(
 func (db *Database) FindPkMappingsByNativeSegwitAddress(
 	ctx context.Context, nativeSegwitAddresses []string,
 ) ([]*dbmodel.PkAddressMapping, error) {
-	client := db.Client.Database(db.DbName).Collection(
-		dbmodel.V1PkAddressMappingsCollection,
-	)
+	client := db.Client.Database(db.DbName).Collection(dbmodel.PkAddressMappingsCollection)
 	filter := bson.M{
 		"$or": []bson.M{
 			{"native_segwit_even": bson.M{"$in": nativeSegwitAddresses}},

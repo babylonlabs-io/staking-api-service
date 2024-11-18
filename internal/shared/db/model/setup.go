@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	// Shared
+	PkAddressMappingsCollection = "pk_address_mappings"
 	// V1
 	V1StatsLockCollection             = "stats_lock"
 	V1OverallStatsCollection          = "overall_stats"
@@ -24,10 +26,11 @@ const (
 	V1UnbondingCollection             = "unbonding_queue"
 	V1BtcInfoCollection               = "btc_info"
 	V1UnprocessableMsgCollection      = "unprocessable_messages"
-	V1PkAddressMappingsCollection     = "pk_address_mappings"
 	// V2
-	V2StakerStatsCollection           = "v2_staker_stats"
+	V2StatsLockCollection             = "v2_stats_lock"
+	V2OverallStatsCollection          = "v2_overall_stats"
 	V2FinalityProviderStatsCollection = "v2_finality_providers_stats"
+	V2StakerStatsCollection           = "v2_staker_stats"
 )
 
 type index struct {
@@ -36,6 +39,13 @@ type index struct {
 }
 
 var collections = map[string][]index{
+	// Shared
+	PkAddressMappingsCollection: {
+		{Indexes: map[string]int{"taproot": 1}, Unique: true},
+		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
+		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
+	},
+	// V1
 	V1StatsLockCollection:             {{Indexes: map[string]int{}}},
 	V1OverallStatsCollection:          {{Indexes: map[string]int{}}},
 	V1FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
@@ -47,13 +57,11 @@ var collections = map[string][]index{
 	V1UnbondingCollection:        {{Indexes: map[string]int{"unbonding_tx_hash_hex": 1}, Unique: true}},
 	V1UnprocessableMsgCollection: {{Indexes: map[string]int{}}},
 	V1BtcInfoCollection:          {{Indexes: map[string]int{}}},
-	V1PkAddressMappingsCollection: {
-		{Indexes: map[string]int{"taproot": 1}, Unique: true},
-		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
-		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
-	},
+	// V2
+	V2StatsLockCollection:             {{Indexes: map[string]int{}}},
 	V2StakerStatsCollection:           {{Indexes: map[string]int{}}},
 	V2FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
+	V2OverallStatsCollection:          {{Indexes: map[string]int{}}},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {

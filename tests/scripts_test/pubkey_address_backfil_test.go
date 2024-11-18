@@ -65,7 +65,7 @@ func TestBackfillAddressesBasedOnPubKeys(t *testing.T) {
 	assert.Nil(t, err)
 	// check if the data is inserted
 	results, err := testutils.InspectDbDocuments[dbmodel.PkAddressMapping](
-		cfg, dbmodel.V1PkAddressMappingsCollection,
+		cfg, dbmodel.PkAddressMappingsCollection,
 	)
 	assert.Nil(t, err)
 	// find the num of unique staker pks from the docs
@@ -93,7 +93,7 @@ func TestBackfillAddressesBasedOnPubKeys(t *testing.T) {
 	err = scripts.BackfillPubkeyAddressesMappings(ctx, cfg)
 	assert.Nil(t, err)
 	results2, err := testutils.InspectDbDocuments[dbmodel.PkAddressMapping](
-		cfg, dbmodel.V1PkAddressMappingsCollection,
+		cfg, dbmodel.PkAddressMappingsCollection,
 	)
 	assert.Nil(t, err)
 	assert.Equal(t, len(results), len(results2))
