@@ -25,9 +25,13 @@ func New(ctx context.Context, cfg *queueConfig.QueueConfig, services *services.S
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up queue handlers")
 	}
+
 	v1QueueClient := v1queueclient.New(cfg, queueHandlers.V1QueueHandler, queueClient)
+	v2QueueClient := v2queueclient.New(cfg, queueHandlers.V2QueueHandler, queueClient)
+
 	return &QueueClients{
 		V1QueueClient: v1QueueClient,
+		V2QueueClient: v2QueueClient,
 	}
 }
 
