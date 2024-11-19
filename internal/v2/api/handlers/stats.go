@@ -9,7 +9,7 @@ import (
 
 // GetStakerStats gets staker stats for babylon staking
 // @Summary Get Staker Stats
-// @Description Fetches staker stats for babylon staking including active tvl, total tvl, active delegations and total delegations.
+// @Description Fetches staker stats for babylon staking including active tvl and active delegations.
 // @Produce json
 // @Tags v2
 // @Success 200 {object} handler.PublicResponse[v2service.StakerStatsPublic] "Staker stats"

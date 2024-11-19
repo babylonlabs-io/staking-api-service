@@ -61,19 +61,14 @@ func BuildV2FinalityProviderStatsPaginationToken(d *V2FinalityProviderStatsDocum
 	return token, nil
 }
 
-type StakingTx struct {
-	TxHashHex string `bson:"tx_hash_hex"`
-}
-
 type V2StakerStatsDocument struct {
-	StakerPkHex                  string      `bson:"_id"` // StakerPkHex
-	StakingTxs                   []StakingTx `bson:"staking_txs"`
-	ActiveTvl                    int64       `bson:"active_tvl"`
-	WithdrawableTvl              int64       `bson:"withdrawable_tvl"`
-	SlashedTvl                   int64       `bson:"slashed_tvl"`
-	TotalActiveDelegations       int64       `bson:"total_active_delegations"`
-	TotalWithdrawableDelegations int64       `bson:"total_withdrawable_delegations"`
-	TotalSlashedDelegations      int64       `bson:"total_slashed_delegations"`
+	StakerPkHex             string      `bson:"_id"` // StakerPkHex
+	ActiveTvl               int64       `bson:"active_tvl"`
+	WithdrawableTvl         int64       `bson:"withdrawable_tvl"`
+	SlashedTvl              int64       `bson:"slashed_tvl"`
+	ActiveDelegations       uint32      `bson:"active_delegations"`
+	WithdrawableDelegations uint32      `bson:"withdrawable_delegations"`
+	SlashedDelegations      uint32      `bson:"slashed_delegations"`
 }
 
 // StakerStatsByStakerPagination is used to paginate the top stakers by active tvl

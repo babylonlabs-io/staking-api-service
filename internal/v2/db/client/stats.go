@@ -51,75 +51,75 @@ func (v2dbclient *V2Database) IncrementOverallStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string, amount uint64,
 ) error {
 	overallStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2OverallStatsCollection)
-    stakerStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
-    fpStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
+	stakerStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
+	fpStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
 
-    // Start a session
-    session, sessionErr := v2dbclient.Client.StartSession()
-    if sessionErr != nil {
-        return sessionErr
-    }
-    defer session.EndSession(ctx)
+	// Start a session
+	session, sessionErr := v2dbclient.Client.StartSession()
+	if sessionErr != nil {
+		return sessionErr
+	}
+	defer session.EndSession(ctx)
 
-    upsertUpdate := bson.M{
-        "$inc": bson.M{
-            "active_tvl":         int64(amount),
-            "total_tvl":          int64(amount),
-            "active_delegations": 1,
-            "total_delegations":  1,
-        },
-    }
+	upsertUpdate := bson.M{
+		"$inc": bson.M{
+			"active_tvl":         int64(amount),
+			"total_tvl":          int64(amount),
+			"active_delegations": 1,
+			"total_delegations":  1,
+		},
+	}
 
-    transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-        err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Active.ToString(), "v2_overall_stats")
-        if err != nil {
-            return nil, err
-        }
+	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Active.ToString(), "v2_overall_stats")
+		if err != nil {
+			return nil, err
+		}
 
-        // Check if this is the first active delegation for the staker
-        var stakerStats v2dbmodel.V2StakerStatsDocument
-        stakerStatsFilter := bson.M{"_id": stakerPkHex}
-        stakerErr := stakerStatsClient.FindOne(ctx, stakerStatsFilter).Decode(&stakerStats)
-        if stakerErr != nil {
-            return nil, stakerErr
-        }
-        if stakerStats.TotalActiveDelegations == 1 {
-            upsertUpdate["$inc"].(bson.M)["total_stakers"] = 1
-            upsertUpdate["$inc"].(bson.M)["active_stakers"] = 1
-        }
+		// Check if this is the first active delegation for the staker
+		var stakerStats v2dbmodel.V2StakerStatsDocument
+		stakerStatsFilter := bson.M{"_id": stakerPkHex}
+		stakerErr := stakerStatsClient.FindOne(ctx, stakerStatsFilter).Decode(&stakerStats)
+		if stakerErr != nil {
+			return nil, stakerErr
+		}
+		if stakerStats.ActiveDelegations == 1 {
+			upsertUpdate["$inc"].(bson.M)["total_stakers"] = 1
+			upsertUpdate["$inc"].(bson.M)["active_stakers"] = 1
+		}
 
-        // Check if this is the first active delegation for the finality provider
-        var fpStats v2dbmodel.V2FinalityProviderStatsDocument
-        fpStatsFilter := bson.M{"_id": fpPkHex}
-        fpErr := fpStatsClient.FindOne(ctx, fpStatsFilter).Decode(&fpStats)
-        if fpErr != nil {
-            return nil, fpErr
-        }
-        if fpStats.ActiveDelegations == 1 {
-            upsertUpdate["$inc"].(bson.M)["total_finality_providers"] = 1
-            upsertUpdate["$inc"].(bson.M)["active_finality_providers"] = 1
-        }
+		// Check if this is the first active delegation for the finality provider
+		var fpStats v2dbmodel.V2FinalityProviderStatsDocument
+		fpStatsFilter := bson.M{"_id": fpPkHex}
+		fpErr := fpStatsClient.FindOne(ctx, fpStatsFilter).Decode(&fpStats)
+		if fpErr != nil {
+			return nil, fpErr
+		}
+		if fpStats.ActiveDelegations == 1 {
+			upsertUpdate["$inc"].(bson.M)["total_finality_providers"] = 1
+			upsertUpdate["$inc"].(bson.M)["active_finality_providers"] = 1
+		}
 
-        shardId, err := v2dbclient.generateOverallStatsId()
-        if err != nil {
-            return nil, err
-        }
+		shardId, err := v2dbclient.generateOverallStatsId()
+		if err != nil {
+			return nil, err
+		}
 
-        upsertFilter := bson.M{"_id": shardId}
-        _, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
-        if err != nil {
-            return nil, err
-        }
-        return nil, nil
-    }
+		upsertFilter := bson.M{"_id": shardId}
+		_, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
 
-    // Execute the transaction
-    _, txErr := session.WithTransaction(ctx, transactionWork)
-    if txErr != nil {
-        return txErr
-    }
+	// Execute the transaction
+	_, txErr := session.WithTransaction(ctx, transactionWork)
+	if txErr != nil {
+		return txErr
+	}
 
-    return nil
+	return nil
 }
 
 // SubtractOverallStats decrements the overall stats for the given staking tx hash
@@ -158,7 +158,7 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 		if stakerErr != nil {
 			return nil, stakerErr
 		}
-		if stakerStats.TotalActiveDelegations == 0 {
+		if stakerStats.ActiveDelegations == 0 {
 			upsertUpdate["$inc"].(bson.M)["active_stakers"] = -1
 		}
 
