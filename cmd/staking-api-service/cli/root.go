@@ -9,17 +9,15 @@ import (
 )
 
 const (
-	defaultConfigFileName              = "config.yml"
-	defaultGlobalParamsFileName        = "global_params.json"
-	defaultFinalityProvidersFileName   = "finality_providers.json"
-	defaultDelegationAllowlistFileName = "delegation_allowlist.json"
+	defaultConfigFileName            = "config.yml"
+	defaultGlobalParamsFileName      = "global_params.json"
+	defaultFinalityProvidersFileName = "finality_providers.json"
 )
 
 var (
 	cfgPath                   string
 	globalParamsPath          string
 	finalityProvidersPath     string
-	delegationAllowlistPath   string
 	replayFlag                bool
 	backfillPubkeyAddressFlag bool
 	rootCmd                   = &cobra.Command{
@@ -36,7 +34,6 @@ func Setup() error {
 	defaultConfigPath := getDefaultConfigFile(homePath, defaultConfigFileName)
 	defaultGlobalParamsPath := getDefaultConfigFile(homePath, defaultGlobalParamsFileName)
 	defaultFinalityProvidersPath := getDefaultConfigFile(homePath, defaultFinalityProvidersFileName)
-	defaultDelegationAllowlistPath := getDefaultConfigFile(homePath, defaultDelegationAllowlistFileName)
 
 	rootCmd.PersistentFlags().StringVar(
 		&cfgPath,
@@ -55,12 +52,6 @@ func Setup() error {
 		"finality-providers",
 		defaultFinalityProvidersPath,
 		fmt.Sprintf("finality providers file (default %s)", defaultFinalityProvidersPath),
-	)
-	rootCmd.PersistentFlags().StringVar(
-		&delegationAllowlistPath,
-		"delegation-allowlist",
-		defaultDelegationAllowlistPath,
-		fmt.Sprintf("delegation allowlist file (default %s)", defaultDelegationAllowlistPath),
 	)
 	rootCmd.PersistentFlags().BoolVar(
 		&replayFlag,
@@ -95,10 +86,6 @@ func GetGlobalParamsPath() string {
 
 func GetFinalityProvidersPath() string {
 	return finalityProvidersPath
-}
-
-func GetDelegationAllowlistPath() string {
-	return delegationAllowlistPath
 }
 
 func GetReplayFlag() bool {
