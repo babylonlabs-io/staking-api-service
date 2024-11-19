@@ -11,12 +11,12 @@ import (
 )
 
 type FinalityProviderPublic struct {
-	BtcPK             string                              `json:"btc_pk"`
+	BtcPk             string                              `json:"btc_pk"`
 	State             types.FinalityProviderQueryingState `json:"state"`
 	Description       types.FinalityProviderDescription   `json:"description"`
 	Commission        string                              `json:"commission"`
-	ActiveTVL         int64                               `json:"active_tvl"`
-	TotalTVL          int64                               `json:"total_tvl"`
+	ActiveTvl         int64                               `json:"active_tvl"`
+	TotalTvl          int64                               `json:"total_tvl"`
 	ActiveDelegations int64                               `json:"active_delegations"`
 	TotalDelegations  int64                               `json:"total_delegations"`
 }
@@ -27,13 +27,13 @@ type FinalityProvidersPublic struct {
 
 func mapToFinalityProviderPublic(provider indexerdbmodel.IndexerFinalityProviderDetails) *FinalityProviderPublic {
 	return &FinalityProviderPublic{
-		BtcPK:       provider.BtcPk,
+		BtcPk:       provider.BtcPk,
 		State:       types.FinalityProviderQueryingState(provider.State),
 		Description: types.FinalityProviderDescription(provider.Description),
 		Commission:  provider.Commission,
 		// TODO: add active_tvl, total_tvl, active_delegations, total_delegations from statistic data field
-		ActiveTVL:         0,
-		TotalTVL:          0,
+		ActiveTvl:         0,
+		TotalTvl:          0,
 		ActiveDelegations: 0,
 		TotalDelegations:  0,
 	}
