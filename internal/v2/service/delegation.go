@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -19,9 +20,15 @@ type DelegationStaking struct {
 	EndHeight        uint32 `json:"end_height,omitempty"`
 }
 
+type CovenantSignature struct {
+	CovenantBtcPkHex string `json:"covenant_btc_pk_hex"`
+	SignatureHex     string `json:"signature_hex"`
+}
+
 type DelegationUnbonding struct {
-	UnbondingTime uint32 `json:"unbonding_time"`
-	UnbondingTx   string `json:"unbonding_tx"`
+	UnbondingTime               uint32              `json:"unbonding_time"`
+	UnbondingTx                 string              `json:"unbonding_tx"`
+	CovenantUnbondingSignatures []CovenantSignature `json:"covenant_unbonding_signatures"`
 }
 
 type StakerDelegationPublic struct {
@@ -58,6 +65,9 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		DelegationUnbonding: DelegationUnbonding{
 			UnbondingTime: delegation.UnbondingTime,
 			UnbondingTx:   delegation.UnbondingTx,
+			CovenantUnbondingSignatures: getUnbondingSignatures(
+				delegation.CovenantUnbondingSignatures,
+			),
 		},
 		State: delegation.State,
 	}
@@ -94,6 +104,9 @@ func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, pagi
 			DelegationUnbonding: DelegationUnbonding{
 				UnbondingTime: delegation.UnbondingTime,
 				UnbondingTx:   delegation.UnbondingTx,
+				CovenantUnbondingSignatures: getUnbondingSignatures(
+					delegation.CovenantUnbondingSignatures,
+				),
 			},
 			State: delegation.State,
 		}
@@ -101,4 +114,12 @@ func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, pagi
 	}
 
 	return delegationsPublic, resultMap.PaginationToken, nil
+}
+
+func getUnbondingSignatures(covenantSignatures []indexerdbmodel.CovenantSignature) []CovenantSignature {
+	covenantSignaturesPublic := make([]CovenantSignature, 0, len(covenantSignatures))
+	for _, covenantSignature := range covenantSignatures {
+		covenantSignaturesPublic = append(covenantSignaturesPublic, CovenantSignature{CovenantBtcPkHex: covenantSignature.CovenantBtcPkHex, SignatureHex: covenantSignature.SignatureHex})
+	}
+	return covenantSignaturesPublic
 }

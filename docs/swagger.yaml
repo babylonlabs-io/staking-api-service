@@ -361,6 +361,13 @@ definitions:
       version:
         type: integer
     type: object
+  v2service.CovenantSignature:
+    properties:
+      covenant_btc_pk_hex:
+        type: string
+      signature_hex:
+        type: string
+    type: object
   v2service.DelegationStaking:
     properties:
       end_height:
@@ -371,11 +378,17 @@ definitions:
         type: integer
       staking_tx_hash_hex:
         type: string
+      staking_tx_hex:
+        type: string
       start_height:
         type: integer
     type: object
   v2service.DelegationUnbonding:
     properties:
+      covenant_unbonding_signatures:
+        items:
+          $ref: '#/definitions/v2service.CovenantSignature'
+        type: array
       unbonding_time:
         type: integer
       unbonding_tx:
@@ -402,6 +415,8 @@ definitions:
     type: object
   v2service.OverallStatsPublic:
     properties:
+      _id:
+        type: string
       active_delegations:
         type: integer
       active_finality_providers:
@@ -449,15 +464,19 @@ definitions:
     type: object
   v2service.StakerStatsPublic:
     properties:
+      _id:
+        type: string
       active_delegations:
         type: integer
       active_tvl:
         type: integer
-      staker_pk_hex:
-        type: string
-      total_delegations:
+      slashed_delegations:
         type: integer
-      total_tvl:
+      slashed_tvl:
+        type: integer
+      withdrawable_delegations:
+        type: integer
+      withdrawable_tvl:
         type: integer
     type: object
 info:
@@ -861,8 +880,8 @@ paths:
       - v2
   /v2/staker/stats:
     get:
-      description: Fetches staker stats for babylon staking including active tvl,
-        total tvl, active delegations and total delegations.
+      description: Fetches staker stats for babylon staking including active tvl and
+        active delegations.
       produces:
       - application/json
       responses:
