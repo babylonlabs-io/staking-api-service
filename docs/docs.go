@@ -589,7 +589,7 @@ const docTemplate = `{
         },
         "/v2/staker/stats": {
             "get": {
-                "description": "Fetches staker stats for babylon staking including active tvl, total tvl, active delegations and total delegations.",
+                "description": "Fetches staker stats for babylon staking including active tvl and active delegations.",
                 "produces": [
                     "application/json"
                 ],
@@ -1195,6 +1195,17 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.CovenantSignature": {
+            "type": "object",
+            "properties": {
+                "covenant_btc_pk_hex": {
+                    "type": "string"
+                },
+                "signature_hex": {
+                    "type": "string"
+                }
+            }
+        },
         "v2service.DelegationStaking": {
             "type": "object",
             "properties": {
@@ -1210,6 +1221,9 @@ const docTemplate = `{
                 "staking_tx_hash_hex": {
                     "type": "string"
                 },
+                "staking_tx_hex": {
+                    "type": "string"
+                },
                 "start_height": {
                     "type": "integer"
                 }
@@ -1218,6 +1232,12 @@ const docTemplate = `{
         "v2service.DelegationUnbonding": {
             "type": "object",
             "properties": {
+                "covenant_unbonding_signatures": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2service.CovenantSignature"
+                    }
+                },
                 "unbonding_time": {
                     "type": "integer"
                 },
@@ -1258,6 +1278,9 @@ const docTemplate = `{
         "v2service.OverallStatsPublic": {
             "type": "object",
             "properties": {
+                "_id": {
+                    "type": "string"
+                },
                 "active_delegations": {
                     "type": "integer"
                 },
@@ -1330,19 +1353,25 @@ const docTemplate = `{
         "v2service.StakerStatsPublic": {
             "type": "object",
             "properties": {
+                "_id": {
+                    "type": "string"
+                },
                 "active_delegations": {
                     "type": "integer"
                 },
                 "active_tvl": {
                     "type": "integer"
                 },
-                "staker_pk_hex": {
-                    "type": "string"
-                },
-                "total_delegations": {
+                "slashed_delegations": {
                     "type": "integer"
                 },
-                "total_tvl": {
+                "slashed_tvl": {
+                    "type": "integer"
+                },
+                "withdrawable_delegations": {
+                    "type": "integer"
+                },
+                "withdrawable_tvl": {
                     "type": "integer"
                 }
             }
