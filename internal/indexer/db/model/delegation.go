@@ -13,6 +13,7 @@ type IndexerDelegationPagination struct {
 
 type IndexerDelegationDetails struct {
 	StakingTxHashHex          string                       `bson:"_id"` // Primary key
+	StakingTxHex              string                       `bson:"staking_tx_hex"`
 	ParamsVersion             uint32                       `bson:"params_version"`
 	FinalityProviderBtcPksHex []string                     `bson:"finality_provider_btc_pks_hex"`
 	StakerBtcPkHex            string                       `bson:"staker_btc_pk_hex"`
