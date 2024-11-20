@@ -12,6 +12,7 @@ import (
 
 type DelegationStaking struct {
 	StakingTxHashHex string `json:"staking_tx_hash_hex"`
+	StakingTxHex     string `json:"staking_tx_hex"`
 	StakingTime      uint32 `json:"staking_time"`
 	StakingAmount    uint64 `json:"staking_amount"`
 	StartHeight      uint32 `json:"start_height,omitempty"`
@@ -48,6 +49,7 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		StakerBtcPkHex:            delegation.StakerBtcPkHex,
 		DelegationStaking: DelegationStaking{
 			StakingTxHashHex: delegation.StakingTxHashHex,
+			StakingTxHex:     delegation.StakingTxHex,
 			StakingTime:      delegation.StakingTime,
 			StakingAmount:    delegation.StakingAmount,
 			StartHeight:      delegation.StartHeight,
@@ -83,6 +85,7 @@ func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, pagi
 			StakerBtcPkHex:            delegation.StakerBtcPkHex,
 			DelegationStaking: DelegationStaking{
 				StakingTxHashHex: delegation.StakingTxHashHex,
+				StakingTxHex:     delegation.StakingTxHex,
 				StakingTime:      delegation.StakingTime,
 				StakingAmount:    delegation.StakingAmount,
 				StartHeight:      delegation.StartHeight,
