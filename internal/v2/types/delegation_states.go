@@ -7,37 +7,37 @@ import (
 )
 
 // DelegationAPIState represents the flattened state for frontend consumption
-type DelegationAPIState string
+type DelegationState string
 
 const (
 	// Basic states
-	StatePending  DelegationAPIState = "PENDING"
-	StateVerified DelegationAPIState = "VERIFIED"
-	StateActive   DelegationAPIState = "ACTIVE"
+	StatePending  DelegationState = "PENDING"
+	StateVerified DelegationState = "VERIFIED"
+	StateActive   DelegationState = "ACTIVE"
 
 	// Unbonding states
-	StateTimelockUnbonding DelegationAPIState = "TIMELOCK_UNBONDING"
-	StateEarlyUnbonding    DelegationAPIState = "EARLY_UNBONDING"
+	StateTimelockUnbonding DelegationState = "TIMELOCK_UNBONDING"
+	StateEarlyUnbonding    DelegationState = "EARLY_UNBONDING"
 
 	// Withdrawable states
-	StateTimelockWithdrawable               DelegationAPIState = "TIMELOCK_WITHDRAWABLE"
-	StateEarlyUnbondingWithdrawable         DelegationAPIState = "EARLY_UNBONDING_WITHDRAWABLE"
-	StateTimelockSlashingWithdrawable       DelegationAPIState = "TIMELOCK_SLASHING_WITHDRAWABLE"
-	StateEarlyUnbondingSlashingWithdrawable DelegationAPIState = "EARLY_UNBONDING_SLASHING_WITHDRAWABLE"
+	StateTimelockWithdrawable               DelegationState = "TIMELOCK_WITHDRAWABLE"
+	StateEarlyUnbondingWithdrawable         DelegationState = "EARLY_UNBONDING_WITHDRAWABLE"
+	StateTimelockSlashingWithdrawable       DelegationState = "TIMELOCK_SLASHING_WITHDRAWABLE"
+	StateEarlyUnbondingSlashingWithdrawable DelegationState = "EARLY_UNBONDING_SLASHING_WITHDRAWABLE"
 
 	// Withdrawn states
-	StateTimelockWithdrawn               DelegationAPIState = "TIMELOCK_WITHDRAWN"
-	StateEarlyUnbondingWithdrawn         DelegationAPIState = "EARLY_UNBONDING_WITHDRAWN"
-	StateTimelockSlashingWithdrawn       DelegationAPIState = "TIMELOCK_SLASHING_WITHDRAWN"
-	StateEarlyUnbondingSlashingWithdrawn DelegationAPIState = "EARLY_UNBONDING_SLASHING_WITHDRAWN"
+	StateTimelockWithdrawn               DelegationState = "TIMELOCK_WITHDRAWN"
+	StateEarlyUnbondingWithdrawn         DelegationState = "EARLY_UNBONDING_WITHDRAWN"
+	StateTimelockSlashingWithdrawn       DelegationState = "TIMELOCK_SLASHING_WITHDRAWN"
+	StateEarlyUnbondingSlashingWithdrawn DelegationState = "EARLY_UNBONDING_SLASHING_WITHDRAWN"
 
 	// Slashed states
-	StateTimelockSlashed       DelegationAPIState = "TIMELOCK_SLASHED"
-	StateEarlyUnbondingSlashed DelegationAPIState = "EARLY_UNBONDING_SLASHED"
+	StateTimelockSlashed       DelegationState = "TIMELOCK_SLASHED"
+	StateEarlyUnbondingSlashed DelegationState = "EARLY_UNBONDING_SLASHED"
 )
 
-// DeriveAPIState converts internal states to API states, returns error if combination is invalid
-func DeriveDelegationAPIState(state indexertypes.DelegationState, subState indexertypes.DelegationSubState) (DelegationAPIState, error) {
+// MapDelegationState converts internal states to API states, returns error if combination is invalid
+func MapDelegationState(state indexertypes.DelegationState, subState indexertypes.DelegationSubState) (DelegationState, error) {
 	switch state {
 	case indexertypes.StatePending:
 		return StatePending, nil

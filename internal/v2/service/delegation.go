@@ -34,12 +34,12 @@ type DelegationUnbonding struct {
 }
 
 type StakerDelegationPublic struct {
-	ParamsVersion             uint32                     `json:"params_version"`
-	StakerBtcPkHex            string                     `json:"staker_btc_pk_hex"`
-	FinalityProviderBtcPksHex []string                   `json:"finality_provider_btc_pks_hex"`
-	DelegationStaking         DelegationStaking          `json:"delegation_staking"`
-	DelegationUnbonding       DelegationUnbonding        `json:"delegation_unbonding"`
-	State                     v2types.DelegationAPIState `json:"state"`
+	ParamsVersion             uint32                  `json:"params_version"`
+	StakerBtcPkHex            string                  `json:"staker_btc_pk_hex"`
+	FinalityProviderBtcPksHex []string                `json:"finality_provider_btc_pks_hex"`
+	DelegationStaking         DelegationStaking       `json:"delegation_staking"`
+	DelegationUnbonding       DelegationUnbonding     `json:"delegation_unbonding"`
+	State                     v2types.DelegationState `json:"state"`
 }
 
 func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*StakerDelegationPublic, *types.Error) {
@@ -52,7 +52,7 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
 
-	state, err := v2types.DeriveDelegationAPIState(delegation.State, delegation.SubState)
+	state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
 	if err != nil {
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get delegation state")
 	}
@@ -98,7 +98,7 @@ func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, pagi
 
 	// Group delegations by state
 	for _, delegation := range resultMap.Data {
-		state, err := v2types.DeriveDelegationAPIState(delegation.State, delegation.SubState)
+		state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
 		if err != nil {
 			return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get delegation state")
 		}
