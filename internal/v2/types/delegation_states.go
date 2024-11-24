@@ -80,9 +80,9 @@ func MapDelegationState(state indexertypes.DelegationState, subState indexertype
 
 	case indexertypes.StateSlashed:
 		switch subState {
-		case indexertypes.SubStateTimelockSlashing:
+		case indexertypes.SubStateTimelock:
 			return StateTimelockSlashed, nil
-		case indexertypes.SubStateEarlyUnbondingSlashing:
+		case indexertypes.SubStateEarlyUnbonding:
 			return StateEarlyUnbondingSlashed, nil
 		}
 	}
