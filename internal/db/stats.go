@@ -15,6 +15,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	// Hardcoded pagination limit of 500 for finality providers, this is to offload
+	// the sorting and searching to the frontend since number of providers is
+	// expected to be small
+	FinalityProviderPaginationLimit = 500
+)
+
 // GetOrCreateStatsLock fetches the lock status for each stats type for the given staking tx hash.
 // If the document does not exist, it will create a new document with the default values
 // Refer to the README.md in this directory for more information on the stats lock
@@ -285,7 +292,7 @@ func (db *Database) FindFinalityProviderStats(ctx context.Context, paginationTok
 	}
 
 	return findWithPagination(
-		ctx, client, filter, options, db.cfg.MaxPaginationLimit,
+		ctx, client, filter, options, FinalityProviderPaginationLimit,
 		model.BuildFinalityProviderStatsPaginationToken,
 	)
 }
