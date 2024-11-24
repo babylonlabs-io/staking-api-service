@@ -6,7 +6,7 @@ import (
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 )
 
-// DelegationAPIState represents the flattened state for frontend consumption
+// DelegationState represents the flattened state for frontend consumption
 type DelegationState string
 
 const (
@@ -36,7 +36,7 @@ const (
 	StateEarlyUnbondingSlashed DelegationState = "EARLY_UNBONDING_SLASHED"
 )
 
-// MapDelegationState converts internal states to API states, returns error if combination is invalid
+// MapDelegationState consumes internal indexer states and maps them to the frontend-facing states
 func MapDelegationState(state indexertypes.DelegationState, subState indexertypes.DelegationSubState) (DelegationState, error) {
 	switch state {
 	case indexertypes.StatePending:
