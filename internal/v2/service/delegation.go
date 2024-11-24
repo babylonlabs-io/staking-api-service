@@ -12,12 +12,14 @@ import (
 )
 
 type DelegationStaking struct {
-	StakingTxHashHex string `json:"staking_tx_hash_hex"`
-	StakingTxHex     string `json:"staking_tx_hex"`
-	StakingTime      uint32 `json:"staking_time"`
-	StakingAmount    uint64 `json:"staking_amount"`
-	StartHeight      uint32 `json:"start_height,omitempty"`
-	EndHeight        uint32 `json:"end_height,omitempty"`
+	StakingTxHashHex   string `json:"staking_tx_hash_hex"`
+	StakingTxHex       string `json:"staking_tx_hex"`
+	StakingTime        uint32 `json:"staking_time"`
+	StakingAmount      uint64 `json:"staking_amount"`
+	StartHeight        uint32 `json:"start_height,omitempty"`
+	EndHeight          uint32 `json:"end_height,omitempty"`
+	BbnInceptionHeight int64  `json:"bbn_inception_height"`
+	BbnInceptionTime   int64  `json:"bbn_inception_time"`
 }
 
 type CovenantSignature struct {
@@ -55,12 +57,14 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		FinalityProviderBtcPksHex: delegation.FinalityProviderBtcPksHex,
 		StakerBtcPkHex:            delegation.StakerBtcPkHex,
 		DelegationStaking: DelegationStaking{
-			StakingTxHashHex: delegation.StakingTxHashHex,
-			StakingTxHex:     delegation.StakingTxHex,
-			StakingTime:      delegation.StakingTime,
-			StakingAmount:    delegation.StakingAmount,
-			StartHeight:      delegation.StartHeight,
-			EndHeight:        delegation.EndHeight,
+			StakingTxHashHex:   delegation.StakingTxHashHex,
+			StakingTxHex:       delegation.StakingTxHex,
+			StakingTime:        delegation.StakingTime,
+			StakingAmount:      delegation.StakingAmount,
+			StartHeight:        delegation.StartHeight,
+			EndHeight:          delegation.EndHeight,
+			BbnInceptionHeight: delegation.BTCDelegationCreatedBbnBlock.Height,
+			BbnInceptionTime:   delegation.BTCDelegationCreatedBbnBlock.Timestamp,
 		},
 		DelegationUnbonding: DelegationUnbonding{
 			UnbondingTime: delegation.UnbondingTime,
