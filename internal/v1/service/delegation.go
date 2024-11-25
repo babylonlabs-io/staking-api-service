@@ -53,8 +53,14 @@ func (s *V1Service) DelegationsByStakerPk(
 		return nil, "", types.NewInternalServiceError(err)
 	}
 	var delegations []*DelegationPublic = make([]*DelegationPublic, 0, len(resultMap.Data))
+	bbnHeight, err := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height")
+		return nil, "", types.NewInternalServiceError(err)
+	}
+
 	for _, d := range resultMap.Data {
-		delegations = append(delegations, s.FromDelegationDocument(ctx, &d))
+		delegations = append(delegations, s.FromDelegationDocument(&d, bbnHeight))
 	}
 	return delegations, resultMap.PaginationToken, nil
 }
@@ -106,7 +112,12 @@ func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*Deleg
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to find delegation by tx hash hex")
 		return nil, types.NewInternalServiceError(err)
 	}
-	return s.FromDelegationDocument(ctx, delegation), nil
+	bbnHeight, err := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height")
+		return nil, types.NewInternalServiceError(err)
+	}
+	return s.FromDelegationDocument(delegation, bbnHeight), nil
 }
 
 func (s *V1Service) CheckStakerHasActiveDelegationByPk(
@@ -127,7 +138,7 @@ func (s *V1Service) CheckStakerHasActiveDelegationByPk(
 }
 
 func (s *V1Service) isEligibleForTransition(
-	ctx context.Context, delegation *v1model.DelegationDocument,
+	delegation *v1model.DelegationDocument, bbnHeight uint64,
 ) bool {
 	if s.Cfg.DelegationTransition == nil {
 		return false
@@ -144,12 +155,6 @@ func (s *V1Service) isEligibleForTransition(
 	if !delegation.IsOverflow && stakingHeight < s.Cfg.DelegationTransition.BeforeBtcHeight {
 		return true
 	}
-	// Get the last processed BBN height
-	bbnHeight, err := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height")
-		return false
-	}
 	if bbnHeight >= s.Cfg.DelegationTransition.AfterBbnHeight {
 		return true
 	}
@@ -158,7 +163,7 @@ func (s *V1Service) isEligibleForTransition(
 }
 
 func (s *V1Service) FromDelegationDocument(
-	ctx context.Context, d *v1model.DelegationDocument,
+	d *v1model.DelegationDocument, bbnHeight uint64,
 ) *DelegationPublic {
 	delPublic := &DelegationPublic{
 		StakingTxHashHex:      d.StakingTxHashHex,
@@ -174,7 +179,7 @@ func (s *V1Service) FromDelegationDocument(
 			TimeLock:       d.StakingTx.TimeLock,
 		},
 		IsOverflow:              d.IsOverflow,
-		IsEligibleForTransition: s.isEligibleForTransition(ctx, d),
+		IsEligibleForTransition: s.isEligibleForTransition(d, bbnHeight),
 	}
 
 	// Add unbonding transaction if it exists
