@@ -129,18 +129,19 @@ func (s *V1Service) CheckStakerHasActiveDelegationByPk(
 func (s *V1Service) isEligibleForTransition(
 	ctx context.Context, delegation *v1model.DelegationDocument,
 ) bool {
+	if s.Cfg.DelegationTransition == nil {
+		return false
+	}
+
 	// Check the delegation state, only active delegations are eligible for transition
 	if delegation.State != types.Active {
 		return false
 	}
 
-	if s.Cfg.DelegationTransition == nil {
-		return false
-	}
-
 	// Check the delegation staking height
 	stakingHeight := delegation.StakingTx.StartHeight
-	if stakingHeight < s.Cfg.DelegationTransition.BeforeBtcHeight {
+	// Only not overflow delegations are eligible for transition before the Btc height
+	if !delegation.IsOverflow && stakingHeight < s.Cfg.DelegationTransition.BeforeBtcHeight {
 		return true
 	}
 	// Get the last processed BBN height
