@@ -12,3 +12,12 @@ const (
 	StateWithdrawn    DelegationState = "WITHDRAWN"
 	StateSlashed      DelegationState = "SLASHED"
 )
+
+type DelegationSubState string
+
+const (
+	SubStateTimelock               DelegationSubState = "TIMELOCK"
+	SubStateEarlyUnbonding         DelegationSubState = "EARLY_UNBONDING"
+	SubStateTimelockSlashing       DelegationSubState = "TIMELOCK_SLASHING"
+	SubStateEarlyUnbondingSlashing DelegationSubState = "EARLY_UNBONDING_SLASHING"
+)
