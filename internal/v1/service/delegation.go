@@ -152,10 +152,10 @@ func (s *V1Service) isEligibleForTransition(
 	// Check the delegation staking height
 	stakingHeight := delegation.StakingTx.StartHeight
 	// Only not overflow delegations are eligible for transition before the Btc height
-	if !delegation.IsOverflow && stakingHeight < s.Cfg.DelegationTransition.BeforeBtcHeight {
+	if !delegation.IsOverflow && stakingHeight < s.Cfg.DelegationTransition.EligibleBeforeBtcHeight {
 		return true
 	}
-	if bbnHeight >= s.Cfg.DelegationTransition.AfterBbnHeight {
+	if bbnHeight >= s.Cfg.DelegationTransition.AllowListExpirationHeight {
 		return true
 	}
 
