@@ -25,7 +25,7 @@ func (h *V1QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	if delErr != nil {
 		return delErr
 	}
-	state := del.State
+	state := types.DelegationState(del.State)
 	if utils.Contains(utils.OutdatedStatesForUnbonding(), state) {
 		// Ignore the message as the delegation state already passed the unbonding state. This is an outdated duplication
 		log.Ctx(ctx).Debug().Str("StakingTxHashHex", unbondingStakingEvent.StakingTxHashHex).

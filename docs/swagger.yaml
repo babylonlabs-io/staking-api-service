@@ -233,6 +233,8 @@ definitions:
     properties:
       finality_provider_pk_hex:
         type: string
+      is_eligible_for_transition:
+        type: boolean
       is_overflow:
         type: boolean
       staker_pk_hex:
@@ -612,6 +614,7 @@ paths:
         - unbonding
         - unbonded
         - withdrawn
+        - transitioned
         in: query
         name: state
         type: string

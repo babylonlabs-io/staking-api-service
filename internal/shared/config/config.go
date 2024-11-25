@@ -10,12 +10,13 @@ import (
 )
 
 type Config struct {
-	Server    *ServerConfig      `mapstructure:"server"`
-	StakingDb *DbConfig          `mapstructure:"staking-db"`
-	IndexerDb *DbConfig          `mapstructure:"indexer-db"`
-	Queue     *queue.QueueConfig `mapstructure:"queue"`
-	Metrics   *MetricsConfig     `mapstructure:"metrics"`
-	Assets    *AssetsConfig      `mapstructure:"assets"`
+	Server               *ServerConfig               `mapstructure:"server"`
+	StakingDb            *DbConfig                   `mapstructure:"staking-db"`
+	IndexerDb            *DbConfig                   `mapstructure:"indexer-db"`
+	Queue                *queue.QueueConfig          `mapstructure:"queue"`
+	Metrics              *MetricsConfig              `mapstructure:"metrics"`
+	Assets               *AssetsConfig               `mapstructure:"assets"`
+	DelegationTransition *DelegationTransitionConfig `mapstructure:"delegation_transition"`
 }
 
 func (cfg *Config) Validate() error {
@@ -42,6 +43,13 @@ func (cfg *Config) Validate() error {
 	// Assets is optional
 	if cfg.Assets != nil {
 		if err := cfg.Assets.Validate(); err != nil {
+			return err
+		}
+	}
+
+	// The DelegationTransition is optional
+	if cfg.DelegationTransition != nil {
+		if err := cfg.DelegationTransition.Validate(); err != nil {
 			return err
 		}
 	}

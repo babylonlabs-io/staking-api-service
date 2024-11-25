@@ -196,7 +196,8 @@ const docTemplate = `{
                             "unbonding_requested",
                             "unbonding",
                             "unbonded",
-                            "withdrawn"
+                            "withdrawn",
+                            "transitioned"
                         ],
                         "type": "string",
                         "description": "Filter by state",
@@ -998,6 +999,9 @@ const docTemplate = `{
             "properties": {
                 "finality_provider_pk_hex": {
                     "type": "string"
+                },
+                "is_eligible_for_transition": {
+                    "type": "boolean"
                 },
                 "is_overflow": {
                     "type": "boolean"

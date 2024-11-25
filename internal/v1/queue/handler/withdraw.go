@@ -25,7 +25,7 @@ func (h *V1QueueHandler) WithdrawStakingHandler(ctx context.Context, messageBody
 	if delErr != nil {
 		return delErr
 	}
-	state := del.State
+	state := types.DelegationState(del.State)
 
 	stakingTxHashHex := withdrawnStakingEvent.GetStakingTxHashHex()
 

@@ -5,7 +5,6 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
 )
 
 // GetDelegationByTxHash @Summary Get a delegation
@@ -26,5 +25,5 @@ func (h *V1Handler) GetDelegationByTxHash(request *http.Request) (*handler.Resul
 		return nil, err
 	}
 
-	return handler.NewResult(v1service.FromDelegationDocument(delegation)), nil
+	return handler.NewResult(delegation), nil
 }
