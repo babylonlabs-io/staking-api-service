@@ -10,6 +10,7 @@ const (
 	Unbonding          DelegationState = "unbonding"
 	Unbonded           DelegationState = "unbonded"
 	Withdrawn          DelegationState = "withdrawn"
+	Transitioned       DelegationState = "transitioned"
 )
 
 func (s DelegationState) ToString() string {
@@ -28,6 +29,8 @@ func FromStringToDelegationState(s string) (DelegationState, error) {
 		return Unbonded, nil
 	case "withdrawn":
 		return Withdrawn, nil
+	case "transitioned":
+		return Transitioned, nil
 	default:
 		return "", fmt.Errorf("invalid delegation state: %s", s)
 	}

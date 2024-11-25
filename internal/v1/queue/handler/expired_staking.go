@@ -26,7 +26,8 @@ func (h *V1QueueHandler) ExpiredStakingHandler(ctx context.Context, messageBody 
 	if delErr != nil {
 		return delErr
 	}
-	if utils.Contains[types.DelegationState](utils.OutdatedStatesForUnbonded(), del.State) {
+	state := types.DelegationState(del.State)
+	if utils.Contains(utils.OutdatedStatesForUnbonded(), state) {
 		// Ignore the message as the delegation state already passed the unbonded state. This is an outdated duplication
 		log.Ctx(ctx).Debug().Str("StakingTxHashHex", expiredStakingEvent.StakingTxHashHex).
 			Msg("delegation state is outdated for unbonded event")

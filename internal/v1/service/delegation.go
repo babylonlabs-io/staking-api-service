@@ -21,50 +21,21 @@ type TransactionPublic struct {
 }
 
 type DelegationPublic struct {
-	StakingTxHashHex      string             `json:"staking_tx_hash_hex"`
-	StakerPkHex           string             `json:"staker_pk_hex"`
-	FinalityProviderPkHex string             `json:"finality_provider_pk_hex"`
-	State                 string             `json:"state"`
-	StakingValue          uint64             `json:"staking_value"`
-	StakingTx             *TransactionPublic `json:"staking_tx"`
-	UnbondingTx           *TransactionPublic `json:"unbonding_tx,omitempty"`
-	IsOverflow            bool               `json:"is_overflow"`
-}
-
-func FromDelegationDocument(d *v1model.DelegationDocument) DelegationPublic {
-	delPublic := DelegationPublic{
-		StakingTxHashHex:      d.StakingTxHashHex,
-		StakerPkHex:           d.StakerPkHex,
-		FinalityProviderPkHex: d.FinalityProviderPkHex,
-		StakingValue:          d.StakingValue,
-		State:                 d.State.ToString(),
-		StakingTx: &TransactionPublic{
-			TxHex:          d.StakingTx.TxHex,
-			OutputIndex:    d.StakingTx.OutputIndex,
-			StartTimestamp: utils.ParseTimestampToIsoFormat(d.StakingTx.StartTimestamp),
-			StartHeight:    d.StakingTx.StartHeight,
-			TimeLock:       d.StakingTx.TimeLock,
-		},
-		IsOverflow: d.IsOverflow,
-	}
-
-	// Add unbonding transaction if it exists
-	if d.UnbondingTx != nil && d.UnbondingTx.TxHex != "" {
-		delPublic.UnbondingTx = &TransactionPublic{
-			TxHex:          d.UnbondingTx.TxHex,
-			OutputIndex:    d.UnbondingTx.OutputIndex,
-			StartTimestamp: utils.ParseTimestampToIsoFormat(d.UnbondingTx.StartTimestamp),
-			StartHeight:    d.UnbondingTx.StartHeight,
-			TimeLock:       d.UnbondingTx.TimeLock,
-		}
-	}
-	return delPublic
+	StakingTxHashHex        string             `json:"staking_tx_hash_hex"`
+	StakerPkHex             string             `json:"staker_pk_hex"`
+	FinalityProviderPkHex   string             `json:"finality_provider_pk_hex"`
+	State                   string             `json:"state"`
+	StakingValue            uint64             `json:"staking_value"`
+	StakingTx               *TransactionPublic `json:"staking_tx"`
+	UnbondingTx             *TransactionPublic `json:"unbonding_tx,omitempty"`
+	IsOverflow              bool               `json:"is_overflow"`
+	IsEligibleForTransition bool               `json:"is_eligible_for_transition"`
 }
 
 func (s *V1Service) DelegationsByStakerPk(
 	ctx context.Context, stakerPk string,
 	state types.DelegationState, pageToken string,
-) ([]DelegationPublic, string, *types.Error) {
+) ([]*DelegationPublic, string, *types.Error) {
 	filter := &v1dbclient.DelegationFilter{}
 	if state != "" {
 		filter = &v1dbclient.DelegationFilter{
@@ -81,9 +52,9 @@ func (s *V1Service) DelegationsByStakerPk(
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to find delegations by staker pk")
 		return nil, "", types.NewInternalServiceError(err)
 	}
-	var delegations []DelegationPublic = make([]DelegationPublic, 0, len(resultMap.Data))
+	var delegations []*DelegationPublic = make([]*DelegationPublic, 0, len(resultMap.Data))
 	for _, d := range resultMap.Data {
-		delegations = append(delegations, FromDelegationDocument(&d))
+		delegations = append(delegations, s.FromDelegationDocument(ctx, &d))
 	}
 	return delegations, resultMap.PaginationToken, nil
 }
@@ -125,7 +96,7 @@ func (s *V1Service) IsDelegationPresent(ctx context.Context, txHashHex string) (
 	return false, nil
 }
 
-func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*v1model.DelegationDocument, *types.Error) {
+func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*DelegationPublic, *types.Error) {
 	delegation, err := s.Service.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, txHashHex)
 	if err != nil {
 		if db.IsNotFoundError(err) {
@@ -135,7 +106,7 @@ func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*v1mod
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to find delegation by tx hash hex")
 		return nil, types.NewInternalServiceError(err)
 	}
-	return delegation, nil
+	return s.FromDelegationDocument(ctx, delegation), nil
 }
 
 func (s *V1Service) CheckStakerHasActiveDelegationByPk(
@@ -153,4 +124,67 @@ func (s *V1Service) CheckStakerHasActiveDelegationByPk(
 		return false, types.NewInternalServiceError(err)
 	}
 	return hasDelegation, nil
+}
+
+func (s *V1Service) isEligibleForTransition(
+	ctx context.Context, delegation *v1model.DelegationDocument,
+) bool {
+	// Check the delegation state, only active delegations are eligible for transition
+	if delegation.State != types.Active {
+		return false
+	}
+
+	if s.Cfg.DelegationTransition == nil {
+		return false
+	}
+
+	// Check the delegation staking height
+	stakingHeight := delegation.StakingTx.StartHeight
+	if stakingHeight < s.Cfg.DelegationTransition.BeforeBtcHeight {
+		return true
+	}
+	// Get the last processed BBN height
+	bbnHeight, err := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height")
+		return false
+	}
+	if bbnHeight >= s.Cfg.DelegationTransition.AfterBbnHeight {
+		return true
+	}
+
+	return false
+}
+
+func (s *V1Service) FromDelegationDocument(
+	ctx context.Context, d *v1model.DelegationDocument,
+) *DelegationPublic {
+	delPublic := &DelegationPublic{
+		StakingTxHashHex:      d.StakingTxHashHex,
+		StakerPkHex:           d.StakerPkHex,
+		FinalityProviderPkHex: d.FinalityProviderPkHex,
+		StakingValue:          d.StakingValue,
+		State:                 d.State.ToString(),
+		StakingTx: &TransactionPublic{
+			TxHex:          d.StakingTx.TxHex,
+			OutputIndex:    d.StakingTx.OutputIndex,
+			StartTimestamp: utils.ParseTimestampToIsoFormat(d.StakingTx.StartTimestamp),
+			StartHeight:    d.StakingTx.StartHeight,
+			TimeLock:       d.StakingTx.TimeLock,
+		},
+		IsOverflow:              d.IsOverflow,
+		IsEligibleForTransition: s.isEligibleForTransition(ctx, d),
+	}
+
+	// Add unbonding transaction if it exists
+	if d.UnbondingTx != nil && d.UnbondingTx.TxHex != "" {
+		delPublic.UnbondingTx = &TransactionPublic{
+			TxHex:          d.UnbondingTx.TxHex,
+			OutputIndex:    d.UnbondingTx.OutputIndex,
+			StartTimestamp: utils.ParseTimestampToIsoFormat(d.UnbondingTx.StartTimestamp),
+			StartHeight:    d.UnbondingTx.StartHeight,
+			TimeLock:       d.UnbondingTx.TimeLock,
+		}
+	}
+	return delPublic
 }
