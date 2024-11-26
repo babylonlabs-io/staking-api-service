@@ -224,7 +224,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.0 // indirect
 	github.com/prometheus/client_golang v1.19.0
-	github.com/rs/cors v1.10.1
+	github.com/rs/cors v1.11.1
 	github.com/rs/zerolog v1.32.0
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
@@ -238,7 +238,7 @@ require (
 	github.com/swaggo/http-swagger v1.3.4
 	go.mongodb.org/mongo-driver v1.14.0
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0 // indirect
+	golang.org/x/exp v0.0.0-20240404231335-c0f41cb1a7a0
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
