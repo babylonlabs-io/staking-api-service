@@ -1,6 +1,10 @@
 package utils
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"golang.org/x/exp/rand"
+)
 
 // Contains checks if a slice contains a specific element.
 // It uses type parameters to work with any slice type.
@@ -27,4 +31,14 @@ func DeepCopy(src, dst interface{}) error {
 	}
 
 	return nil
+}
+
+// Shuffle randomly reorders the elements in a slice.
+// It uses the Fisher-Yates shuffle algorithm.
+func Shuffle[T any](slice []*T) []*T {
+	for i := len(slice) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		slice[i], slice[j] = slice[j], slice[i]
+	}
+	return slice
 }

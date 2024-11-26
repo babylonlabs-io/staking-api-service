@@ -5,6 +5,7 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/utils"
 )
 
 // GetFinalityProviders gets active finality providers sorted by ActiveTvl.
@@ -16,6 +17,9 @@ import (
 // @Success 200 {object} PublicResponse[[]services.FpDetailsPublic] "A list of finality providers sorted by ActiveTvl in descending order"
 // @Router /v1/finality-providers [get]
 func (h *Handler) GetFinalityProviders(request *http.Request) (*Result, *types.Error) {
+	// Check if random sort is requested, defaulting to false if not specified
+	randomSort := request.URL.Query().Get("sort") == "random"
+
 	fpPk, err := parsePublicKeyQuery(request, "fp_btc_pk", true)
 	if err != nil {
 		return nil, err
@@ -41,5 +45,10 @@ func (h *Handler) GetFinalityProviders(request *http.Request) (*Result, *types.E
 	if err != nil {
 		return nil, err
 	}
+
+	if randomSort {
+		fps = utils.Shuffle(fps)
+	}
+
 	return NewResultWithPagination(fps, paginationToken), nil
 }
