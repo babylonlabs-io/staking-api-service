@@ -537,31 +537,24 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/params": {
+        "/v2/network-info": {
             "get": {
-                "description": "Fetches system parameters for babylon chain and BTC chain",
+                "description": "Get network info, including staking status and param",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v2"
                 ],
-                "summary": "Get Parameters",
                 "responses": {
                     "200": {
-                        "description": "Parameters",
+                        "description": "Network info",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-v2service_ParamsPublic"
+                            "$ref": "#/definitions/v2service.NetworkInfoPublic"
                         }
                     },
-                    "404": {
-                        "description": "Error: Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Error: Internal Server Error",
+                    "400": {
+                        "description": "Error: Bad Request",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
@@ -754,17 +747,6 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/v2service.OverallStatsPublic"
-                },
-                "pagination": {
-                    "$ref": "#/definitions/handler.paginationResponse"
-                }
-            }
-        },
-        "handler.PublicResponse-v2service_ParamsPublic": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/v2service.ParamsPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -1248,6 +1230,17 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.NetworkInfoPublic": {
+            "type": "object",
+            "properties": {
+                "params": {
+                    "$ref": "#/definitions/v2service.ParamsPublic"
+                },
+                "staking_status": {
+                    "$ref": "#/definitions/v2service.StakingStatusPublic"
+                }
+            }
+        },
         "v2service.OverallStatsPublic": {
             "type": "object",
             "properties": {
@@ -1346,6 +1339,14 @@ const docTemplate = `{
                 },
                 "withdrawable_tvl": {
                     "type": "integer"
+                }
+            }
+        },
+        "v2service.StakingStatusPublic": {
+            "type": "object",
+            "properties": {
+                "is_staking_open": {
+                    "type": "boolean"
                 }
             }
         },

@@ -47,11 +47,8 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
-	// The DelegationTransition is optional
-	if cfg.DelegationTransition != nil {
-		if err := cfg.DelegationTransition.Validate(); err != nil {
-			return err
-		}
+	if err := cfg.DelegationTransition.Validate(); err != nil {
+		return err
 	}
 
 	return nil
