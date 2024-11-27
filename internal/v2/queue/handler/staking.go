@@ -6,9 +6,7 @@ import (
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	v2queueschema "github.com/babylonlabs-io/staking-api-service/internal/v2/queue/schema"
-	v2types "github.com/babylonlabs-io/staking-api-service/internal/v2/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -64,19 +62,6 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into UnbondingStakingEvent")
 		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
-	}
-
-	// Check if the delegation is in the right state to process the unbonding event
-	del, delErr := h.Service.GetDelegation(ctx, unbondingStakingEvent.StakingTxHashHex)
-	// Requeue if found any error. Including not found error
-	if delErr != nil {
-		return delErr
-	}
-	if utils.Contains(v2types.OutdatedStatesForUnbonding(), del.State) {
-		// Ignore the message as the delegation state already passed the unbonding state. This is an outdated duplication
-		log.Ctx(ctx).Debug().Str("StakingTxHashHex", unbondingStakingEvent.StakingTxHashHex).
-			Msg("delegation state is outdated for unbonding event")
-		return nil
 	}
 
 	// Perform the stats calculation
