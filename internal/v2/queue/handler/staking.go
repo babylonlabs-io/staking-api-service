@@ -8,6 +8,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	v2queueschema "github.com/babylonlabs-io/staking-api-service/internal/v2/queue/schema"
+	v2types "github.com/babylonlabs-io/staking-api-service/internal/v2/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -71,8 +72,21 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	if delErr != nil {
 		return delErr
 	}
-	state := types.DelegationState(del.State)
-	if utils.Contains(utils.OutdatedStatesForUnbonding(), state) {
+	state := v2types.DelegationState(del.State)
+	if utils.Contains([]v2types.DelegationState{
+		v2types.StateTimelockUnbonding,
+		v2types.StateEarlyUnbonding,
+		v2types.StateTimelockWithdrawable,
+		v2types.StateEarlyUnbondingWithdrawable,
+		v2types.StateTimelockSlashingWithdrawable,
+		v2types.StateEarlyUnbondingSlashingWithdrawable,
+		v2types.StateTimelockWithdrawn,
+		v2types.StateEarlyUnbondingWithdrawn,
+		v2types.StateTimelockSlashingWithdrawn,
+		v2types.StateEarlyUnbondingSlashingWithdrawn,
+		v2types.StateTimelockSlashed,
+		v2types.StateEarlyUnbondingSlashed,
+	}, state) {
 		// Ignore the message as the delegation state already passed the unbonding state. This is an outdated duplication
 		log.Ctx(ctx).Debug().Str("StakingTxHashHex", unbondingStakingEvent.StakingTxHashHex).
 			Msg("delegation state is outdated for unbonding event")

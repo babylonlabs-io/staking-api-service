@@ -39,7 +39,6 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		TotalTvl:          overallStats.TotalTvl,
 		ActiveDelegations: overallStats.ActiveDelegations,
 		TotalDelegations:  overallStats.TotalDelegations,
-		ActiveStakers:     overallStats.ActiveStakers,
 		TotalStakers:      overallStats.TotalStakers,
 	}, nil
 }
