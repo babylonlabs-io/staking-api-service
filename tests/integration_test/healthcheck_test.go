@@ -81,12 +81,11 @@ func TestOptionsRequest(t *testing.T) {
 	req, err := http.NewRequest("OPTIONS", url, nil)
 	assert.NoError(t, err, "making OPTION request to health check endpoint should not fail")
 	req.Header.Add("Origin", "https://dashboard.testnet3.babylonlabs-io.io")
-	req.Header.Add("Access-Control-Request-Headers", "Content-Type")
 	req.Header.Add("Access-Control-Request-Method", "GET")
 
 	// Send the request
 	resp, err := client.Do(req)
-	assert.NoError(t, err, "making OPTION request to polygon address check endpoint should not fail")
+	assert.NoError(t, err, "making OPTION request to health check endpoint should not fail")
 	defer resp.Body.Close()
 
 	// Check that the status code is HTTP 204
