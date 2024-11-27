@@ -9,9 +9,6 @@ server:
   btc-net: "signet"
   max-content-length: 40960
   health-check-interval: 2
-delegation-transition:
-  eligible_before_btc_height: 1
-  allow_list_expiration_height: 1
 staking-db:
   username: root
   password: example
