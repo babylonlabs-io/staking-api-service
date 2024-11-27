@@ -19,7 +19,6 @@ import (
 
 // GetOrCreateStatsLock fetches the lock status for each stats type for the given staking tx hash.
 // If the document does not exist, it will create a new document with the default values
-// Refer to the README.md in this directory for more information on the stats lock
 func (db *V2Database) GetOrCreateStatsLock(
 	ctx context.Context, stakingTxHashHex string, txType string,
 ) (*v2dbmodel.V2StatsLockDocument, error) {
@@ -48,7 +47,6 @@ func (db *V2Database) GetOrCreateStatsLock(
 
 // IncrementOverallStats increments the overall stats for the given staking tx hash.
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-// Refer to the README.md in this directory for more information on the sharding logic
 func (v2dbclient *V2Database) IncrementOverallStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
