@@ -155,18 +155,23 @@ func ParseBtcAddressesQuery(
 // If the state is not provided, it returns an empty string
 func ParseStateFilterQuery(
 	r *http.Request, queryName string,
-) (types.DelegationState, *types.Error) {
-	state := r.URL.Query().Get(queryName)
-	if state == "" {
-		return "", nil
+) ([]types.DelegationState, *types.Error) {
+	states := r.URL.Query()[queryName]
+	if len(states) == 0 {
+		return nil, nil
 	}
-	stateEnum, err := types.FromStringToDelegationState(state)
-	if err != nil {
-		return "", types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, err.Error(),
-		)
+
+	var stateEnums []types.DelegationState
+	for _, state := range states {
+		stateEnum, err := types.FromStringToDelegationState(state)
+		if err != nil {
+			return nil, types.NewErrorWithMsg(
+				http.StatusBadRequest, types.BadRequest, err.Error(),
+			)
+		}
+		stateEnums = append(stateEnums, stateEnum)
 	}
-	return stateEnum, nil
+	return stateEnums, nil
 }
 
 func ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {

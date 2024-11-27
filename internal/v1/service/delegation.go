@@ -36,12 +36,12 @@ type DelegationPublic struct {
 
 func (s *V1Service) DelegationsByStakerPk(
 	ctx context.Context, stakerPk string,
-	state types.DelegationState, pageToken string,
+	states []types.DelegationState, pageToken string,
 ) ([]*DelegationPublic, string, *types.Error) {
 	filter := &v1dbclient.DelegationFilter{}
-	if state != "" {
+	if len(states) > 0 {
 		filter = &v1dbclient.DelegationFilter{
-			States: []types.DelegationState{state},
+			States: states,
 		}
 	}
 

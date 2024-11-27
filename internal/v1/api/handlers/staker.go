@@ -17,7 +17,6 @@ type DelegationCheckPublicResponse struct {
 // @Description Retrieves delegations for a given staker
 // @Produce json
 // @Tags v1
-// @Deprecated
 // @Param staker_btc_pk query string true "Staker BTC Public Key"
 // @Param state query types.DelegationState false "Filter by state"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
