@@ -47,7 +47,9 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 // ProcessStakingStatsCalculation calculates the staking stats and updates the database.
 // This method tolerates duplicated calls, only the first call will be processed.
 func (s *V2Service) ProcessStakingStatsCalculation(
-	ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string,
+	ctx context.Context,
+	stakingTxHashHex, stakerPkHex string,
+	finalityProviderBtcPksHex []string,
 	state types.DelegationState, amount uint64,
 ) *types.Error {
 	// Fetch existing or initialize the stats lock document if not exist

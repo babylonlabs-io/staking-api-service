@@ -22,4 +22,10 @@ type V2ServiceProvider interface {
 
 	// Staker
 	ProcessAndSaveBtcAddresses(ctx context.Context, stakerPkHex string) *types.Error
+	ProcessStakingStatsCalculation(
+		ctx context.Context,
+		stakingTxHashHex, stakerPkHex string,
+		finalityProviderBtcPksHex []string,
+		state types.DelegationState, amount uint64,
+	) *types.Error
 }

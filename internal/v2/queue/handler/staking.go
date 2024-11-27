@@ -42,9 +42,9 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 	statsErr := h.Service.ProcessStakingStatsCalculation(
 		ctx, activeStakingEvent.StakingTxHashHex,
 		activeStakingEvent.StakerBtcPkHex,
-		activeStakingEvent.FinalityProviderBtcPkHex,
+		activeStakingEvent.FinalityProviderBtcPksHex,
 		types.Active,
-		activeStakingEvent.StakingValue,
+		activeStakingEvent.StakingAmount,
 	)
 	if statsErr != nil {
 		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process staking stats calculation")
