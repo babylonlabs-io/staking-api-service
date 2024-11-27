@@ -20,4 +20,10 @@ type V2DBClient interface {
 	SubtractOverallStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
+	IncrementStakerStats(
+		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	) error
+	SubtractStakerStats(
+		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	) error
 }

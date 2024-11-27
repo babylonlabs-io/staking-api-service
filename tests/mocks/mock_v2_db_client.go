@@ -232,6 +232,24 @@ func (_m *V2DBClient) IncrementOverallStats(ctx context.Context, stakingTxHashHe
 	return r0
 }
 
+// IncrementStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, amount
+func (_m *V2DBClient) IncrementStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, amount)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IncrementStakerStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, amount)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // InsertPkAddressMappings provides a mock function with given fields: ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven
 func (_m *V2DBClient) InsertPkAddressMappings(ctx context.Context, stakerPkHex string, taproot string, nativeSigwitOdd string, nativeSigwitEven string) error {
 	ret := _m.Called(ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven)
@@ -292,6 +310,24 @@ func (_m *V2DBClient) SubtractOverallStats(ctx context.Context, stakingTxHashHex
 
 	if len(ret) == 0 {
 		panic("no return value specified for SubtractOverallStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, amount)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SubtractStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, amount
+func (_m *V2DBClient) SubtractStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, amount)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SubtractStakerStats")
 	}
 
 	var r0 error

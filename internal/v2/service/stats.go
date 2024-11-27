@@ -65,7 +65,29 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 	case types.Active:
 		// TODO: Add finality provider stats calculation
 
-		// TODO: Add staker stats calculation
+		if !statsLockDocument.StakerStats {
+			// Convert the staker public key to multiple BTC addresses and save
+			// them in the database.
+			if addressConversionErr := s.ProcessAndSaveBtcAddresses(
+				ctx, stakerPkHex,
+			); addressConversionErr != nil {
+				log.Ctx(ctx).Error().Err(addressConversionErr).
+					Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while processing and saving btc addresses")
+				return types.NewInternalServiceError(addressConversionErr)
+			}
+			err = s.Service.DbClients.V2DBClient.IncrementStakerStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
+			if err != nil {
+				if db.IsNotFoundError(err) {
+					return nil
+				}
+				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while incrementing staker stats")
+				return types.NewInternalServiceError(err)
+			}
+		}
 
 		// Add to the overall stats
 		// The overall stats should be the last to be updated as it has dependency
@@ -87,8 +109,19 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 	case types.Unbonded:
 		// TODO: Add finality provider stats calculation
 
-		// TODO: Add staker stats calculation
-
+		if !statsLockDocument.StakerStats {
+			err = s.Service.DbClients.V2DBClient.SubtractStakerStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
+			if err != nil {
+				if db.IsNotFoundError(err) {
+					return nil
+				}
+				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while subtracting staker stats")
+				return types.NewInternalServiceError(err)
+			}
+		}
 		// Subtract from the overall stats.
 		// The overall stats should be the last to be updated as it has dependency
 		// on staker stats.
