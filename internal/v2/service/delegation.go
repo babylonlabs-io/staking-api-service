@@ -20,6 +20,7 @@ type DelegationStaking struct {
 	EndHeight          uint32 `json:"end_height,omitempty"`
 	BbnInceptionHeight int64  `json:"bbn_inception_height"`
 	BbnInceptionTime   int64  `json:"bbn_inception_time"`
+	SlashingTxHex      string `json:"slashing_tx_hex"`
 }
 
 type CovenantSignature struct {
@@ -31,6 +32,7 @@ type DelegationUnbonding struct {
 	UnbondingTime               uint32              `json:"unbonding_time"`
 	UnbondingTx                 string              `json:"unbonding_tx"`
 	CovenantUnbondingSignatures []CovenantSignature `json:"covenant_unbonding_signatures"`
+	SlashingTxHex               string              `json:"slashing_tx_hex"`
 }
 
 type StakerDelegationPublic struct {
@@ -70,6 +72,7 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 			EndHeight:          delegation.EndHeight,
 			BbnInceptionHeight: delegation.BTCDelegationCreatedBbnBlock.Height,
 			BbnInceptionTime:   delegation.BTCDelegationCreatedBbnBlock.Timestamp,
+			SlashingTxHex:      delegation.SlashingTxHex,
 		},
 		DelegationUnbonding: DelegationUnbonding{
 			UnbondingTime: delegation.UnbondingTime,
@@ -77,6 +80,7 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 			CovenantUnbondingSignatures: getUnbondingSignatures(
 				delegation.CovenantUnbondingSignatures,
 			),
+			SlashingTxHex: delegation.UnbondingSlashingTxHex,
 		},
 		State: state,
 	}
@@ -116,6 +120,7 @@ func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, pagi
 				EndHeight:          delegation.EndHeight,
 				BbnInceptionHeight: delegation.BTCDelegationCreatedBbnBlock.Height,
 				BbnInceptionTime:   delegation.BTCDelegationCreatedBbnBlock.Timestamp,
+				SlashingTxHex:      delegation.SlashingTxHex,
 			},
 			DelegationUnbonding: DelegationUnbonding{
 				UnbondingTime: delegation.UnbondingTime,
@@ -123,6 +128,7 @@ func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, pagi
 				CovenantUnbondingSignatures: getUnbondingSignatures(
 					delegation.CovenantUnbondingSignatures,
 				),
+				SlashingTxHex: delegation.UnbondingSlashingTxHex,
 			},
 			State: state,
 		}
