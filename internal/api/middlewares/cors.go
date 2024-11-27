@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/rs/cors"
@@ -53,6 +54,10 @@ func CorsMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 					// This is a preflight request, respond with 204 immediately
 					w.WriteHeader(204)
 				}
+			} else {
+				// Set the default CORS headers for other routes
+				w.Header().Set("Access-Control-Allow-Origin", strings.Join(cfg.Server.AllowedOrigins, ","))
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 			}
 			// Serve the request with the CORS handler
 			corsHandler.ServeHTTP(w, r)
