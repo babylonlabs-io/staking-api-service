@@ -122,7 +122,6 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 		},
 	}
 	overallStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2OverallStatsCollection)
-	stakerStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
 
 	// Start a session
 	session, sessionErr := v2dbclient.Client.StartSession()
@@ -133,22 +132,10 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 
 	// Define the work to be done in the transaction
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonded.ToString(), "v2_overall_stats")
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonded.ToString(), "overall_stats")
 		if err != nil {
 			return nil, err
 		}
-
-		// Check if this was the last active delegation for the staker
-		var stakerStats v2dbmodel.V2StakerStatsDocument
-		stakerStatsFilter := bson.M{"_id": stakerPkHex}
-		stakerErr := stakerStatsClient.FindOne(ctx, stakerStatsFilter).Decode(&stakerStats)
-		if stakerErr != nil {
-			return nil, stakerErr
-		}
-		if stakerStats.ActiveDelegations == 0 {
-			upsertUpdate["$inc"].(bson.M)["active_stakers"] = -1
-		}
-
 		shardId, err := v2dbclient.generateOverallStatsId()
 		if err != nil {
 			return nil, err
