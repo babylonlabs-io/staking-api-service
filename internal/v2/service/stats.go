@@ -2,7 +2,10 @@ package v2service
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
 )
@@ -65,4 +68,73 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		ActiveFinalityProviders: overallStats.ActiveFinalityProviders,
 		TotalFinalityProviders:  overallStats.TotalFinalityProviders,
 	}, nil
+}
+
+// ProcessStakingStatsCalculation calculates the staking stats and updates the database.
+// This method tolerates duplicated calls, only the first call will be processed.
+func (s *V2Service) ProcessStakingStatsCalculation(
+	ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string,
+	state types.DelegationState, amount uint64,
+) *types.Error {
+	// Fetch existing or initialize the stats lock document if not exist
+	statsLockDocument, err := s.Service.DbClients.V2DBClient.GetOrCreateStatsLock(
+		ctx, stakingTxHashHex, state.ToString(),
+	)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+			Msg("error while fetching stats lock document")
+		return types.NewInternalServiceError(err)
+	}
+	switch state {
+	case types.Active:
+		// TODO: Add finality provider stats calculation
+
+		// TODO: Add staker stats calculation
+
+		// Add to the overall stats
+		// The overall stats should be the last to be updated as it has dependency
+		// on staker stats.
+		if !statsLockDocument.OverallStats {
+			err = s.Service.DbClients.V2DBClient.IncrementOverallStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
+			if err != nil {
+				if db.IsNotFoundError(err) {
+					// This is a duplicate call, ignore it
+					return nil
+				}
+				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while incrementing overall stats")
+				return types.NewInternalServiceError(err)
+			}
+		}
+	case types.Unbonded:
+		// TODO: Add finality provider stats calculation
+
+		// TODO: Add staker stats calculation
+
+		// Subtract from the overall stats.
+		// The overall stats should be the last to be updated as it has dependency
+		// on staker stats.
+		if !statsLockDocument.OverallStats {
+			err = s.Service.DbClients.V1DBClient.SubtractOverallStats(
+				ctx, stakingTxHashHex, stakerPkHex, amount,
+			)
+			if err != nil {
+				if db.IsNotFoundError(err) {
+					return nil
+				}
+				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while subtracting overall stats")
+				return types.NewInternalServiceError(err)
+			}
+		}
+	default:
+		return types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			fmt.Sprintf("invalid delegation state for stats calculation: %s", state),
+		)
+	}
+	return nil
 }

@@ -62,13 +62,11 @@ func BuildV2FinalityProviderStatsPaginationToken(d *V2FinalityProviderStatsDocum
 }
 
 type V2StakerStatsDocument struct {
-	StakerPkHex             string      `bson:"_id"` // StakerPkHex
-	ActiveTvl               int64       `bson:"active_tvl"`
-	WithdrawableTvl         int64       `bson:"withdrawable_tvl"`
-	SlashedTvl              int64       `bson:"slashed_tvl"`
-	ActiveDelegations       uint32      `bson:"active_delegations"`
-	WithdrawableDelegations uint32      `bson:"withdrawable_delegations"`
-	SlashedDelegations      uint32      `bson:"slashed_delegations"`
+	StakerPkHex       string `bson:"_id"`
+	ActiveTvl         int64  `bson:"active_tvl"`
+	TotalTvl          int64  `bson:"total_tvl"`
+	ActiveDelegations int64  `bson:"active_delegations"`
+	TotalDelegations  int64  `bson:"total_delegations"`
 }
 
 // StakerStatsByStakerPagination is used to paginate the top stakers by active tvl
