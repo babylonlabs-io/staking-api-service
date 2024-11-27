@@ -39,6 +39,8 @@ type IndexerDelegationDetails struct {
 	EndHeight                    uint32                          `bson:"end_height"`
 	CovenantUnbondingSignatures  []CovenantSignature             `bson:"covenant_unbonding_signatures"`
 	BTCDelegationCreatedBbnBlock BTCDelegationCreatedBbnBlock    `bson:"btc_delegation_created_bbn_block"`
+	SlashingTxHex                string                          `bson:"slashing_tx_hex"`
+	UnbondingSlashingTxHex       string                          `bson:"unbonding_slashing_tx_hex"`
 }
 
 func BuildDelegationPaginationToken(d IndexerDelegationDetails) (string, error) {
