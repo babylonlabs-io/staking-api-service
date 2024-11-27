@@ -30,7 +30,6 @@ type V2OverallStatsDocument struct {
 	TotalTvl          int64  `bson:"total_tvl"`
 	ActiveDelegations int64  `bson:"active_delegations"`
 	TotalDelegations  int64  `bson:"total_delegations"`
-	ActiveStakers     uint64 `bson:"active_stakers"`
 	TotalStakers      uint64 `bson:"total_stakers"`
 }
 
