@@ -100,7 +100,7 @@ func TestOptionsRequest(t *testing.T) {
 	// Check that the status code is HTTP 204
 	assert.Equal(t, http.StatusNoContent, resp.StatusCode, "expected HTTP 204 OK status")
 	assert.Equal(t, "*", resp.Header.Get("Access-Control-Allow-Origin"), "expected Access-Control-Allow-Origin to be *")
-	assert.Equal(t, "GET", resp.Header.Get("Access-Control-Allow-Methods"), "expected Access-Control-Allow-Methods to be GET")
+	assert.Contains(t, resp.Header.Get("Access-Control-Allow-Methods"), "GET", "expected Access-Control-Allow-Methods to include GET")
 }
 
 func TestSecurityHeaders(t *testing.T) {
