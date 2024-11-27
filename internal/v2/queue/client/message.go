@@ -11,14 +11,14 @@ func (q *V2QueueClient) StartReceivingMessages() {
 	log.Printf("Starting to receive messages from verified staking queue")
 	queueclient.StartQueueMessageProcessing(
 		q.VerifiedStakingEventQueueClient,
-		q.Handler.VerifiedStakingHandler, q.Handler.HandleUnprocessedMessage,
+		q.Handler.VerifiedStakingHandler, nil,
 		q.MaxRetryAttempts, q.ProcessingTimeout,
 	)
 
 	log.Printf("Starting to receive messages from pending staking queue")
 	queueclient.StartQueueMessageProcessing(
 		q.PendingStakingEventQueueClient,
-		q.Handler.PendingStakingHandler, q.Handler.HandleUnprocessedMessage,
+		q.Handler.PendingStakingHandler, nil,
 		q.MaxRetryAttempts, q.ProcessingTimeout,
 	)
 

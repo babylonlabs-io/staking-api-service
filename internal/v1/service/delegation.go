@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
@@ -30,6 +31,7 @@ type DelegationPublic struct {
 	UnbondingTx             *TransactionPublic `json:"unbonding_tx,omitempty"`
 	IsOverflow              bool               `json:"is_overflow"`
 	IsEligibleForTransition bool               `json:"is_eligible_for_transition"`
+	IsSlashed               bool               `json:"is_slashed"`
 }
 
 func (s *V1Service) DelegationsByStakerPk(
@@ -59,8 +61,15 @@ func (s *V1Service) DelegationsByStakerPk(
 		return nil, "", types.NewInternalServiceError(err)
 	}
 
+	// Get list of all finality providers in phase-2
+	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get finality providers")
+		return nil, "", types.NewInternalServiceError(err)
+	}
+
 	for _, d := range resultMap.Data {
-		delegations = append(delegations, s.FromDelegationDocument(&d, bbnHeight))
+		delegations = append(delegations, s.FromDelegationDocument(&d, bbnHeight, transitionedFps))
 	}
 	return delegations, resultMap.PaginationToken, nil
 }
@@ -117,7 +126,15 @@ func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*Deleg
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height")
 		return nil, types.NewInternalServiceError(err)
 	}
-	return s.FromDelegationDocument(delegation, bbnHeight), nil
+
+	// Get list of all finality providers in phase-2
+	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get finality providers")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	return s.FromDelegationDocument(delegation, bbnHeight, transitionedFps), nil
 }
 
 func (s *V1Service) CheckStakerHasActiveDelegationByPk(
@@ -135,6 +152,18 @@ func (s *V1Service) CheckStakerHasActiveDelegationByPk(
 		return false, types.NewInternalServiceError(err)
 	}
 	return hasDelegation, nil
+}
+
+// This method checks if the finality provider is slashed and whether it is in the transitioned list
+func (s *V1Service) checkFpStatus(
+	fpPk string, transitionedFps []*indexerdbmodel.IndexerFinalityProviderDetails,
+) (bool, bool) {
+	for _, fp := range transitionedFps {
+		if fp.BtcPk == fpPk {
+			return true, fp.State == indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED
+		}
+	}
+	return false, false
 }
 
 func (s *V1Service) isEligibleForTransition(
@@ -164,7 +193,9 @@ func (s *V1Service) isEligibleForTransition(
 
 func (s *V1Service) FromDelegationDocument(
 	d *v1model.DelegationDocument, bbnHeight uint64,
+	transitionedFps []*indexerdbmodel.IndexerFinalityProviderDetails,
 ) *DelegationPublic {
+	isTransitioned, isSlashed := s.checkFpStatus(d.FinalityProviderPkHex, transitionedFps)
 	delPublic := &DelegationPublic{
 		StakingTxHashHex:      d.StakingTxHashHex,
 		StakerPkHex:           d.StakerPkHex,
@@ -179,7 +210,8 @@ func (s *V1Service) FromDelegationDocument(
 			TimeLock:       d.StakingTx.TimeLock,
 		},
 		IsOverflow:              d.IsOverflow,
-		IsEligibleForTransition: s.isEligibleForTransition(d, bbnHeight),
+		IsEligibleForTransition: isTransitioned && !isSlashed && s.isEligibleForTransition(d, bbnHeight),
+		IsSlashed:               isSlashed,
 	}
 
 	// Add unbonding transaction if it exists
