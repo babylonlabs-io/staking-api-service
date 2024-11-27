@@ -19,6 +19,14 @@ type OverallStatsPublic struct {
 	TotalStakers      uint64 `json:"total_stakers"`
 }
 
+type StakerStatsPublic struct {
+	StakerPkHex       string `json:"staker_pk_hex"`
+	ActiveTvl         int64  `json:"active_tvl"`
+	TotalTvl          int64  `json:"total_tvl"`
+	ActiveDelegations int64  `json:"active_delegations"`
+	TotalDelegations  int64  `json:"total_delegations"`
+}
+
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
 	overallStats, err := s.DbClients.V2DBClient.GetOverallStats(ctx)
 	if err != nil {

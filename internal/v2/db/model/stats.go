@@ -25,40 +25,13 @@ func NewV2StatsLockDocument(
 }
 
 type V2OverallStatsDocument struct {
-	Id                      string `bson:"_id"`
-	ActiveTvl               int64  `bson:"active_tvl"`
-	TotalTvl                int64  `bson:"total_tvl"`
-	ActiveDelegations       int64  `bson:"active_delegations"`
-	TotalDelegations        int64  `bson:"total_delegations"`
-	ActiveStakers           uint64 `bson:"active_stakers"`
-	TotalStakers            uint64 `bson:"total_stakers"`
-	ActiveFinalityProviders uint64 `bson:"active_finality_providers"`
-	TotalFinalityProviders  uint64 `bson:"total_finality_providers"`
-}
-
-type V2FinalityProviderStatsDocument struct {
-	FinalityProviderPkHex string `bson:"_id"` // FinalityProviderPkHex
-	ActiveTvl             int64  `bson:"active_tvl"`
-	TotalTvl              int64  `bson:"total_tvl"`
-	ActiveDelegations     int64  `bson:"active_delegations"`
-	TotalDelegations      int64  `bson:"total_delegations"`
-}
-
-type V2FinalityProviderStatsPagination struct {
-	FinalityProviderPkHex string `json:"finality_provider_pk_hex"`
-	ActiveTvl             int64  `json:"active_tvl"`
-}
-
-func BuildV2FinalityProviderStatsPaginationToken(d *V2FinalityProviderStatsDocument) (string, error) {
-	page := V2FinalityProviderStatsPagination{
-		ActiveTvl:             d.ActiveTvl,
-		FinalityProviderPkHex: d.FinalityProviderPkHex,
-	}
-	token, err := dbmodel.GetPaginationToken(page)
-	if err != nil {
-		return "", err
-	}
-	return token, nil
+	Id                string `bson:"_id"`
+	ActiveTvl         int64  `bson:"active_tvl"`
+	TotalTvl          int64  `bson:"total_tvl"`
+	ActiveDelegations int64  `bson:"active_delegations"`
+	TotalDelegations  int64  `bson:"total_delegations"`
+	ActiveStakers     uint64 `bson:"active_stakers"`
+	TotalStakers      uint64 `bson:"total_stakers"`
 }
 
 type V2StakerStatsDocument struct {
