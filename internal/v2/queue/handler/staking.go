@@ -72,21 +72,7 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	if delErr != nil {
 		return delErr
 	}
-	state := v2types.DelegationState(del.State)
-	if utils.Contains([]v2types.DelegationState{
-		v2types.StateTimelockUnbonding,
-		v2types.StateEarlyUnbonding,
-		v2types.StateTimelockWithdrawable,
-		v2types.StateEarlyUnbondingWithdrawable,
-		v2types.StateTimelockSlashingWithdrawable,
-		v2types.StateEarlyUnbondingSlashingWithdrawable,
-		v2types.StateTimelockWithdrawn,
-		v2types.StateEarlyUnbondingWithdrawn,
-		v2types.StateTimelockSlashingWithdrawn,
-		v2types.StateEarlyUnbondingSlashingWithdrawn,
-		v2types.StateTimelockSlashed,
-		v2types.StateEarlyUnbondingSlashed,
-	}, state) {
+	if utils.Contains(v2types.OutdatedStatesForUnbonding(), del.State) {
 		// Ignore the message as the delegation state already passed the unbonding state. This is an outdated duplication
 		log.Ctx(ctx).Debug().Str("StakingTxHashHex", unbondingStakingEvent.StakingTxHashHex).
 			Msg("delegation state is outdated for unbonding event")
