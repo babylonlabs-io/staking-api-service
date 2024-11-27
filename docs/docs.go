@@ -209,6 +209,12 @@ const docTemplate = `{
                         "description": "Pagination key to fetch the next page of delegations",
                         "name": "pagination_key",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by pending action",
+                        "name": "pending_action",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -893,27 +899,6 @@ const docTemplate = `{
                 }
             }
         },
-        "indexertypes.DelegationState": {
-            "type": "string",
-            "enum": [
-                "PENDING",
-                "VERIFIED",
-                "ACTIVE",
-                "UNBONDING",
-                "WITHDRAWABLE",
-                "WITHDRAWN",
-                "SLASHED"
-            ],
-            "x-enum-varnames": [
-                "StatePending",
-                "StateVerified",
-                "StateActive",
-                "StateUnbonding",
-                "StateWithdrawable",
-                "StateWithdrawn",
-                "StateSlashed"
-            ]
-        },
         "types.ErrorCode": {
             "type": "string",
             "enum": [
@@ -1213,8 +1198,17 @@ const docTemplate = `{
         "v2service.DelegationStaking": {
             "type": "object",
             "properties": {
+                "bbn_inception_height": {
+                    "type": "integer"
+                },
+                "bbn_inception_time": {
+                    "type": "integer"
+                },
                 "end_height": {
                     "type": "integer"
+                },
+                "slashing_tx_hex": {
+                    "type": "string"
                 },
                 "staking_amount": {
                     "type": "integer"
@@ -1241,6 +1235,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/v2service.CovenantSignature"
                     }
+                },
+                "slashing_tx_hex": {
+                    "type": "string"
                 },
                 "unbonding_time": {
                     "type": "integer"
@@ -1350,7 +1347,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "state": {
-                    "$ref": "#/definitions/indexertypes.DelegationState"
+                    "$ref": "#/definitions/v2types.DelegationState"
                 }
             }
         },
@@ -1379,6 +1376,43 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "v2types.DelegationState": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "VERIFIED",
+                "ACTIVE",
+                "TIMELOCK_UNBONDING",
+                "EARLY_UNBONDING",
+                "TIMELOCK_WITHDRAWABLE",
+                "EARLY_UNBONDING_WITHDRAWABLE",
+                "TIMELOCK_SLASHING_WITHDRAWABLE",
+                "EARLY_UNBONDING_SLASHING_WITHDRAWABLE",
+                "TIMELOCK_WITHDRAWN",
+                "EARLY_UNBONDING_WITHDRAWN",
+                "TIMELOCK_SLASHING_WITHDRAWN",
+                "EARLY_UNBONDING_SLASHING_WITHDRAWN",
+                "TIMELOCK_SLASHED",
+                "EARLY_UNBONDING_SLASHED"
+            ],
+            "x-enum-varnames": [
+                "StatePending",
+                "StateVerified",
+                "StateActive",
+                "StateTimelockUnbonding",
+                "StateEarlyUnbonding",
+                "StateTimelockWithdrawable",
+                "StateEarlyUnbondingWithdrawable",
+                "StateTimelockSlashingWithdrawable",
+                "StateEarlyUnbondingSlashingWithdrawable",
+                "StateTimelockWithdrawn",
+                "StateEarlyUnbondingWithdrawn",
+                "StateTimelockSlashingWithdrawn",
+                "StateEarlyUnbondingSlashingWithdrawn",
+                "StateTimelockSlashed",
+                "StateEarlyUnbondingSlashed"
+            ]
         }
     }
 }`

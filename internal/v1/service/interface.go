@@ -10,7 +10,7 @@ import (
 type V1ServiceProvider interface {
 	service.SharedServiceProvider
 	// Delegation
-	DelegationsByStakerPk(ctx context.Context, stakerPk string, state types.DelegationState, pageToken string) ([]*DelegationPublic, string, *types.Error)
+	DelegationsByStakerPk(ctx context.Context, stakerPk string, state types.DelegationState, pageToken string, pendingAction bool) ([]*DelegationPublic, string, *types.Error)
 	SaveActiveStakingDelegation(ctx context.Context, txHashHex, stakerPkHex, finalityProviderPkHex string, value, startHeight uint64, stakingTimestamp int64, timeLock, stakingOutputIndex uint64, stakingTxHex string, isOverflow bool) *types.Error
 	IsDelegationPresent(ctx context.Context, txHashHex string) (bool, *types.Error)
 	GetDelegation(ctx context.Context, txHashHex string) (*DelegationPublic, *types.Error)

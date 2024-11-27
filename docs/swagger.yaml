@@ -154,24 +154,6 @@ definitions:
       version:
         type: integer
     type: object
-  indexertypes.DelegationState:
-    enum:
-    - PENDING
-    - VERIFIED
-    - ACTIVE
-    - UNBONDING
-    - WITHDRAWABLE
-    - WITHDRAWN
-    - SLASHED
-    type: string
-    x-enum-varnames:
-    - StatePending
-    - StateVerified
-    - StateActive
-    - StateUnbonding
-    - StateWithdrawable
-    - StateWithdrawn
-    - StateSlashed
   types.ErrorCode:
     enum:
     - INTERNAL_SERVICE_ERROR
@@ -372,8 +354,14 @@ definitions:
     type: object
   v2service.DelegationStaking:
     properties:
+      bbn_inception_height:
+        type: integer
+      bbn_inception_time:
+        type: integer
       end_height:
         type: integer
+      slashing_tx_hex:
+        type: string
       staking_amount:
         type: integer
       staking_time:
@@ -391,6 +379,8 @@ definitions:
         items:
           $ref: '#/definitions/v2service.CovenantSignature'
         type: array
+      slashing_tx_hex:
+        type: string
       unbonding_time:
         type: integer
       unbonding_tx:
@@ -462,7 +452,7 @@ definitions:
       staker_btc_pk_hex:
         type: string
       state:
-        $ref: '#/definitions/indexertypes.DelegationState'
+        $ref: '#/definitions/v2types.DelegationState'
     type: object
   v2service.StakerStatsPublic:
     properties:
@@ -481,6 +471,40 @@ definitions:
       withdrawable_tvl:
         type: integer
     type: object
+  v2types.DelegationState:
+    enum:
+    - PENDING
+    - VERIFIED
+    - ACTIVE
+    - TIMELOCK_UNBONDING
+    - EARLY_UNBONDING
+    - TIMELOCK_WITHDRAWABLE
+    - EARLY_UNBONDING_WITHDRAWABLE
+    - TIMELOCK_SLASHING_WITHDRAWABLE
+    - EARLY_UNBONDING_SLASHING_WITHDRAWABLE
+    - TIMELOCK_WITHDRAWN
+    - EARLY_UNBONDING_WITHDRAWN
+    - TIMELOCK_SLASHING_WITHDRAWN
+    - EARLY_UNBONDING_SLASHING_WITHDRAWN
+    - TIMELOCK_SLASHED
+    - EARLY_UNBONDING_SLASHED
+    type: string
+    x-enum-varnames:
+    - StatePending
+    - StateVerified
+    - StateActive
+    - StateTimelockUnbonding
+    - StateEarlyUnbonding
+    - StateTimelockWithdrawable
+    - StateEarlyUnbondingWithdrawable
+    - StateTimelockSlashingWithdrawable
+    - StateEarlyUnbondingSlashingWithdrawable
+    - StateTimelockWithdrawn
+    - StateEarlyUnbondingWithdrawn
+    - StateTimelockSlashingWithdrawn
+    - StateEarlyUnbondingSlashingWithdrawn
+    - StateTimelockSlashed
+    - StateEarlyUnbondingSlashed
 info:
   contact:
     email: contact@babylonlabs.io
@@ -622,6 +646,10 @@ paths:
         in: query
         name: pagination_key
         type: string
+      - description: Filter by pending action
+        in: query
+        name: pending_action
+        type: boolean
       produces:
       - application/json
       responses:

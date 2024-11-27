@@ -21,6 +21,7 @@ type DelegationCheckPublicResponse struct {
 // @Param staker_btc_pk query string true "Staker BTC Public Key"
 // @Param state query types.DelegationState false "Filter by state"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
+// @Param pending_action query boolean false "Filter by pending action"
 // @Success 200 {object} handler.PublicResponse[[]v1service.DelegationPublic]{array} "List of delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v1/staker/delegations [get]
@@ -37,8 +38,9 @@ func (h *V1Handler) GetStakerDelegations(request *http.Request) (*handler.Result
 	if err != nil {
 		return nil, err
 	}
+	pendingAction := request.URL.Query().Get("pending_action") == "true"
 	delegations, newPaginationKey, err := h.Service.DelegationsByStakerPk(
-		request.Context(), stakerBtcPk, stateFilter, paginationKey,
+		request.Context(), stakerBtcPk, stateFilter, paginationKey, pendingAction,
 	)
 	if err != nil {
 		return nil, err

@@ -35,12 +35,19 @@ type DelegationPublic struct {
 func (s *V1Service) DelegationsByStakerPk(
 	ctx context.Context, stakerPk string,
 	state types.DelegationState, pageToken string,
+	pendingAction bool,
 ) ([]*DelegationPublic, string, *types.Error) {
 	filter := &v1dbclient.DelegationFilter{}
-	if state != "" {
-		filter = &v1dbclient.DelegationFilter{
-			States: []types.DelegationState{state},
+
+	if pendingAction {
+		// All states except withdrawn
+		filter.States = []types.DelegationState{
+			types.Active,
+			types.UnbondingRequested,
+			types.Unbonding,
 		}
+	} else if state != "" {
+		filter.States = []types.DelegationState{state}
 	}
 
 	resultMap, err := s.Service.DbClients.V1DBClient.FindDelegationsByStakerPk(ctx, stakerPk, filter, pageToken)
@@ -52,6 +59,7 @@ func (s *V1Service) DelegationsByStakerPk(
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to find delegations by staker pk")
 		return nil, "", types.NewInternalServiceError(err)
 	}
+
 	var delegations []*DelegationPublic = make([]*DelegationPublic, 0, len(resultMap.Data))
 	bbnHeight, err := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
 	if err != nil {
