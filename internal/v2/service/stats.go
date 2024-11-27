@@ -93,7 +93,7 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 		// The overall stats should be the last to be updated as it has dependency
 		// on staker stats.
 		if !statsLockDocument.OverallStats {
-			err = s.DbClients.V1DBClient.SubtractOverallStats(
+			err = s.DbClients.V2DBClient.SubtractOverallStats(
 				ctx, stakingTxHashHex, stakerPkHex, amount,
 			)
 			if err != nil {

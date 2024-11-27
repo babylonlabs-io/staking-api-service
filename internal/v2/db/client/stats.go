@@ -123,7 +123,6 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 	}
 	overallStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2OverallStatsCollection)
 	stakerStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
-	fpStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
 
 	// Start a session
 	session, sessionErr := v2dbclient.Client.StartSession()
@@ -148,17 +147,6 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 		}
 		if stakerStats.ActiveDelegations == 0 {
 			upsertUpdate["$inc"].(bson.M)["active_stakers"] = -1
-		}
-
-		// Check if this was the last active delegation for the finality provider
-		var fpStats v2dbmodel.V2FinalityProviderStatsDocument
-		fpStatsFilter := bson.M{"_id": stakerPkHex}
-		fpErr := fpStatsClient.FindOne(ctx, fpStatsFilter).Decode(&fpStats)
-		if fpErr != nil {
-			return nil, fpErr
-		}
-		if fpStats.ActiveDelegations == 0 {
-			upsertUpdate["$inc"].(bson.M)["active_finality_providers"] = -1
 		}
 
 		shardId, err := v2dbclient.generateOverallStatsId()
@@ -253,118 +241,6 @@ func constructStatsLockId(stakingTxHashHex, state string) string {
 	return stakingTxHashHex + ":" + state
 }
 
-// IncrementFinalityProviderStats increments the finality provider stats for the given staking tx hash
-// This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) IncrementFinalityProviderStats(
-	ctx context.Context, stakingTxHashHex, fpPkHex string, amount uint64,
-) error {
-	upsertUpdate := bson.M{
-		"$inc": bson.M{
-			"active_tvl":         int64(amount),
-			"total_tvl":          int64(amount),
-			"active_delegations": 1,
-			"total_delegations":  1,
-		},
-	}
-	return v2dbclient.updateFinalityProviderStats(ctx, types.Active.ToString(), stakingTxHashHex, fpPkHex, upsertUpdate)
-}
-
-// SubtractFinalityProviderStats decrements the finality provider stats for the given provider pk hex
-// This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-// Refer to the README.md in this directory for more information on the sharding logic
-func (v2dbclient *V2Database) SubtractFinalityProviderStats(
-	ctx context.Context, stakingTxHashHex, fpPkHex string, amount uint64,
-) error {
-	upsertUpdate := bson.M{
-		"$inc": bson.M{
-			"active_tvl":         -int64(amount),
-			"active_delegations": -1,
-		},
-	}
-	return v2dbclient.updateFinalityProviderStats(ctx, types.Unbonded.ToString(), stakingTxHashHex, fpPkHex, upsertUpdate)
-}
-
-// FindFinalityProviderStats fetches the finality provider stats from the database
-func (v2dbclient *V2Database) FindFinalityProviderStats(ctx context.Context, paginationToken string) (*db.DbResultMap[*v2dbmodel.V2FinalityProviderStatsDocument], error) {
-	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
-	options := options.Find().SetSort(bson.D{{Key: "active_tvl", Value: -1}}) // Sorting in descending order
-	var filter bson.M
-
-	// Decode the pagination token first if it exist
-	if paginationToken != "" {
-		decodedToken, err := dbmodel.DecodePaginationToken[v2dbmodel.V2FinalityProviderStatsPagination](paginationToken)
-		if err != nil {
-			return nil, &db.InvalidPaginationTokenError{
-				Message: "Invalid pagination token",
-			}
-		}
-		filter = bson.M{
-			"$or": []bson.M{
-				{"active_tvl": bson.M{"$lt": decodedToken.ActiveTvl}},
-				{"active_tvl": decodedToken.ActiveTvl, "_id": bson.M{"$lt": decodedToken.FinalityProviderPkHex}},
-			},
-		}
-	}
-
-	return db.FindWithPagination(
-		ctx, client, filter, options, v2dbclient.Cfg.MaxPaginationLimit,
-		v2dbmodel.BuildV2FinalityProviderStatsPaginationToken,
-	)
-}
-
-func (v2dbclient *V2Database) FindFinalityProviderStatsByFinalityProviderPkHex(
-	ctx context.Context, finalityProviderPkHex []string,
-) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
-	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
-	filter := bson.M{"_id": bson.M{"$in": finalityProviderPkHex}}
-	cursor, err := client.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var finalityProviders []*v2dbmodel.V2FinalityProviderStatsDocument
-	if err = cursor.All(ctx, &finalityProviders); err != nil {
-		return nil, err
-	}
-
-	return finalityProviders, nil
-}
-
-func (v2dbclient *V2Database) updateFinalityProviderStats(ctx context.Context, state, stakingTxHashHex, fpPkHex string, upsertUpdate primitive.M) error {
-	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
-
-	// Start a session
-	session, sessionErr := v2dbclient.Client.StartSession()
-	if sessionErr != nil {
-		return sessionErr
-	}
-	defer session.EndSession(ctx)
-
-	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, state, "v2_finality_provider_stats")
-		if err != nil {
-			return nil, err
-		}
-
-		upsertFilter := bson.M{"_id": fpPkHex}
-
-		_, err = client.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
-	}
-
-	// Execute the transaction
-	_, txErr := session.WithTransaction(ctx, transactionWork)
-	if txErr != nil {
-		return txErr
-	}
-
-	return nil
-}
-
 // IncrementStakerStats increments the staker stats for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) IncrementStakerStats(
@@ -423,33 +299,6 @@ func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stak
 	// Execute the transaction
 	_, txErr := session.WithTransaction(ctx, transactionWork)
 	return txErr
-}
-
-func (v2dbclient *V2Database) FindTopStakersByTvl(ctx context.Context, paginationToken string) (*db.DbResultMap[*v2dbmodel.V2StakerStatsDocument], error) {
-	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
-
-	opts := options.Find().SetSort(bson.D{{Key: "active_tvl", Value: -1}})
-	var filter bson.M
-	// Decode the pagination token first if it exist
-	if paginationToken != "" {
-		decodedToken, err := dbmodel.DecodePaginationToken[v2dbmodel.V2StakerStatsByStakerPagination](paginationToken)
-		if err != nil {
-			return nil, &db.InvalidPaginationTokenError{
-				Message: "Invalid pagination token",
-			}
-		}
-		filter = bson.M{
-			"$or": []bson.M{
-				{"active_tvl": bson.M{"$lt": decodedToken.ActiveTvl}},
-				{"active_tvl": decodedToken.ActiveTvl, "_id": bson.M{"$lt": decodedToken.StakerPkHex}},
-			},
-		}
-	}
-
-	return db.FindWithPagination(
-		ctx, client, filter, opts, v2dbclient.Cfg.MaxPaginationLimit,
-		v2dbmodel.BuildV2StakerStatsByStakerPaginationToken,
-	)
 }
 
 func (v2dbclient *V2Database) GetStakerStats(
