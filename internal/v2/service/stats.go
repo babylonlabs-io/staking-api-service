@@ -11,43 +11,12 @@ import (
 )
 
 type OverallStatsPublic struct {
-	Id                      string `json:"_id"`
-	ActiveTvl               int64  `json:"active_tvl"`
-	TotalTvl                int64  `json:"total_tvl"`
-	ActiveDelegations       int64  `json:"active_delegations"`
-	TotalDelegations        int64  `json:"total_delegations"`
-	ActiveStakers           uint64 `json:"active_stakers"`
-	TotalStakers            uint64 `json:"total_stakers"`
-	ActiveFinalityProviders uint64 `json:"active_finality_providers"`
-	TotalFinalityProviders  uint64 `json:"total_finality_providers"`
-}
-
-type StakerStatsPublic struct {
-	StakerPkHex             string `json:"_id"`
-	ActiveTvl               int64  `json:"active_tvl"`
-	WithdrawableTvl         int64  `json:"withdrawable_tvl"`
-	SlashedTvl              int64  `json:"slashed_tvl"`
-	ActiveDelegations       uint32 `json:"active_delegations"`
-	WithdrawableDelegations uint32 `json:"withdrawable_delegations"`
-	SlashedDelegations      uint32 `json:"slashed_delegations"`
-}
-
-func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error) {
-	stakerStats, err := s.DbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("error while fetching staker stats")
-		return nil, types.NewInternalServiceError(err)
-	}
-
-	return &StakerStatsPublic{
-		StakerPkHex:             stakerStats.StakerPkHex,
-		ActiveTvl:               stakerStats.ActiveTvl,
-		WithdrawableTvl:         stakerStats.WithdrawableTvl,
-		SlashedTvl:              stakerStats.SlashedTvl,
-		ActiveDelegations:       stakerStats.ActiveDelegations,
-		WithdrawableDelegations: stakerStats.WithdrawableDelegations,
-		SlashedDelegations:      stakerStats.SlashedDelegations,
-	}, nil
+	ActiveTvl         int64  `json:"active_tvl"`
+	TotalTvl          int64  `json:"total_tvl"`
+	ActiveDelegations int64  `json:"active_delegations"`
+	TotalDelegations  int64  `json:"total_delegations"`
+	ActiveStakers     uint64 `json:"active_stakers"`
+	TotalStakers      uint64 `json:"total_stakers"`
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
@@ -58,15 +27,12 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 	}
 
 	return &OverallStatsPublic{
-		Id:                      overallStats.Id,
-		ActiveTvl:               overallStats.ActiveTvl,
-		TotalTvl:                overallStats.TotalTvl,
-		ActiveDelegations:       overallStats.ActiveDelegations,
-		TotalDelegations:        overallStats.TotalDelegations,
-		ActiveStakers:           overallStats.ActiveStakers,
-		TotalStakers:            overallStats.TotalStakers,
-		ActiveFinalityProviders: overallStats.ActiveFinalityProviders,
-		TotalFinalityProviders:  overallStats.TotalFinalityProviders,
+		ActiveTvl:         overallStats.ActiveTvl,
+		TotalTvl:          overallStats.TotalTvl,
+		ActiveDelegations: overallStats.ActiveDelegations,
+		TotalDelegations:  overallStats.TotalDelegations,
+		ActiveStakers:     overallStats.ActiveStakers,
+		TotalStakers:      overallStats.TotalStakers,
 	}, nil
 }
 
@@ -77,7 +43,7 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 	state types.DelegationState, amount uint64,
 ) *types.Error {
 	// Fetch existing or initialize the stats lock document if not exist
-	statsLockDocument, err := s.Service.DbClients.V2DBClient.GetOrCreateStatsLock(
+	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx, stakingTxHashHex, state.ToString(),
 	)
 	if err != nil {
@@ -95,7 +61,7 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 		// The overall stats should be the last to be updated as it has dependency
 		// on staker stats.
 		if !statsLockDocument.OverallStats {
-			err = s.Service.DbClients.V2DBClient.IncrementOverallStats(
+			err = s.DbClients.V2DBClient.IncrementOverallStats(
 				ctx, stakingTxHashHex, stakerPkHex, amount,
 			)
 			if err != nil {
@@ -117,7 +83,7 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 		// The overall stats should be the last to be updated as it has dependency
 		// on staker stats.
 		if !statsLockDocument.OverallStats {
-			err = s.Service.DbClients.V1DBClient.SubtractOverallStats(
+			err = s.DbClients.V1DBClient.SubtractOverallStats(
 				ctx, stakingTxHashHex, stakerPkHex, amount,
 			)
 			if err != nil {
