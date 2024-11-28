@@ -9,17 +9,17 @@ import "errors"
 // 2. The current BBN height is greater than AllowListExpirationHeight
 // (allowing all delegations to transition)
 type DelegationTransitionConfig struct {
-	EligibleBeforeBtcHeight   uint64 `mapstructure:"eligible_before_btc_height"`
-	AllowListExpirationHeight uint64 `mapstructure:"allow_list_expiration_height"`
+	EligibleBeforeBtcHeight   uint64 `mapstructure:"eligible-before-btc-height"`
+	AllowListExpirationHeight uint64 `mapstructure:"allow-list-expiration-height"`
 }
 
 func (cfg *DelegationTransitionConfig) Validate() error {
 	if cfg.EligibleBeforeBtcHeight == 0 {
-		return errors.New("before_btc_height cannot be 0")
+		return errors.New("before-btc-height cannot be 0")
 	}
 
 	if cfg.AllowListExpirationHeight == 0 {
-		return errors.New("allow_list_expiration_height cannot be 0")
+		return errors.New("allow-list-expiration-height cannot be 0")
 	}
 
 	return nil

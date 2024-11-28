@@ -195,7 +195,7 @@ func (s *V1Service) FromDelegationDocument(
 	d *v1model.DelegationDocument, bbnHeight uint64,
 	transitionedFps []*indexerdbmodel.IndexerFinalityProviderDetails,
 ) *DelegationPublic {
-	isTransitioned, isSlashed := s.checkFpStatus(d.FinalityProviderPkHex, transitionedFps)
+	isFpTransitioned, isSlashed := s.checkFpStatus(d.FinalityProviderPkHex, transitionedFps)
 	delPublic := &DelegationPublic{
 		StakingTxHashHex:      d.StakingTxHashHex,
 		StakerPkHex:           d.StakerPkHex,
@@ -210,7 +210,7 @@ func (s *V1Service) FromDelegationDocument(
 			TimeLock:       d.StakingTx.TimeLock,
 		},
 		IsOverflow:              d.IsOverflow,
-		IsEligibleForTransition: isTransitioned && !isSlashed && s.isEligibleForTransition(d, bbnHeight),
+		IsEligibleForTransition: isFpTransitioned && !isSlashed && s.isEligibleForTransition(d, bbnHeight),
 		IsSlashed:               isSlashed,
 	}
 
