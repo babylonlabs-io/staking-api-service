@@ -14,6 +14,7 @@ const (
 	StatePending  DelegationState = "PENDING"
 	StateVerified DelegationState = "VERIFIED"
 	StateActive   DelegationState = "ACTIVE"
+	StateSlashed  DelegationState = "SLASHED"
 
 	// Unbonding states
 	StateTimelockUnbonding DelegationState = "TIMELOCK_UNBONDING"
@@ -45,6 +46,8 @@ func MapDelegationState(state indexertypes.DelegationState, subState indexertype
 		return StateVerified, nil
 	case indexertypes.StateActive:
 		return StateActive, nil
+	case indexertypes.StateSlashed:
+		return StateSlashed, nil
 
 	case indexertypes.StateUnbonding:
 		switch subState {
@@ -76,14 +79,6 @@ func MapDelegationState(state indexertypes.DelegationState, subState indexertype
 			return StateTimelockSlashingWithdrawn, nil
 		case indexertypes.SubStateEarlyUnbondingSlashing:
 			return StateEarlyUnbondingSlashingWithdrawn, nil
-		}
-
-	case indexertypes.StateSlashed:
-		switch subState {
-		case indexertypes.SubStateTimelock:
-			return StateTimelockSlashed, nil
-		case indexertypes.SubStateEarlyUnbonding:
-			return StateEarlyUnbondingSlashed, nil
 		}
 	}
 
