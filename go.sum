@@ -274,8 +274,8 @@ github.com/babylonlabs-io/babylon v0.12.1 h1:Qfmrq3pdDEZGq6DtMXxwiQjx0HD+t+U0cXQ
 github.com/babylonlabs-io/babylon v0.12.1/go.mod h1:ZOrTde9vs2xoqGTFw4xhupu2CMulnpywiuk0eh4kPOw=
 github.com/babylonlabs-io/networks/parameters v0.2.2 h1:TCu39fZvjX5f6ZZrjhYe54M6wWxglNewuKu56yE+zrc=
 github.com/babylonlabs-io/networks/parameters v0.2.2/go.mod h1:iEJVOzaLsE33vpP7J4u+CRGfkSIfErUAwRmgCFCBpyI=
-github.com/babylonlabs-io/staking-queue-client v0.4.3 h1:wYDE/LXc9zmeliKoy602UVtSwahP2iDxoTNYuIf/WrM=
-github.com/babylonlabs-io/staking-queue-client v0.4.3/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
+github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20241128065526-664aebdb9c1b h1:kdBDqW+wm4fiBhEiUzos9TnhmRcf6//tWyUBiBkyoqQ=
+github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20241128065526-664aebdb9c1b/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=

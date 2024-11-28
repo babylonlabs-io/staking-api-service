@@ -6,14 +6,14 @@ import (
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v2queueschema "github.com/babylonlabs-io/staking-api-service/internal/v2/queue/schema"
+	queueClient "github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/rs/zerolog/log"
 )
 
 // ActiveStakingHandler processes active staking events
 func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody string) *types.Error {
 	// acknowledge the message
-	var activeStakingEvent v2queueschema.ActiveStakingEvent
+	var activeStakingEvent queueClient.StakingEvent
 	err := json.Unmarshal([]byte(messageBody), &activeStakingEvent)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into ActiveStakingEvent")
@@ -57,7 +57,7 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 
 // UnbondingStakingHandler processes unbonding staking events
 func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBody string) *types.Error {
-	var unbondingStakingEvent v2queueschema.UnbondingStakingEvent
+	var unbondingStakingEvent queueClient.StakingEvent
 	err := json.Unmarshal([]byte(messageBody), &unbondingStakingEvent)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into UnbondingStakingEvent")
