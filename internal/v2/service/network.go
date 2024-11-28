@@ -31,7 +31,7 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 	// Default to true if there is no rules for delegation transition
 	status := true
 	if s.Cfg.DelegationTransition != nil {
-		bbnHeight, dbError := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+		bbnHeight, dbError := s.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
 		if dbError != nil {
 			log.Ctx(ctx).Error().Err(dbError).Msg("Failed to get last processed BBN height")
 			return nil, types.NewInternalServiceError(err)
