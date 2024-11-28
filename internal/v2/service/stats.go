@@ -20,35 +20,35 @@ type OverallStatsPublic struct {
 }
 
 type StakerStatsPublic struct {
-	StakerPkHex                  string            `json:"_id"`
-	ActiveTvl                    int64             `json:"active_tvl"`
-	WithdrawableTvl              int64             `json:"withdrawable_tvl"`
-	SlashedTvl                   int64             `json:"slashed_tvl"`
-	ActiveDelegations            uint32            `json:"active_delegations"`
-	WithdrawableDelegations      uint32            `json:"withdrawable_delegations"`
-	SlashedDelegations           uint32            `json:"slashed_delegations"`
+	StakerPkHex             string `json:"_id"`
+	ActiveTvl               int64  `json:"active_tvl"`
+	WithdrawableTvl         int64  `json:"withdrawable_tvl"`
+	SlashedTvl              int64  `json:"slashed_tvl"`
+	ActiveDelegations       uint32 `json:"active_delegations"`
+	WithdrawableDelegations uint32 `json:"withdrawable_delegations"`
+	SlashedDelegations      uint32 `json:"slashed_delegations"`
 }
 
 func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error) {
-	stakerStats, err := s.Service.DbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
+	stakerStats, err := s.DbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching staker stats")
 		return nil, types.NewInternalServiceError(err)
 	}
 
 	return &StakerStatsPublic{
-		StakerPkHex:                  stakerStats.StakerPkHex,
-		ActiveTvl:                    stakerStats.ActiveTvl,
-		WithdrawableTvl:              stakerStats.WithdrawableTvl,
-		SlashedTvl:                   stakerStats.SlashedTvl,
-		ActiveDelegations:            stakerStats.ActiveDelegations,
-		WithdrawableDelegations:      stakerStats.WithdrawableDelegations,
-		SlashedDelegations:            stakerStats.SlashedDelegations,
+		StakerPkHex:             stakerStats.StakerPkHex,
+		ActiveTvl:               stakerStats.ActiveTvl,
+		WithdrawableTvl:         stakerStats.WithdrawableTvl,
+		SlashedTvl:              stakerStats.SlashedTvl,
+		ActiveDelegations:       stakerStats.ActiveDelegations,
+		WithdrawableDelegations: stakerStats.WithdrawableDelegations,
+		SlashedDelegations:      stakerStats.SlashedDelegations,
 	}, nil
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
-	overallStats, err := s.Service.DbClients.V2DBClient.GetOverallStats(ctx)
+	overallStats, err := s.DbClients.V2DBClient.GetOverallStats(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
 		return nil, types.NewInternalServiceError(err)

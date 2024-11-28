@@ -181,7 +181,6 @@ const docTemplate = `{
                 "tags": [
                     "v1"
                 ],
-                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -502,7 +501,7 @@ const docTemplate = `{
         },
         "/v2/finality-providers": {
             "get": {
-                "description": "Fetches finality providers with optional filtering and pagination",
+                "description": "Fetches finality providers with its stats, currently does not support pagination",
                 "produces": [
                     "application/json"
                 ],
@@ -510,45 +509,27 @@ const docTemplate = `{
                     "v2"
                 ],
                 "summary": "List Finality Providers",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Pagination key to fetch the next page",
-                        "name": "pagination_key",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "active",
-                            "standby"
-                        ],
-                        "type": "string",
-                        "description": "Filter by state",
-                        "name": "state",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "List of finality providers and pagination token",
+                        "description": "List of finality providers with its stats",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderStatsPublic"
                         }
                     },
                     "400": {
-                        "description": "Error: Bad Request",
+                        "description": "Invalid parameters or malformed request",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
                     },
                     "404": {
-                        "description": "Error: Not Found",
+                        "description": "No finality providers found",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
                     },
                     "500": {
-                        "description": "Error: Internal Server Error",
+                        "description": "Internal server error occurred",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
@@ -707,13 +688,13 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_FinalityProviderPublic": {
+        "handler.PublicResponse-array_v2service_FinalityProviderStatsPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.FinalityProviderPublic"
+                        "$ref": "#/definitions/v2service.FinalityProviderStatsPublic"
                     }
                 },
                 "pagination": {
@@ -893,27 +874,6 @@ const docTemplate = `{
                 }
             }
         },
-        "indexertypes.DelegationState": {
-            "type": "string",
-            "enum": [
-                "PENDING",
-                "VERIFIED",
-                "ACTIVE",
-                "UNBONDING",
-                "WITHDRAWABLE",
-                "WITHDRAWN",
-                "SLASHED"
-            ],
-            "x-enum-varnames": [
-                "StatePending",
-                "StateVerified",
-                "StateActive",
-                "StateUnbonding",
-                "StateWithdrawable",
-                "StateWithdrawn",
-                "StateSlashed"
-            ]
-        },
         "types.ErrorCode": {
             "type": "string",
             "enum": [
@@ -1004,6 +964,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "is_overflow": {
+                    "type": "boolean"
+                },
+                "is_slashed": {
                     "type": "boolean"
                 },
                 "staker_pk_hex": {
@@ -1213,8 +1176,17 @@ const docTemplate = `{
         "v2service.DelegationStaking": {
             "type": "object",
             "properties": {
+                "bbn_inception_height": {
+                    "type": "integer"
+                },
+                "bbn_inception_time": {
+                    "type": "integer"
+                },
                 "end_height": {
                     "type": "integer"
+                },
+                "slashing_tx_hex": {
+                    "type": "string"
                 },
                 "staking_amount": {
                     "type": "integer"
@@ -1242,6 +1214,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/v2service.CovenantSignature"
                     }
                 },
+                "slashing_tx_hex": {
+                    "type": "string"
+                },
                 "unbonding_time": {
                     "type": "integer"
                 },
@@ -1250,7 +1225,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v2service.FinalityProviderPublic": {
+        "v2service.FinalityProviderStatsPublic": {
             "type": "object",
             "properties": {
                 "active_delegations": {
@@ -1270,12 +1245,6 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
-                },
-                "total_delegations": {
-                    "type": "integer"
-                },
-                "total_tvl": {
-                    "type": "integer"
                 }
             }
         },
@@ -1350,7 +1319,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "state": {
-                    "$ref": "#/definitions/indexertypes.DelegationState"
+                    "$ref": "#/definitions/v2types.DelegationState"
                 }
             }
         },
@@ -1379,6 +1348,43 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "v2types.DelegationState": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "VERIFIED",
+                "ACTIVE",
+                "TIMELOCK_UNBONDING",
+                "EARLY_UNBONDING",
+                "TIMELOCK_WITHDRAWABLE",
+                "EARLY_UNBONDING_WITHDRAWABLE",
+                "TIMELOCK_SLASHING_WITHDRAWABLE",
+                "EARLY_UNBONDING_SLASHING_WITHDRAWABLE",
+                "TIMELOCK_WITHDRAWN",
+                "EARLY_UNBONDING_WITHDRAWN",
+                "TIMELOCK_SLASHING_WITHDRAWN",
+                "EARLY_UNBONDING_SLASHING_WITHDRAWN",
+                "TIMELOCK_SLASHED",
+                "EARLY_UNBONDING_SLASHED"
+            ],
+            "x-enum-varnames": [
+                "StatePending",
+                "StateVerified",
+                "StateActive",
+                "StateTimelockUnbonding",
+                "StateEarlyUnbonding",
+                "StateTimelockWithdrawable",
+                "StateEarlyUnbondingWithdrawable",
+                "StateTimelockSlashingWithdrawable",
+                "StateEarlyUnbondingSlashingWithdrawable",
+                "StateTimelockWithdrawn",
+                "StateEarlyUnbondingWithdrawn",
+                "StateTimelockSlashingWithdrawn",
+                "StateEarlyUnbondingSlashingWithdrawn",
+                "StateTimelockSlashed",
+                "StateEarlyUnbondingSlashed"
+            ]
         }
     }
 }`
