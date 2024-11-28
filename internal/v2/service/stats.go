@@ -75,7 +75,7 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 					Msg("error while processing and saving btc addresses")
 				return types.NewInternalServiceError(addressConversionErr)
 			}
-			err = s.Service.DbClients.V2DBClient.IncrementStakerStats(
+			err = s.DbClients.V2DBClient.IncrementStakerStats(
 				ctx, stakingTxHashHex, stakerPkHex, amount,
 			)
 			if err != nil {
@@ -109,7 +109,7 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 		// TODO: Add finality provider stats calculation
 
 		if !statsLockDocument.StakerStats {
-			err = s.Service.DbClients.V2DBClient.SubtractStakerStats(
+			err = s.DbClients.V2DBClient.SubtractStakerStats(
 				ctx, stakingTxHashHex, stakerPkHex, amount,
 			)
 			if err != nil {
