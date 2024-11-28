@@ -161,3 +161,12 @@ func (s *V2Service) IsDelegationPresent(ctx context.Context, txHashHex string) (
 
 	return false, nil
 }
+
+func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error {
+	err := s.DbClients.V2DBClient.SaveUnprocessableMessage(ctx, messageBody, receipt)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("error while saving unprocessable message")
+		return types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "error while saving unprocessable message")
+	}
+	return nil
+}

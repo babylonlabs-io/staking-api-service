@@ -3,13 +3,10 @@ package v2service
 import (
 	"context"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
 type V2ServiceProvider interface {
-	service.SharedServiceProvider
-
 	GetFinalityProvidersWithStats(ctx context.Context) (
 		[]*FinalityProviderStatsPublic, *types.Error,
 	)
@@ -27,4 +24,6 @@ type V2ServiceProvider interface {
 		finalityProviderBtcPksHex []string,
 		state types.DelegationState, amount uint64,
 	) *types.Error
+
+	SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error
 }
