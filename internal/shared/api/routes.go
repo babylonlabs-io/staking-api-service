@@ -29,15 +29,17 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	}
 
 	// Don't deprecate this endpoint
-	r.Get("/v1/staker/pubkey-lookup", registerHandler(handlers.V1Handler.GetPubKeys))
-
-	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	// V2 API
+	r.Get("/v2/network-info", registerHandler(handlers.V2Handler.GetNetworkInfo))
 	r.Get("/v2/finality-providers", registerHandler(handlers.V2Handler.GetFinalityProviders))
-	r.Get("/v2/params", registerHandler(handlers.V2Handler.GetParams))
 	r.Get("/v2/delegation", registerHandler(handlers.V2Handler.GetDelegation))
 	r.Get("/v2/delegations", registerHandler(handlers.V2Handler.GetDelegations))
 	r.Get("/v2/stats", registerHandler(handlers.V2Handler.GetOverallStats))
 	r.Get("/v2/staker/stats", registerHandler(handlers.V2Handler.GetStakerStats))
+
+	// Common routes
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	r.Get("/v1/staker/pubkey-lookup", registerHandler(handlers.V1Handler.GetPubKeys))
+
 }

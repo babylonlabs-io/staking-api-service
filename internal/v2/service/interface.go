@@ -10,7 +10,7 @@ type V2ServiceProvider interface {
 	GetFinalityProvidersWithStats(ctx context.Context) (
 		[]*FinalityProviderStatsPublic, *types.Error,
 	)
-	GetParams(ctx context.Context) (*ParamsPublic, *types.Error)
+	GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error)
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*StakerDelegationPublic, *types.Error)
 	GetDelegations(ctx context.Context, stakerPKHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error)
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)

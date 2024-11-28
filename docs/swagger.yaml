@@ -80,13 +80,6 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
-  handler.PublicResponse-v2service_ParamsPublic:
-    properties:
-      data:
-        $ref: '#/definitions/v2service.ParamsPublic'
-      pagination:
-        $ref: '#/definitions/handler.paginationResponse'
-    type: object
   handler.PublicResponse-v2service_StakerDelegationPublic:
     properties:
       data:
@@ -403,6 +396,13 @@ definitions:
       state:
         $ref: '#/definitions/types.FinalityProviderQueryingState'
     type: object
+  v2service.NetworkInfoPublic:
+    properties:
+      params:
+        $ref: '#/definitions/v2service.ParamsPublic'
+      staking_status:
+        $ref: '#/definitions/v2service.StakingStatusPublic'
+    type: object
   v2service.OverallStatsPublic:
     properties:
       _id:
@@ -468,6 +468,11 @@ definitions:
         type: integer
       withdrawable_tvl:
         type: integer
+    type: object
+  v2service.StakingStatusPublic:
+    properties:
+      is_staking_open:
+        type: boolean
     type: object
   v2types.DelegationState:
     enum:
@@ -870,25 +875,20 @@ paths:
       summary: List Finality Providers
       tags:
       - v2
-  /v2/params:
+  /v2/network-info:
     get:
-      description: Fetches system parameters for babylon chain and BTC chain
+      description: Get network info, including staking status and param
       produces:
       - application/json
       responses:
         "200":
-          description: Parameters
+          description: Network info
           schema:
-            $ref: '#/definitions/handler.PublicResponse-v2service_ParamsPublic'
-        "404":
-          description: 'Error: Not Found'
-          schema:
-            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-        "500":
-          description: 'Error: Internal Server Error'
+            $ref: '#/definitions/v2service.NetworkInfoPublic'
+        "400":
+          description: 'Error: Bad Request'
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get Parameters
       tags:
       - v2
   /v2/staker/stats:

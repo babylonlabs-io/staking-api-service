@@ -16,7 +16,7 @@ type Config struct {
 	Queue                *queue.QueueConfig          `mapstructure:"queue"`
 	Metrics              *MetricsConfig              `mapstructure:"metrics"`
 	Assets               *AssetsConfig               `mapstructure:"assets"`
-	DelegationTransition *DelegationTransitionConfig `mapstructure:"delegation_transition"`
+	DelegationTransition *DelegationTransitionConfig `mapstructure:"delegation-transition"`
 }
 
 func (cfg *Config) Validate() error {
@@ -47,7 +47,6 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
-	// The DelegationTransition is optional
 	if cfg.DelegationTransition != nil {
 		if err := cfg.DelegationTransition.Validate(); err != nil {
 			return err
