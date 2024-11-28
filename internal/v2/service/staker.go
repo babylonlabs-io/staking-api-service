@@ -21,7 +21,7 @@ func (s *V2Service) ProcessAndSaveBtcAddresses(
 ) *types.Error {
 	// Prepare the btc addresses
 	addresses, err := utils.DeriveAddressesFromNoCoordPk(
-		stakerPkHex, s.Service.Cfg.Server.BTCNetParam,
+		stakerPkHex, s.Cfg.Server.BTCNetParam,
 	)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to derive addresses from staker pk")
@@ -32,7 +32,7 @@ func (s *V2Service) ProcessAndSaveBtcAddresses(
 	}
 
 	// Try to save the btc addresses, ignore if they already exist
-	err = s.Service.DbClients.V1DBClient.InsertPkAddressMappings(
+	err = s.DbClients.V1DBClient.InsertPkAddressMappings(
 		ctx, stakerPkHex, addresses.Taproot,
 		addresses.NativeSegwitOdd, addresses.NativeSegwitEven,
 	)
@@ -55,7 +55,7 @@ func (s *V2Service) GetStakerPublicKeysByAddresses(
 	// Split the addresses into taproot and native segwit
 	var taprootAddresses, nativeSegwitAddresses []string
 	for _, addr := range addresses {
-		addressType, err := utils.CheckBtcAddressType(addr, s.Service.Cfg.Server.BTCNetParam)
+		addressType, err := utils.CheckBtcAddressType(addr, s.Cfg.Server.BTCNetParam)
 		if err != nil {
 			return nil, types.NewErrorWithMsg(
 				http.StatusBadRequest, types.BadRequest, "invalid btc address",
@@ -76,7 +76,7 @@ func (s *V2Service) GetStakerPublicKeysByAddresses(
 	addressPkMapping := make(map[string]string)
 	// Get the public keys from the db by taproot addresses
 	if len(taprootAddresses) > 0 {
-		mappings, err := s.Service.DbClients.V1DBClient.FindPkMappingsByTaprootAddress(
+		mappings, err := s.DbClients.V1DBClient.FindPkMappingsByTaprootAddress(
 			ctx, taprootAddresses,
 		)
 		if err != nil {
@@ -90,7 +90,7 @@ func (s *V2Service) GetStakerPublicKeysByAddresses(
 	}
 	// Get the public keys from the db by native segwit addresses
 	if len(nativeSegwitAddresses) > 0 {
-		mappings, err := s.Service.DbClients.V1DBClient.FindPkMappingsByNativeSegwitAddress(
+		mappings, err := s.DbClients.V1DBClient.FindPkMappingsByNativeSegwitAddress(
 			ctx, nativeSegwitAddresses,
 		)
 		if err != nil {
