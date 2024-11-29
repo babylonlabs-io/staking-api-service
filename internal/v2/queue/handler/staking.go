@@ -20,23 +20,11 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
 	}
 
-	// Check if delegation already exists
-	exist, delError := h.Service.IsDelegationPresent(ctx, activeStakingEvent.StakingTxHashHex)
-	if delError != nil {
-		return delError
+	// Perform the address lookup conversion
+	addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
+	if addressLookupErr != nil {
+		return addressLookupErr
 	}
-	if exist {
-		// Ignore the message as the delegation already exists. This is a duplicate message
-		log.Ctx(ctx).Debug().Str("StakingTxHashHex", activeStakingEvent.StakingTxHashHex).
-			Msg("delegation already exists")
-		return nil
-	}
-
-	// // Perform the address lookup conversion
-	// addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
-	// if addressLookupErr != nil {
-	// 	return addressLookupErr
-	// }
 
 	// Perform the stats calculation
 	statsErr := h.Service.ProcessStakingStatsCalculation(

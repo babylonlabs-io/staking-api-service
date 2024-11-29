@@ -70,7 +70,7 @@ func (v2dbclient *V2Database) IncrementOverallStats(
 	}
 	// Define the work to be done in the transaction
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Active.ToString(), "v2_overall_stats")
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Active.ToString(), "overall_stats")
 		if err != nil {
 			return nil, err
 		}
@@ -132,7 +132,7 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 
 	// Define the work to be done in the transaction
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonded.ToString(), "v2_overall_stats")
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonded.ToString(), "overall_stats")
 		if err != nil {
 			return nil, err
 		}
@@ -269,7 +269,7 @@ func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stak
 	defer session.EndSession(ctx)
 
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, state, "v2_staker_stats")
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, state, "staker_stats")
 		if err != nil {
 			return nil, err
 		}
