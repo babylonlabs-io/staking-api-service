@@ -105,6 +105,18 @@ definitions:
       next_key:
         type: string
     type: object
+  indexerdbmodel.FinalityProviderState:
+    enum:
+    - FINALITY_PROVIDER_STATUS_INACTIVE
+    - FINALITY_PROVIDER_STATUS_ACTIVE
+    - FINALITY_PROVIDER_STATUS_JAILED
+    - FINALITY_PROVIDER_STATUS_SLASHED
+    type: string
+    x-enum-varnames:
+    - FinalityProviderStatus_FINALITY_PROVIDER_STATUS_INACTIVE
+    - FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE
+    - FinalityProviderStatus_FINALITY_PROVIDER_STATUS_JAILED
+    - FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED
   indexertypes.BbnStakingParams:
     properties:
       covenant_pks:
@@ -178,14 +190,6 @@ definitions:
       website:
         type: string
     type: object
-  types.FinalityProviderQueryingState:
-    enum:
-    - active
-    - standby
-    type: string
-    x-enum-varnames:
-    - FinalityProviderStateActive
-    - FinalityProviderStateStandby
   v1handlers.DelegationCheckPublicResponse:
     properties:
       code:
@@ -394,7 +398,7 @@ definitions:
       description:
         $ref: '#/definitions/types.FinalityProviderDescription'
       state:
-        $ref: '#/definitions/types.FinalityProviderQueryingState'
+        $ref: '#/definitions/indexerdbmodel.FinalityProviderState'
       transition_required:
         type: boolean
     type: object

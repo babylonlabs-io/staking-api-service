@@ -9,6 +9,7 @@ import (
 	"time"
 
 	bbndatagen "github.com/babylonlabs-io/babylon/testutil/datagen"
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -184,8 +185,13 @@ func GenerateRandomFinalityProviderDetail(r *rand.Rand, numOfFps uint64) []types
 	return finalityProviders
 }
 
-func RandomFinalityProviderState(r *rand.Rand) types.FinalityProviderQueryingState {
-	states := []types.FinalityProviderQueryingState{types.FinalityProviderStateActive, types.FinalityProviderStateStandby}
+func RandomFinalityProviderState(r *rand.Rand) indexerdbmodel.FinalityProviderState {
+	states := []indexerdbmodel.FinalityProviderState{
+		indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE,
+		indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_INACTIVE,
+		indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_JAILED,
+		indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED,
+	}
 	return states[r.Intn(len(states))]
 }
 

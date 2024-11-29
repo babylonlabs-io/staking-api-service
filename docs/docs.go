@@ -801,6 +801,21 @@ const docTemplate = `{
                 }
             }
         },
+        "indexerdbmodel.FinalityProviderState": {
+            "type": "string",
+            "enum": [
+                "FINALITY_PROVIDER_STATUS_INACTIVE",
+                "FINALITY_PROVIDER_STATUS_ACTIVE",
+                "FINALITY_PROVIDER_STATUS_JAILED",
+                "FINALITY_PROVIDER_STATUS_SLASHED"
+            ],
+            "x-enum-varnames": [
+                "FinalityProviderStatus_FINALITY_PROVIDER_STATUS_INACTIVE",
+                "FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE",
+                "FinalityProviderStatus_FINALITY_PROVIDER_STATUS_JAILED",
+                "FinalityProviderStatus_FINALITY_PROVIDER_STATUS_SLASHED"
+            ]
+        },
         "indexertypes.BbnStakingParams": {
             "type": "object",
             "properties": {
@@ -905,17 +920,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "types.FinalityProviderQueryingState": {
-            "type": "string",
-            "enum": [
-                "active",
-                "standby"
-            ],
-            "x-enum-varnames": [
-                "FinalityProviderStateActive",
-                "FinalityProviderStateStandby"
-            ]
         },
         "v1handlers.DelegationCheckPublicResponse": {
             "type": "object",
@@ -1235,7 +1239,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/types.FinalityProviderDescription"
                 },
                 "state": {
-                    "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                    "$ref": "#/definitions/indexerdbmodel.FinalityProviderState"
                 },
                 "transition_required": {
                     "type": "boolean"
