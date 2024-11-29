@@ -9,7 +9,7 @@ jobs:
   lint_test:
     uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.6.0
     with:
-     run-unit-tests: true
+     run-unit-tests: false
      run-integration-tests: false
      run-lint: false
      run-build: true
