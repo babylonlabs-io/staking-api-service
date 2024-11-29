@@ -11,7 +11,7 @@ jobs:
     with:
      run-unit-tests: false
      run-integration-tests: false
-     run-lint: false
+     run-lint: true
      run-build: true
      run-gosec: true
      gosec-args: "-no-fail ./..."
