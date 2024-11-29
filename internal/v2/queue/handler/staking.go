@@ -32,11 +32,11 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 		return nil
 	}
 
-	// Perform the address lookup conversion
-	addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
-	if addressLookupErr != nil {
-		return addressLookupErr
-	}
+	// // Perform the address lookup conversion
+	// addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
+	// if addressLookupErr != nil {
+	// 	return addressLookupErr
+	// }
 
 	// Perform the stats calculation
 	statsErr := h.Service.ProcessStakingStatsCalculation(

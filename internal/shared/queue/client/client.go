@@ -29,7 +29,7 @@ func New(ctx context.Context, cfg *queueConfig.QueueConfig, service *services.Se
 	}
 
 	return &Queue{
-		ProcessingTimeout: time.Duration(cfg.QueueProcessingTimeout) * time.Second,
+		ProcessingTimeout: cfg.QueueProcessingTimeout,
 		MaxRetryAttempts:  cfg.MsgMaxRetryAttempts,
 		StatsQueueClient:  statsQueueClient,
 	}

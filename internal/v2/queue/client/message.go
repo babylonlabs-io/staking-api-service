@@ -10,14 +10,18 @@ func (q *V2QueueClient) StartReceivingMessages() {
 	// start processing messages from the active staking queue
 	queueclient.StartQueueMessageProcessing(
 		q.ActiveStakingEventQueueClient,
-		q.Handler.ActiveStakingHandler, q.Handler.HandleUnprocessedMessage,
-		q.MaxRetryAttempts, q.ProcessingTimeout,
+		q.Handler.ActiveStakingHandler,
+		q.Handler.HandleUnprocessedMessage,
+		q.MaxRetryAttempts,
+		q.ProcessingTimeout,
 	)
 	log.Printf("Starting to receive messages from unbonding staking queue")
 	queueclient.StartQueueMessageProcessing(
 		q.UnbondingEventQueueClient,
-		q.Handler.UnbondingStakingHandler, q.Handler.HandleUnprocessedMessage,
-		q.MaxRetryAttempts, q.ProcessingTimeout,
+		q.Handler.UnbondingStakingHandler,
+		q.Handler.HandleUnprocessedMessage,
+		q.MaxRetryAttempts,
+		q.ProcessingTimeout,
 	)
 	// ...add more queues here
 }
