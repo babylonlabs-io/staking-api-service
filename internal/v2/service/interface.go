@@ -15,8 +15,7 @@ type V2ServiceProvider interface {
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*StakerDelegationPublic, *types.Error)
 	GetDelegations(ctx context.Context, stakerPKHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error)
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
-
-	// Staker
+	GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error)
 	ProcessAndSaveBtcAddresses(ctx context.Context, stakerPkHex string) *types.Error
 	ProcessStakingStatsCalculation(
 		ctx context.Context,

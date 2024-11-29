@@ -36,6 +36,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v2/delegation", registerHandler(handlers.V2Handler.GetDelegation))
 	r.Get("/v2/delegations", registerHandler(handlers.V2Handler.GetDelegations))
 	r.Get("/v2/stats", registerHandler(handlers.V2Handler.GetOverallStats))
+	r.Get("/v2/staker/stats", registerHandler(handlers.V2Handler.GetStakerStats))
 
 	// Common routes
 	r.Get("/swagger/*", httpSwagger.WrapHandler)

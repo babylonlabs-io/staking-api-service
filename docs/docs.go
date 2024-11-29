@@ -572,6 +572,15 @@ const docTemplate = `{
                     "v2"
                 ],
                 "summary": "Get Staker Stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Public key of the staker to fetch",
+                        "name": "staker_pk_hex",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Staker stats",
@@ -1244,13 +1253,7 @@ const docTemplate = `{
         "v2service.OverallStatsPublic": {
             "type": "object",
             "properties": {
-                "_id": {
-                    "type": "string"
-                },
                 "active_delegations": {
-                    "type": "integer"
-                },
-                "active_finality_providers": {
                     "type": "integer"
                 },
                 "active_stakers": {
@@ -1260,9 +1263,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "total_delegations": {
-                    "type": "integer"
-                },
-                "total_finality_providers": {
                     "type": "integer"
                 },
                 "total_stakers": {
@@ -1319,25 +1319,19 @@ const docTemplate = `{
         "v2service.StakerStatsPublic": {
             "type": "object",
             "properties": {
-                "_id": {
-                    "type": "string"
-                },
                 "active_delegations": {
                     "type": "integer"
                 },
                 "active_tvl": {
                     "type": "integer"
                 },
-                "slashed_delegations": {
+                "staker_pk_hex": {
+                    "type": "string"
+                },
+                "total_delegations": {
                     "type": "integer"
                 },
-                "slashed_tvl": {
-                    "type": "integer"
-                },
-                "withdrawable_delegations": {
-                    "type": "integer"
-                },
-                "withdrawable_tvl": {
+                "total_tvl": {
                     "type": "integer"
                 }
             }

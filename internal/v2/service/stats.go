@@ -43,6 +43,22 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 	}, nil
 }
 
+func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error) {
+	stakerStats, err := s.DbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	return &StakerStatsPublic{
+		StakerPkHex:       stakerStats.StakerPkHex,
+		ActiveTvl:         stakerStats.ActiveTvl,
+		TotalTvl:          stakerStats.TotalTvl,
+		ActiveDelegations: stakerStats.ActiveDelegations,
+		TotalDelegations:  stakerStats.TotalDelegations,
+	}, nil
+}
+
 // ProcessStakingStatsCalculation calculates the staking stats and updates the database.
 // This method tolerates duplicated calls, only the first call will be processed.
 func (s *V2Service) ProcessStakingStatsCalculation(
