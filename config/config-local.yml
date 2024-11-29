@@ -12,7 +12,7 @@ server:
 staking-db:
   username: root
   password: example
-  address: "mongodb://localhost:27018/?directConnection=true"
+  address: "mongodb://localhost:27017/?directConnection=true"
   db-name: staking-api-service
   max-pagination-limit: 10
   db-batch-size-limit: 100
@@ -28,13 +28,13 @@ queue:
   queue_user: user # can be replaced by values in .env file
   queue_password: password
   url: "localhost:5672"
-  processing_timeout: 30s
+  processing_timeout: 5s
   msg_max_retry_attempts: 3
   requeue_delay_time: 300s
   queue_type: quorum
 metrics:
   host: 0.0.0.0
-  port: 2113
+  port: 2112
 assets:
   max_utxos: 100
   ordinals:
