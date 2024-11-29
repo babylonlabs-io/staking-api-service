@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - 'main'
+    - 'gusin13/v2-overall-stats'
     tags:
     - '*'
 
