@@ -1228,6 +1228,9 @@
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                },
+                "transition_required": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1342,6 +1345,7 @@
                 "PENDING",
                 "VERIFIED",
                 "ACTIVE",
+                "SLASHED",
                 "TIMELOCK_UNBONDING",
                 "EARLY_UNBONDING",
                 "TIMELOCK_WITHDRAWABLE",
@@ -1359,6 +1363,7 @@
                 "StatePending",
                 "StateVerified",
                 "StateActive",
+                "StateSlashed",
                 "StateTimelockUnbonding",
                 "StateEarlyUnbonding",
                 "StateTimelockWithdrawable",

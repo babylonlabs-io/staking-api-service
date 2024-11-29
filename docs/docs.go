@@ -1236,6 +1236,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                },
+                "transition_required": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1350,6 +1353,7 @@ const docTemplate = `{
                 "PENDING",
                 "VERIFIED",
                 "ACTIVE",
+                "SLASHED",
                 "TIMELOCK_UNBONDING",
                 "EARLY_UNBONDING",
                 "TIMELOCK_WITHDRAWABLE",
@@ -1367,6 +1371,7 @@ const docTemplate = `{
                 "StatePending",
                 "StateVerified",
                 "StateActive",
+                "StateSlashed",
                 "StateTimelockUnbonding",
                 "StateEarlyUnbonding",
                 "StateTimelockWithdrawable",

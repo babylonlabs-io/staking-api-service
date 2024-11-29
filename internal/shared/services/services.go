@@ -34,7 +34,7 @@ func New(
 	if err != nil {
 		return nil, err
 	}
-	v2Service, err := v2service.New(ctx, cfg, clients, dbClients)
+	v2Service, err := v2service.New(ctx, cfg, clients, dbClients, finalityProviders)
 	if err != nil {
 		return nil, err
 	}

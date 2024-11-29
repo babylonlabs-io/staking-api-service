@@ -2,10 +2,8 @@ package indexerdbmodel
 
 import (
 	"encoding/json"
-	"fmt"
 
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
 type FinalityProviderState string
@@ -56,15 +54,4 @@ func DecodeFinalityProviderPaginationToken(token string) (*IndexerFinalityProvid
 	var pagination IndexerFinalityProviderPagination
 	err := json.Unmarshal([]byte(token), &pagination)
 	return &pagination, err
-}
-
-func FromStringToFinalityProviderState(s string) (types.FinalityProviderQueryingState, error) {
-	switch s {
-	case "active":
-		return types.FinalityProviderStateActive, nil
-	case "standby":
-		return types.FinalityProviderStateStandby, nil
-	default:
-		return "", fmt.Errorf("invalid finality provider state: %s", s)
-	}
 }

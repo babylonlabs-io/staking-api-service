@@ -8,7 +8,7 @@ import (
 	v1service "github.com/babylonlabs-io/staking-api-service/internal/v1/service"
 )
 
-// GetFinalityProviders gets active finality providers sorted by ActiveTvl.
+// Deprecated: GetFinalityProviders gets active finality providers sorted by ActiveTvl. Querying V2 finality providers is preferred for a combined list of V1 and V2 finality providers.
 // @Summary Get Active Finality Providers
 // @Description Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order.
 // @Produce json

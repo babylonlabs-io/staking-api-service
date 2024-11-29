@@ -395,6 +395,8 @@ definitions:
         $ref: '#/definitions/types.FinalityProviderDescription'
       state:
         $ref: '#/definitions/types.FinalityProviderQueryingState'
+      transition_required:
+        type: boolean
     type: object
   v2service.NetworkInfoPublic:
     properties:
@@ -469,6 +471,7 @@ definitions:
     - PENDING
     - VERIFIED
     - ACTIVE
+    - SLASHED
     - TIMELOCK_UNBONDING
     - EARLY_UNBONDING
     - TIMELOCK_WITHDRAWABLE
@@ -486,6 +489,7 @@ definitions:
     - StatePending
     - StateVerified
     - StateActive
+    - StateSlashed
     - StateTimelockUnbonding
     - StateEarlyUnbonding
     - StateTimelockWithdrawable

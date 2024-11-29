@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"regexp"
 
-	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -205,20 +204,4 @@ func ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (str
 	}
 
 	return str, nil
-}
-
-func ParseFPStateQuery(r *http.Request, isOptional bool) (types.FinalityProviderQueryingState, *types.Error) {
-	state := r.URL.Query().Get("state")
-	if state == "" {
-		if isOptional {
-			return "", nil
-		}
-	}
-	stateEnum, err := indexerdbmodel.FromStringToFinalityProviderState(state)
-	if err != nil {
-		return "", types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, err.Error(),
-		)
-	}
-	return stateEnum, nil
 }
