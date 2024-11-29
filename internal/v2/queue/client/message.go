@@ -7,40 +7,37 @@ import (
 
 func (q *V2QueueClient) StartReceivingMessages() {
 	log.Printf("Starting to receive messages from v2 queues")
-
-	log.Printf("Starting to receive messages from verified staking queue")
+	// start processing messages from the active staking queue
 	queueclient.StartQueueMessageProcessing(
-		q.VerifiedStakingEventQueueClient,
-		q.Handler.VerifiedStakingHandler, nil,
-		q.MaxRetryAttempts, q.ProcessingTimeout,
+		q.ActiveStakingEventQueueClient,
+		q.Handler.ActiveStakingHandler,
+		q.Handler.HandleUnprocessedMessage,
+		q.MaxRetryAttempts,
+		q.ProcessingTimeout,
 	)
-
-	log.Printf("Starting to receive messages from pending staking queue")
+	log.Printf("Starting to receive messages from unbonding staking queue")
 	queueclient.StartQueueMessageProcessing(
-		q.PendingStakingEventQueueClient,
-		q.Handler.PendingStakingHandler, nil,
-		q.MaxRetryAttempts, q.ProcessingTimeout,
+		q.UnbondingEventQueueClient,
+		q.Handler.UnbondingStakingHandler,
+		q.Handler.HandleUnprocessedMessage,
+		q.MaxRetryAttempts,
+		q.ProcessingTimeout,
 	)
-
+	// ...add more queues here
 }
 
-// Turn off all message processing
 func (q *V2QueueClient) StopReceivingMessages() {
-	log.Printf("Stopping to receive messages from v2 queues")
-
-	log.Printf("Stopping to receive messages from verified staking queue")
-	verifiedQueueErr := q.VerifiedStakingEventQueueClient.Stop()
-	if verifiedQueueErr != nil {
-		log.Error().Err(verifiedQueueErr).
-			Str("queueName", q.VerifiedStakingEventQueueClient.GetQueueName()).
+	activeQueueErr := q.ActiveStakingEventQueueClient.Stop()
+	if activeQueueErr != nil {
+		log.Error().Err(activeQueueErr).
+			Str("queueName", q.ActiveStakingEventQueueClient.GetQueueName()).
 			Msg("error while stopping queue")
 	}
-
-	log.Printf("Stopping to receive messages from pending staking queue")
-	pendingQueueErr := q.PendingStakingEventQueueClient.Stop()
-	if pendingQueueErr != nil {
-		log.Error().Err(pendingQueueErr).
-			Str("queueName", q.PendingStakingEventQueueClient.GetQueueName()).
+	unbondingQueueErr := q.UnbondingEventQueueClient.Stop()
+	if unbondingQueueErr != nil {
+		log.Error().Err(unbondingQueueErr).
+			Str("queueName", q.UnbondingEventQueueClient.GetQueueName()).
 			Msg("error while stopping queue")
 	}
+	// ...add more queues here
 }

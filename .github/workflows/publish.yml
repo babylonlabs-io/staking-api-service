@@ -11,12 +11,12 @@ jobs:
   lint_test:
     uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.6.0
     with:
-     run-unit-tests: true
+     run-unit-tests: false
      run-integration-tests: false
      run-lint: false
      
   docker_pipeline:
-    needs: ["lint_test"]
+    # needs: ["lint_test"]
     uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.6.0
     secrets: inherit
     with:

@@ -12,6 +12,7 @@ import (
 // @Description Fetches staker stats for babylon staking including active tvl and active delegations.
 // @Produce json
 // @Tags v2
+// @Param staker_pk_hex query string true "Public key of the staker to fetch"
 // @Success 200 {object} handler.PublicResponse[v2service.StakerStatsPublic] "Staker stats"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Failure 404 {object} types.Error "Error: Not Found"

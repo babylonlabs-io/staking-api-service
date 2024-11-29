@@ -31,9 +31,9 @@ queue:
   queue_user: user # can be replaced by values in .env file
   queue_password: password
   url: "rabbitmq:5672"
-  processing_timeout: 30
+  processing_timeout: 5s
   msg_max_retry_attempts: 10
-  requeue_delay_time: 300 # delay failed message requeue time in seconds
+  requeue_delay_time: 300s # delay failed message requeue time in seconds
   queue_type: quorum
 metrics:
   host: 0.0.0.0

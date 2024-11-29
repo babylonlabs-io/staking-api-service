@@ -405,19 +405,13 @@ definitions:
     type: object
   v2service.OverallStatsPublic:
     properties:
-      _id:
-        type: string
       active_delegations:
-        type: integer
-      active_finality_providers:
         type: integer
       active_stakers:
         type: integer
       active_tvl:
         type: integer
       total_delegations:
-        type: integer
-      total_finality_providers:
         type: integer
       total_stakers:
         type: integer
@@ -454,19 +448,15 @@ definitions:
     type: object
   v2service.StakerStatsPublic:
     properties:
-      _id:
-        type: string
       active_delegations:
         type: integer
       active_tvl:
         type: integer
-      slashed_delegations:
+      staker_pk_hex:
+        type: string
+      total_delegations:
         type: integer
-      slashed_tvl:
-        type: integer
-      withdrawable_delegations:
-        type: integer
-      withdrawable_tvl:
+      total_tvl:
         type: integer
     type: object
   v2service.StakingStatusPublic:
@@ -895,6 +885,12 @@ paths:
     get:
       description: Fetches staker stats for babylon staking including active tvl and
         active delegations.
+      parameters:
+      - description: Public key of the staker to fetch
+        in: query
+        name: staker_pk_hex
+        required: true
+        type: string
       produces:
       - application/json
       responses:
