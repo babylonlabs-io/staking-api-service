@@ -121,126 +121,107 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	return nil
 }
 
-// ProcessUnbondingDelegationStats calculates the unbonding delegation stats and updates the database.
-func (s *V2Service) ProcessUnbondingDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error {
-	// Fetch existing or initialize the stats lock document if not exist
+// processStatsSubtraction handles the common logic for subtracting stats
+func (s *V2Service) processStatsSubtraction(
+	ctx context.Context,
+	stakingTxHashHex string,
+	stakerPkHex string,
+	fpBtcPkHexes []string,
+	amount uint64,
+) *types.Error {
 	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
-		ctx, stakingTxHashHex, types.Unbonding.ToString(),
+		ctx,
+		stakingTxHashHex,
+		types.Unbonding.ToString(), // use same state for both slashed and unbonding
 	)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-			Msg("error while fetching stats lock document")
+		log.Ctx(ctx).Error().
+			Err(err).
+			Str("staking_tx_hash", stakingTxHashHex).
+			Msg("Failed to fetch stats lock document")
 		return types.NewInternalServiceError(err)
 	}
 
-	// Subtract from the finality stats
-	if !statsLockDocument.FinalityProviderStats {
-		err = s.DbClients.V2DBClient.SubtractFinalityProviderStats(
-			ctx, stakingTxHashHex, fpBtcPkHexes, amount,
-		)
+	// Helper for common error handling
+	handleSubtractionError := func(err error, operation string) *types.Error {
 		if err != nil {
 			if db.IsNotFoundError(err) {
 				return nil
 			}
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while subtracting finality stats")
+			log.Ctx(ctx).Error().
+				Err(err).
+				Str("staking_tx_hash", stakingTxHashHex).
+				Str("operation", operation).
+				Msg("Failed to subtract stats")
 			return types.NewInternalServiceError(err)
+		}
+		return nil
+	}
+
+	// Subtract from finality provider stats
+	if !statsLockDocument.FinalityProviderStats {
+		if err := s.DbClients.V2DBClient.SubtractFinalityProviderStats(
+			ctx, stakingTxHashHex, fpBtcPkHexes, amount,
+		); err != nil {
+			return handleSubtractionError(err, "finality_provider_stats")
 		}
 	}
 
+	// Subtract from staker stats
 	if !statsLockDocument.StakerStats {
-		err = s.DbClients.V2DBClient.SubtractStakerStats(
+		if err := s.DbClients.V2DBClient.SubtractStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
-		)
-		if err != nil {
-			if db.IsNotFoundError(err) {
-				return nil
-			}
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while subtracting staker stats")
-			return types.NewInternalServiceError(err)
+		); err != nil {
+			return handleSubtractionError(err, "staker_stats")
 		}
 	}
-	// Subtract from the overall stats.
-	// The overall stats should be the last to be updated as it has dependency
-	// on staker stats.
+
+	// Subtract from overall stats
 	if !statsLockDocument.OverallStats {
-		err = s.DbClients.V2DBClient.SubtractOverallStats(
+		if err := s.DbClients.V2DBClient.SubtractOverallStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
-		)
-		if err != nil {
-			if db.IsNotFoundError(err) {
-				return nil
-			}
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while subtracting overall stats")
-			return types.NewInternalServiceError(err)
+		); err != nil {
+			return handleSubtractionError(err, "overall_stats")
 		}
 	}
 
 	return nil
 }
 
-func (s *V2Service) ProcessSlashedFpStats(ctx context.Context, fpBtcPkHex string) *types.Error {
-	slashedFpDelegations, err := s.DbClients.IndexerDBClient.GetSlashedFpDelegations(ctx, fpBtcPkHex)
+// ProcessUnbondingDelegationStats calculates the unbonding delegation stats
+func (s *V2Service) ProcessUnbondingDelegationStats(
+	ctx context.Context,
+	stakingTxHashHex string,
+	stakerPkHex string,
+	fpBtcPkHexes []string,
+	amount uint64,
+) *types.Error {
+	return s.processStatsSubtraction(ctx, stakingTxHashHex, stakerPkHex, fpBtcPkHexes, amount)
+}
+
+// ProcessSlashedFpStats processes stats for slashed finality providers
+func (s *V2Service) ProcessSlashedFpStats(
+	ctx context.Context,
+	fpBtcPkHex string,
+) *types.Error {
+	slashedDelegations, err := s.DbClients.IndexerDBClient.GetSlashedFpDelegations(ctx, fpBtcPkHex)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Str("fpBtcPkHex", fpBtcPkHex).Msg("error while fetching slashed fp delegations")
+		log.Ctx(ctx).Error().
+			Err(err).
+			Str("finality_provider_pk_hex", fpBtcPkHex).
+			Msg("Failed to fetch slashed delegations")
 		return types.NewInternalServiceError(err)
 	}
 
-	for _, delegation := range slashedFpDelegations {
-		statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
-			ctx, delegation.StakingTxHashHex, types.Unbonding.ToString(),
-		)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", delegation.StakingTxHashHex).
-				Msg("error while fetching stats lock document")
-			return types.NewInternalServiceError(err)
-		}
-
-		// Subtract from the finality stats
-		if !statsLockDocument.FinalityProviderStats {
-			err = s.DbClients.V2DBClient.SubtractFinalityProviderStats(
-				ctx, delegation.StakingTxHashHex, delegation.FinalityProviderBtcPksHex, delegation.StakingAmount,
-			)
-			if err != nil {
-				if db.IsNotFoundError(err) {
-					return nil
-				}
-				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", delegation.StakingTxHashHex).
-					Msg("error while subtracting finality stats")
-				return types.NewInternalServiceError(err)
-			}
-		}
-
-		if !statsLockDocument.StakerStats {
-			err = s.DbClients.V2DBClient.SubtractStakerStats(
-				ctx, delegation.StakingTxHashHex, delegation.StakerBtcPkHex, delegation.StakingAmount,
-			)
-			if err != nil {
-				if db.IsNotFoundError(err) {
-					return nil
-				}
-				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", delegation.StakingTxHashHex).
-					Msg("error while subtracting staker stats")
-				return types.NewInternalServiceError(err)
-			}
-		}
-		// Subtract from the overall stats.
-		// The overall stats should be the last to be updated as it has dependency
-		// on staker stats.
-		if !statsLockDocument.OverallStats {
-			err = s.DbClients.V2DBClient.SubtractOverallStats(
-				ctx, delegation.StakingTxHashHex, delegation.StakerBtcPkHex, delegation.StakingAmount,
-			)
-			if err != nil {
-				if db.IsNotFoundError(err) {
-					return nil
-				}
-				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", delegation.StakingTxHashHex).
-					Msg("error while subtracting overall stats")
-				return types.NewInternalServiceError(err)
-			}
+	for _, delegation := range slashedDelegations {
+		if err := s.processStatsSubtraction(
+			ctx,
+			delegation.StakingTxHashHex,
+			delegation.StakerBtcPkHex,
+			delegation.FinalityProviderBtcPksHex,
+			delegation.StakingAmount,
+		); err != nil {
+			return err
 		}
 	}
 
