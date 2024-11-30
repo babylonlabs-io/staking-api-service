@@ -46,3 +46,15 @@ type V2FinalityProviderStatsDocument struct {
 	ActiveDelegations     int64  `bson:"active_delegations"`
 	TotalDelegations      int64  `bson:"total_delegations"`
 }
+
+type V2FpSlashingLockDocument struct {
+	FinalityProviderPkHex string `bson:"_id"`          // <fp_btc_pk_hex>
+	IsProcessed           bool   `bson:"is_processed"` // true when processing is complete
+}
+
+func NewV2FpSlashingLockDocument(fpBtcPkHex string) *V2FpSlashingLockDocument {
+	return &V2FpSlashingLockDocument{
+		FinalityProviderPkHex: fpBtcPkHex,
+		IsProcessed:           false,
+	}
+}

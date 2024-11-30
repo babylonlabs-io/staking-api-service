@@ -204,6 +204,22 @@ func (s *V2Service) ProcessSlashedFpStats(
 	ctx context.Context,
 	fpBtcPkHex string,
 ) *types.Error {
+	// Check if the lock exists
+	fpSlashingLock, err := s.DbClients.V2DBClient.GetFpSlashingLock(ctx, fpBtcPkHex)
+	if err != nil && !db.IsNotFoundError(err) {
+		return types.NewInternalServiceError(err)
+	}
+
+	// if the lock exist, skip the processing
+	if fpSlashingLock != nil {
+		return nil
+	}
+
+	// Create the lock
+	if err := s.DbClients.V2DBClient.CreateFpSlashingLock(ctx, fpBtcPkHex); err != nil {
+		return types.NewInternalServiceError(err)
+	}
+
 	slashedDelegations, err := s.DbClients.IndexerDBClient.GetSlashedFpDelegations(ctx, fpBtcPkHex)
 	if err != nil {
 		log.Ctx(ctx).Error().
@@ -223,6 +239,11 @@ func (s *V2Service) ProcessSlashedFpStats(
 		); err != nil {
 			return err
 		}
+	}
+
+	// Update the lock
+	if err := s.DbClients.V2DBClient.UpdateFpSlashingLock(ctx, fpBtcPkHex); err != nil {
+		return types.NewInternalServiceError(err)
 	}
 
 	return nil

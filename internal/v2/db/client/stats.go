@@ -45,6 +45,42 @@ func (db *V2Database) GetOrCreateStatsLock(
 	return &result, nil
 }
 
+func (v2dbclient *V2Database) GetFpSlashingLock(ctx context.Context, fpBtcPkHex string) (*v2dbmodel.V2FpSlashingLockDocument, error) {
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FpSlashingLockCollection)
+	filter := bson.M{"_id": fpBtcPkHex}
+	var result v2dbmodel.V2FpSlashingLockDocument
+	err := client.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (v2dbclient *V2Database) CreateFpSlashingLock(ctx context.Context, fpBtcPkHex string) error {
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FpSlashingLockCollection)
+	_, err := client.InsertOne(ctx, v2dbmodel.NewV2FpSlashingLockDocument(fpBtcPkHex))
+	return err
+}
+
+func (v2dbclient *V2Database) UpdateFpSlashingLock(ctx context.Context, fpBtcPkHex string) error {
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FpSlashingLockCollection)
+
+	filter := bson.M{"_id": fpBtcPkHex}
+	update := bson.M{"$set": bson.M{"is_processed": true}}
+
+	result, err := client.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	// If no document was modified, it means the lock didn't exist
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("fp slashing lock not found for fp: %s", fpBtcPkHex)
+	}
+
+	return nil
+}
+
 // IncrementOverallStats increments the overall stats for the given staking tx hash.
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) IncrementOverallStats(
