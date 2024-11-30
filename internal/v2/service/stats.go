@@ -94,16 +94,17 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 		}
 
 		if !statsLockDocument.StakerStats {
-			// Convert the staker public key to multiple BTC addresses and save
-			// them in the database.
-			if addressConversionErr := s.ProcessAndSaveBtcAddresses(
-				ctx, stakerPkHex,
-			); addressConversionErr != nil {
-				log.Ctx(ctx).Error().Err(addressConversionErr).
-					Str("stakingTxHashHex", stakingTxHashHex).
-					Msg("error while processing and saving btc addresses")
-				return types.NewInternalServiceError(addressConversionErr)
-			}
+			// TODO: https://github.com/babylonlabs-io/staking-api-service/issues/162
+			// // Convert the staker public key to multiple BTC addresses and save
+			// // them in the database.
+			// if addressConversionErr := s.ProcessAndSaveBtcAddresses(
+			// 	ctx, stakerPkHex,
+			// ); addressConversionErr != nil {
+			// 	log.Ctx(ctx).Error().Err(addressConversionErr).
+			// 		Str("stakingTxHashHex", stakingTxHashHex).
+			// 		Msg("error while processing and saving btc addresses")
+			// 	return types.NewInternalServiceError(addressConversionErr)
+			// }
 			err = s.DbClients.V2DBClient.IncrementStakerStats(
 				ctx, stakingTxHashHex, stakerPkHex, amount,
 			)
