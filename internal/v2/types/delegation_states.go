@@ -31,10 +31,6 @@ const (
 	StateEarlyUnbondingWithdrawn         DelegationState = "EARLY_UNBONDING_WITHDRAWN"
 	StateTimelockSlashingWithdrawn       DelegationState = "TIMELOCK_SLASHING_WITHDRAWN"
 	StateEarlyUnbondingSlashingWithdrawn DelegationState = "EARLY_UNBONDING_SLASHING_WITHDRAWN"
-
-	// Slashed states
-	StateTimelockSlashed       DelegationState = "TIMELOCK_SLASHED"
-	StateEarlyUnbondingSlashed DelegationState = "EARLY_UNBONDING_SLASHED"
 )
 
 // MapDelegationState consumes internal indexer states and maps them to the frontend-facing states
