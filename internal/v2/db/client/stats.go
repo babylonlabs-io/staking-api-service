@@ -408,3 +408,20 @@ func (v2dbclient *V2Database) updateFinalityProviderStats(
 	_, txErr := session.WithTransaction(ctx, transactionWork)
 	return txErr
 }
+
+func (v2dbclient *V2Database) GetFinalityProviderStats(
+	ctx context.Context,
+) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
+	cursor, err := client.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []*v2dbmodel.V2FinalityProviderStatsDocument
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+	return results, nil
+}

@@ -7,6 +7,7 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"github.com/rs/zerolog/log"
 )
 
@@ -23,39 +24,72 @@ type FinalityProvidersStatsPublic struct {
 	FinalityProviders []FinalityProviderStatsPublic `json:"finality_providers"`
 }
 
-func mapToFinalityProviderStatsPublic(provider indexerdbmodel.IndexerFinalityProviderDetails) *FinalityProviderStatsPublic {
+func mapToFinalityProviderStatsPublic(
+	provider indexerdbmodel.IndexerFinalityProviderDetails,
+	fpStats *v2dbmodel.V2FinalityProviderStatsDocument,
+) *FinalityProviderStatsPublic {
 	return &FinalityProviderStatsPublic{
 		BtcPk:             provider.BtcPk,
 		State:             types.FinalityProviderQueryingState(provider.State),
 		Description:       types.FinalityProviderDescription(provider.Description),
 		Commission:        provider.Commission,
-		ActiveTvl:         0,
-		ActiveDelegations: 0,
+		ActiveTvl:         fpStats.ActiveTvl,
+		ActiveDelegations: fpStats.ActiveDelegations,
 	}
 }
 
-// GetFinalityProviders gets a list of finality providers with stats
+// GetFinalityProvidersWithStats retrieves all finality providers and their associated statistics
 func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
 ) ([]*FinalityProviderStatsPublic, *types.Error) {
-	fps, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	finalityProviders, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("Finality providers not found")
+			log.Ctx(ctx).Warn().Err(err).Msg("No finality providers found")
 			return nil, types.NewErrorWithMsg(
-				http.StatusNotFound, types.NotFound, "finality providers not found, please retry",
+				http.StatusNotFound,
+				types.NotFound,
+				"finality providers not found, please retry",
 			)
 		}
 		return nil, types.NewErrorWithMsg(
-			http.StatusInternalServerError, types.InternalServiceError, "failed to get finality providers",
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			"failed to get finality providers",
 		)
 	}
 
-	// TODO: Call the FP stats service to get the stats for compose the response
-	providersPublic := make([]*FinalityProviderStatsPublic, 0, len(fps))
-
-	for _, provider := range fps {
-		providersPublic = append(providersPublic, mapToFinalityProviderStatsPublic(*provider))
+	providerStats, err := s.DbClients.V2DBClient.GetFinalityProviderStats(ctx)
+	if err != nil {
+		return nil, types.NewErrorWithMsg(
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			"failed to get finality provider stats",
+		)
 	}
-	return providersPublic, nil
+
+	statsLookup := make(map[string]*v2dbmodel.V2FinalityProviderStatsDocument)
+	for _, stats := range providerStats {
+		statsLookup[stats.FinalityProviderPkHex] = stats
+	}
+
+	finalityProvidersWithStats := make([]*FinalityProviderStatsPublic, 0, len(finalityProviders))
+
+	for _, provider := range finalityProviders {
+		providerStats, hasStats := statsLookup[provider.BtcPk]
+		if !hasStats {
+			providerStats = &v2dbmodel.V2FinalityProviderStatsDocument{
+				ActiveTvl:         0,
+				ActiveDelegations: 0,
+			}
+			log.Ctx(ctx).Debug().
+				Str("finality_provider_pk_hex", provider.BtcPk).
+				Msg("Initializing finality provider with default stats")
+		}
+		finalityProvidersWithStats = append(
+			finalityProvidersWithStats,
+			mapToFinalityProviderStatsPublic(*provider, providerStats),
+		)
+	}
+	return finalityProvidersWithStats, nil
 }

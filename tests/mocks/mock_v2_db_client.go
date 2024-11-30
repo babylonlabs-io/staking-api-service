@@ -124,6 +124,36 @@ func (_m *V2DBClient) FindUnprocessableMessages(ctx context.Context) ([]dbmodel.
 	return r0, r1
 }
 
+// GetFinalityProviderStats provides a mock function with given fields: ctx
+func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFinalityProviderStats")
+	}
+
+	var r0 []*v2dbmodel.V2FinalityProviderStatsDocument
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*v2dbmodel.V2FinalityProviderStatsDocument); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*v2dbmodel.V2FinalityProviderStatsDocument)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOrCreateStatsLock provides a mock function with given fields: ctx, stakingTxHashHex, state
 func (_m *V2DBClient) GetOrCreateStatsLock(ctx context.Context, stakingTxHashHex string, state string) (*v2dbmodel.V2StatsLockDocument, error) {
 	ret := _m.Called(ctx, stakingTxHashHex, state)
