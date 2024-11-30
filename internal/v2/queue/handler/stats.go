@@ -76,5 +76,14 @@ func (h *V2QueueHandler) SlashedFpHandler(ctx context.Context, messageBody strin
 		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
 	}
 
+	statsErr := h.Service.ProcessSlashedFpStats(
+		ctx,
+		slashedFpEvent.FinalityProviderBtcPkHex,
+	)
+	if statsErr != nil {
+		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process slashed FP stats calculation")
+		return statsErr
+	}
+
 	return nil
 }
