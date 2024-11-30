@@ -345,7 +345,6 @@ func (v2dbclient *V2Database) SubtractFinalityProviderStats(
 	fpPkHexes []string,
 	amount uint64,
 ) error {
-
 	// Create bulk write operations for each FP
 	var operations []mongo.WriteModel
 	for _, fpPkHex := range fpPkHexes {
