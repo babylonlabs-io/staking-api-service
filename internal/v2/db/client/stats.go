@@ -307,3 +307,51 @@ func (v2dbclient *V2Database) GetStakerStats(
 	}
 	return &result, nil
 }
+
+func (v2dbclient *V2Database) IncrementFinalityProviderStats(
+	ctx context.Context, stakingTxHashHex, fpPkHex string, amount uint64,
+) error {
+	upsertUpdate := bson.M{
+		"$inc": bson.M{
+			"active_tvl":         int64(amount),
+			"total_tvl":          int64(amount),
+			"active_delegations": 1,
+			"total_delegations":  1,
+		},
+	}
+	return v2dbclient.updateFinalityProviderStats(ctx, types.Active.ToString(), stakingTxHashHex, fpPkHex, upsertUpdate)
+}
+
+func (v2dbclient *V2Database) updateFinalityProviderStats(ctx context.Context, state, stakingTxHashHex, fpPkHex string, upsertUpdate primitive.M) error {
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
+
+	// Start a session
+	session, sessionErr := v2dbclient.Client.StartSession()
+	if sessionErr != nil {
+		return sessionErr
+	}
+	defer session.EndSession(ctx)
+
+	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, state, "finality_provider_stats")
+		if err != nil {
+			return nil, err
+		}
+
+		upsertFilter := bson.M{"_id": fpPkHex}
+
+		_, err = client.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	// Execute the transaction
+	_, txErr := session.WithTransaction(ctx, transactionWork)
+	if txErr != nil {
+		return txErr
+	}
+
+	return nil
+}

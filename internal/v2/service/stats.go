@@ -79,6 +79,19 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 	switch state {
 	case types.Active:
 		// TODO: Add finality provider stats calculation
+		if !statsLockDocument.FinalityProviderStats {
+			err = s.DbClients.V2DBClient.IncrementFinalityProviderStats(
+				ctx, stakingTxHashHex, finalityProviderBtcPksHex, amount,
+			)
+			if err != nil {
+				if db.IsNotFoundError(err) {
+					return nil
+				}
+				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while incrementing finality stats")
+				return types.NewInternalServiceError(err)
+			}
+		}
 
 		if !statsLockDocument.StakerStats {
 			// Convert the staker public key to multiple BTC addresses and save
