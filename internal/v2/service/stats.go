@@ -135,7 +135,20 @@ func (s *V2Service) ProcessStakingStatsCalculation(
 			}
 		}
 	case types.Unbonded:
-		// TODO: Add finality provider stats calculation
+		// Subtract from the finality stats
+		if !statsLockDocument.FinalityProviderStats {
+			err = s.DbClients.V2DBClient.SubtractFinalityProviderStats(
+				ctx, stakingTxHashHex, finalityProviderBtcPksHex, amount,
+			)
+			if err != nil {
+				if db.IsNotFoundError(err) {
+					return nil
+				}
+				log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+					Msg("error while subtracting finality stats")
+				return types.NewInternalServiceError(err)
+			}
+		}
 
 		if !statsLockDocument.StakerStats {
 			err = s.DbClients.V2DBClient.SubtractStakerStats(

@@ -339,6 +339,36 @@ func (v2dbclient *V2Database) IncrementFinalityProviderStats(
 	)
 }
 
+func (v2dbclient *V2Database) SubtractFinalityProviderStats(
+	ctx context.Context,
+	stakingTxHashHex string,
+	fpPkHexes []string,
+	amount uint64,
+) error {
+
+	// Create bulk write operations for each FP
+	var operations []mongo.WriteModel
+	for _, fpPkHex := range fpPkHexes {
+		operation := mongo.NewUpdateOneModel().
+			SetFilter(bson.M{"_id": fpPkHex}).
+			SetUpdate(bson.M{
+				"$inc": bson.M{
+					"active_tvl":         -int64(amount),
+					"active_delegations": -1,
+				},
+			}).
+			SetUpsert(true)
+		operations = append(operations, operation)
+	}
+
+	return v2dbclient.updateFinalityProviderStats(
+		ctx,
+		types.Unbonded.ToString(),
+		stakingTxHashHex,
+		operations,
+	)
+}
+
 func (v2dbclient *V2Database) updateFinalityProviderStats(
 	ctx context.Context,
 	state string,

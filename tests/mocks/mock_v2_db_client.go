@@ -214,6 +214,24 @@ func (_m *V2DBClient) GetStakerStats(ctx context.Context, stakerPKHex string) (*
 	return r0, r1
 }
 
+// IncrementFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHexes, amount
+func (_m *V2DBClient) IncrementFinalityProviderStats(ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, fpPkHexes, amount)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IncrementFinalityProviderStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, fpPkHexes, amount)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // IncrementOverallStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, amount
 func (_m *V2DBClient) IncrementOverallStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string, amount uint64) error {
 	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, amount)
@@ -297,6 +315,24 @@ func (_m *V2DBClient) SaveUnprocessableMessage(ctx context.Context, messageBody 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
 		r0 = rf(ctx, messageBody, receipt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SubtractFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHexes, amount
+func (_m *V2DBClient) SubtractFinalityProviderStats(ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, fpPkHexes, amount)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SubtractFinalityProviderStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, fpPkHexes, amount)
 	} else {
 		r0 = ret.Error(0)
 	}
