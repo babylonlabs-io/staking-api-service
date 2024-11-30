@@ -18,11 +18,7 @@ type V2ServiceProvider interface {
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
 	GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error)
 	ProcessAndSaveBtcAddresses(ctx context.Context, stakerPkHex string) *types.Error
-	ProcessStakingStatsCalculation(
-		ctx context.Context,
-		stakingTxHashHex, stakerPkHex string,
-		finalityProviderBtcPksHex []string,
-		state types.DelegationState, amount uint64,
-	) *types.Error
 	SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error
+	ProcessActiveDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error
+	ProcessUnbondingDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error
 }

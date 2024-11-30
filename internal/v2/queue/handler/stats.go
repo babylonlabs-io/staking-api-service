@@ -26,25 +26,14 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 		return err
 	}
 
-	// Perform the address lookup conversion
-	addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
-	if addressLookupErr != nil {
-		return addressLookupErr
-	}
+	// TODO: Perform the address lookup conversion
+	// https://github.com/babylonlabs-io/staking-api-service/issues/162
 
-	// // Perform the address lookup conversion
-	// addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
-	// if addressLookupErr != nil {
-	// 	return addressLookupErr
-	// }
-
-	// Perform the stats calculation
-	statsErr := h.Service.ProcessStakingStatsCalculation(
+	statsErr := h.Service.ProcessActiveDelegationStats(
 		ctx,
 		activeStakingEvent.StakingTxHashHex,
 		activeStakingEvent.StakerBtcPkHex,
 		activeStakingEvent.FinalityProviderBtcPksHex,
-		types.Active,
 		activeStakingEvent.StakingAmount,
 	)
 	if statsErr != nil {
@@ -65,12 +54,11 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	}
 
 	// Perform the stats calculation
-	statsErr := h.Service.ProcessStakingStatsCalculation(
+	statsErr := h.Service.ProcessUnbondingDelegationStats(
 		ctx,
 		unbondingStakingEvent.StakingTxHashHex,
 		unbondingStakingEvent.StakerBtcPkHex,
 		unbondingStakingEvent.FinalityProviderBtcPksHex,
-		types.Unbonding,
 		unbondingStakingEvent.StakingAmount,
 	)
 	if statsErr != nil {
@@ -80,18 +68,13 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	return nil
 }
 
-// Convert the staker's public key into corresponding BTC addresses for
-// database lookup. This is performed only for active delegation events to
-// prevent duplicated database writes.
-func (h *V2QueueHandler) performAddressLookupConversion(ctx context.Context, stakerPkHex string, state types.DelegationState) *types.Error {
-	// Perform the address lookup conversion only for active delegation events
-	// to prevent duplicated database writes
-	if state == types.Active {
-		addErr := h.Service.ProcessAndSaveBtcAddresses(ctx, stakerPkHex)
-		if addErr != nil {
-			log.Ctx(ctx).Error().Err(addErr).Msg("Failed to process and save btc addresses")
-			return addErr
-		}
+func (h *V2QueueHandler) SlashedFpHandler(ctx context.Context, messageBody string) *types.Error {
+	var slashedFpEvent queueClient.SlashedFpEvent
+	err := json.Unmarshal([]byte(messageBody), &slashedFpEvent)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into SlashedFpEvent")
+		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
 	}
+
 	return nil
 }
