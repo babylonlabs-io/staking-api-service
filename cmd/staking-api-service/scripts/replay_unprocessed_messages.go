@@ -8,7 +8,7 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
-	queueclients "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/clients"
+	v2queue "github.com/babylonlabs-io/staking-api-service/internal/v2/queue"
 	queueClient "github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/rs/zerolog/log"
 )
@@ -17,7 +17,7 @@ type GenericEvent struct {
 	EventType queueClient.EventType `json:"event_type"`
 }
 
-func ReplayUnprocessableMessages(ctx context.Context, cfg *config.Config, queues *queueclients.QueueClients, db dbclient.DBClient) (err error) {
+func ReplayUnprocessableMessages(ctx context.Context, cfg *config.Config, queues *v2queue.Queues, db dbclient.DBClient) (err error) {
 	// Fetch unprocessable messages
 	unprocessableMessages, err := db.FindUnprocessableMessages(ctx)
 	if err != nil {
@@ -55,20 +55,12 @@ func ReplayUnprocessableMessages(ctx context.Context, cfg *config.Config, queues
 }
 
 // processEventMessage processes the event message based on its EventType.
-func processEventMessage(ctx context.Context, queues *queueclients.QueueClients, event GenericEvent, messageBody string) error {
+func processEventMessage(ctx context.Context, queues *v2queue.Queues, event GenericEvent, messageBody string) error {
 	switch event.EventType {
 	case queueClient.ActiveStakingEventType:
-		return queues.V1QueueClient.ActiveStakingQueueClient.SendMessage(ctx, messageBody)
+		return queues.ActiveStakingQueueClient.SendMessage(ctx, messageBody)
 	case queueClient.UnbondingStakingEventType:
-		return queues.V1QueueClient.UnbondingStakingQueueClient.SendMessage(ctx, messageBody)
-	case queueClient.WithdrawStakingEventType:
-		return queues.V1QueueClient.WithdrawStakingQueueClient.SendMessage(ctx, messageBody)
-	case queueClient.ExpiredStakingEventType:
-		return queues.V1QueueClient.ExpiredStakingQueueClient.SendMessage(ctx, messageBody)
-	case queueClient.StatsEventType:
-		return queues.V1QueueClient.StatsQueueClient.SendMessage(ctx, messageBody)
-	case queueClient.BtcInfoEventType:
-		return queues.V1QueueClient.BtcInfoQueueClient.SendMessage(ctx, messageBody)
+		return queues.UnbondingStakingQueueClient.SendMessage(ctx, messageBody)
 	default:
 		return fmt.Errorf("unknown event type: %v", event.EventType)
 	}

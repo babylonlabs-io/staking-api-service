@@ -29,7 +29,7 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 	// TODO: Perform the address lookup conversion
 	// https://github.com/babylonlabs-io/staking-api-service/issues/162
 
-	statsErr := h.Service.ProcessActiveDelegationStats(
+	statsErr := h.Services.V2Service.ProcessActiveDelegationStats(
 		ctx,
 		activeStakingEvent.StakingTxHashHex,
 		activeStakingEvent.StakerBtcPkHex,
@@ -54,7 +54,7 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	}
 
 	// Perform the stats calculation
-	statsErr := h.Service.ProcessUnbondingDelegationStats(
+	statsErr := h.Services.V2Service.ProcessUnbondingDelegationStats(
 		ctx,
 		unbondingStakingEvent.StakingTxHashHex,
 		unbondingStakingEvent.StakerBtcPkHex,

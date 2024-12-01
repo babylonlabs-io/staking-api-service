@@ -158,7 +158,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
 		stakingTxHashHex,
-		types.Unbonding.ToString(), // use same state for both slashed and unbonding
+		types.Unbonded.ToString(), // use same state for both slashed and unbonding
 	)
 	if err != nil {
 		log.Ctx(ctx).Error().
