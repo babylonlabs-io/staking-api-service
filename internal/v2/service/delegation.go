@@ -170,3 +170,21 @@ func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, 
 	}
 	return nil
 }
+
+func (s *V2Service) MarkV1DelegationAsTransformed(ctx context.Context, stakingTxHashHex string) *types.Error {
+	// check if v1 delegation exists
+	delegation, err := s.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, stakingTxHashHex)
+	if err != nil {
+		return types.NewInternalServiceError(err)
+	}
+	if delegation == nil {
+		return nil
+	}
+
+	// mark as transformed
+	err = s.DbClients.V1DBClient.MarkDelegationAsTransformed(ctx, stakingTxHashHex)
+	if err != nil {
+		return types.NewInternalServiceError(err)
+	}
+	return nil
+}

@@ -156,6 +156,23 @@ func (v1dbclient *V1Database) ScanDelegationsPaginated(
 	)
 }
 
+// MarkDelegationAsTransformed marks an existing delegation as transformed
+func (v1dbclient *V1Database) MarkDelegationAsTransformed(ctx context.Context, stakingTxHashHex string) error {
+	client := v1dbclient.Client.Database(v1dbclient.DbName).Collection(dbmodel.V1DelegationCollection)
+	update := bson.M{"$set": bson.M{"transformed": true}}
+	result, err := client.UpdateOne(ctx, bson.M{"_id": stakingTxHashHex}, update)
+	if err != nil {
+		return err
+	}
+	if result.MatchedCount == 0 {
+		return &db.NotFoundError{
+			Key:     stakingTxHashHex,
+			Message: "Delegation not found",
+		}
+	}
+	return nil
+}
+
 // TransitionState updates the state of a staking transaction to a new state
 // It returns an NotFoundError if the staking transaction is not found or not in the eligible state to transition
 func (v1dbclient *V1Database) transitionState(
