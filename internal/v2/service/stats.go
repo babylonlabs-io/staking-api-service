@@ -32,11 +32,18 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		return nil, types.NewInternalServiceError(err)
 	}
 
+	activeStakersCount, err := s.DbClients.V2DBClient.GetActiveStakersCount(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
+		return nil, types.NewInternalServiceError(err)
+	}
+
 	return &OverallStatsPublic{
 		ActiveTvl:         overallStats.ActiveTvl,
 		TotalTvl:          overallStats.TotalTvl,
 		ActiveDelegations: overallStats.ActiveDelegations,
 		TotalDelegations:  overallStats.TotalDelegations,
+		ActiveStakers:     uint64(activeStakersCount),
 		TotalStakers:      overallStats.TotalStakers,
 	}, nil
 }

@@ -33,4 +33,5 @@ type V2DBClient interface {
 	SubtractFinalityProviderStats(
 		ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64,
 	) error
+	GetActiveStakersCount(ctx context.Context) (int64, error)
 }

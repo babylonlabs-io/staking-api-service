@@ -308,6 +308,25 @@ func (v2dbclient *V2Database) GetStakerStats(
 	return &result, nil
 }
 
+func (v2dbclient *V2Database) GetActiveStakersCount(ctx context.Context) (int64, error) {
+	client := v2dbclient.Client.
+		Database(v2dbclient.DbName).
+		Collection(dbmodel.V2StakerStatsCollection)
+
+	filter := bson.M{
+		"active_delegations": bson.M{
+			"$gt": 0,
+		},
+	}
+
+	count, err := client.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count active stakers: %w", err)
+	}
+
+	return count, nil
+}
+
 func (v2dbclient *V2Database) IncrementFinalityProviderStats(
 	ctx context.Context,
 	stakingTxHashHex string,
