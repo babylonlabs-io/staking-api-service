@@ -20,5 +20,4 @@ type V2ServiceProvider interface {
 	SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error
 	ProcessActiveDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error
 	ProcessUnbondingDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error
-	ProcessSlashedFpStats(ctx context.Context, fpBtcPkHex string) *types.Error
 }

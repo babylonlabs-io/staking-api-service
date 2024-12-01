@@ -121,8 +121,8 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	return nil
 }
 
-// processStatsSubtraction handles the common logic for subtracting stats
-func (s *V2Service) processStatsSubtraction(
+// ProcessUnbondingDelegationStats calculates the unbonding delegation stats
+func (s *V2Service) ProcessUnbondingDelegationStats(
 	ctx context.Context,
 	stakingTxHashHex string,
 	stakerPkHex string,
@@ -142,107 +142,48 @@ func (s *V2Service) processStatsSubtraction(
 		return types.NewInternalServiceError(err)
 	}
 
-	// Helper for common error handling
-	handleSubtractionError := func(err error, operation string) *types.Error {
+	// Subtract from the finality stats
+	if !statsLockDocument.FinalityProviderStats {
+		err = s.DbClients.V2DBClient.SubtractFinalityProviderStats(
+			ctx, stakingTxHashHex, fpBtcPkHexes, amount,
+		)
 		if err != nil {
 			if db.IsNotFoundError(err) {
 				return nil
 			}
-			log.Ctx(ctx).Error().
-				Err(err).
-				Str("staking_tx_hash", stakingTxHashHex).
-				Str("operation", operation).
-				Msg("Failed to subtract stats")
+			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+				Msg("error while subtracting finality stats")
 			return types.NewInternalServiceError(err)
 		}
-		return nil
 	}
-
-	// Subtract from finality provider stats
-	if !statsLockDocument.FinalityProviderStats {
-		if err := s.DbClients.V2DBClient.SubtractFinalityProviderStats(
-			ctx, stakingTxHashHex, fpBtcPkHexes, amount,
-		); err != nil {
-			return handleSubtractionError(err, "finality_provider_stats")
-		}
-	}
-
-	// Subtract from staker stats
 	if !statsLockDocument.StakerStats {
-		if err := s.DbClients.V2DBClient.SubtractStakerStats(
+		err = s.DbClients.V2DBClient.SubtractStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
-		); err != nil {
-			return handleSubtractionError(err, "staker_stats")
+		)
+		if err != nil {
+			if db.IsNotFoundError(err) {
+				return nil
+			}
+			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+				Msg("error while subtracting staker stats")
+			return types.NewInternalServiceError(err)
 		}
 	}
-
-	// Subtract from overall stats
+	// Subtract from the overall stats.
+	// The overall stats should be the last to be updated as it has dependency
+	// on staker stats.
 	if !statsLockDocument.OverallStats {
-		if err := s.DbClients.V2DBClient.SubtractOverallStats(
+		err = s.DbClients.V2DBClient.SubtractOverallStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
-		); err != nil {
-			return handleSubtractionError(err, "overall_stats")
+		)
+		if err != nil {
+			if db.IsNotFoundError(err) {
+				return nil
+			}
+			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+				Msg("error while subtracting overall stats")
+			return types.NewInternalServiceError(err)
 		}
-	}
-
-	return nil
-}
-
-// ProcessUnbondingDelegationStats calculates the unbonding delegation stats
-func (s *V2Service) ProcessUnbondingDelegationStats(
-	ctx context.Context,
-	stakingTxHashHex string,
-	stakerPkHex string,
-	fpBtcPkHexes []string,
-	amount uint64,
-) *types.Error {
-	return s.processStatsSubtraction(ctx, stakingTxHashHex, stakerPkHex, fpBtcPkHexes, amount)
-}
-
-// ProcessSlashedFpStats processes stats for slashed finality providers
-func (s *V2Service) ProcessSlashedFpStats(
-	ctx context.Context,
-	fpBtcPkHex string,
-) *types.Error {
-	fpSlashingLock, err := s.DbClients.V2DBClient.GetOrCreateFpSlashingLock(ctx, fpBtcPkHex)
-	if err != nil {
-		return types.NewInternalServiceError(err)
-	}
-
-	// If already processed, skip
-	if fpSlashingLock.IsProcessed {
-		log.Ctx(ctx).Debug().
-			Str("finality_provider_pk_hex", fpBtcPkHex).
-			Msg("FP already processed for slashing")
-		return nil
-	}
-
-	// Fetch the slashed delegations
-	slashedDelegations, err := s.DbClients.IndexerDBClient.GetSlashedFpDelegations(ctx, fpBtcPkHex)
-	if err != nil {
-		log.Ctx(ctx).Error().
-			Err(err).
-			Str("finality_provider_pk_hex", fpBtcPkHex).
-			Msg("Failed to fetch slashed delegations")
-		return types.NewInternalServiceError(err)
-	}
-
-	// Process each delegation...
-	for _, delegation := range slashedDelegations {
-		if err := s.processStatsSubtraction(
-			ctx,
-			delegation.StakingTxHashHex,
-			delegation.StakerBtcPkHex,
-			delegation.FinalityProviderBtcPksHex,
-			delegation.StakingAmount,
-		); err != nil {
-			return err
-		}
-	}
-
-	// Update the lock
-	if err := s.DbClients.V2DBClient.UpdateFpSlashingLock(ctx, fpBtcPkHex); err != nil {
-		return types.NewInternalServiceError(err)
 	}
 
 	return nil

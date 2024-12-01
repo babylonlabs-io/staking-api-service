@@ -154,36 +154,6 @@ func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context) ([]*v2dbmode
 	return r0, r1
 }
 
-// GetOrCreateFpSlashingLock provides a mock function with given fields: ctx, fpBtcPkHex
-func (_m *V2DBClient) GetOrCreateFpSlashingLock(ctx context.Context, fpBtcPkHex string) (*v2dbmodel.V2FpSlashingLockDocument, error) {
-	ret := _m.Called(ctx, fpBtcPkHex)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetOrCreateFpSlashingLock")
-	}
-
-	var r0 *v2dbmodel.V2FpSlashingLockDocument
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*v2dbmodel.V2FpSlashingLockDocument, error)); ok {
-		return rf(ctx, fpBtcPkHex)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *v2dbmodel.V2FpSlashingLockDocument); ok {
-		r0 = rf(ctx, fpBtcPkHex)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v2dbmodel.V2FpSlashingLockDocument)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, fpBtcPkHex)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetOrCreateStatsLock provides a mock function with given fields: ctx, stakingTxHashHex, state
 func (_m *V2DBClient) GetOrCreateStatsLock(ctx context.Context, stakingTxHashHex string, state string) (*v2dbmodel.V2StatsLockDocument, error) {
 	ret := _m.Called(ctx, stakingTxHashHex, state)
@@ -429,24 +399,6 @@ func (_m *V2DBClient) SubtractStakerStats(ctx context.Context, stakingTxHashHex 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, uint64) error); ok {
 		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, amount)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// UpdateFpSlashingLock provides a mock function with given fields: ctx, fpBtcPkHex
-func (_m *V2DBClient) UpdateFpSlashingLock(ctx context.Context, fpBtcPkHex string) error {
-	ret := _m.Called(ctx, fpBtcPkHex)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateFpSlashingLock")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, fpBtcPkHex)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -15,8 +15,6 @@ type V2DBClient interface {
 	GetOrCreateStatsLock(
 		ctx context.Context, stakingTxHashHex string, state string,
 	) (*v2dbmodel.V2StatsLockDocument, error)
-	GetOrCreateFpSlashingLock(ctx context.Context, fpBtcPkHex string) (*v2dbmodel.V2FpSlashingLockDocument, error)
-	UpdateFpSlashingLock(ctx context.Context, fpBtcPkHex string) error
 	IncrementOverallStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error

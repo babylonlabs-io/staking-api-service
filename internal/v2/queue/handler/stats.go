@@ -67,23 +67,3 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	}
 	return nil
 }
-
-func (h *V2QueueHandler) SlashedFpHandler(ctx context.Context, messageBody string) *types.Error {
-	var slashedFpEvent queueClient.SlashedFpEvent
-	err := json.Unmarshal([]byte(messageBody), &slashedFpEvent)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into SlashedFpEvent")
-		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
-	}
-
-	statsErr := h.Service.ProcessSlashedFpStats(
-		ctx,
-		slashedFpEvent.FinalityProviderBtcPkHex,
-	)
-	if statsErr != nil {
-		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process slashed FP stats calculation")
-		return statsErr
-	}
-
-	return nil
-}

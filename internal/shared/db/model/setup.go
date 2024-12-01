@@ -31,7 +31,6 @@ const (
 	V2OverallStatsCollection          = "v2_overall_stats"
 	V2FinalityProviderStatsCollection = "v2_finality_providers_stats"
 	V2StakerStatsCollection           = "v2_staker_stats"
-	V2FpSlashingLockCollection        = "v2_fp_slashing_lock"
 )
 
 type index struct {
@@ -63,7 +62,6 @@ var collections = map[string][]index{
 	V2StakerStatsCollection:           {{Indexes: map[string]int{}}},
 	V2FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
 	V2OverallStatsCollection:          {{Indexes: map[string]int{}}},
-	V2FpSlashingLockCollection:        {{Indexes: map[string]int{}}},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {
