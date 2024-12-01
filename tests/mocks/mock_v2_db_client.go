@@ -16,24 +16,6 @@ type V2DBClient struct {
 	mock.Mock
 }
 
-// CreateFpSlashingLock provides a mock function with given fields: ctx, fpBtcPkHex
-func (_m *V2DBClient) CreateFpSlashingLock(ctx context.Context, fpBtcPkHex string) error {
-	ret := _m.Called(ctx, fpBtcPkHex)
-
-	if len(ret) == 0 {
-		panic("no return value specified for CreateFpSlashingLock")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, fpBtcPkHex)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // DeleteUnprocessableMessage provides a mock function with given fields: ctx, Receipt
 func (_m *V2DBClient) DeleteUnprocessableMessage(ctx context.Context, Receipt interface{}) error {
 	ret := _m.Called(ctx, Receipt)
@@ -172,12 +154,12 @@ func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context) ([]*v2dbmode
 	return r0, r1
 }
 
-// GetFpSlashingLock provides a mock function with given fields: ctx, fpBtcPkHex
-func (_m *V2DBClient) GetFpSlashingLock(ctx context.Context, fpBtcPkHex string) (*v2dbmodel.V2FpSlashingLockDocument, error) {
+// GetOrCreateFpSlashingLock provides a mock function with given fields: ctx, fpBtcPkHex
+func (_m *V2DBClient) GetOrCreateFpSlashingLock(ctx context.Context, fpBtcPkHex string) (*v2dbmodel.V2FpSlashingLockDocument, error) {
 	ret := _m.Called(ctx, fpBtcPkHex)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetFpSlashingLock")
+		panic("no return value specified for GetOrCreateFpSlashingLock")
 	}
 
 	var r0 *v2dbmodel.V2FpSlashingLockDocument

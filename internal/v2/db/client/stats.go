@@ -45,21 +45,33 @@ func (db *V2Database) GetOrCreateStatsLock(
 	return &result, nil
 }
 
-func (v2dbclient *V2Database) GetFpSlashingLock(ctx context.Context, fpBtcPkHex string) (*v2dbmodel.V2FpSlashingLockDocument, error) {
-	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FpSlashingLockCollection)
+func (db *V2Database) GetOrCreateFpSlashingLock(
+	ctx context.Context,
+	fpBtcPkHex string,
+) (*v2dbmodel.V2FpSlashingLockDocument, error) {
+	client := db.Client.Database(db.DbName).Collection(dbmodel.V2FpSlashingLockCollection)
+
 	filter := bson.M{"_id": fpBtcPkHex}
+
+	// This will only be applied if document doesn't exist
+	update := bson.M{
+		"$setOnInsert": bson.M{
+			"_id":          fpBtcPkHex,
+			"is_processed": false,
+		},
+	}
+
+	opts := options.FindOneAndUpdate().
+		SetUpsert(true).
+		SetReturnDocument(options.After)
+
 	var result v2dbmodel.V2FpSlashingLockDocument
-	err := client.FindOne(ctx, filter).Decode(&result)
+	err := client.FindOneAndUpdate(ctx, filter, update, opts).Decode(&result)
 	if err != nil {
 		return nil, err
 	}
-	return &result, nil
-}
 
-func (v2dbclient *V2Database) CreateFpSlashingLock(ctx context.Context, fpBtcPkHex string) error {
-	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FpSlashingLockCollection)
-	_, err := client.InsertOne(ctx, v2dbmodel.NewV2FpSlashingLockDocument(fpBtcPkHex))
-	return err
+	return &result, nil
 }
 
 func (v2dbclient *V2Database) UpdateFpSlashingLock(ctx context.Context, fpBtcPkHex string) error {

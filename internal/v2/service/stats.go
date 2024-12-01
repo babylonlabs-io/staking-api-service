@@ -204,22 +204,20 @@ func (s *V2Service) ProcessSlashedFpStats(
 	ctx context.Context,
 	fpBtcPkHex string,
 ) *types.Error {
-	// Check if the lock exists
-	fpSlashingLock, err := s.DbClients.V2DBClient.GetFpSlashingLock(ctx, fpBtcPkHex)
-	if err != nil && !db.IsNotFoundError(err) {
+	fpSlashingLock, err := s.DbClients.V2DBClient.GetOrCreateFpSlashingLock(ctx, fpBtcPkHex)
+	if err != nil {
 		return types.NewInternalServiceError(err)
 	}
 
-	// if the lock exist, skip the processing
-	if fpSlashingLock != nil {
+	// If already processed, skip
+	if fpSlashingLock.IsProcessed {
+		log.Ctx(ctx).Debug().
+			Str("finality_provider_pk_hex", fpBtcPkHex).
+			Msg("FP already processed for slashing")
 		return nil
 	}
 
-	// Create the lock
-	if err := s.DbClients.V2DBClient.CreateFpSlashingLock(ctx, fpBtcPkHex); err != nil {
-		return types.NewInternalServiceError(err)
-	}
-
+	// Fetch the slashed delegations
 	slashedDelegations, err := s.DbClients.IndexerDBClient.GetSlashedFpDelegations(ctx, fpBtcPkHex)
 	if err != nil {
 		log.Ctx(ctx).Error().
@@ -229,6 +227,7 @@ func (s *V2Service) ProcessSlashedFpStats(
 		return types.NewInternalServiceError(err)
 	}
 
+	// Process each delegation...
 	for _, delegation := range slashedDelegations {
 		if err := s.processStatsSubtraction(
 			ctx,
