@@ -3,18 +3,21 @@ package v2service
 import (
 	"context"
 
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
 )
 
 type OverallStatsPublic struct {
-	ActiveTvl         int64  `json:"active_tvl"`
-	TotalTvl          int64  `json:"total_tvl"`
-	ActiveDelegations int64  `json:"active_delegations"`
-	TotalDelegations  int64  `json:"total_delegations"`
-	ActiveStakers     uint64 `json:"active_stakers"`
-	TotalStakers      uint64 `json:"total_stakers"`
+	ActiveTvl               int64  `json:"active_tvl"`
+	TotalTvl                int64  `json:"total_tvl"`
+	ActiveDelegations       int64  `json:"active_delegations"`
+	TotalDelegations        int64  `json:"total_delegations"`
+	ActiveStakers           uint64 `json:"active_stakers"`
+	TotalStakers            uint64 `json:"total_stakers"`
+	ActiveFinalityProviders uint64 `json:"active_finality_providers"`
+	TotalFinalityProviders  uint64 `json:"total_finality_providers"`
 }
 
 type StakerStatsPublic struct {
@@ -38,13 +41,28 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		return nil, types.NewInternalServiceError(err)
 	}
 
+	finalityProviders, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching finality providers")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	activeFinalityProvidersCount := 0
+	for _, fp := range finalityProviders {
+		if fp.State == indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE {
+			activeFinalityProvidersCount++
+		}
+	}
+
 	return &OverallStatsPublic{
-		ActiveTvl:         overallStats.ActiveTvl,
-		TotalTvl:          overallStats.TotalTvl,
-		ActiveDelegations: overallStats.ActiveDelegations,
-		TotalDelegations:  overallStats.TotalDelegations,
-		ActiveStakers:     uint64(activeStakersCount),
-		TotalStakers:      overallStats.TotalStakers,
+		ActiveTvl:               overallStats.ActiveTvl,
+		TotalTvl:                overallStats.TotalTvl,
+		ActiveDelegations:       overallStats.ActiveDelegations,
+		TotalDelegations:        overallStats.TotalDelegations,
+		ActiveStakers:           uint64(activeStakersCount),
+		TotalStakers:            overallStats.TotalStakers,
+		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
+		TotalFinalityProviders:  uint64(len(finalityProviders)),
 	}, nil
 }
 

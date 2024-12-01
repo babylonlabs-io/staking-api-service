@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
-	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -63,28 +62,4 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
 		indexerdbmodel.BuildDelegationPaginationToken,
 	)
-}
-
-func (indexerdbclient *IndexerDatabase) GetSlashedFpDelegations(ctx context.Context, fpBtcPkHex string) ([]*indexerdbmodel.IndexerDelegationDetails, error) {
-	collection := indexerdbclient.Client.
-		Database(indexerdbclient.DbName).
-		Collection(indexerdbmodel.BTCDelegationDetailsCollection)
-
-	filter := bson.M{
-		"finality_provider_btc_pk_hex": fpBtcPkHex,
-		"state":                        indexertypes.StateSlashed.String(),
-	}
-
-	cursor, err := collection.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var delegations []*indexerdbmodel.IndexerDelegationDetails
-	if err := cursor.All(ctx, &delegations); err != nil {
-		return nil, err
-	}
-
-	return delegations, nil
 }
