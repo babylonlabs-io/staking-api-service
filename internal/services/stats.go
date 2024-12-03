@@ -186,7 +186,7 @@ func (s *Services) GetOverallStats(
 		pendingTvl = unconfirmedTvl - confirmedTvl
 	}
 
-	// Only fetch BTC price if external APIs are configured
+	// Only fetch BTC price if ExternalAPIs are configured
 	var btcPrice *float64
 	if s.cfg.ExternalAPIs != nil {
 		price, err := s.GetLatestBtcPriceUsd(ctx)
