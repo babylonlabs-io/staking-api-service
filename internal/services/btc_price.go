@@ -38,8 +38,7 @@ func (s *Services) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 
 			// Store in MongoDB with TTL
 			if err := s.DbClient.SetBtcPrice(ctx, price); err != nil {
-				log.Ctx(ctx).Error().Err(err).Msg("failed to cache btc price")
-				// Don't return error here, we can still return the price
+				return 0, fmt.Errorf("failed to cache btc price: %w", err)
 			}
 
 			return price, nil

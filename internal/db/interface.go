@@ -106,7 +106,9 @@ type DBClient interface {
 	) (*DbResultMap[model.DelegationDocument], error)
 	// SaveTermsAcceptance saves the acceptance of the terms of service of the public key
 	SaveTermsAcceptance(ctx context.Context, termsAcceptance *model.TermsAcceptance) error
+	// GetLatestBtcPrice fetches the BTC price from the database.
 	GetLatestBtcPrice(ctx context.Context) (*model.BtcPrice, error)
+	// SetBtcPrice sets the latest BTC price in the database.
 	SetBtcPrice(ctx context.Context, price float64) error
 }
 
