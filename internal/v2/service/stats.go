@@ -111,10 +111,6 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	}
 
 	if !statsLockDocument.StakerStats {
-		// TODO: Convert the staker public key to multiple BTC addresses and save
-		// them in the database.
-		// https://github.com/babylonlabs-io/staking-api-service/issues/162
-
 		err = s.DbClients.V2DBClient.IncrementStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
 		)
