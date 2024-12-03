@@ -33,7 +33,7 @@ func (v2dbclient *V2Database) MarkV1DelegationAsTransitioned(ctx context.Context
 			return nil, err
 		}
 
-		update := bson.M{"$set": bson.M{"transitioned": true}}
+		update := bson.M{"$set": bson.M{"is_transitioned": true}}
 		result, err := client.UpdateOne(sessCtx, filter, update)
 		if err != nil {
 			return nil, err
