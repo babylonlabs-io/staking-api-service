@@ -82,10 +82,12 @@ func Setup(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 
-	// Create TTL index for BTC price collection
-	if err := createTTLIndexes(ctx, database, cfg.ExternalAPIs.CoinMarketCap.CacheTTL); err != nil {
-		log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
-		return err
+	// If external APIs are configured, create TTL index for BTC price collection
+	if cfg.ExternalAPIs != nil {
+		if err := createTTLIndexes(ctx, database, cfg.ExternalAPIs.CoinMarketCap.CacheTTL); err != nil {
+			log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
+			return err
+		}
 	}
 
 	log.Info().Msg("Collections and Indexes created successfully.")

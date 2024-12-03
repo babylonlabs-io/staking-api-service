@@ -12,14 +12,14 @@ import (
 )
 
 type OverallStatsPublic struct {
-	ActiveTvl         int64   `json:"active_tvl"`
-	TotalTvl          int64   `json:"total_tvl"`
-	ActiveDelegations int64   `json:"active_delegations"`
-	TotalDelegations  int64   `json:"total_delegations"`
-	TotalStakers      uint64  `json:"total_stakers"`
-	UnconfirmedTvl    uint64  `json:"unconfirmed_tvl"`
-	PendingTvl        uint64  `json:"pending_tvl"`
-	BtcPriceUsd       float64 `json:"btc_price_usd"`
+	ActiveTvl         int64    `json:"active_tvl"`
+	TotalTvl          int64    `json:"total_tvl"`
+	ActiveDelegations int64    `json:"active_delegations"`
+	TotalDelegations  int64    `json:"total_delegations"`
+	TotalStakers      uint64   `json:"total_stakers"`
+	UnconfirmedTvl    uint64   `json:"unconfirmed_tvl"`
+	PendingTvl        uint64   `json:"pending_tvl"`
+	BtcPriceUsd       *float64 `json:"btc_price_usd,omitempty"` // Optional field
 }
 
 type StakerStatsPublic struct {
@@ -186,10 +186,16 @@ func (s *Services) GetOverallStats(
 		pendingTvl = unconfirmedTvl - confirmedTvl
 	}
 
-	btcPriceUsd, err := s.GetLatestBtcPriceUsd(ctx)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
-		return nil, types.NewInternalServiceError(err)
+	// Only fetch BTC price if external APIs are configured
+	var btcPrice *float64
+	if s.cfg.ExternalAPIs != nil {
+		price, err := s.GetLatestBtcPriceUsd(ctx)
+		if err != nil {
+			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
+			return nil, types.NewInternalServiceError(err)
+		}
+		roundedPrice := math.Round(price*100) / 100
+		btcPrice = &roundedPrice
 	}
 
 	return &OverallStatsPublic{
@@ -200,7 +206,7 @@ func (s *Services) GetOverallStats(
 		TotalStakers:      stats.TotalStakers,
 		UnconfirmedTvl:    unconfirmedTvl,
 		PendingTvl:        pendingTvl,
-		BtcPriceUsd:       math.Round(btcPriceUsd*100) / 100, // round to 2 decimal places
+		BtcPriceUsd:       btcPrice,
 	}, nil
 }
 
