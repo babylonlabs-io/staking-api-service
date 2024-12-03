@@ -35,6 +35,7 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		return nil, types.NewInternalServiceError(err)
 	}
 
+	// TODO: count fetch will affect the performance of the API
 	activeStakersCount, err := s.DbClients.V2DBClient.GetActiveStakersCount(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
