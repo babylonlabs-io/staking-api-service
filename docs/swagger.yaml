@@ -214,6 +214,8 @@ definitions:
         type: boolean
       is_slashed:
         type: boolean
+      is_transitioned:
+        type: boolean
       staker_pk_hex:
         type: string
       staking_tx:

@@ -30,6 +30,7 @@ type V1DBClient interface {
 		ctx context.Context, stakingTxHashHex, unbondingTxHashHex, txHex, signatureHex string,
 	) error
 	FindDelegationByTxHashHex(ctx context.Context, txHashHex string) (*v1dbmodel.DelegationDocument, error)
+	MarkDelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) error
 	SaveTimeLockExpireCheck(ctx context.Context, stakingTxHashHex string, expireHeight uint64, txType string) error
 	TransitionToUnbondedState(
 		ctx context.Context, stakingTxHashHex string, eligiblePreviousState []types.DelegationState,

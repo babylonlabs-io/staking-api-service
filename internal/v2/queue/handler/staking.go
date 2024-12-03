@@ -20,6 +20,12 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
 	}
 
+	// Mark as v1 delegation as transitioned if it exists
+	if err := h.Service.MarkV1DelegationAsTransitioned(ctx, activeStakingEvent.StakingTxHashHex); err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to mark v1 delegation as transitioned")
+		return err
+	}
+
 	// Perform the address lookup conversion
 	addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
 	if addressLookupErr != nil {

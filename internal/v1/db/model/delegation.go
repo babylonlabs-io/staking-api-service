@@ -22,6 +22,7 @@ type DelegationDocument struct {
 	StakingTx             *TimelockTransaction  `bson:"staking_tx"` // Always exist
 	UnbondingTx           *TimelockTransaction  `bson:"unbonding_tx,omitempty"`
 	IsOverflow            bool                  `bson:"is_overflow"`
+	IsTransitioned        bool                  `bson:"is_transitioned"`
 }
 
 type DelegationByStakerPagination struct {

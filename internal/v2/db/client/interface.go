@@ -26,4 +26,5 @@ type V2DBClient interface {
 	SubtractStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
+	MarkV1DelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) error
 }

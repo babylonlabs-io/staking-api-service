@@ -170,3 +170,14 @@ func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, 
 	}
 	return nil
 }
+
+func (s *V2Service) MarkV1DelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) *types.Error {
+	err := s.DbClients.V2DBClient.MarkV1DelegationAsTransitioned(ctx, stakingTxHashHex)
+	if err != nil {
+		if db.IsNotFoundError(err) {
+			return nil
+		}
+		return types.NewInternalServiceError(err)
+	}
+	return nil
+}

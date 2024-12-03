@@ -960,6 +960,9 @@ const docTemplate = `{
                 "is_slashed": {
                     "type": "boolean"
                 },
+                "is_transitioned": {
+                    "type": "boolean"
+                },
                 "staker_pk_hex": {
                     "type": "string"
                 },
