@@ -82,6 +82,12 @@ func Setup(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 
+	// Create TTL index for BTC price collection
+	if err := createTTLIndexes(ctx, database); err != nil {
+		log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
+		return err
+	}
+
 	log.Info().Msg("Collections and Indexes created successfully.")
 	return nil
 }
@@ -123,4 +129,17 @@ func createIndex(ctx context.Context, database *mongo.Database, collectionName s
 	}
 
 	log.Debug().Msg("Index created successfully on collection: " + collectionName)
+}
+
+func createTTLIndexes(ctx context.Context, database *mongo.Database) error {
+	collection := database.Collection(BtcPriceCollection)
+
+	// Create TTL index with expiration
+	index := mongo.IndexModel{
+		Keys:    bson.D{{Key: "created_at", Value: 1}},
+		Options: options.Index().SetExpireAfterSeconds(3), // 5 minutes TTL
+	}
+
+	_, err := collection.Indexes().CreateOne(ctx, index)
+	return err
 }
