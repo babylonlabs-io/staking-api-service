@@ -36,3 +36,9 @@ assets:
     timeout: 1000
 terms_acceptance_logging:
   enabled: true
+external_apis:
+  coinmarketcap:
+    api_key: ${COINMARKETCAP_API_KEY}
+    base_url: "https://pro-api.coinmarketcap.com/v1"
+    timeout: 10s
+    cache_ttl: 3s # 3 seconds
