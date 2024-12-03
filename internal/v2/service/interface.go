@@ -14,7 +14,7 @@ type V2ServiceProvider interface {
 	IsDelegationPresent(ctx context.Context, txHashHex string) (bool, *types.Error)
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*StakerDelegationPublic, *types.Error)
 	GetDelegations(ctx context.Context, stakerPKHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error)
-	MarkV1DelegationAsTransformed(ctx context.Context, stakingTxHashHex string) *types.Error
+	MarkV1DelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) *types.Error
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
 	GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error)
 	ProcessAndSaveBtcAddresses(ctx context.Context, stakerPkHex string) *types.Error

@@ -32,7 +32,7 @@ type DelegationPublic struct {
 	IsOverflow              bool               `json:"is_overflow"`
 	IsEligibleForTransition bool               `json:"is_eligible_for_transition"`
 	IsSlashed               bool               `json:"is_slashed"`
-	Transformed             bool               `json:"transformed"`
+	IsTransitioned          bool               `json:"is_transitioned"`
 }
 
 func (s *V1Service) DelegationsByStakerPk(
@@ -213,7 +213,7 @@ func (s *V1Service) FromDelegationDocument(
 		IsOverflow:              d.IsOverflow,
 		IsEligibleForTransition: isFpTransitioned && !isSlashed && s.isEligibleForTransition(d, bbnHeight),
 		IsSlashed:               isSlashed,
-		Transformed:             d.Transformed,
+		IsTransitioned:            d.IsTransitioned,
 	}
 
 	// Add unbonding transaction if it exists

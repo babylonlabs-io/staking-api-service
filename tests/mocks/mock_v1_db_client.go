@@ -500,12 +500,12 @@ func (_m *V1DBClient) InsertPkAddressMappings(ctx context.Context, stakerPkHex s
 	return r0
 }
 
-// MarkDelegationAsTransformed provides a mock function with given fields: ctx, stakingTxHashHex
-func (_m *V1DBClient) MarkDelegationAsTransformed(ctx context.Context, stakingTxHashHex string) error {
+// MarkDelegationAsTransitioned provides a mock function with given fields: ctx, stakingTxHashHex
+func (_m *V1DBClient) MarkDelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) error {
 	ret := _m.Called(ctx, stakingTxHashHex)
 
 	if len(ret) == 0 {
-		panic("no return value specified for MarkDelegationAsTransformed")
+		panic("no return value specified for MarkDelegationAsTransitioned")
 	}
 
 	var r0 error

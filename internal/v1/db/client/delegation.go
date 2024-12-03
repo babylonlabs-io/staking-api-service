@@ -156,10 +156,10 @@ func (v1dbclient *V1Database) ScanDelegationsPaginated(
 	)
 }
 
-// MarkDelegationAsTransformed marks an existing delegation as transformed
-func (v1dbclient *V1Database) MarkDelegationAsTransformed(ctx context.Context, stakingTxHashHex string) error {
+// MarkDelegationAsTransitioned marks an existing delegation as transitioned
+func (v1dbclient *V1Database) MarkDelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) error {
 	client := v1dbclient.Client.Database(v1dbclient.DbName).Collection(dbmodel.V1DelegationCollection)
-	update := bson.M{"$set": bson.M{"transformed": true}}
+	update := bson.M{"$set": bson.M{"transitioned": true}}
 	result, err := client.UpdateOne(ctx, bson.M{"_id": stakingTxHashHex}, update)
 	if err != nil {
 		return err
