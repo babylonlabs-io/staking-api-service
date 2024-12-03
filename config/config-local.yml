@@ -40,5 +40,5 @@ external_apis:
   coinmarketcap:
     api_key: ${COINMARKETCAP_API_KEY}
     base_url: "https://pro-api.coinmarketcap.com/v1"
-    timeout: 10s
-    cache_ttl: 3s # 3 seconds
+    timeout: 10s  # http client timeout
+    cache_ttl: 3s  # mongodb ttl
