@@ -106,6 +106,8 @@ type DBClient interface {
 	) (*DbResultMap[model.DelegationDocument], error)
 	// SaveTermsAcceptance saves the acceptance of the terms of service of the public key
 	SaveTermsAcceptance(ctx context.Context, termsAcceptance *model.TermsAcceptance) error
+	GetLatestBtcPrice(ctx context.Context) (*model.BtcPrice, error)
+	SetBtcPrice(ctx context.Context, price float64) error
 }
 
 type DelegationFilter struct {

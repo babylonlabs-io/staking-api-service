@@ -22,6 +22,7 @@ const (
 	TimeLockCollection              = "timelock_queue"
 	UnbondingCollection             = "unbonding_queue"
 	BtcInfoCollection               = "btc_info"
+	BtcPriceCollection              = "btc_price"
 	UnprocessableMsgCollection      = "unprocessable_messages"
 	PkAddressMappingsCollection     = "pk_address_mappings"
 	TermsAcceptanceCollection       = "terms_acceptance"

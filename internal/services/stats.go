@@ -18,6 +18,7 @@ type OverallStatsPublic struct {
 	TotalStakers      uint64 `json:"total_stakers"`
 	UnconfirmedTvl    uint64 `json:"unconfirmed_tvl"`
 	PendingTvl        uint64 `json:"pending_tvl"`
+	BtcPriceUsd       uint64 `json:"btc_price_usd"`
 }
 
 type StakerStatsPublic struct {

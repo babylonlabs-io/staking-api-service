@@ -334,6 +334,36 @@ func (_m *DBClient) GetLatestBtcInfo(ctx context.Context) (*model.BtcInfo, error
 	return r0, r1
 }
 
+// GetLatestBtcPrice provides a mock function with given fields: ctx
+func (_m *DBClient) GetLatestBtcPrice(ctx context.Context) (*model.BtcPrice, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLatestBtcPrice")
+	}
+
+	var r0 *model.BtcPrice
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*model.BtcPrice, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *model.BtcPrice); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.BtcPrice)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOrCreateStatsLock provides a mock function with given fields: ctx, stakingTxHashHex, state
 func (_m *DBClient) GetOrCreateStatsLock(ctx context.Context, stakingTxHashHex string, state string) (*model.StatsLockDocument, error) {
 	ret := _m.Called(ctx, stakingTxHashHex, state)
@@ -632,6 +662,24 @@ func (_m *DBClient) ScanDelegationsPaginated(ctx context.Context, paginationToke
 	}
 
 	return r0, r1
+}
+
+// SetBtcPrice provides a mock function with given fields: ctx, price
+func (_m *DBClient) SetBtcPrice(ctx context.Context, price float64) error {
+	ret := _m.Called(ctx, price)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetBtcPrice")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, float64) error); ok {
+		r0 = rf(ctx, price)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // SubtractFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHex, amount
