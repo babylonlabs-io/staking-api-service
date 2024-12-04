@@ -38,7 +38,7 @@ terms_acceptance_logging:
   enabled: true
 external_apis:
   coinmarketcap:
-    api_key: "c382e883-36c9-401b-85c3-ff4607f473a4"
+    api_key: ${COINMARKETCAP_API_KEY}
     base_url: "https://pro-api.coinmarketcap.com/v1"
     timeout: 10s  # http client timeout
-    cache_ttl: 9s  # mongodb ttl
+    cache_ttl: 300s  # mongodb ttl
