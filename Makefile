@@ -59,6 +59,7 @@ run-unprocessed-events-replay-local:
 generate-mock-interface:
 	cd internal/db && mockery --name=DBClient --output=../../tests/mocks --outpkg=mocks --filename=mock_db_client.go
 	cd internal/clients/ordinals && mockery --name=OrdinalsClientInterface --output=../../../tests/mocks --outpkg=mocks --filename=mock_ordinal_client.go
+	cd internal/clients/coinmarketcap && mockery --name=CoinMarketCapClientInterface --output=../../../tests/mocks --outpkg=mocks --filename=mock_coinmarketcap_client.go
 
 test:
 	./bin/local-startup.sh;

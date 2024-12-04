@@ -11,12 +11,16 @@ import (
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/api/handlers"
+	"github.com/babylonlabs-io/staking-api-service/internal/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/services"
+	"github.com/babylonlabs-io/staking-api-service/internal/types"
+	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/babylonlabs-io/staking-api-service/tests/testutils"
 	"github.com/babylonlabs-io/staking-queue-client/client"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -463,6 +467,108 @@ func FuzzTestTopStakersWithPaginationResponse(f *testing.F) {
 		for i := 0; i < len(allDataCollected)-1; i++ {
 			assert.True(t, allDataCollected[i].ActiveTvl >= allDataCollected[i+1].ActiveTvl, "expected collected data to be sorted by start height")
 		}
+	})
+}
+
+func TestOverallStatsEndpointBTCPriceIntegration(t *testing.T) {
+	t.Run("should return BTC price when successfully fetched from CoinMarketCap", func(t *testing.T) {
+		// Setup mock
+		mockCMC := new(mocks.CoinMarketCapClientInterface)
+		mockCMC.On("GetLatestBtcPrice", mock.Anything).
+			Return(42000.50, nil)
+
+		mockedClients := &clients.Clients{
+			CoinMarketCap: mockCMC,
+		}
+
+		testServer := setupTestServer(t, &TestServerDependency{
+			MockedClients: mockedClients,
+		})
+		defer testServer.Close()
+
+		// Fetch stats and verify
+		stats := fetchOverallStatsEndpoint(t, testServer)
+		assert.NotNil(t, stats.BtcPriceUsd)
+		assert.Equal(t, 42000.50, *stats.BtcPriceUsd)
+		mockCMC.AssertExpectations(t)
+	})
+
+	t.Run("should return nil BTC price when CoinMarketCap fetch fails", func(t *testing.T) {
+		mockCMC := new(mocks.CoinMarketCapClientInterface)
+		mockCMC.On("GetLatestBtcPrice", mock.Anything).
+			Return(0.0, types.NewErrorWithMsg(
+				http.StatusInternalServerError,
+				types.InternalServiceError,
+				"failed to fetch BTC price",
+			))
+
+		mockedClients := &clients.Clients{
+			CoinMarketCap: mockCMC,
+		}
+
+		testServer := setupTestServer(t, &TestServerDependency{
+			MockedClients: mockedClients,
+		})
+		defer testServer.Close()
+
+		// Fetch stats and verify
+		stats := fetchOverallStatsEndpoint(t, testServer)
+		assert.Nil(t, stats.BtcPriceUsd)
+		mockCMC.AssertExpectations(t)
+	})
+
+	t.Run("should return nil BTC price when external APIs are disabled", func(t *testing.T) {
+		// Setup mock
+		mockCMC := new(mocks.CoinMarketCapClientInterface)
+		mockCMC.On("GetLatestBtcPrice", mock.Anything).
+			Return(42000.50, nil)
+
+		mockedClients := &clients.Clients{
+			CoinMarketCap: mockCMC,
+		}
+
+		testConfig, err := config.New("../config/config-test.yml")
+		if err != nil {
+			t.Fatalf("Failed to load test config: %v", err)
+		}
+		testConfig.ExternalAPIs = nil
+
+		testServer := setupTestServer(t, &TestServerDependency{
+			ConfigOverrides: testConfig,
+			MockedClients:   mockedClients,
+		})
+		defer testServer.Close()
+
+		// Fetch stats and verify
+		stats := fetchOverallStatsEndpoint(t, testServer)
+		assert.Nil(t, stats.BtcPriceUsd)
+	})
+
+	t.Run("should return nil BTC price when CoinMarketCap is disabled", func(t *testing.T) {
+		// Setup mock
+		mockCMC := new(mocks.CoinMarketCapClientInterface)
+		mockCMC.On("GetLatestBtcPrice", mock.Anything).
+			Return(42000.50, nil)
+
+		mockedClients := &clients.Clients{
+			CoinMarketCap: mockCMC,
+		}
+
+		testConfig, err := config.New("../config/config-test.yml")
+		if err != nil {
+			t.Fatalf("Failed to load test config: %v", err)
+		}
+		testConfig.ExternalAPIs.CoinMarketCap = nil
+
+		testServer := setupTestServer(t, &TestServerDependency{
+			ConfigOverrides: testConfig,
+			MockedClients:   mockedClients,
+		})
+		defer testServer.Close()
+
+		// Fetch stats and verify
+		stats := fetchOverallStatsEndpoint(t, testServer)
+		assert.Nil(t, stats.BtcPriceUsd)
 	})
 }
 
