@@ -11,6 +11,7 @@ type V2DBClient interface {
 	dbclient.DBClient
 	GetOverallStats(ctx context.Context) (*v2dbmodel.V2OverallStatsDocument, error)
 	GetStakerStats(ctx context.Context, stakerPKHex string) (*v2dbmodel.V2StakerStatsDocument, error)
+	GetFinalityProviderStats(ctx context.Context) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error)
 	GetOrCreateStatsLock(
 		ctx context.Context, stakingTxHashHex string, state string,
 	) (*v2dbmodel.V2StatsLockDocument, error)
@@ -26,4 +27,11 @@ type V2DBClient interface {
 	SubtractStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
+	IncrementFinalityProviderStats(
+		ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64,
+	) error
+	SubtractFinalityProviderStats(
+		ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64,
+	) error
+	GetActiveStakersCount(ctx context.Context) (int64, error)
 }

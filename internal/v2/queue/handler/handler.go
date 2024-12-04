@@ -3,23 +3,23 @@ package v2queuehandler
 import (
 	"context"
 
-	queuehandler "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/handler"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/service"
 )
 
 type V2QueueHandler struct {
-	*queuehandler.QueueHandler
-	Service v2service.V2ServiceProvider
+	Services *services.Services
 }
 
-func New(queueHandler *queuehandler.QueueHandler, service v2service.V2ServiceProvider) *V2QueueHandler {
+type MessageHandler func(ctx context.Context, messageBody string) *types.Error
+type UnprocessableMessageHandler func(ctx context.Context, messageBody, receipt string) *types.Error
+
+func NewV2QueueHandler(services *services.Services) *V2QueueHandler {
 	return &V2QueueHandler{
-		QueueHandler: queueHandler,
-		Service:      service,
+		Services: services,
 	}
 }
 
 func (qh *V2QueueHandler) HandleUnprocessedMessage(ctx context.Context, messageBody, receipt string) *types.Error {
-	return qh.Service.SaveUnprocessableMessages(ctx, messageBody, receipt)
+	return qh.Services.SharedService.SaveUnprocessableMessages(ctx, messageBody, receipt)
 }

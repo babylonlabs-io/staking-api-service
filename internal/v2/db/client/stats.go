@@ -307,3 +307,139 @@ func (v2dbclient *V2Database) GetStakerStats(
 	}
 	return &result, nil
 }
+
+func (v2dbclient *V2Database) GetActiveStakersCount(ctx context.Context) (int64, error) {
+	client := v2dbclient.Client.
+		Database(v2dbclient.DbName).
+		Collection(dbmodel.V2StakerStatsCollection)
+
+	filter := bson.M{
+		"active_delegations": bson.M{
+			"$gt": 0,
+		},
+	}
+
+	count, err := client.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count active stakers: %w", err)
+	}
+
+	return count, nil
+}
+
+func (v2dbclient *V2Database) IncrementFinalityProviderStats(
+	ctx context.Context,
+	stakingTxHashHex string,
+	fpPkHexes []string,
+	amount uint64,
+) error {
+	// Create bulk write operations for each FP
+	var operations []mongo.WriteModel
+	for _, fpPkHex := range fpPkHexes {
+		operation := mongo.NewUpdateOneModel().
+			SetFilter(bson.M{"_id": fpPkHex}).
+			SetUpdate(bson.M{
+				"$inc": bson.M{
+					"active_tvl":         int64(amount),
+					"total_tvl":          int64(amount),
+					"active_delegations": 1,
+					"total_delegations":  1,
+				},
+			}).
+			SetUpsert(true)
+		operations = append(operations, operation)
+	}
+
+	return v2dbclient.updateFinalityProviderStats(
+		ctx,
+		types.Active.ToString(),
+		stakingTxHashHex,
+		operations,
+	)
+}
+
+func (v2dbclient *V2Database) SubtractFinalityProviderStats(
+	ctx context.Context,
+	stakingTxHashHex string,
+	fpPkHexes []string,
+	amount uint64,
+) error {
+	// Create bulk write operations for each FP
+	var operations []mongo.WriteModel
+	for _, fpPkHex := range fpPkHexes {
+		operation := mongo.NewUpdateOneModel().
+			SetFilter(bson.M{"_id": fpPkHex}).
+			SetUpdate(bson.M{
+				"$inc": bson.M{
+					"active_tvl":         -int64(amount),
+					"active_delegations": -1,
+				},
+			}).
+			SetUpsert(true)
+		operations = append(operations, operation)
+	}
+
+	return v2dbclient.updateFinalityProviderStats(
+		ctx,
+		types.Unbonded.ToString(),
+		stakingTxHashHex,
+		operations,
+	)
+}
+
+func (v2dbclient *V2Database) updateFinalityProviderStats(
+	ctx context.Context,
+	state string,
+	stakingTxHashHex string,
+	operations []mongo.WriteModel,
+) error {
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
+
+	session, sessionErr := v2dbclient.Client.StartSession()
+	if sessionErr != nil {
+		return sessionErr
+	}
+	defer session.EndSession(ctx)
+
+	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// Single lock for the entire operation
+		err := v2dbclient.updateStatsLockByFieldName(
+			sessCtx,
+			stakingTxHashHex,
+			state,
+			"finality_provider_stats",
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		// Execute all updates in a single bulk write
+		opts := options.BulkWrite().SetOrdered(true)
+		_, err = client.BulkWrite(sessCtx, operations, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
+
+	_, txErr := session.WithTransaction(ctx, transactionWork)
+	return txErr
+}
+
+func (v2dbclient *V2Database) GetFinalityProviderStats(
+	ctx context.Context,
+) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
+	cursor, err := client.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []*v2dbmodel.V2FinalityProviderStatsDocument
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+	return results, nil
+}

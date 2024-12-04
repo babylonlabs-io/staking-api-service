@@ -13,6 +13,10 @@ const (
 	StateSlashed      DelegationState = "SLASHED"
 )
 
+func (s DelegationState) String() string {
+	return string(s)
+}
+
 type DelegationSubState string
 
 const (

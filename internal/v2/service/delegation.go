@@ -146,22 +146,6 @@ func getUnbondingSignatures(covenantSignatures []indexerdbmodel.CovenantSignatur
 	return covenantSignaturesPublic
 }
 
-func (s *V2Service) IsDelegationPresent(ctx context.Context, txHashHex string) (bool, *types.Error) {
-	delegation, err := s.DbClients.IndexerDBClient.GetDelegation(ctx, txHashHex)
-	if err != nil {
-		if db.IsNotFoundError(err) {
-			return false, nil
-		}
-		log.Ctx(ctx).Error().Err(err).Msg("Failed to find delegation by tx hash hex")
-		return false, types.NewInternalServiceError(err)
-	}
-	if delegation != nil {
-		return true, nil
-	}
-
-	return false, nil
-}
-
 func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error {
 	err := s.DbClients.V2DBClient.SaveUnprocessableMessage(ctx, messageBody, receipt)
 	if err != nil {

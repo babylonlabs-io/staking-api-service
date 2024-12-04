@@ -13,9 +13,9 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/healthcheck"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
-	queueclients "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v2queue "github.com/babylonlabs-io/staking-api-service/internal/v2/queue"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
@@ -83,13 +83,13 @@ func main() {
 	}
 
 	// Start the event queue processing
-	queueClients := queueclients.New(ctx, cfg.Queue, services)
+	v2queues := v2queue.New(cfg.Queue, services)
 
 	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
 		log.Info().Msg("Replay flag is set. Starting replay of unprocessable messages.")
 
-		err := scripts.ReplayUnprocessableMessages(ctx, cfg, queueClients, dbClients.SharedDBClient)
+		err := scripts.ReplayUnprocessableMessages(ctx, cfg, v2queues, dbClients.SharedDBClient)
 		if err != nil {
 			log.Fatal().Err(err).Msg("error while replaying unprocessable messages")
 		}
@@ -103,9 +103,9 @@ func main() {
 		return
 	}
 
-	queueClients.StartReceivingMessages()
+	v2queues.StartReceivingMessages()
 
-	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, queueClients, cfg.Server.HealthCheckInterval)
+	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, v2queues, cfg.Server.HealthCheckInterval)
 	if healthcheckErr != nil {
 		log.Fatal().Err(healthcheckErr).Msg("error while starting health check cron")
 	}

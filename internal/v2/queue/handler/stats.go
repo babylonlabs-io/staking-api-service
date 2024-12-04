@@ -21,24 +21,19 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 	}
 
 	// Mark as v1 delegation as transitioned if it exists
-	if err := h.Service.MarkV1DelegationAsTransitioned(ctx, activeStakingEvent.StakingTxHashHex); err != nil {
+	if err := h.Services.V2Service.MarkV1DelegationAsTransitioned(ctx, activeStakingEvent.StakingTxHashHex); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to mark v1 delegation as transitioned")
 		return err
 	}
 
-	// Perform the address lookup conversion
-	addressLookupErr := h.performAddressLookupConversion(ctx, activeStakingEvent.StakerBtcPkHex, types.Active)
-	if addressLookupErr != nil {
-		return addressLookupErr
-	}
+	// TODO: Perform the address lookup conversion
+	// https://github.com/babylonlabs-io/staking-api-service/issues/162
 
-	// Perform the stats calculation
-	statsErr := h.Service.ProcessStakingStatsCalculation(
+	statsErr := h.Services.V2Service.ProcessActiveDelegationStats(
 		ctx,
 		activeStakingEvent.StakingTxHashHex,
 		activeStakingEvent.StakerBtcPkHex,
 		activeStakingEvent.FinalityProviderBtcPksHex,
-		types.Active,
 		activeStakingEvent.StakingAmount,
 	)
 	if statsErr != nil {
@@ -59,33 +54,16 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	}
 
 	// Perform the stats calculation
-	statsErr := h.Service.ProcessStakingStatsCalculation(
+	statsErr := h.Services.V2Service.ProcessUnbondingDelegationStats(
 		ctx,
 		unbondingStakingEvent.StakingTxHashHex,
 		unbondingStakingEvent.StakerBtcPkHex,
 		unbondingStakingEvent.FinalityProviderBtcPksHex,
-		types.Unbonding,
 		unbondingStakingEvent.StakingAmount,
 	)
 	if statsErr != nil {
 		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process staking stats calculation")
 		return statsErr
-	}
-	return nil
-}
-
-// Convert the staker's public key into corresponding BTC addresses for
-// database lookup. This is performed only for active delegation events to
-// prevent duplicated database writes.
-func (h *V2QueueHandler) performAddressLookupConversion(ctx context.Context, stakerPkHex string, state types.DelegationState) *types.Error {
-	// Perform the address lookup conversion only for active delegation events
-	// to prevent duplicated database writes
-	if state == types.Active {
-		addErr := h.Service.ProcessAndSaveBtcAddresses(ctx, stakerPkHex)
-		if addErr != nil {
-			log.Ctx(ctx).Error().Err(addErr).Msg("Failed to process and save btc addresses")
-			return addErr
-		}
 	}
 	return nil
 }

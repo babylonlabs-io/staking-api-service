@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
-	queueclient "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/client"
-	queueclients "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/clients"
+	v2queue "github.com/babylonlabs-io/staking-api-service/internal/v2/queue"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -18,7 +17,7 @@ func SetLogger(customLogger zerolog.Logger) {
 	logger = customLogger
 }
 
-func StartHealthCheckCron(ctx context.Context, queueClients *queueclients.QueueClients, cronTime int) error {
+func StartHealthCheckCron(ctx context.Context, queues *v2queue.Queues, cronTime int) error {
 	c := cron.New()
 	logger.Info().Msg("Initiated Health Check Cron")
 
@@ -29,7 +28,7 @@ func StartHealthCheckCron(ctx context.Context, queueClients *queueclients.QueueC
 	cronSpec := fmt.Sprintf("@every %ds", cronTime)
 
 	_, err := c.AddFunc(cronSpec, func() {
-		queueHealthCheck(queueClients.V1QueueClient)
+		queueHealthCheck(queues)
 	})
 
 	if err != nil {
@@ -47,8 +46,8 @@ func StartHealthCheckCron(ctx context.Context, queueClients *queueclients.QueueC
 	return nil
 }
 
-func queueHealthCheck(queueClient queueclient.QueueClient) {
-	if err := queueClient.IsConnectionHealthy(); err != nil {
+func queueHealthCheck(queues *v2queue.Queues) {
+	if err := queues.IsConnectionHealthy(); err != nil {
 		logger.Error().Err(err).Msg("One or more queue connections are not healthy.")
 		// Record service unavailable in metrics
 		metrics.RecordServiceCrash("queue")
