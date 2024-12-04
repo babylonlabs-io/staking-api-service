@@ -43,3 +43,8 @@ func QualifiedStatesToWithdraw() []types.DelegationState {
 func OutdatedStatesForWithdraw() []types.DelegationState {
 	return []types.DelegationState{types.Withdrawn}
 }
+
+// QualifiedStatesToTransitioned returns the qualified exisitng states to transition to "transitioned"
+func QualifiedStatesToTransitioned() []types.DelegationState {
+	return []types.DelegationState{types.Active, types.UnbondingRequested}
+}

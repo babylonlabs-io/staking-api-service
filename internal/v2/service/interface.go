@@ -24,6 +24,5 @@ type V2ServiceProvider interface {
 		finalityProviderBtcPksHex []string,
 		state types.DelegationState, amount uint64,
 	) *types.Error
-
 	SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error
 }
