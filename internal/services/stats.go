@@ -192,7 +192,7 @@ func (s *Services) GetOverallStats(
 		price, err := s.GetLatestBtcPriceUsd(ctx)
 		if err != nil {
 			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
-			return nil, types.NewInternalServiceError(err)
+			btcPrice = nil
 		}
 		roundedPrice := math.Round(price*100) / 100
 		btcPrice = &roundedPrice
