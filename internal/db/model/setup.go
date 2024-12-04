@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
@@ -136,12 +137,24 @@ func createIndex(ctx context.Context, database *mongo.Database, collectionName s
 func createTTLIndexes(ctx context.Context, database *mongo.Database, cacheTTL time.Duration) error {
 	collection := database.Collection(BtcPriceCollection)
 
-	// Create TTL index with expiration
-	index := mongo.IndexModel{
-		Keys:    bson.D{{Key: "created_at", Value: 1}},
-		Options: options.Index().SetExpireAfterSeconds(int32(cacheTTL.Seconds())), // TTL from config
+	// First, drop the existing TTL index if it exists
+	_, err := collection.Indexes().DropOne(ctx, "created_at_1")
+	if err != nil && !strings.Contains(err.Error(), "not found") {
+		return fmt.Errorf("failed to drop existing TTL index: %w", err)
 	}
 
-	_, err := collection.Indexes().CreateOne(ctx, index)
-	return err
+	// Create new TTL index
+	model := mongo.IndexModel{
+		Keys: bson.D{{Key: "created_at", Value: 1}},
+		Options: options.Index().
+			SetExpireAfterSeconds(int32(cacheTTL.Seconds())).
+			SetName("created_at_1"),
+	}
+
+	_, err = collection.Indexes().CreateOne(ctx, model)
+	if err != nil {
+		return fmt.Errorf("failed to create TTL index: %w", err)
+	}
+
+	return nil
 }
