@@ -171,12 +171,18 @@ func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, 
 	return nil
 }
 
-func (s *V2Service) MarkV1DelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) *types.Error {
-	err := s.DbClients.V2DBClient.MarkV1DelegationAsTransitioned(ctx, stakingTxHashHex)
+// MarkV1DelegationAsTransitioned marks a v1 delegation as transitioned
+func (s *V2Service) MarkV1DelegationAsTransitioned(
+	ctx context.Context, stakingTxHashHex string,
+) *types.Error {
+	err := s.DbClients.V1DBClient.TransitionToTransitionedState(ctx, stakingTxHashHex)
 	if err != nil {
 		if db.IsNotFoundError(err) {
+			// If the delegation is not found, it means it has already been transitioned
+			// or not relevant to phase-1 at all.
 			return nil
 		}
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to transition v1 delegation to transitioned state")
 		return types.NewInternalServiceError(err)
 	}
 	return nil
