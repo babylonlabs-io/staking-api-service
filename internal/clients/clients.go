@@ -1,12 +1,14 @@
 package clients
 
 import (
+	"github.com/babylonlabs-io/staking-api-service/internal/clients/coinmarketcap"
 	"github.com/babylonlabs-io/staking-api-service/internal/clients/ordinals"
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
 )
 
 type Clients struct {
-	Ordinals ordinals.OrdinalsClientInterface
+	Ordinals      ordinals.OrdinalsClientInterface
+	CoinMarketCap coinmarketcap.CoinMarketCapClientInterface
 }
 
 func New(cfg *config.Config) *Clients {
@@ -16,7 +18,13 @@ func New(cfg *config.Config) *Clients {
 		ordinalsClient = ordinals.NewOrdinalsClient(cfg.Assets.Ordinals)
 	}
 
+	var coinMarketCapClient *coinmarketcap.CoinMarketCapClient
+	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.CoinMarketCap != nil {
+		coinMarketCapClient = coinmarketcap.NewCoinMarketCapClient(cfg.ExternalAPIs.CoinMarketCap)
+	}
+
 	return &Clients{
-		Ordinals: ordinalsClient,
+		Ordinals:      ordinalsClient,
+		CoinMarketCap: coinMarketCapClient,
 	}
 }
