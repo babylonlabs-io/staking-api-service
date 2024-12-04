@@ -16,6 +16,7 @@ type Config struct {
 	Metrics                *MetricsConfig         `mapstructure:"metrics"`
 	Assets                 *AssetsConfig          `mapstructure:"assets"`
 	TermsAcceptanceLogging *TermsAcceptanceConfig `mapstructure:"terms_acceptance_logging"`
+	ExternalAPIs           *ExternalAPIsConfig    `mapstructure:"external_apis"`
 }
 
 func (cfg *Config) Validate() error {
@@ -38,6 +39,13 @@ func (cfg *Config) Validate() error {
 	// Assets is optional
 	if cfg.Assets != nil {
 		if err := cfg.Assets.Validate(); err != nil {
+			return err
+		}
+	}
+
+	// ExternalAPIs is optional
+	if cfg.ExternalAPIs != nil {
+		if err := cfg.ExternalAPIs.Validate(); err != nil {
 			return err
 		}
 	}

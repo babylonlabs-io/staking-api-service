@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/config"
@@ -22,6 +23,7 @@ const (
 	TimeLockCollection              = "timelock_queue"
 	UnbondingCollection             = "unbonding_queue"
 	BtcInfoCollection               = "btc_info"
+	BtcPriceCollection              = "btc_price"
 	UnprocessableMsgCollection      = "unprocessable_messages"
 	PkAddressMappingsCollection     = "pk_address_mappings"
 	TermsAcceptanceCollection       = "terms_acceptance"
@@ -81,6 +83,14 @@ func Setup(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 
+	// If external APIs are configured, create TTL index for BTC price collection
+	if cfg.ExternalAPIs != nil {
+		if err := createTTLIndexes(ctx, database, cfg.ExternalAPIs.CoinMarketCap.CacheTTL); err != nil {
+			log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
+			return err
+		}
+	}
+
 	log.Info().Msg("Collections and Indexes created successfully.")
 	return nil
 }
@@ -122,4 +132,29 @@ func createIndex(ctx context.Context, database *mongo.Database, collectionName s
 	}
 
 	log.Debug().Msg("Index created successfully on collection: " + collectionName)
+}
+
+func createTTLIndexes(ctx context.Context, database *mongo.Database, cacheTTL time.Duration) error {
+	collection := database.Collection(BtcPriceCollection)
+
+	// First, drop the existing TTL index if it exists
+	_, err := collection.Indexes().DropOne(ctx, "created_at_1")
+	if err != nil && !strings.Contains(err.Error(), "not found") {
+		return fmt.Errorf("failed to drop existing TTL index: %w", err)
+	}
+
+	// Create new TTL index
+	model := mongo.IndexModel{
+		Keys: bson.D{{Key: "created_at", Value: 1}},
+		Options: options.Index().
+			SetExpireAfterSeconds(int32(cacheTTL.Seconds())).
+			SetName("created_at_1"),
+	}
+
+	_, err = collection.Indexes().CreateOne(ctx, model)
+	if err != nil {
+		return fmt.Errorf("failed to create TTL index: %w", err)
+	}
+
+	return nil
 }
