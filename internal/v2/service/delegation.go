@@ -7,6 +7,7 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	v2types "github.com/babylonlabs-io/staking-api-service/internal/v2/types"
 	"github.com/rs/zerolog/log"
 )
@@ -14,12 +15,12 @@ import (
 type DelegationStaking struct {
 	StakingTxHashHex   string `json:"staking_tx_hash_hex"`
 	StakingTxHex       string `json:"staking_tx_hex"`
-	StakingTime        uint32 `json:"staking_time"`
+	StakingTime        string `json:"staking_time"`
 	StakingAmount      uint64 `json:"staking_amount"`
 	StartHeight        uint32 `json:"start_height,omitempty"`
 	EndHeight          uint32 `json:"end_height,omitempty"`
 	BbnInceptionHeight int64  `json:"bbn_inception_height"`
-	BbnInceptionTime   int64  `json:"bbn_inception_time"`
+	BbnInceptionTime   string `json:"bbn_inception_time"`
 	SlashingTxHex      string `json:"slashing_tx_hex"`
 }
 
@@ -29,13 +30,13 @@ type CovenantSignature struct {
 }
 
 type DelegationUnbonding struct {
-	UnbondingTime               uint32              `json:"unbonding_time"`
+	UnbondingTime               string              `json:"unbonding_time"`
 	UnbondingTx                 string              `json:"unbonding_tx"`
 	CovenantUnbondingSignatures []CovenantSignature `json:"covenant_unbonding_signatures"`
 	SlashingTxHex               string              `json:"slashing_tx_hex"`
 }
 
-type StakerDelegationPublic struct {
+type DelegationPublic struct {
 	ParamsVersion             uint32                  `json:"params_version"`
 	StakerBtcPkHex            string                  `json:"staker_btc_pk_hex"`
 	FinalityProviderBtcPksHex []string                `json:"finality_provider_btc_pks_hex"`
@@ -44,7 +45,48 @@ type StakerDelegationPublic struct {
 	State                     v2types.DelegationState `json:"state"`
 }
 
-func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*StakerDelegationPublic, *types.Error) {
+func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) (*DelegationPublic, *types.Error) {
+	state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
+	if err != nil {
+		return nil, types.NewErrorWithMsg(
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			"failed to get delegation state",
+		)
+	}
+
+	delegationPublic := &DelegationPublic{
+		ParamsVersion:             delegation.ParamsVersion,
+		FinalityProviderBtcPksHex: delegation.FinalityProviderBtcPksHex,
+		StakerBtcPkHex:            delegation.StakerBtcPkHex,
+		DelegationStaking: DelegationStaking{
+			StakingTxHashHex:   delegation.StakingTxHashHex,
+			StakingTxHex:       delegation.StakingTxHex,
+			StakingTime:        utils.ParseTimestampToIsoFormat(int64(delegation.StakingTime)),
+			StakingAmount:      delegation.StakingAmount,
+			StartHeight:        delegation.StartHeight,
+			EndHeight:          delegation.EndHeight,
+			BbnInceptionHeight: delegation.BTCDelegationCreatedBbnBlock.Height,
+			BbnInceptionTime: utils.ParseTimestampToIsoFormat(
+				delegation.BTCDelegationCreatedBbnBlock.Timestamp,
+			),
+			SlashingTxHex: delegation.SlashingTxHex,
+		},
+		DelegationUnbonding: DelegationUnbonding{
+			UnbondingTime: utils.ParseTimestampToIsoFormat(int64(delegation.UnbondingTime)),
+			UnbondingTx:   delegation.UnbondingTx,
+			CovenantUnbondingSignatures: getUnbondingSignatures(
+				delegation.CovenantUnbondingSignatures,
+			),
+			SlashingTxHex: delegation.UnbondingSlashingTxHex,
+		},
+		State: state,
+	}
+
+	return delegationPublic, nil
+}
+
+func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error) {
 	delegation, err := s.DbClients.IndexerDBClient.GetDelegation(ctx, stakingTxHashHex)
 	if err != nil {
 		if db.IsNotFoundError(err) {
@@ -54,40 +96,10 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
 
-	state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
-	if err != nil {
-		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get delegation state")
-	}
-
-	delegationPublic := &StakerDelegationPublic{
-		ParamsVersion:             delegation.ParamsVersion,
-		FinalityProviderBtcPksHex: delegation.FinalityProviderBtcPksHex,
-		StakerBtcPkHex:            delegation.StakerBtcPkHex,
-		DelegationStaking: DelegationStaking{
-			StakingTxHashHex:   delegation.StakingTxHashHex,
-			StakingTxHex:       delegation.StakingTxHex,
-			StakingTime:        delegation.StakingTime,
-			StakingAmount:      delegation.StakingAmount,
-			StartHeight:        delegation.StartHeight,
-			EndHeight:          delegation.EndHeight,
-			BbnInceptionHeight: delegation.BTCDelegationCreatedBbnBlock.Height,
-			BbnInceptionTime:   delegation.BTCDelegationCreatedBbnBlock.Timestamp,
-			SlashingTxHex:      delegation.SlashingTxHex,
-		},
-		DelegationUnbonding: DelegationUnbonding{
-			UnbondingTime: delegation.UnbondingTime,
-			UnbondingTx:   delegation.UnbondingTx,
-			CovenantUnbondingSignatures: getUnbondingSignatures(
-				delegation.CovenantUnbondingSignatures,
-			),
-			SlashingTxHex: delegation.UnbondingSlashingTxHex,
-		},
-		State: state,
-	}
-	return delegationPublic, nil
+	return FromDelegationDocument(*delegation)
 }
 
-func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, paginationKey string) ([]*StakerDelegationPublic, string, *types.Error) {
+func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, paginationKey string) ([]*DelegationPublic, string, *types.Error) {
 	resultMap, err := s.DbClients.IndexerDBClient.GetDelegations(ctx, stakerPkHex, paginationKey)
 	if err != nil {
 		if db.IsNotFoundError(err) {
@@ -98,39 +110,13 @@ func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, pagi
 	}
 
 	// Initialize result structure
-	delegationsPublic := make([]*StakerDelegationPublic, 0, len(resultMap.Data))
+	delegationsPublic := make([]*DelegationPublic, 0, len(resultMap.Data))
 
 	// Group delegations by state
 	for _, delegation := range resultMap.Data {
-		state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
-		if err != nil {
-			return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get delegation state")
-		}
-
-		delegationPublic := &StakerDelegationPublic{
-			ParamsVersion:             delegation.ParamsVersion,
-			FinalityProviderBtcPksHex: delegation.FinalityProviderBtcPksHex,
-			StakerBtcPkHex:            delegation.StakerBtcPkHex,
-			DelegationStaking: DelegationStaking{
-				StakingTxHashHex:   delegation.StakingTxHashHex,
-				StakingTxHex:       delegation.StakingTxHex,
-				StakingTime:        delegation.StakingTime,
-				StakingAmount:      delegation.StakingAmount,
-				StartHeight:        delegation.StartHeight,
-				EndHeight:          delegation.EndHeight,
-				BbnInceptionHeight: delegation.BTCDelegationCreatedBbnBlock.Height,
-				BbnInceptionTime:   delegation.BTCDelegationCreatedBbnBlock.Timestamp,
-				SlashingTxHex:      delegation.SlashingTxHex,
-			},
-			DelegationUnbonding: DelegationUnbonding{
-				UnbondingTime: delegation.UnbondingTime,
-				UnbondingTx:   delegation.UnbondingTx,
-				CovenantUnbondingSignatures: getUnbondingSignatures(
-					delegation.CovenantUnbondingSignatures,
-				),
-				SlashingTxHex: delegation.UnbondingSlashingTxHex,
-			},
-			State: state,
+		delegationPublic, delErr := FromDelegationDocument(delegation)
+		if delErr != nil {
+			return nil, "", delErr
 		}
 		delegationsPublic = append(delegationsPublic, delegationPublic)
 	}

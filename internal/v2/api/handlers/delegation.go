@@ -13,7 +13,7 @@ import (
 // @Produce json
 // @Tags v2
 // @Param staking_tx_hash_hex query string true "Staking transaction hash in hex format"
-// @Success 200 {object} handler.PublicResponse[v2service.StakerDelegationPublic] "Staker delegation"
+// @Success 200 {object} handler.PublicResponse[v2service.DelegationPublic] "Staker delegation"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Failure 404 {object} types.Error "Error: Not Found"
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
@@ -38,7 +38,7 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 // @Tags v2
 // @Param staker_pk_hex query string true "Staker public key in hex format"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
-// @Success 200 {object} handler.PublicResponse[[]v2service.StakerDelegationPublic]{array} "List of staker delegations and pagination token"
+// @Success 200 {object} handler.PublicResponse[[]v2service.DelegationPublic]{array} "List of staker delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Failure 404 {object} types.Error "Error: Not Found"
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
