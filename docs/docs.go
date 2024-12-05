@@ -422,7 +422,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Staker delegation",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-v2service_StakerDelegationPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-v2service_DelegationPublic"
                         }
                     },
                     "400": {
@@ -475,7 +475,7 @@ const docTemplate = `{
                     "200": {
                         "description": "List of staker delegations and pagination token",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_DelegationPublic"
                         }
                     },
                     "400": {
@@ -690,13 +690,13 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_FinalityProviderStatsPublic": {
+        "handler.PublicResponse-array_v2service_DelegationPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.FinalityProviderStatsPublic"
+                        "$ref": "#/definitions/v2service.DelegationPublic"
                     }
                 },
                 "pagination": {
@@ -704,13 +704,13 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_StakerDelegationPublic": {
+        "handler.PublicResponse-array_v2service_FinalityProviderStatsPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.StakerDelegationPublic"
+                        "$ref": "#/definitions/v2service.FinalityProviderStatsPublic"
                     }
                 },
                 "pagination": {
@@ -751,22 +751,22 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-v2service_OverallStatsPublic": {
+        "handler.PublicResponse-v2service_DelegationPublic": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/v2service.OverallStatsPublic"
+                    "$ref": "#/definitions/v2service.DelegationPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
                 }
             }
         },
-        "handler.PublicResponse-v2service_StakerDelegationPublic": {
+        "handler.PublicResponse-v2service_OverallStatsPublic": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/v2service.StakerDelegationPublic"
+                    "$ref": "#/definitions/v2service.OverallStatsPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -1164,6 +1164,32 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.DelegationPublic": {
+            "type": "object",
+            "properties": {
+                "delegation_staking": {
+                    "$ref": "#/definitions/v2service.DelegationStaking"
+                },
+                "delegation_unbonding": {
+                    "$ref": "#/definitions/v2service.DelegationUnbonding"
+                },
+                "finality_provider_btc_pks_hex": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "params_version": {
+                    "type": "integer"
+                },
+                "staker_btc_pk_hex": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/v2types.DelegationState"
+                }
+            }
+        },
         "v2service.DelegationStaking": {
             "type": "object",
             "properties": {
@@ -1171,7 +1197,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "bbn_inception_time": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "end_height": {
                     "type": "integer"
@@ -1183,7 +1209,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "staking_time": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "staking_tx_hash_hex": {
                     "type": "string"
@@ -1209,7 +1235,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "unbonding_time": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "unbonding_tx": {
                     "type": "string"
@@ -1256,6 +1282,9 @@ const docTemplate = `{
                 "active_delegations": {
                     "type": "integer"
                 },
+                "active_finality_providers": {
+                    "type": "integer"
+                },
                 "active_stakers": {
                     "type": "integer"
                 },
@@ -1263,6 +1292,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "total_delegations": {
+                    "type": "integer"
+                },
+                "total_finality_providers": {
                     "type": "integer"
                 },
                 "total_stakers": {
@@ -1287,32 +1319,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
                     }
-                }
-            }
-        },
-        "v2service.StakerDelegationPublic": {
-            "type": "object",
-            "properties": {
-                "delegation_staking": {
-                    "$ref": "#/definitions/v2service.DelegationStaking"
-                },
-                "delegation_unbonding": {
-                    "$ref": "#/definitions/v2service.DelegationUnbonding"
-                },
-                "finality_provider_btc_pks_hex": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "params_version": {
-                    "type": "integer"
-                },
-                "staker_btc_pk_hex": {
-                    "type": "string"
-                },
-                "state": {
-                    "$ref": "#/definitions/v2types.DelegationState"
                 }
             }
         },

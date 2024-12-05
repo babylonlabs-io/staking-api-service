@@ -34,20 +34,20 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-array_v2service_DelegationPublic:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/v2service.DelegationPublic'
+        type: array
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-array_v2service_FinalityProviderStatsPublic:
     properties:
       data:
         items:
           $ref: '#/definitions/v2service.FinalityProviderStatsPublic'
-        type: array
-      pagination:
-        $ref: '#/definitions/handler.paginationResponse'
-    type: object
-  handler.PublicResponse-array_v2service_StakerDelegationPublic:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/v2service.StakerDelegationPublic'
         type: array
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
@@ -73,17 +73,17 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-v2service_DelegationPublic:
+    properties:
+      data:
+        $ref: '#/definitions/v2service.DelegationPublic'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-v2service_OverallStatsPublic:
     properties:
       data:
         $ref: '#/definitions/v2service.OverallStatsPublic'
-      pagination:
-        $ref: '#/definitions/handler.paginationResponse'
-    type: object
-  handler.PublicResponse-v2service_StakerDelegationPublic:
-    properties:
-      data:
-        $ref: '#/definitions/v2service.StakerDelegationPublic'
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
@@ -347,12 +347,29 @@ definitions:
       signature_hex:
         type: string
     type: object
+  v2service.DelegationPublic:
+    properties:
+      delegation_staking:
+        $ref: '#/definitions/v2service.DelegationStaking'
+      delegation_unbonding:
+        $ref: '#/definitions/v2service.DelegationUnbonding'
+      finality_provider_btc_pks_hex:
+        items:
+          type: string
+        type: array
+      params_version:
+        type: integer
+      staker_btc_pk_hex:
+        type: string
+      state:
+        $ref: '#/definitions/v2types.DelegationState'
+    type: object
   v2service.DelegationStaking:
     properties:
       bbn_inception_height:
         type: integer
       bbn_inception_time:
-        type: integer
+        type: string
       end_height:
         type: integer
       slashing_tx_hex:
@@ -360,7 +377,7 @@ definitions:
       staking_amount:
         type: integer
       staking_time:
-        type: integer
+        type: string
       staking_tx_hash_hex:
         type: string
       staking_tx_hex:
@@ -377,7 +394,7 @@ definitions:
       slashing_tx_hex:
         type: string
       unbonding_time:
-        type: integer
+        type: string
       unbonding_tx:
         type: string
     type: object
@@ -407,11 +424,15 @@ definitions:
     properties:
       active_delegations:
         type: integer
+      active_finality_providers:
+        type: integer
       active_stakers:
         type: integer
       active_tvl:
         type: integer
       total_delegations:
+        type: integer
+      total_finality_providers:
         type: integer
       total_stakers:
         type: integer
@@ -428,23 +449,6 @@ definitions:
         items:
           $ref: '#/definitions/indexertypes.BtcCheckpointParams'
         type: array
-    type: object
-  v2service.StakerDelegationPublic:
-    properties:
-      delegation_staking:
-        $ref: '#/definitions/v2service.DelegationStaking'
-      delegation_unbonding:
-        $ref: '#/definitions/v2service.DelegationUnbonding'
-      finality_provider_btc_pks_hex:
-        items:
-          type: string
-        type: array
-      params_version:
-        type: integer
-      staker_btc_pk_hex:
-        type: string
-      state:
-        $ref: '#/definitions/v2types.DelegationState'
     type: object
   v2service.StakerStatsPublic:
     properties:
@@ -785,7 +789,7 @@ paths:
         "200":
           description: Staker delegation
           schema:
-            $ref: '#/definitions/handler.PublicResponse-v2service_StakerDelegationPublic'
+            $ref: '#/definitions/handler.PublicResponse-v2service_DelegationPublic'
         "400":
           description: 'Error: Bad Request'
           schema:
@@ -821,7 +825,7 @@ paths:
         "200":
           description: List of staker delegations and pagination token
           schema:
-            $ref: '#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic'
+            $ref: '#/definitions/handler.PublicResponse-array_v2service_DelegationPublic'
         "400":
           description: 'Error: Bad Request'
           schema:
