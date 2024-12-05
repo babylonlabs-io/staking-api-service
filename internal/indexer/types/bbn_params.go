@@ -19,11 +19,13 @@ type BbnStakingParams struct {
 	SlashingPkScript             string   `json:"slashing_pk_script"`
 	MinSlashingTxFeeSat          int64    `json:"min_slashing_tx_fee_sat"`
 	SlashingRate                 string   `json:"slashing_rate"`
-	MinUnbondingTimeBlocks       uint32   `json:"min_unbonding_time_blocks"`
+	UnbondingTimeBlocks          uint32   `json:"unbonding_time_blocks"`
 	UnbondingFeeSat              int64    `json:"unbonding_fee_sat"`
 	MinCommissionRate            string   `json:"min_commission_rate"`
 	MaxActiveFinalityProviders   uint32   `json:"max_active_finality_providers"`
 	DelegationCreationBaseGasFee uint64   `json:"delegation_creation_base_gas_fee"`
+	AllowListExpirationHeight    uint64   `json:"allow_list_expiration_height"`
+	BtcActivationHeight          uint32   `json:"btc_activation_height"`
 }
 
 type BtcCheckpointParams struct {

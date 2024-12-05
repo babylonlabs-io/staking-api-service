@@ -36,21 +36,23 @@ func (db *IndexerDatabase) GetBbnStakingParams(ctx context.Context) ([]*indexert
 		}
 
 		bbnParams := &indexertypes.BbnStakingParams{
-			Version:                     model.Version,
-			CovenantPks:                stakingParams.CovenantPks,
-			CovenantQuorum:             stakingParams.CovenantQuorum,
-			MinStakingValueSat:         stakingParams.MinStakingValueSat,
-			MaxStakingValueSat:         stakingParams.MaxStakingValueSat,
-			MinStakingTimeBlocks:       stakingParams.MinStakingTimeBlocks,
-			MaxStakingTimeBlocks:       stakingParams.MaxStakingTimeBlocks,
-			SlashingPkScript:           stakingParams.SlashingPkScript,
-			MinSlashingTxFeeSat:        stakingParams.MinSlashingTxFeeSat,
-			SlashingRate:               stakingParams.SlashingRate,
-			MinUnbondingTimeBlocks:     stakingParams.MinUnbondingTimeBlocks,
-			UnbondingFeeSat:            stakingParams.UnbondingFeeSat,
-			MinCommissionRate:          stakingParams.MinCommissionRate,
-			MaxActiveFinalityProviders: stakingParams.MaxActiveFinalityProviders,
+			Version:                      model.Version,
+			CovenantPks:                  stakingParams.CovenantPks,
+			CovenantQuorum:               stakingParams.CovenantQuorum,
+			MinStakingValueSat:           stakingParams.MinStakingValueSat,
+			MaxStakingValueSat:           stakingParams.MaxStakingValueSat,
+			MinStakingTimeBlocks:         stakingParams.MinStakingTimeBlocks,
+			MaxStakingTimeBlocks:         stakingParams.MaxStakingTimeBlocks,
+			SlashingPkScript:             stakingParams.SlashingPkScript,
+			MinSlashingTxFeeSat:          stakingParams.MinSlashingTxFeeSat,
+			SlashingRate:                 stakingParams.SlashingRate,
+			UnbondingTimeBlocks:          stakingParams.UnbondingTimeBlocks,
+			UnbondingFeeSat:              stakingParams.UnbondingFeeSat,
+			MinCommissionRate:            stakingParams.MinCommissionRate,
+			MaxActiveFinalityProviders:   stakingParams.MaxActiveFinalityProviders,
 			DelegationCreationBaseGasFee: stakingParams.DelegationCreationBaseGasFee,
+			AllowListExpirationHeight:    stakingParams.AllowListExpirationHeight,
+			BtcActivationHeight:          stakingParams.BtcActivationHeight,
 		}
 
 		params = append(params, bbnParams)
