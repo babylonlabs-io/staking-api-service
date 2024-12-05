@@ -187,11 +187,12 @@ func GenerateRandomBabylonParams(r *rand.Rand) indexertypes.BbnStakingParams {
 		SlashingPkScript:             RandomString(r, 10),
 		MinSlashingTxFeeSat:          int64(r.Intn(10)),
 		SlashingRate:                 fmt.Sprintf("%f", RandomPostiveFloat64(r)),
-		MinUnbondingTimeBlocks:       uint32(r.Intn(10)),
+		UnbondingTimeBlocks:          uint32(r.Intn(10)),
 		UnbondingFeeSat:              int64(r.Intn(10)),
 		MinCommissionRate:            fmt.Sprintf("%f", RandomPostiveFloat64(r)),
 		MaxActiveFinalityProviders:   uint32(r.Intn(10)),
 		DelegationCreationBaseGasFee: uint64(r.Intn(10)),
+		BtcActivationHeight:          uint32(r.Intn(10)),
 	}
 }
 

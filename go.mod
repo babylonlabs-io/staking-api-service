@@ -5,7 +5,7 @@ go 1.23.1
 toolchain go1.23.3
 
 require (
-	github.com/babylonlabs-io/babylon v0.17.2
+	github.com/babylonlabs-io/babylon v0.18.0
 	github.com/babylonlabs-io/networks/parameters v0.2.2
 	github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20241203052145-e50972fc19c9
 	github.com/btcsuite/btcd v0.24.2
