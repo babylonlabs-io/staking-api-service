@@ -23,7 +23,7 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 	// Mark as v1 delegation as transitioned if it exists
 	if err := h.Services.V2Service.MarkV1DelegationAsTransitioned(ctx, activeStakingEvent.StakingTxHashHex); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to mark v1 delegation as transitioned")
-		return err
+		return types.NewError(http.StatusInternalServerError, types.InternalServiceError, err)
 	}
 
 	// TODO: Perform the address lookup conversion
