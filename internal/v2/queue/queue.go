@@ -43,7 +43,7 @@ func New(cfg *queueConfig.QueueConfig, service *services.Services) *Queues {
 	handlers := v2queuehandler.NewV2QueueHandler(service)
 	return &Queues{
 		Handlers:                    handlers,
-		processingTimeout:           time.Duration(cfg.QueueProcessingTimeout) * time.Second,
+		processingTimeout:           cfg.QueueProcessingTimeout,
 		maxRetryAttempts:            cfg.MsgMaxRetryAttempts,
 		ActiveStakingQueueClient:    activeStakingQueueClient,
 		UnbondingStakingQueueClient: unbondingStakingQueueClient,
