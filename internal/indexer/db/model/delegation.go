@@ -27,11 +27,11 @@ type IndexerDelegationDetails struct {
 	ParamsVersion                uint32                          `bson:"params_version"`
 	FinalityProviderBtcPksHex    []string                        `bson:"finality_provider_btc_pks_hex"`
 	StakerBtcPkHex               string                          `bson:"staker_btc_pk_hex"`
-	StakingTime                  uint32                          `bson:"staking_time"`
+	StakingTimeLock              uint32                          `bson:"staking_time"`
 	StakingAmount                uint64                          `bson:"staking_amount"`
 	StakingOutputPkScript        string                          `bson:"staking_output_pk_script"`
 	StakingOutputIdx             uint32                          `bson:"staking_output_idx"`
-	UnbondingTime                uint32                          `bson:"unbonding_time"`
+	UnbondingTimeLock            uint32                          `bson:"unbonding_time"`
 	UnbondingTx                  string                          `bson:"unbonding_tx"`
 	State                        indexertypes.DelegationState    `bson:"state"`
 	SubState                     indexertypes.DelegationSubState `bson:"sub_state,omitempty"`

@@ -107,6 +107,10 @@ definitions:
     type: object
   indexertypes.BbnStakingParams:
     properties:
+      allow_list_expiration_height:
+        type: integer
+      btc_activation_height:
+        type: integer
       covenant_pks:
         items:
           type: string
@@ -129,13 +133,13 @@ definitions:
         type: integer
       min_staking_value_sat:
         type: integer
-      min_unbonding_time_blocks:
-        type: integer
       slashing_pk_script:
         type: string
       slashing_rate:
         type: string
       unbonding_fee_sat:
+        type: integer
+      unbonding_time_blocks:
         type: integer
       version:
         type: integer
@@ -376,8 +380,8 @@ definitions:
         type: string
       staking_amount:
         type: integer
-      staking_time:
-        type: string
+      staking_timelock:
+        type: integer
       staking_tx_hash_hex:
         type: string
       staking_tx_hex:
@@ -393,8 +397,8 @@ definitions:
         type: array
       slashing_tx_hex:
         type: string
-      unbonding_time:
-        type: string
+      unbonding_timelock:
+        type: integer
       unbonding_tx:
         type: string
     type: object

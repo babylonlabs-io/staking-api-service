@@ -804,6 +804,12 @@ const docTemplate = `{
         "indexertypes.BbnStakingParams": {
             "type": "object",
             "properties": {
+                "allow_list_expiration_height": {
+                    "type": "integer"
+                },
+                "btc_activation_height": {
+                    "type": "integer"
+                },
                 "covenant_pks": {
                     "type": "array",
                     "items": {
@@ -837,9 +843,6 @@ const docTemplate = `{
                 "min_staking_value_sat": {
                     "type": "integer"
                 },
-                "min_unbonding_time_blocks": {
-                    "type": "integer"
-                },
                 "slashing_pk_script": {
                     "type": "string"
                 },
@@ -847,6 +850,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "unbonding_fee_sat": {
+                    "type": "integer"
+                },
+                "unbonding_time_blocks": {
                     "type": "integer"
                 },
                 "version": {
@@ -1208,8 +1214,8 @@ const docTemplate = `{
                 "staking_amount": {
                     "type": "integer"
                 },
-                "staking_time": {
-                    "type": "string"
+                "staking_timelock": {
+                    "type": "integer"
                 },
                 "staking_tx_hash_hex": {
                     "type": "string"
@@ -1234,8 +1240,8 @@ const docTemplate = `{
                 "slashing_tx_hex": {
                     "type": "string"
                 },
-                "unbonding_time": {
-                    "type": "string"
+                "unbonding_timelock": {
+                    "type": "integer"
                 },
                 "unbonding_tx": {
                     "type": "string"
