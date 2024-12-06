@@ -15,7 +15,7 @@ import (
 type DelegationStaking struct {
 	StakingTxHashHex   string `json:"staking_tx_hash_hex"`
 	StakingTxHex       string `json:"staking_tx_hex"`
-	StakingTime        string `json:"staking_time"`
+	StakingTimelock    uint32 `json:"staking_timelock"`
 	StakingAmount      uint64 `json:"staking_amount"`
 	StartHeight        uint32 `json:"start_height,omitempty"`
 	EndHeight          uint32 `json:"end_height,omitempty"`
@@ -30,7 +30,7 @@ type CovenantSignature struct {
 }
 
 type DelegationUnbonding struct {
-	UnbondingTime               string              `json:"unbonding_time"`
+	UnbondingTimelock           uint32              `json:"unbonding_timelock"`
 	UnbondingTx                 string              `json:"unbonding_tx"`
 	CovenantUnbondingSignatures []CovenantSignature `json:"covenant_unbonding_signatures"`
 	SlashingTxHex               string              `json:"slashing_tx_hex"`
@@ -62,7 +62,7 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 		DelegationStaking: DelegationStaking{
 			StakingTxHashHex:   delegation.StakingTxHashHex,
 			StakingTxHex:       delegation.StakingTxHex,
-			StakingTime:        utils.ParseTimestampToIsoFormat(int64(delegation.StakingTime)),
+			StakingTimelock:    delegation.StakingTimeLock,
 			StakingAmount:      delegation.StakingAmount,
 			StartHeight:        delegation.StartHeight,
 			EndHeight:          delegation.EndHeight,
@@ -73,8 +73,8 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 			SlashingTxHex: delegation.SlashingTxHex,
 		},
 		DelegationUnbonding: DelegationUnbonding{
-			UnbondingTime: utils.ParseTimestampToIsoFormat(int64(delegation.UnbondingTime)),
-			UnbondingTx:   delegation.UnbondingTx,
+			UnbondingTimelock: delegation.UnbondingTimeLock,
+			UnbondingTx:       delegation.UnbondingTx,
 			CovenantUnbondingSignatures: getUnbondingSignatures(
 				delegation.CovenantUnbondingSignatures,
 			),
