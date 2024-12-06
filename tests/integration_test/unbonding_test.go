@@ -520,7 +520,10 @@ func TestUnbondingRequestValidation(t *testing.T) {
 	_, unbondingTxHashHex := testutils.RandomBytes(r, 32)
 	_, unbondingTxHex, _ := testutils.GenerateRandomTx(
 		r,
-		&struct{ DisableRbf bool }{DisableRbf: true},
+		&struct {
+			DisableRbf bool
+			Version    uint32
+		}{DisableRbf: true, Version: 2},
 	)
 	_, fakeSig := testutils.RandomBytes(r, 64)
 
@@ -576,6 +579,35 @@ func TestUnbondingRequestValidation(t *testing.T) {
 	assert.NoError(t, err, "unmarshalling response body should not fail")
 	assert.Equal(t, types.ValidationError.String(), unbondingResponse.ErrorCode)
 	assert.Equal(t, "invalid unbonding tx hex: the unbonding tx is not a valid pre-signed unbonding tx: pre-signed tx must not be replaceable", unbondingResponse.Message)
+
+	txHash, version1TxHex, _ := testutils.GenerateRandomTx(
+		r,
+		&struct {
+			DisableRbf bool
+			Version    uint32
+		}{DisableRbf: true, Version: 1},
+	)
+
+	payload = handlers.UnbondDelegationRequestPayload{
+		StakingTxHashHex:         stakingTxHashHex,
+		UnbondingTxHashHex:       txHash.TxHash().String(),
+		UnbondingTxHex:           version1TxHex,
+		StakerSignedSignatureHex: fakeSig,
+	}
+
+	requestBodyBytes, err = json.Marshal(payload)
+	assert.NoError(t, err, "marshalling request body should not fail")
+
+	resp, err = http.Post(unbondingUrl, "application/json", bytes.NewReader(requestBodyBytes))
+	assert.NoError(t, err, "making POST request to unbonding endpoint should not fail")
+	defer resp.Body.Close()
+	bodyBytes, err = io.ReadAll(resp.Body)
+	assert.NoError(t, err, "reading response body should not fail")
+
+	err = json.Unmarshal(bodyBytes, &unbondingResponse)
+	assert.NoError(t, err, "unmarshalling response body should not fail")
+	assert.Equal(t, types.ValidationError.String(), unbondingResponse.ErrorCode)
+	assert.Equal(t, "invalid unbonding tx hex: the unbonding tx is not a valid pre-signed unbonding tx: tx version must be between 2 and 2", unbondingResponse.Message)
 }
 
 func TestContentLength(t *testing.T) {
