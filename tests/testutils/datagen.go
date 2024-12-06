@@ -100,14 +100,21 @@ func RandomAmount(r *rand.Rand) int64 {
 // GenerateRandomTx generates a random transaction with random values for each field.
 func GenerateRandomTx(
 	r *rand.Rand,
-	options *struct{ DisableRbf bool },
+	options *struct {
+		DisableRbf bool
+		Version    uint32
+	},
 ) (*wire.MsgTx, string, error) {
 	sequence := r.Uint32()
 	if options != nil && options.DisableRbf {
 		sequence = wire.MaxTxInSequenceNum
 	}
+	version := int32(2)
+	if options != nil && options.Version > 0 {
+		version = int32(options.Version)
+	}
 	tx := &wire.MsgTx{
-		Version: 1,
+		Version: version,
 		TxIn: []*wire.TxIn{
 			{
 				PreviousOutPoint: wire.OutPoint{
