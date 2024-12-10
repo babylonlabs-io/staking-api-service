@@ -60,10 +60,6 @@ func main() {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading finality providers file: %s", finalityProvidersPath))
 	}
 
-	// initialize metrics with the metrics port from config
-	metricsPort := cfg.Metrics.GetMetricsPort()
-	metrics.Init(metricsPort)
-
 	err = dbmodel.Setup(ctx, cfg)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking db model")
@@ -103,6 +99,11 @@ func main() {
 		return
 	}
 
+	// initialize metrics with the metrics port from config
+	metricsPort := cfg.Metrics.GetMetricsPort()
+	metrics.Init(metricsPort)
+
+	// Start the event queue processing
 	v2queues.StartReceivingMessages()
 
 	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, v2queues, cfg.Server.HealthCheckInterval)
