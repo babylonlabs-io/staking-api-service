@@ -218,9 +218,7 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
 			"active_tvl":         int64(amount),
-			"total_tvl":          int64(amount),
 			"active_delegations": 1,
-			"total_delegations":  1,
 		},
 	}
 	return v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
@@ -323,9 +321,7 @@ func (v2dbclient *V2Database) IncrementFinalityProviderStats(
 			SetUpdate(bson.M{
 				"$inc": bson.M{
 					"active_tvl":         int64(amount),
-					"total_tvl":          int64(amount),
 					"active_delegations": 1,
-					"total_delegations":  1,
 				},
 			}).
 			SetUpsert(true)
