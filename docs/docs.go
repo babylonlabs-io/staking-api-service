@@ -1297,16 +1297,7 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
-                "total_delegations": {
-                    "type": "integer"
-                },
                 "total_finality_providers": {
-                    "type": "integer"
-                },
-                "total_stakers": {
-                    "type": "integer"
-                },
-                "total_tvl": {
                     "type": "integer"
                 }
             }
@@ -1339,12 +1330,6 @@ const docTemplate = `{
                 },
                 "staker_pk_hex": {
                     "type": "string"
-                },
-                "total_delegations": {
-                    "type": "integer"
-                },
-                "total_tvl": {
-                    "type": "integer"
                 }
             }
         },

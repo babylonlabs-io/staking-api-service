@@ -25,36 +25,17 @@ func NewV2StatsLockDocument(
 type V2OverallStatsDocument struct {
 	Id                string `bson:"_id"`
 	ActiveTvl         int64  `bson:"active_tvl"`
-	TotalTvl          int64  `bson:"total_tvl"`
 	ActiveDelegations int64  `bson:"active_delegations"`
-	TotalDelegations  int64  `bson:"total_delegations"`
-	TotalStakers      uint64 `bson:"total_stakers"`
 }
 
 type V2StakerStatsDocument struct {
 	StakerPkHex       string `bson:"_id"`
 	ActiveTvl         int64  `bson:"active_tvl"`
-	TotalTvl          int64  `bson:"total_tvl"`
 	ActiveDelegations int64  `bson:"active_delegations"`
-	TotalDelegations  int64  `bson:"total_delegations"`
 }
 
 type V2FinalityProviderStatsDocument struct {
 	FinalityProviderPkHex string `bson:"_id"`
 	ActiveTvl             int64  `bson:"active_tvl"`
-	TotalTvl              int64  `bson:"total_tvl"`
 	ActiveDelegations     int64  `bson:"active_delegations"`
-	TotalDelegations      int64  `bson:"total_delegations"`
-}
-
-type V2FpSlashingLockDocument struct {
-	FinalityProviderPkHex string `bson:"_id"`          // <fp_btc_pk_hex>
-	IsProcessed           bool   `bson:"is_processed"` // true when processing is complete
-}
-
-func NewV2FpSlashingLockDocument(fpBtcPkHex string) *V2FpSlashingLockDocument {
-	return &V2FpSlashingLockDocument{
-		FinalityProviderPkHex: fpBtcPkHex,
-		IsProcessed:           false,
-	}
 }
