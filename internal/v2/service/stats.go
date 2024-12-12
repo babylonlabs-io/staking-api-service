@@ -11,11 +11,8 @@ import (
 
 type OverallStatsPublic struct {
 	ActiveTvl               int64  `json:"active_tvl"`
-	TotalTvl                int64  `json:"total_tvl"`
 	ActiveDelegations       int64  `json:"active_delegations"`
-	TotalDelegations        int64  `json:"total_delegations"`
 	ActiveStakers           uint64 `json:"active_stakers"`
-	TotalStakers            uint64 `json:"total_stakers"`
 	ActiveFinalityProviders uint64 `json:"active_finality_providers"`
 	TotalFinalityProviders  uint64 `json:"total_finality_providers"`
 }
@@ -23,9 +20,7 @@ type OverallStatsPublic struct {
 type StakerStatsPublic struct {
 	StakerPkHex       string `json:"staker_pk_hex"`
 	ActiveTvl         int64  `json:"active_tvl"`
-	TotalTvl          int64  `json:"total_tvl"`
 	ActiveDelegations int64  `json:"active_delegations"`
-	TotalDelegations  int64  `json:"total_delegations"`
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
@@ -58,11 +53,8 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 
 	return &OverallStatsPublic{
 		ActiveTvl:               overallStats.ActiveTvl,
-		TotalTvl:                overallStats.TotalTvl,
 		ActiveDelegations:       overallStats.ActiveDelegations,
-		TotalDelegations:        overallStats.TotalDelegations,
 		ActiveStakers:           uint64(activeStakersCount),
-		TotalStakers:            overallStats.TotalStakers,
 		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
 		TotalFinalityProviders:  uint64(len(finalityProviders)),
 	}, nil
@@ -78,9 +70,7 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 	return &StakerStatsPublic{
 		StakerPkHex:       stakerStats.StakerPkHex,
 		ActiveTvl:         stakerStats.ActiveTvl,
-		TotalTvl:          stakerStats.TotalTvl,
 		ActiveDelegations: stakerStats.ActiveDelegations,
-		TotalDelegations:  stakerStats.TotalDelegations,
 	}, nil
 }
 
