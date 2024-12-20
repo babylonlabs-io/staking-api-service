@@ -21,6 +21,12 @@ type BTCDelegationCreatedBbnBlock struct {
 	Timestamp int64 `bson:"timestamp"` // epoch time in seconds
 }
 
+type SlashingTx struct {
+	SlashingTxHex          string `bson:"slashing_tx_hex"`
+	UnbondingSlashingTxHex string `bson:"unbonding_slashing_tx_hex"`
+	SpendingHeight         uint32 `bson:"spending_height"`
+}
+
 type IndexerDelegationDetails struct {
 	StakingTxHashHex             string                          `bson:"_id"` // Primary key
 	StakingTxHex                 string                          `bson:"staking_tx_hex"`
@@ -39,8 +45,7 @@ type IndexerDelegationDetails struct {
 	EndHeight                    uint32                          `bson:"end_height"`
 	CovenantUnbondingSignatures  []CovenantSignature             `bson:"covenant_unbonding_signatures"`
 	BTCDelegationCreatedBbnBlock BTCDelegationCreatedBbnBlock    `bson:"btc_delegation_created_bbn_block"`
-	SlashingTxHex                string                          `bson:"slashing_tx_hex"`
-	UnbondingSlashingTxHex       string                          `bson:"unbonding_slashing_tx_hex"`
+	SlashingTx                   SlashingTx                      `bson:"slashing_tx"`
 }
 
 func BuildDelegationPaginationToken(d IndexerDelegationDetails) (string, error) {

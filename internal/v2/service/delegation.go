@@ -13,15 +13,25 @@ import (
 )
 
 type DelegationStaking struct {
-	StakingTxHashHex   string `json:"staking_tx_hash_hex"`
-	StakingTxHex       string `json:"staking_tx_hex"`
-	StakingTimelock    uint32 `json:"staking_timelock"`
-	StakingAmount      uint64 `json:"staking_amount"`
-	StartHeight        uint32 `json:"start_height,omitempty"`
-	EndHeight          uint32 `json:"end_height,omitempty"`
-	BbnInceptionHeight int64  `json:"bbn_inception_height"`
-	BbnInceptionTime   string `json:"bbn_inception_time"`
-	SlashingTxHex      string `json:"slashing_tx_hex"`
+	StakingTxHashHex   string          `json:"staking_tx_hash_hex"`
+	StakingTxHex       string          `json:"staking_tx_hex"`
+	StakingTimelock    uint32          `json:"staking_timelock"`
+	StakingAmount      uint64          `json:"staking_amount"`
+	StartHeight        uint32          `json:"start_height,omitempty"`
+	EndHeight          uint32          `json:"end_height,omitempty"`
+	BbnInceptionHeight int64           `json:"bbn_inception_height"`
+	BbnInceptionTime   string          `json:"bbn_inception_time"`
+	Slashing           StakingSlashing `json:"slashing"`
+}
+
+type StakingSlashing struct {
+	SlashingTxHex  string `json:"slashing_tx_hex"`
+	SpendingHeight uint32 `json:"spending_height"`
+}
+
+type UnbondingSlashing struct {
+	UnbondingSlashingTxHex string `json:"unbonding_slashing_tx_hex"`
+	SpendingHeight         uint32 `json:"spending_height"`
 }
 
 type CovenantSignature struct {
@@ -33,7 +43,7 @@ type DelegationUnbonding struct {
 	UnbondingTimelock           uint32              `json:"unbonding_timelock"`
 	UnbondingTx                 string              `json:"unbonding_tx"`
 	CovenantUnbondingSignatures []CovenantSignature `json:"covenant_unbonding_signatures"`
-	SlashingTxHex               string              `json:"slashing_tx_hex"`
+	Slashing                    UnbondingSlashing   `json:"slashing"`
 }
 
 type DelegationPublic struct {
@@ -70,7 +80,10 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 			BbnInceptionTime: utils.ParseTimestampToIsoFormat(
 				delegation.BTCDelegationCreatedBbnBlock.Timestamp,
 			),
-			SlashingTxHex: delegation.SlashingTxHex,
+			Slashing: StakingSlashing{
+				SlashingTxHex:  delegation.SlashingTx.SlashingTxHex,
+				SpendingHeight: delegation.SlashingTx.SpendingHeight,
+			},
 		},
 		DelegationUnbonding: DelegationUnbonding{
 			UnbondingTimelock: delegation.UnbondingTimeLock,
@@ -78,7 +91,10 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 			CovenantUnbondingSignatures: getUnbondingSignatures(
 				delegation.CovenantUnbondingSignatures,
 			),
-			SlashingTxHex: delegation.UnbondingSlashingTxHex,
+			Slashing: UnbondingSlashing{
+				UnbondingSlashingTxHex: delegation.SlashingTx.UnbondingSlashingTxHex,
+				SpendingHeight:         delegation.SlashingTx.SpendingHeight,
+			},
 		},
 		State: state,
 	}
