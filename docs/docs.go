@@ -1208,8 +1208,8 @@ const docTemplate = `{
                 "end_height": {
                     "type": "integer"
                 },
-                "slashing_tx_hex": {
-                    "type": "string"
+                "slashing": {
+                    "$ref": "#/definitions/v2service.StakingSlashing"
                 },
                 "staking_amount": {
                     "type": "integer"
@@ -1237,8 +1237,8 @@ const docTemplate = `{
                         "$ref": "#/definitions/v2service.CovenantSignature"
                     }
                 },
-                "slashing_tx_hex": {
-                    "type": "string"
+                "slashing": {
+                    "$ref": "#/definitions/v2service.UnbondingSlashing"
                 },
                 "unbonding_timelock": {
                     "type": "integer"
@@ -1333,11 +1333,33 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.StakingSlashing": {
+            "type": "object",
+            "properties": {
+                "slashing_tx_hex": {
+                    "type": "string"
+                },
+                "spending_height": {
+                    "type": "integer"
+                }
+            }
+        },
         "v2service.StakingStatusPublic": {
             "type": "object",
             "properties": {
                 "is_staking_open": {
                     "type": "boolean"
+                }
+            }
+        },
+        "v2service.UnbondingSlashing": {
+            "type": "object",
+            "properties": {
+                "spending_height": {
+                    "type": "integer"
+                },
+                "unbonding_slashing_tx_hex": {
+                    "type": "string"
                 }
             }
         },
