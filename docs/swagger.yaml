@@ -376,8 +376,8 @@ definitions:
         type: string
       end_height:
         type: integer
-      slashing_tx_hex:
-        type: string
+      slashing:
+        $ref: '#/definitions/v2service.StakingSlashing'
       staking_amount:
         type: integer
       staking_timelock:
@@ -395,8 +395,8 @@ definitions:
         items:
           $ref: '#/definitions/v2service.CovenantSignature'
         type: array
-      slashing_tx_hex:
-        type: string
+      slashing:
+        $ref: '#/definitions/v2service.UnbondingSlashing'
       unbonding_timelock:
         type: integer
       unbonding_tx:
@@ -457,10 +457,24 @@ definitions:
       staker_pk_hex:
         type: string
     type: object
+  v2service.StakingSlashing:
+    properties:
+      slashing_tx_hex:
+        type: string
+      spending_height:
+        type: integer
+    type: object
   v2service.StakingStatusPublic:
     properties:
       is_staking_open:
         type: boolean
+    type: object
+  v2service.UnbondingSlashing:
+    properties:
+      spending_height:
+        type: integer
+      unbonding_slashing_tx_hex:
+        type: string
     type: object
   v2types.DelegationState:
     enum:
