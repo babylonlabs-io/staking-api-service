@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	queueClient "github.com/babylonlabs-io/staking-queue-client/client"
@@ -31,6 +32,7 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 
 	log.Debug().
 		Str("staking_tx", activeStakingEvent.StakingTxHashHex).
+		Str("staking_amount", strconv.FormatUint(activeStakingEvent.StakingAmount, 10)).
 		Msg("processing active delegation event")
 
 	statsErr := h.Services.V2Service.ProcessActiveDelegationStats(
@@ -59,6 +61,7 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 
 	log.Debug().
 		Str("staking_tx", unbondingStakingEvent.StakingTxHashHex).
+		Str("staking_amount", strconv.FormatUint(unbondingStakingEvent.StakingAmount, 10)).
 		Msg("processing unbonding delegation event")
 
 	// Perform the stats calculation
