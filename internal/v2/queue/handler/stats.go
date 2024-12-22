@@ -29,6 +29,10 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 	// TODO: Perform the address lookup conversion
 	// https://github.com/babylonlabs-io/staking-api-service/issues/162
 
+	log.Debug().
+		Str("staking_tx", activeStakingEvent.StakingTxHashHex).
+		Msg("processing active delegation event")
+
 	statsErr := h.Services.V2Service.ProcessActiveDelegationStats(
 		ctx,
 		activeStakingEvent.StakingTxHashHex,
@@ -52,6 +56,10 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into UnbondingStakingEvent")
 		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
 	}
+
+	log.Debug().
+		Str("staking_tx", unbondingStakingEvent.StakingTxHashHex).
+		Msg("processing unbonding delegation event")
 
 	// Perform the stats calculation
 	statsErr := h.Services.V2Service.ProcessUnbondingDelegationStats(
