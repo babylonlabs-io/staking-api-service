@@ -217,7 +217,7 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(ctx context.Context, stak
 	}
 
 	if !statsLockDocument.StakerStats {
-		err = s.DbClients.V2DBClient.HandleWithdrawableDelegation(
+		err = s.DbClients.V2DBClient.HandleWithdrawableStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex,
 		)
 		if err != nil {
@@ -248,7 +248,7 @@ func (s *V2Service) ProcessWithdrawnDelegationStats(ctx context.Context, staking
 	}
 
 	if !statsLockDocument.StakerStats {
-		err = s.DbClients.V2DBClient.HandleWithdrawnDelegation(
+		err = s.DbClients.V2DBClient.HandleWithdrawnStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex,
 		)
 		if err != nil {

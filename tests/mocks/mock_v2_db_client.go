@@ -272,12 +272,12 @@ func (_m *V2DBClient) GetStakerStats(ctx context.Context, stakerPKHex string) (*
 	return r0, r1
 }
 
-// HandleWithdrawableDelegationStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
-func (_m *V2DBClient) HandleWithdrawableDelegationStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
+// HandleWithdrawableStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
+func (_m *V2DBClient) HandleWithdrawableStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
 	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex)
 
 	if len(ret) == 0 {
-		panic("no return value specified for HandleWithdrawableDelegationStakerStats")
+		panic("no return value specified for HandleWithdrawableStakerStats")
 	}
 
 	var r0 error
@@ -290,12 +290,12 @@ func (_m *V2DBClient) HandleWithdrawableDelegationStakerStats(ctx context.Contex
 	return r0
 }
 
-// HandleWithdrawnDelegationStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
-func (_m *V2DBClient) HandleWithdrawnDelegationStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
+// HandleWithdrawnStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
+func (_m *V2DBClient) HandleWithdrawnStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
 	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex)
 
 	if len(ret) == 0 {
-		panic("no return value specified for HandleWithdrawnDelegationStakerStats")
+		panic("no return value specified for HandleWithdrawnStakerStats")
 	}
 
 	var r0 error
