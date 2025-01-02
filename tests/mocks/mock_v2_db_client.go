@@ -272,6 +272,42 @@ func (_m *V2DBClient) GetStakerStats(ctx context.Context, stakerPKHex string) (*
 	return r0, r1
 }
 
+// HandleWithdrawableDelegation provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
+func (_m *V2DBClient) HandleWithdrawableDelegation(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HandleWithdrawableDelegation")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// HandleWithdrawnDelegation provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
+func (_m *V2DBClient) HandleWithdrawnDelegation(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HandleWithdrawnDelegation")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // IncrementFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHexes, amount
 func (_m *V2DBClient) IncrementFinalityProviderStats(ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64) error {
 	ret := _m.Called(ctx, stakingTxHashHex, fpPkHexes, amount)

@@ -67,3 +67,50 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 	}
 	return nil
 }
+
+// WithdrawableStakingHandler processes withdrawable staking events
+func (h *V2QueueHandler) WithdrawableStakingHandler(ctx context.Context, messageBody string) *types.Error {
+	var withdrawableStakingEvent queueClient.StakingEvent
+	err := json.Unmarshal([]byte(messageBody), &withdrawableStakingEvent)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into WithdrawableStakingEvent")
+		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
+	}
+
+	// TODO: Perform the address lookup conversion
+	// https://github.com/babylonlabs-io/staking-api-service/issues/162
+
+	statsErr := h.Services.V2Service.ProcessWithdrawableDelegationStats(
+		ctx,
+		withdrawableStakingEvent.StakingTxHashHex,
+		withdrawableStakingEvent.StakerBtcPkHex,
+	)
+	if statsErr != nil {
+		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process staking stats calculation")
+		return statsErr
+	}
+
+	return nil
+}
+
+// WithdrawnStakingHandler processes withdrawn staking events
+func (h *V2QueueHandler) WithdrawnStakingHandler(ctx context.Context, messageBody string) *types.Error {
+	var withdrawnStakingEvent queueClient.StakingEvent
+	err := json.Unmarshal([]byte(messageBody), &withdrawnStakingEvent)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to unmarshal the message body into WithdrawnStakingEvent")
+		return types.NewError(http.StatusBadRequest, types.BadRequest, err)
+	}
+
+	statsErr := h.Services.V2Service.ProcessWithdrawnDelegationStats(
+		ctx,
+		withdrawnStakingEvent.StakingTxHashHex,
+		withdrawnStakingEvent.StakerBtcPkHex,
+	)
+	if statsErr != nil {
+		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process staking stats calculation")
+		return statsErr
+	}
+
+	return nil
+}

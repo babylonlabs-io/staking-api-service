@@ -87,10 +87,8 @@ github.com/babylonlabs-io/babylon v0.18.0 h1:phMY/GiR9N5MpD3XCmvyPpZkc1I3kTM9yX+
 github.com/babylonlabs-io/babylon v0.18.0/go.mod h1:sT+KG2U+M0tDMNZZ2L5CwlXX0OpagGEs56BiWXqaZFw=
 github.com/babylonlabs-io/networks/parameters v0.2.2 h1:TCu39fZvjX5f6ZZrjhYe54M6wWxglNewuKu56yE+zrc=
 github.com/babylonlabs-io/networks/parameters v0.2.2/go.mod h1:iEJVOzaLsE33vpP7J4u+CRGfkSIfErUAwRmgCFCBpyI=
-github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20241212104643-06828f6e25d5 h1:b89cYr2MuW8bzKDVIHT8kPKD1dQygCERYpTtR8eGmcY=
-github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20241212104643-06828f6e25d5/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
-github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20241212112557-9ac7de686075 h1:gB+jslBkK5/ror4sn9NHldKjLu4nE88jgD43d2L3osc=
-github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20241212112557-9ac7de686075/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
+github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250102114800-e2899342683b h1:U88aKs6LYDsS1+Co8MvMvxtogO7HYjUoeyeO9PDFiaY=
+github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250102114800-e2899342683b/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=

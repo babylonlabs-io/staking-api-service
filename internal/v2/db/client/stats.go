@@ -219,6 +219,7 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 		"$inc": bson.M{
 			"active_tvl":         int64(amount),
 			"active_delegations": 1,
+			"total_delegations":  1,
 		},
 	}
 	return v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
@@ -236,6 +237,33 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 		},
 	}
 	return v2dbclient.updateStakerStats(ctx, types.Unbonded.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+}
+
+// HandleWithdrawableDelegation increments the withdrawable stats for the given staking tx hash
+// This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
+func (v2dbclient *V2Database) HandleWithdrawableDelegation(
+	ctx context.Context, stakingTxHashHex, stakerPkHex string,
+) error {
+	upsertUpdate := bson.M{
+		"$inc": bson.M{
+			"withdrawable_delegations": 1,
+		},
+	}
+	return v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+}
+
+// HandleWithdrawnDelegation decrements the withdrawable stats and increments the withdrawn stats for the given staking tx hash
+// This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
+func (v2dbclient *V2Database) HandleWithdrawnDelegation(
+	ctx context.Context, stakingTxHashHex, stakerPkHex string,
+) error {
+	upsertUpdate := bson.M{
+		"$inc": bson.M{
+			"withdrawable_delegations": -1,
+			"withdrawn_delegations":    1,
+		},
+	}
+	return v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
 func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {

@@ -145,7 +145,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
 		stakingTxHashHex,
-		types.Unbonded.ToString(), // use same state for both slashed and unbonding
+		types.Unbonding.ToString(), // use same state for both slashed and unbonding
 	)
 	if err != nil {
 		log.Ctx(ctx).Error().
@@ -195,6 +195,68 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 			}
 			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
 				Msg("error while subtracting overall stats")
+			return types.NewInternalServiceError(err)
+		}
+	}
+
+	return nil
+}
+
+func (s *V2Service) ProcessWithdrawableDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string) *types.Error {
+	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
+		ctx,
+		stakingTxHashHex,
+		types.Withdrawable.ToString(), // use same state for both slashed and unbonding
+	)
+	if err != nil {
+		log.Ctx(ctx).Error().
+			Err(err).
+			Str("staking_tx_hash", stakingTxHashHex).
+			Msg("Failed to fetch stats lock document")
+		return types.NewInternalServiceError(err)
+	}
+
+	if !statsLockDocument.StakerStats {
+		err = s.DbClients.V2DBClient.HandleWithdrawableDelegation(
+			ctx, stakingTxHashHex, stakerPkHex,
+		)
+		if err != nil {
+			if db.IsNotFoundError(err) {
+				return nil
+			}
+			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+				Msg("error while incrementing staker stats")
+			return types.NewInternalServiceError(err)
+		}
+	}
+
+	return nil
+}
+
+func (s *V2Service) ProcessWithdrawnDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string) *types.Error {
+	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
+		ctx,
+		stakingTxHashHex,
+		types.Withdrawn.ToString(),
+	)
+	if err != nil {
+		log.Ctx(ctx).Error().
+			Err(err).
+			Str("staking_tx_hash", stakingTxHashHex).
+			Msg("Failed to fetch stats lock document")
+		return types.NewInternalServiceError(err)
+	}
+
+	if !statsLockDocument.StakerStats {
+		err = s.DbClients.V2DBClient.HandleWithdrawnDelegation(
+			ctx, stakingTxHashHex, stakerPkHex,
+		)
+		if err != nil {
+			if db.IsNotFoundError(err) {
+				return nil
+			}
+			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
+				Msg("error while handling withdrawn delegation")
 			return types.NewInternalServiceError(err)
 		}
 	}
