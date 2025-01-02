@@ -27,10 +27,10 @@ type V2DBClient interface {
 	SubtractStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
-	HandleWithdrawableDelegation(
+	HandleWithdrawableDelegationStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string,
 	) error
-	HandleWithdrawnDelegation(
+	HandleWithdrawnDelegationStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string,
 	) error
 	IncrementFinalityProviderStats(

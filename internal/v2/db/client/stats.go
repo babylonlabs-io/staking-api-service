@@ -239,9 +239,9 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 	return v2dbclient.updateStakerStats(ctx, types.Unbonded.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
-// HandleWithdrawableDelegation increments the withdrawable stats for the given staking tx hash
+// HandleWithdrawableDelegationStakerStats increments the withdrawable delegations count for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) HandleWithdrawableDelegation(
+func (v2dbclient *V2Database) HandleWithdrawableDelegationStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string,
 ) error {
 	upsertUpdate := bson.M{
@@ -252,9 +252,10 @@ func (v2dbclient *V2Database) HandleWithdrawableDelegation(
 	return v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
-// HandleWithdrawnDelegation decrements the withdrawable stats and increments the withdrawn stats for the given staking tx hash
+// HandleWithdrawnDelegationStakerStats decrements the withdrawable delegations count and
+// increments the withdrawn delegations count for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) HandleWithdrawnDelegation(
+func (v2dbclient *V2Database) HandleWithdrawnDelegationStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string,
 ) error {
 	upsertUpdate := bson.M{
