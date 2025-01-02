@@ -255,7 +255,7 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 // HandleWithdrawntakerStats decrements the withdrawable delegations count and
 // increments the withdrawn delegations count for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) HandleWithdrawntakerStats(
+func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string,
 ) error {
 	upsertUpdate := bson.M{
