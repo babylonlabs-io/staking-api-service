@@ -1322,6 +1322,18 @@ const docTemplate = `{
                 },
                 "staker_pk_hex": {
                     "type": "string"
+                },
+                "withdrawable_delegations": {
+                    "type": "integer"
+                },
+                "withdrawable_tvl": {
+                    "type": "integer"
+                },
+                "withdrawn_delegations": {
+                    "type": "integer"
+                },
+                "withdrawn_tvl": {
+                    "type": "integer"
                 }
             }
         },
