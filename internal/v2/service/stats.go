@@ -139,6 +139,11 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 		}
 	}
 
+	log.Debug().
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Str("stakerPkHex", stakerPkHex).
+		Msg("Finished processing active delegation stats")
+
 	return nil
 }
 
@@ -268,6 +273,11 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 		}
 	}
 
+	log.Debug().
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Str("stakerPkHex", stakerPkHex).
+		Msg("Finished processing withdrawable delegation stats")
+
 	return nil
 }
 
@@ -307,6 +317,11 @@ func (s *V2Service) ProcessWithdrawnDelegationStats(
 			return types.NewInternalServiceError(err)
 		}
 	}
+
+	log.Debug().
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Str("stakerPkHex", stakerPkHex).
+		Msg("Finished processing withdrawn delegation stats")
 
 	return nil
 }
