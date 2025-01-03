@@ -223,7 +223,6 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 			"withdrawable_delegations": 0,
 			"withdrawn_tvl":            0,
 			"withdrawn_delegations":    0,
-			"total_delegations":        1,
 		},
 	}
 	return v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
