@@ -220,7 +220,7 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 			"active_tvl":               int64(amount),
 			"active_delegations":       1,
 			"withdrawable_tvl":         0,
-			"withdrawable_delegations": 1,
+			"withdrawable_delegations": 0,
 			"withdrawn_tvl":            0,
 			"withdrawn_delegations":    0,
 			"total_delegations":        1,
