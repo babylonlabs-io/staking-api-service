@@ -39,7 +39,7 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 
 	// Default sort by start_height for stable sorting
 	options := options.Find().SetSort(bson.D{
-		{Key: "start_height", Value: -1},
+		{Key: "btc_delegation_created_bbn_block.height", Value: -1},
 		{Key: "_id", Value: 1},
 	})
 
@@ -55,13 +55,13 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 		filter = bson.M{
 			"$or": []bson.M{
 				{
-					"staker_btc_pk_hex": stakerPKHex,
-					"start_height":      bson.M{"$lt": decodedToken.StartHeight},
+					"staker_btc_pk_hex":                       stakerPKHex,
+					"btc_delegation_created_bbn_block.height": bson.M{"$lt": decodedToken.StartHeight},
 				},
 				{
-					"staker_btc_pk_hex": stakerPKHex,
-					"start_height":      decodedToken.StartHeight,
-					"_id":               bson.M{"$gt": decodedToken.StakingTxHashHex},
+					"staker_btc_pk_hex":                       stakerPKHex,
+					"btc_delegation_created_bbn_block.height": decodedToken.StartHeight,
+					"_id": bson.M{"$gt": decodedToken.StakingTxHashHex},
 				},
 			},
 		}
