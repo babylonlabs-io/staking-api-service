@@ -18,9 +18,13 @@ type OverallStatsPublic struct {
 }
 
 type StakerStatsPublic struct {
-	StakerPkHex       string `json:"staker_pk_hex"`
-	ActiveTvl         int64  `json:"active_tvl"`
-	ActiveDelegations int64  `json:"active_delegations"`
+	StakerPkHex             string `json:"staker_pk_hex"`
+	ActiveTvl               int64  `json:"active_tvl"`
+	ActiveDelegations       int64  `json:"active_delegations"`
+	WithdrawableTvl         int64  `json:"withdrawable_tvl"`
+	WithdrawableDelegations int64  `json:"withdrawable_delegations"`
+	WithdrawnTvl            int64  `json:"withdrawn_tvl"`
+	WithdrawnDelegations    int64  `json:"withdrawn_delegations"`
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
@@ -68,9 +72,13 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 	}
 
 	return &StakerStatsPublic{
-		StakerPkHex:       stakerStats.StakerPkHex,
-		ActiveTvl:         stakerStats.ActiveTvl,
-		ActiveDelegations: stakerStats.ActiveDelegations,
+		StakerPkHex:             stakerStats.StakerPkHex,
+		ActiveTvl:               stakerStats.ActiveTvl,
+		ActiveDelegations:       stakerStats.ActiveDelegations,
+		WithdrawableTvl:         stakerStats.WithdrawableTvl,
+		WithdrawableDelegations: stakerStats.WithdrawableDelegations,
+		WithdrawnTvl:            stakerStats.WithdrawnTvl,
+		WithdrawnDelegations:    stakerStats.WithdrawnDelegations,
 	}, nil
 }
 

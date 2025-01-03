@@ -29,9 +29,13 @@ type V2OverallStatsDocument struct {
 }
 
 type V2StakerStatsDocument struct {
-	StakerPkHex       string `bson:"_id"`
-	ActiveTvl         int64  `bson:"active_tvl"`
-	ActiveDelegations int64  `bson:"active_delegations"`
+	StakerPkHex             string `bson:"_id"`
+	ActiveTvl               int64  `bson:"active_tvl"`
+	ActiveDelegations       int64  `bson:"active_delegations"`
+	WithdrawableTvl         int64  `bson:"withdrawable_tvl"`
+	WithdrawableDelegations int64  `bson:"withdrawable_delegations"`
+	WithdrawnTvl            int64  `bson:"withdrawn_tvl"`
+	WithdrawnDelegations    int64  `bson:"withdrawn_delegations"`
 }
 
 type V2FinalityProviderStatsDocument struct {
