@@ -117,7 +117,7 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 
 	// Define the work to be done in the transaction
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonded.ToString(), "overall_stats")
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonding.ToString(), "overall_stats")
 		if err != nil {
 			return nil, err
 		}
@@ -240,7 +240,7 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 			"active_delegations": -1,
 		},
 	}
-	return v2dbclient.updateStakerStats(ctx, types.Unbonded.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	return v2dbclient.updateStakerStats(ctx, types.Unbonding.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
 // HandleWithdrawableStakerStats increments the withdrawable delegations count for the given staking tx hash
@@ -395,7 +395,7 @@ func (v2dbclient *V2Database) SubtractFinalityProviderStats(
 
 	return v2dbclient.updateFinalityProviderStats(
 		ctx,
-		types.Unbonded.ToString(),
+		types.Unbonding.ToString(),
 		stakingTxHashHex,
 		operations,
 	)
