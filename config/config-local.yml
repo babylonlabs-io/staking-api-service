@@ -15,7 +15,6 @@ staking-db:
   address: "mongodb://localhost:27017/?directConnection=true"
   db-name: staking-api-service
   max-pagination-limit: 10
-  db-batch-size-limit: 100
   logical-shard-count: 2
 indexer-db:
   username: root
@@ -23,7 +22,6 @@ indexer-db:
   address: "mongodb://localhost:27019/?directConnection=true"
   db-name: babylon-staking-indexer
   max-pagination-limit: 10
-  db-batch-size-limit: 100
 queue:
   queue_user: user # can be replaced by values in .env file
   queue_password: password
