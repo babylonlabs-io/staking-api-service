@@ -272,17 +272,17 @@ func (_m *V2DBClient) GetStakerStats(ctx context.Context, stakerPKHex string) (*
 	return r0, r1
 }
 
-// HandleWithdrawableStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
-func (_m *V2DBClient) HandleWithdrawableStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
-	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex)
+// HandleWithdrawableStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, amount
+func (_m *V2DBClient) HandleWithdrawableStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, amount)
 
 	if len(ret) == 0 {
 		panic("no return value specified for HandleWithdrawableStakerStats")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, stakingTxHashHex, stakerPkHex)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, amount)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -290,17 +290,17 @@ func (_m *V2DBClient) HandleWithdrawableStakerStats(ctx context.Context, staking
 	return r0
 }
 
-// HandleWithdrawnStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex
-func (_m *V2DBClient) HandleWithdrawnStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string) error {
-	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex)
+// HandleWithdrawnStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, amount
+func (_m *V2DBClient) HandleWithdrawnStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, amount)
 
 	if len(ret) == 0 {
 		panic("no return value specified for HandleWithdrawnStakerStats")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, stakingTxHashHex, stakerPkHex)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, amount)
 	} else {
 		r0 = ret.Error(0)
 	}

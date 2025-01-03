@@ -219,7 +219,9 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 		"$inc": bson.M{
 			"active_tvl":               int64(amount),
 			"active_delegations":       1,
-			"withdrawable_delegations": 0,
+			"withdrawable_tvl":         0,
+			"withdrawable_delegations": 1,
+			"withdrawn_tvl":            0,
 			"withdrawn_delegations":    0,
 			"total_delegations":        1,
 		},
@@ -244,10 +246,11 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 // HandleWithdrawableStakerStats increments the withdrawable delegations count for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string,
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
+			"withdrawable_tvl":         int64(amount),
 			"withdrawable_delegations": 1,
 		},
 	}
@@ -258,11 +261,13 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 // increments the withdrawn delegations count for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string,
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
+			"withdrawable_tvl":         -int64(amount),
 			"withdrawable_delegations": -1,
+			"withdrawn_tvl":            int64(amount),
 			"withdrawn_delegations":    1,
 		},
 	}

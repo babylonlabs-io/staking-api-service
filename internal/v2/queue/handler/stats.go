@@ -84,6 +84,7 @@ func (h *V2QueueHandler) WithdrawableStakingHandler(ctx context.Context, message
 		ctx,
 		withdrawableStakingEvent.StakingTxHashHex,
 		withdrawableStakingEvent.StakerBtcPkHex,
+		withdrawableStakingEvent.StakingAmount,
 	)
 	if statsErr != nil {
 		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process staking stats calculation")
@@ -106,6 +107,7 @@ func (h *V2QueueHandler) WithdrawnStakingHandler(ctx context.Context, messageBod
 		ctx,
 		withdrawnStakingEvent.StakingTxHashHex,
 		withdrawnStakingEvent.StakerBtcPkHex,
+		withdrawnStakingEvent.StakingAmount,
 	)
 	if statsErr != nil {
 		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process staking stats calculation")
