@@ -217,6 +217,10 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(ctx context.Context, stak
 	}
 
 	if !statsLockDocument.StakerStats {
+		log.Debug().
+			Str("stakingTxHashHex", stakingTxHashHex).
+			Str("stakerPkHex", stakerPkHex).
+			Msg("Handling withdrawable staker stats")
 		err = s.DbClients.V2DBClient.HandleWithdrawableStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex,
 		)
@@ -248,6 +252,10 @@ func (s *V2Service) ProcessWithdrawnDelegationStats(ctx context.Context, staking
 	}
 
 	if !statsLockDocument.StakerStats {
+		log.Debug().
+			Str("stakingTxHashHex", stakingTxHashHex).
+			Str("stakerPkHex", stakerPkHex).
+			Msg("Handling withdrawn staker stats")
 		err = s.DbClients.V2DBClient.HandleWithdrawnStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex,
 		)
