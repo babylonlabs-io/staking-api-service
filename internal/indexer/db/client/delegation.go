@@ -39,7 +39,8 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 
 	// Default sort by start_height for stable sorting
 	options := options.Find().SetSort(bson.D{
-		{Key: "start_height", Value: 1},
+		{Key: "start_height", Value: -1},
+		{Key: "_id", Value: 1},
 	})
 
 	// Decode the pagination token if it exists
@@ -51,10 +52,18 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 			}
 		}
 
-		// Add start_height filter while maintaining the stakingTxHashHex filter
 		filter = bson.M{
-			"staker_btc_pk_hex": stakerPKHex,
-			"start_height":      bson.M{"$gt": decodedToken.StartHeight},
+			"$or": []bson.M{
+				{
+					"staker_btc_pk_hex": stakerPKHex,
+					"start_height":      bson.M{"$lt": decodedToken.StartHeight},
+				},
+				{
+					"staker_btc_pk_hex": stakerPKHex,
+					"start_height":      decodedToken.StartHeight,
+					"_id":               bson.M{"$gt": decodedToken.StakingTxHashHex},
+				},
+			},
 		}
 	}
 
