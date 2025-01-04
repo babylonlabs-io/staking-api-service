@@ -245,7 +245,7 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
 		stakingTxHashHex,
-		types.Withdrawable.ToString(), // use same state for both slashed and unbonding
+		types.Withdrawable.ToString(),
 	)
 	if err != nil {
 		log.Ctx(ctx).Error().
@@ -254,6 +254,12 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 			Msg("Failed to fetch stats lock document")
 		return types.NewInternalServiceError(err)
 	}
+
+	log.Debug().
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Str("stakerPkHex", stakerPkHex).
+		Bool("stakerStats", statsLockDocument.StakerStats).
+		Msg("Processing withdrawable stats")
 
 	if !statsLockDocument.StakerStats {
 		log.Debug().
@@ -264,13 +270,21 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
 		)
 		if err != nil {
+			log.Error().
+				Err(err).
+				Str("stakingTxHashHex", stakingTxHashHex).
+				Str("stakerPkHex", stakerPkHex).
+				Msg("error while handling withdrawable staker stats")
 			if db.IsNotFoundError(err) {
 				return nil
 			}
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while incrementing staker stats")
 			return types.NewInternalServiceError(err)
 		}
+	} else {
+		log.Warn().
+			Str("stakingTxHashHex", stakingTxHashHex).
+			Str("stakerPkHex", stakerPkHex).
+			Msg("Found existing stats lock document for withdrawable stats - THIS SHOULD NOT HAPPEN")
 	}
 
 	log.Debug().
