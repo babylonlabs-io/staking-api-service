@@ -11,6 +11,7 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
+	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -253,7 +254,27 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 			"withdrawable_delegations": 1,
 		},
 	}
-	return v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+
+	err := v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	log.Debug().
+		Err(err).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Str("stakerPkHex", stakerPkHex).
+		Str("amount", fmt.Sprintf("%d", amount)).
+		Msg("Finished handling withdrawable staker stats")
+	if err != nil {
+		return err
+	}
+
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling withdrawable")
+	return nil
 }
 
 // HandleWithdrawntakerStats decrements the withdrawable delegations count and
@@ -270,7 +291,26 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 			"withdrawn_delegations":    1,
 		},
 	}
-	return v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	log.Debug().
+		Err(err).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Str("stakerPkHex", stakerPkHex).
+		Str("amount", fmt.Sprintf("%d", amount)).
+		Msg("Finished handling withdrawn staker stats")
+	if err != nil {
+		return err
+	}
+
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling withdrawn")
+	return nil
 }
 
 func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {
