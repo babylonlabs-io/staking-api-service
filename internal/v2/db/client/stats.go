@@ -248,24 +248,61 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
-	upsertUpdate := bson.M{
-		"$inc": bson.M{
-			"withdrawable_tvl":         int64(amount),
-			"withdrawable_delegations": 1,
-		},
+	session, err := v2dbclient.Client.StartSession()
+	if err != nil {
+		return err
+	}
+	defer session.EndSession(ctx)
+
+	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// Get collection references inside transaction
+		stakerStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
+
+		// 1. First lock the withdrawable state (prevents duplicate processing)
+		if err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Withdrawable.ToString(), "staker_stats"); err != nil {
+			return nil, err
+		}
+
+		// 2. Try to lock active state - if we can't lock it, it means it wasn't active
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonding.ToString(), "staker_stats")
+		wasUnbonding := (err == nil)
+
+		var update bson.M
+		if wasUnbonding {
+			// Was in active state, need to decrement active and increment withdrawable
+			update = bson.M{
+				"$inc": bson.M{
+					"active_tvl":               -int64(amount),
+					"active_delegations":       -1,
+					"withdrawable_tvl":         int64(amount),
+					"withdrawable_delegations": 1,
+				},
+			}
+		} else {
+			// Direct to withdrawable (from some other state)
+			update = bson.M{
+				"$inc": bson.M{
+					"withdrawable_tvl":         int64(amount),
+					"withdrawable_delegations": 1,
+				},
+			}
+		}
+
+		_, err = stakerStatsClient.UpdateOne(
+			sessCtx,
+			bson.M{"_id": stakerPkHex},
+			update,
+			options.Update().SetUpsert(true),
+		)
+		return nil, err
 	}
 
-	err := v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
-	log.Debug().
-		Err(err).
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Str("stakerPkHex", stakerPkHex).
-		Str("amount", fmt.Sprintf("%d", amount)).
-		Msg("Finished handling withdrawable staker stats")
+	_, err = session.WithTransaction(ctx, transactionWork)
 	if err != nil {
 		return err
 	}
 
+	// Log the final stats
 	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
 	if err != nil {
 		return err
@@ -283,21 +320,54 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
-	upsertUpdate := bson.M{
-		"$inc": bson.M{
-			"withdrawable_tvl":         -int64(amount),
-			"withdrawable_delegations": -1,
-			"withdrawn_tvl":            int64(amount),
-			"withdrawn_delegations":    1,
-		},
+	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
+	session, err := v2dbclient.Client.StartSession()
+	if err != nil {
+		return err
 	}
-	err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
-	log.Debug().
-		Err(err).
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Str("stakerPkHex", stakerPkHex).
-		Str("amount", fmt.Sprintf("%d", amount)).
-		Msg("Finished handling withdrawn staker stats")
+	defer session.EndSession(ctx)
+
+	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// 1. First lock the withdrawn state (prevents duplicate processing)
+		if err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Withdrawn.ToString(), "staker_stats"); err != nil {
+			return nil, err
+		}
+
+		// 2. Try to lock withdrawable state - if we can't lock it, it means it's already true
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Withdrawable.ToString(), "staker_stats")
+		wasWithdrawable := (err == nil)
+
+		var update bson.M
+		if wasWithdrawable {
+			// Was in withdrawable state, need to decrement
+			update = bson.M{
+				"$inc": bson.M{
+					"withdrawable_tvl":         -int64(amount),
+					"withdrawable_delegations": -1,
+					"withdrawn_tvl":            int64(amount),
+					"withdrawn_delegations":    1,
+				},
+			}
+		} else {
+			// Direct to withdrawn
+			update = bson.M{
+				"$inc": bson.M{
+					"withdrawn_tvl":         int64(amount),
+					"withdrawn_delegations": 1,
+				},
+			}
+		}
+
+		_, err = client.UpdateOne(
+			sessCtx,
+			bson.M{"_id": stakerPkHex},
+			update,
+			options.Update().SetUpsert(true),
+		)
+		return nil, err
+	}
+
+	_, err = session.WithTransaction(ctx, transactionWork)
 	if err != nil {
 		return err
 	}
