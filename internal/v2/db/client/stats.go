@@ -226,7 +226,22 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 			"withdrawn_delegations":    0,
 		},
 	}
-	return v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	err := v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	if err != nil {
+		return err
+	}
+
+	// Log the final stats
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling active")
+	return nil
 }
 
 // SubtractStakerStats decrements the staker stats for the given staking tx hash
@@ -240,7 +255,23 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 			"active_delegations": -1,
 		},
 	}
-	return v2dbclient.updateStakerStats(ctx, types.Unbonding.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	err := v2dbclient.updateStakerStats(ctx, types.Unbonding.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	if err != nil {
+		return err
+	}
+
+	// Log the final stats
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling unbonding")
+	return nil
 }
 
 // HandleWithdrawableStakerStats increments the withdrawable delegations count for the given staking tx hash
@@ -304,6 +335,7 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	}
 	log.Debug().
 		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
 		Interface("stakerStats", stakerStats).
 		Msg("Staker stats after handling withdrawable")
 	return nil
@@ -378,6 +410,7 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	}
 	log.Debug().
 		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
 		Interface("stakerStats", stakerStats).
 		Msg("Staker stats after handling withdrawn")
 	return nil
