@@ -2,12 +2,12 @@ package utils
 
 import "github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 
-// QualifiedStatesToUnbondingRequest returns the qualified exisitng states to transition to "unbonding_request"
+// QualifiedStatesToUnbondingRequest returns the qualified existing states to transition to "unbonding_request"
 func QualifiedStatesToUnbondingRequest() []types.DelegationState {
 	return []types.DelegationState{types.Active}
 }
 
-// QualifiedStatesToUnbonding returns the qualified exisitng states to transition to "unbonding"
+// QualifiedStatesToUnbonding returns the qualified existing states to transition to "unbonding"
 // The Active state is allowed to directly transition to Unbonding without the need of UnbondingRequested due to bootstrap usecase
 func QualifiedStatesToUnbonding() []types.DelegationState {
 	return []types.DelegationState{types.Active, types.UnbondingRequested}
@@ -18,7 +18,7 @@ func OutdatedStatesForUnbonding() []types.DelegationState {
 	return []types.DelegationState{types.Unbonding, types.Unbonded, types.Withdrawn}
 }
 
-// QualifiedStatesToUnbonded returns the qualified exisitng states to transition to "unbonded"
+// QualifiedStatesToUnbonded returns the qualified existing states to transition to "unbonded"
 func QualifiedStatesToUnbonded(unbondTxType types.StakingTxType) []types.DelegationState {
 	switch unbondTxType {
 	case types.ActiveTxType:
@@ -35,7 +35,7 @@ func OutdatedStatesForUnbonded() []types.DelegationState {
 	return []types.DelegationState{types.Unbonded, types.Withdrawn}
 }
 
-// QualifiedStatesToWithdrawn returns the qualified exisitng states to transition to "withdrawn"
+// QualifiedStatesToWithdrawn returns the qualified existing states to transition to "withdrawn"
 func QualifiedStatesToWithdraw() []types.DelegationState {
 	return []types.DelegationState{types.Unbonded}
 }
@@ -44,7 +44,7 @@ func OutdatedStatesForWithdraw() []types.DelegationState {
 	return []types.DelegationState{types.Withdrawn}
 }
 
-// QualifiedStatesToTransitioned returns the qualified exisitng states to transition to "transitioned"
+// QualifiedStatesToTransitioned returns the qualified existing states to transition to "transitioned"
 func QualifiedStatesToTransitioned() []types.DelegationState {
 	return []types.DelegationState{types.Active, types.UnbondingRequested}
 }
