@@ -263,29 +263,24 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 			return nil, err
 		}
 
-		// 2. Try to lock active state - if we can't lock it, it means it wasn't active
+		// 2. Try to lock unbonding state - if we can't lock it, it means it was already unbonding
 		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonding.ToString(), "staker_stats")
-		wasUnbonding := (err == nil)
+		shouldUnbond := (err == nil)
 
-		var update bson.M
-		if wasUnbonding {
-			// Was in active state, need to decrement active and increment withdrawable
-			update = bson.M{
-				"$inc": bson.M{
-					"active_tvl":               -int64(amount),
-					"active_delegations":       -1,
-					"withdrawable_tvl":         int64(amount),
-					"withdrawable_delegations": 1,
-				},
-			}
-		} else {
-			// Direct to withdrawable (from some other state)
-			update = bson.M{
-				"$inc": bson.M{
-					"withdrawable_tvl":         int64(amount),
-					"withdrawable_delegations": 1,
-				},
-			}
+		// Common fields that will be incremented in both cases
+		updateFields := bson.M{
+			"withdrawable_tvl":         int64(amount),
+			"withdrawable_delegations": 1,
+		}
+
+		// Add unbonding fields if needed
+		if shouldUnbond {
+			updateFields["active_tvl"] = -int64(amount)
+			updateFields["active_delegations"] = -1
+		}
+
+		update := bson.M{
+			"$inc": updateFields,
 		}
 
 		_, err = stakerStatsClient.UpdateOne(
@@ -335,27 +330,32 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 
 		// 2. Try to lock withdrawable state - if we can't lock it, it means it's already true
 		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Withdrawable.ToString(), "staker_stats")
-		wasWithdrawable := (err == nil)
+		shouldWithdrawable := (err == nil)
 
-		var update bson.M
-		if wasWithdrawable {
-			// Was in withdrawable state, need to decrement
-			update = bson.M{
-				"$inc": bson.M{
-					"withdrawable_tvl":         -int64(amount),
-					"withdrawable_delegations": -1,
-					"withdrawn_tvl":            int64(amount),
-					"withdrawn_delegations":    1,
-				},
-			}
-		} else {
-			// Direct to withdrawn
-			update = bson.M{
-				"$inc": bson.M{
-					"withdrawn_tvl":         int64(amount),
-					"withdrawn_delegations": 1,
-				},
-			}
+		// 3. Try to lock unbonding state - if we can't lock it, it means it's already true
+		err = v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonding.ToString(), "staker_stats")
+		shouldUnbond := (err == nil)
+
+		// Common fields that will be incremented in both cases
+		updateFields := bson.M{
+			"withdrawn_tvl":         int64(amount),
+			"withdrawn_delegations": 1,
+		}
+
+		// Add withdrawable fields if needed
+		if shouldWithdrawable {
+			updateFields["withdrawable_tvl"] = -int64(amount)
+			updateFields["withdrawable_delegations"] = -1
+		}
+
+		// Add unbonding fields if needed
+		if shouldUnbond {
+			updateFields["active_tvl"] = -int64(amount)
+			updateFields["active_delegations"] = -1
+		}
+
+		update := bson.M{
+			"$inc": updateFields,
 		}
 
 		_, err = client.UpdateOne(
