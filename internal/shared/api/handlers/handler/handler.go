@@ -174,6 +174,29 @@ func ParseStateFilterQuery(
 	return stateEnums, nil
 }
 
+// ParseBooleanQuery parses the boolean query and returns the boolean value
+// If the boolean is not provided, it returns false
+// If the boolean is not valid, it returns an error
+func ParseBooleanQuery(
+	r *http.Request, queryName string, isOptional bool,
+) (bool, *types.Error) {
+	value := r.URL.Query().Get(queryName)
+	if value == "" {
+		if isOptional {
+			return false, nil
+		}
+		return false, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, queryName+" is required",
+		)
+	}
+	if value != "true" && value != "false" {
+		return false, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, "invalid "+queryName,
+		)
+	}
+	return value == "true", nil
+}
+
 func ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
 	// max length of a public key in hex and the max length of a finality provider moniker is 64
 	const maxSearchQueryLength = 64

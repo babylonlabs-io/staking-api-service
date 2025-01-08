@@ -633,17 +633,11 @@ paths:
         name: staker_btc_pk
         required: true
         type: string
-      - description: Filter by state
-        enum:
-        - active
-        - unbonding_requested
-        - unbonding
-        - unbonded
-        - withdrawn
-        - transitioned
+      - description: Only return delegations with pending actions which include active,
+          unbonding, unbonding_requested, unbonded
         in: query
-        name: state
-        type: string
+        name: pending_action
+        type: boolean
       - description: Pagination key to fetch the next page of delegations
         in: query
         name: pagination_key

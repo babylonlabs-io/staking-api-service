@@ -190,17 +190,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "enum": [
-                            "active",
-                            "unbonding_requested",
-                            "unbonding",
-                            "unbonded",
-                            "withdrawn",
-                            "transitioned"
-                        ],
-                        "type": "string",
-                        "description": "Filter by state",
-                        "name": "state",
+                        "type": "boolean",
+                        "description": "Only return delegations with pending actions which include active, unbonding, unbonding_requested, unbonded",
+                        "name": "pending_action",
                         "in": "query"
                     },
                     {
