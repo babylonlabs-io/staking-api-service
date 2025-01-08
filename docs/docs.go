@@ -1403,12 +1403,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "2.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Babylon Staking API",
-	Description:      "The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.\nYour access and use is governed by the API Access License linked to below.",
+	Description:      "The Babylon Staking API offers information about the state of the Babylon BTC Staking system.\nYour access and use is governed by the API Access License linked to below.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
