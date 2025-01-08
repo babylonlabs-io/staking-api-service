@@ -27,8 +27,8 @@ func init() {
 }
 
 // @title           Babylon Staking API
-// @version         1.0
-// @description     The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.
+// @version         2.0
+// @description     The Babylon Staking API offers information about the state of the Babylon BTC Staking system.
 // @description     Your access and use is governed by the API Access License linked to below.
 // @license.name    API Access License
 // @license.url     https://docs.babylonlabs.io/assets/files/api-access-license.pdf
