@@ -308,17 +308,17 @@ func (_m *V2DBClient) HandleUnbondingStakerStats(ctx context.Context, stakingTxH
 	return r0
 }
 
-// HandleWithdrawableStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, amount
-func (_m *V2DBClient) HandleWithdrawableStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string, amount uint64) error {
-	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, amount)
+// HandleWithdrawableStakerStats provides a mock function with given fields: ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory
+func (_m *V2DBClient) HandleWithdrawableStakerStats(ctx context.Context, stakingTxHashHex string, stakerPkHex string, amount uint64, stateHistory []string) error {
+	ret := _m.Called(ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory)
 
 	if len(ret) == 0 {
 		panic("no return value specified for HandleWithdrawableStakerStats")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, uint64) error); ok {
-		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, amount)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, uint64, []string) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory)
 	} else {
 		r0 = ret.Error(0)
 	}

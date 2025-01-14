@@ -272,7 +272,7 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 			Str("stakerPkHex", stakerPkHex).
 			Msg("Handling withdrawable staker stats")
 		err = s.DbClients.V2DBClient.HandleWithdrawableStakerStats(
-			ctx, stakingTxHashHex, stakerPkHex, amount,
+			ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory,
 		)
 		if err != nil {
 			log.Error().
