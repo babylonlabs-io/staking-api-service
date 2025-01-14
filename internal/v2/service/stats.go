@@ -113,7 +113,7 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	}
 
 	if !statsLockDocument.StakerStats {
-		err = s.DbClients.V2DBClient.IncrementStakerStats(
+		err = s.DbClients.V2DBClient.HandleActiveStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
 		)
 		if err != nil {
@@ -197,7 +197,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 			Str("stakerPkHex", stakerPkHex).
 			Str("event_type", "unbonding").
 			Msg("Subtracting staker stats")
-		err = s.DbClients.V2DBClient.SubtractStakerStats(
+		err = s.DbClients.V2DBClient.HandleUnbondingStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
 		)
 		if err != nil {

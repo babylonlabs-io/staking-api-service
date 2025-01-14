@@ -212,9 +212,9 @@ func constructStatsLockId(stakingTxHashHex, state string) string {
 	return stakingTxHashHex + ":" + state
 }
 
-// IncrementStakerStats increments the staker stats for the given staking tx hash
+// HandleActiveStakerStats handles the active event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) IncrementStakerStats(
+func (v2dbclient *V2Database) HandleActiveStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
 	upsertUpdate := bson.M{
@@ -241,9 +241,9 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 	return nil
 }
 
-// SubtractStakerStats decrements the staker stats for the given staking tx hash
+// HandleUnbondingStakerStats handles the unbonding event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) SubtractStakerStats(
+func (v2dbclient *V2Database) HandleUnbondingStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
 	// It is certain the active event is emitted by the indexer
@@ -275,7 +275,7 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 	return nil
 }
 
-// HandleWithdrawableStakerStats increments the withdrawable delegations count for the given staking tx hash
+// HandleWithdrawableStakerStats handles the withdrawable event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
@@ -308,8 +308,7 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	return nil
 }
 
-// HandleWithdrawntakerStats decrements the withdrawable delegations count and
-// increments the withdrawn delegations count for the given staking tx hash
+// HandleWithdrawnStakerStats handles the withdrawn event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
