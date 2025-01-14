@@ -91,6 +91,8 @@ github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250102114800-e28993426
 github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250102114800-e2899342683b/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
 github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250102124054-14d01f4accfb h1:+lWIl/RENFXQRnc8bVmU/RwUfgbeqd+UAmFXLDeAsCk=
 github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250102124054-14d01f4accfb/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
+github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250114081836-51b7de172499 h1:prWmna9fAzHjpej2pGfcKtIkT0EDYB1mYEfMl/OdJIk=
+github.com/babylonlabs-io/staking-queue-client v0.4.7-0.20250114081836-51b7de172499/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
