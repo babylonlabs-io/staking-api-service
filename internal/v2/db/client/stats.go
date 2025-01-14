@@ -360,7 +360,10 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		statsUpdates["unbonding_tvl"] = -int64(amount)
 		statsUpdates["unbonding_delegations"] = -1
 	case hasWithdrawableState && !hasUnbondingState:
-		return fmt.Errorf("invalid state history: withdrawable state found without preceding unbonding state")
+		statsUpdates["withdrawable_tvl"] = -int64(amount)
+		statsUpdates["withdrawable_delegations"] = -1
+		statsUpdates["active_tvl"] = -int64(amount)
+		statsUpdates["active_delegations"] = -1
 	}
 
 	// Apply the stats updates atomically
