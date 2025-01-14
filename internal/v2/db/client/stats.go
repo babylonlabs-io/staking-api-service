@@ -219,14 +219,8 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 ) error {
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
-			"active_tvl":               int64(amount),
-			"active_delegations":       1,
-			"unbonding_tvl":            0,
-			"unbonding_delegations":    0,
-			"withdrawable_tvl":         0,
-			"withdrawable_delegations": 0,
-			"withdrawn_tvl":            0,
-			"withdrawn_delegations":    0,
+			"active_tvl":         int64(amount),
+			"active_delegations": 1,
 		},
 	}
 	err := v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
