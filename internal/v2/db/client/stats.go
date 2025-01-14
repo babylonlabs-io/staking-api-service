@@ -313,8 +313,8 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 ) error {
-	if len(stateHistory) < 2 {
-		return fmt.Errorf("state history should have at least 2 states")
+	if len(stateHistory) < 1 {
+		return fmt.Errorf("state history should have at least 1 state")
 	}
 
 	statsUpdates := bson.M{
@@ -322,15 +322,36 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		"withdrawn_delegations": 1,
 	}
 
-	// When the last state is withdrawable, it indicates that a withdrawable event was emitted by the indexer
-	// and will be processed by the API service, resulting in an increment of withdrawable stats.
-	// Therefore, we need to decrement the withdrawable stats here to avoid double counting.
-	lastState := strings.ToLower(stateHistory[len(stateHistory)-1])
-	if lastState == types.Withdrawable.ToString() {
-		// if the last state is withdrawable, this means the withdrawable event was/will be processed
-		// so we need to decrement the withdrawable stats
+	isWithdrawableEventEmitted := false
+	isUnbondingEventEmitted := false
+
+	for _, state := range stateHistory {
+		// If we have withdrawable in the state history, it means the withdrawable event was emitted by the indexer
+		// and will be processed by the API service, resulting in an increment of withdrawable stats.
+		if strings.ToLower(state) == types.Withdrawable.ToString() {
+			isWithdrawableEventEmitted = true
+		}
+
+		// If we have unbonding in the state history, it means the unbonding event was emitted by the indexer
+		// and will be processed by the API service, resulting in an increment of unbonding stats.
+		if strings.ToLower(state) == types.Unbonding.ToString() {
+			isUnbondingEventEmitted = true
+		}
+	}
+
+	switch {
+	case isWithdrawableEventEmitted && isUnbondingEventEmitted:
 		statsUpdates["withdrawable_tvl"] = -int64(amount)
 		statsUpdates["withdrawable_delegations"] = -1
+	case !isWithdrawableEventEmitted && !isUnbondingEventEmitted:
+		statsUpdates["active_tvl"] = -int64(amount)
+		statsUpdates["active_delegations"] = -1
+	case !isWithdrawableEventEmitted && isUnbondingEventEmitted:
+		statsUpdates["unbonding_tvl"] = -int64(amount)
+		statsUpdates["unbonding_delegations"] = -1
+	case isWithdrawableEventEmitted && !isUnbondingEventEmitted:
+		// if withdrawable exists, unbonding must exist
+		return fmt.Errorf("invalid state history: withdrawable event found without unbonding event")
 	}
 
 	upsertUpdate := bson.M{
