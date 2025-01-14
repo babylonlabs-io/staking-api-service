@@ -21,6 +21,8 @@ type StakerStatsPublic struct {
 	StakerPkHex             string `json:"staker_pk_hex"`
 	ActiveTvl               int64  `json:"active_tvl"`
 	ActiveDelegations       int64  `json:"active_delegations"`
+	UnbondingTvl            int64  `json:"unbonding_tvl"`
+	UnbondingDelegations    int64  `json:"unbonding_delegations"`
 	WithdrawableTvl         int64  `json:"withdrawable_tvl"`
 	WithdrawableDelegations int64  `json:"withdrawable_delegations"`
 	WithdrawnTvl            int64  `json:"withdrawn_tvl"`
@@ -75,6 +77,8 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 		StakerPkHex:             stakerStats.StakerPkHex,
 		ActiveTvl:               stakerStats.ActiveTvl,
 		ActiveDelegations:       stakerStats.ActiveDelegations,
+		UnbondingTvl:            stakerStats.UnbondingTvl,
+		UnbondingDelegations:    stakerStats.UnbondingDelegations,
 		WithdrawableTvl:         stakerStats.WithdrawableTvl,
 		WithdrawableDelegations: stakerStats.WithdrawableDelegations,
 		WithdrawnTvl:            stakerStats.WithdrawnTvl,

@@ -221,6 +221,8 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 		"$inc": bson.M{
 			"active_tvl":               int64(amount),
 			"active_delegations":       1,
+			"unbonding_tvl":            0,
+			"unbonding_delegations":    0,
 			"withdrawable_tvl":         0,
 			"withdrawable_delegations": 0,
 			"withdrawn_tvl":            0,
@@ -250,10 +252,14 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 func (v2dbclient *V2Database) SubtractStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
+	// It is certain the active event is emitted by the indexer
+	// so we need to decrement the active stats
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
-			"active_tvl":         -int64(amount),
-			"active_delegations": -1,
+			"active_tvl":            -int64(amount),
+			"active_delegations":    -1,
+			"unbonding_tvl":         int64(amount),
+			"unbonding_delegations": 1,
 		},
 	}
 	err := v2dbclient.updateStakerStats(ctx, types.Unbonding.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
@@ -280,8 +286,12 @@ func (v2dbclient *V2Database) SubtractStakerStats(
 func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
+	// It is certain that unbonding event is emitted by the indexer
+	// so we need to decrement the unbonding stats
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
+			"unbonding_tvl":            -int64(amount),
+			"unbonding_delegations":    -1,
 			"withdrawable_tvl":         int64(amount),
 			"withdrawable_delegations": 1,
 		},
@@ -314,21 +324,24 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		return fmt.Errorf("state history should have at least 2 states")
 	}
 
-	increments := bson.M{
+	statsUpdates := bson.M{
 		"withdrawn_tvl":         int64(amount),
 		"withdrawn_delegations": 1,
 	}
 
+	// When the last state is withdrawable, it indicates that a withdrawable event was emitted by the indexer
+	// and will be processed by the API service, resulting in an increment of withdrawable stats.
+	// Therefore, we need to decrement the withdrawable stats here to avoid double counting.
 	lastState := strings.ToLower(stateHistory[len(stateHistory)-1])
 	if lastState == types.Withdrawable.ToString() {
 		// if the last state is withdrawable, this means the withdrawable event was/will be processed
 		// so we need to decrement the withdrawable stats
-		increments["withdrawable_tvl"] = -int64(amount)
-		increments["withdrawable_delegations"] = -1
+		statsUpdates["withdrawable_tvl"] = -int64(amount)
+		statsUpdates["withdrawable_delegations"] = -1
 	}
 
 	upsertUpdate := bson.M{
-		"$inc": increments,
+		"$inc": statsUpdates,
 	}
 
 	err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
