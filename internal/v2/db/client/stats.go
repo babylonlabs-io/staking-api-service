@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
@@ -309,8 +310,8 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 ) error {
-	if len(stateHistory) == 0 {
-		return fmt.Errorf("state history is empty")
+	if len(stateHistory) < 2 {
+		return fmt.Errorf("state history should have at least 2 states")
 	}
 
 	increments := bson.M{
@@ -318,7 +319,7 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		"withdrawn_delegations": 1,
 	}
 
-	lastState := stateHistory[len(stateHistory)-1]
+	lastState := strings.ToLower(stateHistory[len(stateHistory)-1])
 	if lastState == types.Withdrawable.ToString() {
 		// if the last state is withdrawable, this means the withdrawable event was/will be processed
 		// so we need to decrement the withdrawable stats
