@@ -278,20 +278,38 @@ func (v2dbclient *V2Database) HandleUnbondingStakerStats(
 // HandleWithdrawableStakerStats handles the withdrawable event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 ) error {
-	// It is certain that unbonding event is emitted by the indexer
-	// so we need to decrement the unbonding stats
-	upsertUpdate := bson.M{
-		"$inc": bson.M{
-			"unbonding_tvl":            -int64(amount),
-			"unbonding_delegations":    -1,
-			"withdrawable_tvl":         int64(amount),
-			"withdrawable_delegations": 1,
-		},
+	if len(stateHistory) < 1 {
+		return fmt.Errorf("state history should have at least 1 state")
 	}
-	err := v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
-	if err != nil {
+
+	statsUpdates := bson.M{
+		"withdrawable_tvl":         int64(amount),
+		"withdrawable_delegations": 1,
+	}
+
+	var hasUnbondingState bool
+	for _, state := range stateHistory {
+		if strings.ToLower(state) == types.Unbonding.ToString() {
+			hasUnbondingState = true
+		}
+	}
+
+	if hasUnbondingState {
+		statsUpdates["unbonding_tvl"] = -int64(amount)
+		statsUpdates["unbonding_delegations"] = -1
+	} else {
+		statsUpdates["active_tvl"] = -int64(amount)
+		statsUpdates["active_delegations"] = -1
+	}
+
+	// Apply the stats updates atomically
+	upsertUpdate := bson.M{
+		"$inc": statsUpdates,
+	}
+
+	if err := v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate); err != nil {
 		return err
 	}
 
@@ -317,19 +335,16 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		return fmt.Errorf("state history should have at least 1 state")
 	}
 
-	// Initialize stats updates with withdrawn stats that will always be incremented
 	statsUpdates := bson.M{
 		"withdrawn_tvl":         int64(amount),
 		"withdrawn_delegations": 1,
 	}
 
-	// Track which state transitions occurred based on history
 	var (
 		hasWithdrawableState bool
 		hasUnbondingState    bool
 	)
 
-	// Analyze state history to determine which transitions occurred
 	for _, state := range stateHistory {
 		switch strings.ToLower(state) {
 		case types.Withdrawable.ToString():
