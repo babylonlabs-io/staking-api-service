@@ -31,7 +31,7 @@ type V2DBClient interface {
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
 	HandleWithdrawnStakerStats(
-		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 	) error
 	IncrementFinalityProviderStats(
 		ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64,

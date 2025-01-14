@@ -241,6 +241,7 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 	stakingTxHashHex,
 	stakerPkHex string,
 	amount uint64,
+	stateHistory []string,
 ) *types.Error {
 	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
@@ -300,6 +301,7 @@ func (s *V2Service) ProcessWithdrawnDelegationStats(
 	stakingTxHashHex,
 	stakerPkHex string,
 	amount uint64,
+	stateHistory []string,
 ) *types.Error {
 	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
@@ -320,7 +322,7 @@ func (s *V2Service) ProcessWithdrawnDelegationStats(
 			Str("stakerPkHex", stakerPkHex).
 			Msg("Handling withdrawn staker stats")
 		err = s.DbClients.V2DBClient.HandleWithdrawnStakerStats(
-			ctx, stakingTxHashHex, stakerPkHex, amount,
+			ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory,
 		)
 		if err != nil {
 			if db.IsNotFoundError(err) {

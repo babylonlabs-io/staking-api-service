@@ -307,79 +307,35 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 // increments the withdrawn delegations count for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 ) error {
-	stakerStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
-	session, err := v2dbclient.Client.StartSession()
-	if err != nil {
-		return err
-	}
-	defer session.EndSession(ctx)
-
-	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		// 1. Create lock documents
-		_, err := v2dbclient.GetOrCreateStatsLock(sessCtx, stakingTxHashHex, types.Withdrawn.ToString())
-		if err != nil {
-			return nil, fmt.Errorf("failed to create withdrawn lock: %w", err)
-		}
-		_, err = v2dbclient.GetOrCreateStatsLock(sessCtx, stakingTxHashHex, types.Withdrawable.ToString())
-		if err != nil {
-			return nil, fmt.Errorf("failed to create withdrawable lock: %w", err)
-		}
-		_, err = v2dbclient.GetOrCreateStatsLock(sessCtx, stakingTxHashHex, types.Unbonding.ToString())
-		if err != nil {
-			return nil, fmt.Errorf("failed to create unbonding lock: %w", err)
-		}
-
-		// 2. First lock the withdrawn state (prevents duplicate processing)
-		if err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Withdrawn.ToString(), "staker_stats"); err != nil {
-			return nil, err
-		}
-
-		// 3. Try to lock withdrawable state - if we can't lock it, it means it's already true
-		err = v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Withdrawable.ToString(), "staker_stats")
-		withdrawableKeyExists := (err != nil)
-
-		// 4. Try to lock unbonding state - if we can't lock it, it means it's already true
-		err = v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonding.ToString(), "staker_stats")
-		unbondingKeyExists := (err != nil)
-
-		// Common fields that will be incremented in both cases
-		updateFields := bson.M{
-			"withdrawn_tvl":         int64(amount),
-			"withdrawn_delegations": 1,
-		}
-
-		// Add withdrawable fields if needed
-		if withdrawableKeyExists {
-			updateFields["withdrawable_tvl"] = -int64(amount)
-			updateFields["withdrawable_delegations"] = -1
-		}
-
-		// Add unbonding fields if needed
-		if !unbondingKeyExists {
-			updateFields["active_tvl"] = -int64(amount)
-			updateFields["active_delegations"] = -1
-		}
-
-		update := bson.M{
-			"$inc": updateFields,
-		}
-
-		_, err = stakerStatsClient.UpdateOne(
-			sessCtx,
-			bson.M{"_id": stakerPkHex},
-			update,
-			options.Update().SetUpsert(true),
-		)
-		return nil, err
+	if len(stateHistory) == 0 {
+		return fmt.Errorf("state history is empty")
 	}
 
-	_, err = session.WithTransaction(ctx, transactionWork)
+	increments := bson.M{
+		"withdrawn_tvl":         int64(amount),
+		"withdrawn_delegations": 1,
+	}
+
+	lastState := stateHistory[len(stateHistory)-1]
+	if lastState == types.Withdrawable.ToString() {
+		// if the last state is withdrawable, this means the withdrawable event was/will be processed
+		// so we need to decrement the withdrawable stats
+		increments["withdrawable_tvl"] = -int64(amount)
+		increments["withdrawable_delegations"] = -1
+	}
+
+	upsertUpdate := bson.M{
+		"$inc": increments,
+	}
+
+	err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 	if err != nil {
 		return err
 	}
 
+	// Log the final stats
 	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
 	if err != nil {
 		return err
