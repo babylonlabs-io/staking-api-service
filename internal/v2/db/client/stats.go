@@ -317,49 +317,58 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		return fmt.Errorf("state history should have at least 1 state")
 	}
 
+	// Initialize stats updates with withdrawn stats that will always be incremented
 	statsUpdates := bson.M{
 		"withdrawn_tvl":         int64(amount),
 		"withdrawn_delegations": 1,
 	}
 
-	isWithdrawableEventEmitted := false
-	isUnbondingEventEmitted := false
+	// Track which state transitions occurred based on history
+	var (
+		hasWithdrawableState bool
+		hasUnbondingState    bool
+	)
 
+	// Analyze state history to determine which transitions occurred
 	for _, state := range stateHistory {
-		// If we have withdrawable in the state history, it means the withdrawable event was emitted by the indexer
-		// and will be processed by the API service, resulting in an increment of withdrawable stats.
-		if strings.ToLower(state) == types.Withdrawable.ToString() {
-			isWithdrawableEventEmitted = true
-		}
-
-		// If we have unbonding in the state history, it means the unbonding event was emitted by the indexer
-		// and will be processed by the API service, resulting in an increment of unbonding stats.
-		if strings.ToLower(state) == types.Unbonding.ToString() {
-			isUnbondingEventEmitted = true
+		switch strings.ToLower(state) {
+		case types.Withdrawable.ToString():
+			hasWithdrawableState = true
+		case types.Unbonding.ToString():
+			hasUnbondingState = true
 		}
 	}
 
+	// Handle stats updates based on state transition history:
+	//
+	// 1. If both withdrawable and unbonding occurred:
+	//    - Only need to decrement withdrawable stats since that was the last state
+	// 2. If neither occurred:
+	//    - Delegation stats were in active state, so decrement active stats
+	// 3. If only unbonding occurred:
+	//    - Delegation stats were in unbonding state, so decrement unbonding stats
+	// 4. If only withdrawable occurred:
+	//    - Invalid state since withdrawable requires unbonding first
 	switch {
-	case isWithdrawableEventEmitted && isUnbondingEventEmitted:
+	case hasWithdrawableState && hasUnbondingState:
 		statsUpdates["withdrawable_tvl"] = -int64(amount)
 		statsUpdates["withdrawable_delegations"] = -1
-	case !isWithdrawableEventEmitted && !isUnbondingEventEmitted:
+	case !hasWithdrawableState && !hasUnbondingState:
 		statsUpdates["active_tvl"] = -int64(amount)
 		statsUpdates["active_delegations"] = -1
-	case !isWithdrawableEventEmitted && isUnbondingEventEmitted:
+	case !hasWithdrawableState && hasUnbondingState:
 		statsUpdates["unbonding_tvl"] = -int64(amount)
 		statsUpdates["unbonding_delegations"] = -1
-	case isWithdrawableEventEmitted && !isUnbondingEventEmitted:
-		// if withdrawable exists, unbonding must exist
-		return fmt.Errorf("invalid state history: withdrawable event found without unbonding event")
+	case hasWithdrawableState && !hasUnbondingState:
+		return fmt.Errorf("invalid state history: withdrawable state found without preceding unbonding state")
 	}
 
+	// Apply the stats updates atomically
 	upsertUpdate := bson.M{
 		"$inc": statsUpdates,
 	}
 
-	err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
-	if err != nil {
+	if err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate); err != nil {
 		return err
 	}
 
