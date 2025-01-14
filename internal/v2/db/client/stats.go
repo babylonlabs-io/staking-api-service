@@ -342,13 +342,14 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	// Handle stats updates based on state transition history:
 	//
 	// 1. If both withdrawable and unbonding occurred:
-	//    - Only need to decrement withdrawable stats since that was the last state
-	// 2. If neither occurred:
-	//    - Delegation stats were in active state, so decrement active stats
-	// 3. If only unbonding occurred:
-	//    - Delegation stats were in unbonding state, so decrement unbonding stats
-	// 4. If only withdrawable occurred:
-	//    - Invalid state since withdrawable requires unbonding first
+	//    - Decrement withdrawable stats since it was the final state before withdrawn
+	// 2. If neither withdrawable nor unbonding occurred:
+	//    - Decrement active stats since delegation was withdrawn directly from active state
+	// 3. If only unbonding occurred (no withdrawable):
+	//    - Decrement unbonding stats since delegation was withdrawn from unbonding state
+	// 4. If only withdrawable occurred (no unbonding):
+	//    - Decrement both withdrawable and active stats since delegation transitioned
+	//      directly from active to withdrawn
 	switch {
 	case hasWithdrawableState && hasUnbondingState:
 		statsUpdates["withdrawable_tvl"] = -int64(amount)
