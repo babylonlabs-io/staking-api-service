@@ -283,11 +283,6 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 			}
 			return types.NewInternalServiceError(err)
 		}
-	} else {
-		log.Warn().
-			Str("stakingTxHashHex", stakingTxHashHex).
-			Str("stakerPkHex", stakerPkHex).
-			Msg("Found existing stats lock document for withdrawable stats - THIS SHOULD NOT HAPPEN")
 	}
 
 	log.Debug().
