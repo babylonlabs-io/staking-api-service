@@ -158,6 +158,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 	stakerPkHex string,
 	fpBtcPkHexes []string,
 	amount uint64,
+	stateHistory []string,
 ) *types.Error {
 	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
@@ -196,21 +197,22 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 			Str("stakingTxHashHex", stakingTxHashHex).
 			Str("stakerPkHex", stakerPkHex).
 			Str("event_type", "unbonding").
-			Msg("Subtracting staker stats")
+			Msg("Handling unbonding staker stats")
+
 		err = s.DbClients.V2DBClient.HandleUnbondingStakerStats(
-			ctx, stakingTxHashHex, stakerPkHex, amount,
+			ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory,
 		)
 		if err != nil {
 			log.Debug().
 				Str("stakingTxHashHex", stakingTxHashHex).
 				Str("stakerPkHex", stakerPkHex).
 				Str("event_type", "unbonding").
-				Msg("Subtracting staker stats")
+				Msg("Handling unbonding staker stats")
 			if db.IsNotFoundError(err) {
 				return nil
 			}
 			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while subtracting staker stats")
+				Msg("error while handling unbonding staker stats")
 			return types.NewInternalServiceError(err)
 		}
 	}

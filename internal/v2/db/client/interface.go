@@ -25,7 +25,7 @@ type V2DBClient interface {
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
 	HandleUnbondingStakerStats(
-		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 	) error
 	HandleWithdrawableStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,

@@ -60,6 +60,7 @@ func (h *V2QueueHandler) UnbondingStakingHandler(ctx context.Context, messageBod
 		unbondingStakingEvent.StakerBtcPkHex,
 		unbondingStakingEvent.FinalityProviderBtcPksHex,
 		unbondingStakingEvent.StakingAmount,
+		unbondingStakingEvent.StateHistory,
 	)
 	if statsErr != nil {
 		log.Ctx(ctx).Error().Err(statsErr).Msg("Failed to process staking stats calculation")

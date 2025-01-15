@@ -244,8 +244,18 @@ func (v2dbclient *V2Database) HandleActiveStakerStats(
 // HandleUnbondingStakerStats handles the unbonding event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) HandleUnbondingStakerStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 ) error {
+	// Check if we should process this state change
+	for _, state := range stateHistory {
+		stateLower := strings.ToLower(state)
+		if stateLower == types.Withdrawn.ToString() || stateLower == types.Withdrawable.ToString() {
+			// This may happen when Active -> Withdrawn -> Slashed or Active -> Withdrawable -> Slashed
+			// Stats already handled by ProcessWithdrawnDelegationStats or ProcessWithdrawableDelegationStats
+			return nil
+		}
+	}
+
 	// It is certain the active event is emitted by the indexer
 	// so we need to decrement the active stats
 	upsertUpdate := bson.M{
