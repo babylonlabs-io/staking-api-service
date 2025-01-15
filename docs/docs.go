@@ -1334,12 +1334,6 @@ const docTemplate = `{
                 },
                 "withdrawable_tvl": {
                     "type": "integer"
-                },
-                "withdrawn_delegations": {
-                    "type": "integer"
-                },
-                "withdrawn_tvl": {
-                    "type": "integer"
                 }
             }
         },

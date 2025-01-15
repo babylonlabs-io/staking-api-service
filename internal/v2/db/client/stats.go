@@ -345,10 +345,8 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		return fmt.Errorf("state history should have at least 1 state")
 	}
 
-	statsUpdates := bson.M{
-		"withdrawn_tvl":         int64(amount),
-		"withdrawn_delegations": 1,
-	}
+	// Initialize empty stats updates map
+	statsUpdates := bson.M{}
 
 	var (
 		hasWithdrawableState bool

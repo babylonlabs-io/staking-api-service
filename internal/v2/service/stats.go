@@ -25,8 +25,6 @@ type StakerStatsPublic struct {
 	UnbondingDelegations    int64  `json:"unbonding_delegations"`
 	WithdrawableTvl         int64  `json:"withdrawable_tvl"`
 	WithdrawableDelegations int64  `json:"withdrawable_delegations"`
-	WithdrawnTvl            int64  `json:"withdrawn_tvl"`
-	WithdrawnDelegations    int64  `json:"withdrawn_delegations"`
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
@@ -81,8 +79,6 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 		UnbondingDelegations:    stakerStats.UnbondingDelegations,
 		WithdrawableTvl:         stakerStats.WithdrawableTvl,
 		WithdrawableDelegations: stakerStats.WithdrawableDelegations,
-		WithdrawnTvl:            stakerStats.WithdrawnTvl,
-		WithdrawnDelegations:    stakerStats.WithdrawnDelegations,
 	}, nil
 }
 

@@ -36,8 +36,6 @@ type V2StakerStatsDocument struct {
 	UnbondingDelegations    int64  `bson:"unbonding_delegations"`
 	WithdrawableTvl         int64  `bson:"withdrawable_tvl"`
 	WithdrawableDelegations int64  `bson:"withdrawable_delegations"`
-	WithdrawnTvl            int64  `bson:"withdrawn_tvl"`
-	WithdrawnDelegations    int64  `bson:"withdrawn_delegations"`
 }
 
 type V2FinalityProviderStatsDocument struct {
