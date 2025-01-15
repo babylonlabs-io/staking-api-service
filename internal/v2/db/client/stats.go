@@ -229,6 +229,7 @@ func (v2dbclient *V2Database) HandleActiveStakerStats(
 	}
 
 	// Log the final stats
+	// TODO: Remove this after testing
 	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
 	if err != nil {
 		return err
@@ -272,6 +273,7 @@ func (v2dbclient *V2Database) HandleUnbondingStakerStats(
 	}
 
 	// Log the final stats
+	// TODO: Remove this after testing
 	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
 	if err != nil {
 		return err
@@ -325,6 +327,7 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	}
 
 	// Log the final stats
+	// TODO: Remove this after testing
 	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
 	if err != nil {
 		return err
@@ -401,6 +404,7 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	}
 
 	// Log the final stats
+	// TODO: Remove this after testing
 	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
 	if err != nil {
 		return err

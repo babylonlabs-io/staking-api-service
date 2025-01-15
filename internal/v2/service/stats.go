@@ -169,11 +169,6 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 		return types.NewInternalServiceError(err)
 	}
 
-	log.Debug().
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Str("stakerPkHex", stakerPkHex).
-		Msg("Processing unbonding delegation stats")
-
 	// Subtract from the finality stats
 	if !statsLockDocument.FinalityProviderStats {
 		err = s.DbClients.V2DBClient.SubtractFinalityProviderStats(
@@ -199,11 +194,6 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory,
 		)
 		if err != nil {
-			log.Debug().
-				Str("stakingTxHashHex", stakingTxHashHex).
-				Str("stakerPkHex", stakerPkHex).
-				Str("event_type", "unbonding").
-				Msg("Handling unbonding staker stats")
 			if db.IsNotFoundError(err) {
 				return nil
 			}
@@ -257,12 +247,6 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 			Msg("Failed to fetch stats lock document")
 		return types.NewInternalServiceError(err)
 	}
-
-	log.Debug().
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Str("stakerPkHex", stakerPkHex).
-		Bool("stakerStats", statsLockDocument.StakerStats).
-		Msg("Processing withdrawable stats")
 
 	if !statsLockDocument.StakerStats {
 		log.Debug().
