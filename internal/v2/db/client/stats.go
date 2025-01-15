@@ -303,6 +303,7 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	for _, state := range stateHistory {
 		if strings.ToLower(state) == types.Unbonding.ToString() {
 			hasUnbondingState = true
+			break
 		}
 	}
 
