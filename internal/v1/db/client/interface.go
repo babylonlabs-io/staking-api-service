@@ -9,6 +9,7 @@ import (
 	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 )
 
+//go:generate mockery --name=V1DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_v1_db_client.go
 type V1DBClient interface {
 	dbclient.DBClient
 	SaveActiveStakingDelegation(
