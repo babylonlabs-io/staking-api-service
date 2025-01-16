@@ -5,6 +5,9 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
+	"slices"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
+	"cmp"
 )
 
 type StakingStatusPublic struct {
@@ -38,6 +41,11 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 		}
 		status = bbnHeight >= s.Cfg.DelegationTransition.AllowListExpirationHeight
 	}
+
+	// sort (asc) babylon params according to their version
+	slices.SortFunc(babylonParams, func(a, b *indexertypes.BbnStakingParams) int {
+		return cmp.Compare(a.Version, b.Version)
+	})
 
 	return &NetworkInfoPublic{
 		StakingStatus: StakingStatusPublic{
