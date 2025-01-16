@@ -8,6 +8,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 )
 
+//go:generate mockery --name=IndexerDBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_indexer_db_client.go
 type IndexerDBClient interface {
 	Ping(ctx context.Context) error
 	// Params
