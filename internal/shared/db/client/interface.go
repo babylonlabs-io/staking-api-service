@@ -6,6 +6,7 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 )
 
+//go:generate mockery --name=DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_db_client.go
 type DBClient interface {
 	Ping(ctx context.Context) error
 	// InsertPkAddressMappings inserts the btc public key and

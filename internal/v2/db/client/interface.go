@@ -7,6 +7,7 @@ import (
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 )
 
+//go:generate mockery --name=V2DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_v2_db_client.go
 type V2DBClient interface {
 	dbclient.DBClient
 	GetOverallStats(ctx context.Context) (*v2dbmodel.V2OverallStatsDocument, error)
