@@ -9,6 +9,7 @@ const (
 	UnbondingRequested DelegationState = "unbonding_requested"
 	Unbonding          DelegationState = "unbonding"
 	Unbonded           DelegationState = "unbonded"
+	Withdrawable       DelegationState = "withdrawable"
 	Withdrawn          DelegationState = "withdrawn"
 	Transitioned       DelegationState = "transitioned"
 )
@@ -27,6 +28,8 @@ func FromStringToDelegationState(s string) (DelegationState, error) {
 		return Unbonding, nil
 	case "unbonded":
 		return Unbonded, nil
+	case "withdrawable":
+		return Withdrawable, nil
 	case "withdrawn":
 		return Withdrawn, nil
 	case "transitioned":

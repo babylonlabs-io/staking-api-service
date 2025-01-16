@@ -18,11 +18,13 @@ import (
 )
 
 type Queues struct {
-	Handlers                    *v2queuehandler.V2QueueHandler
-	processingTimeout           time.Duration
-	maxRetryAttempts            int32
-	ActiveStakingQueueClient    client.QueueClient
-	UnbondingStakingQueueClient client.QueueClient
+	Handlers                       *v2queuehandler.V2QueueHandler
+	processingTimeout              time.Duration
+	maxRetryAttempts               int32
+	ActiveStakingQueueClient       client.QueueClient
+	UnbondingStakingQueueClient    client.QueueClient
+	WithdrawableStakingQueueClient client.QueueClient
+	WithdrawnStakingQueueClient    client.QueueClient
 }
 
 func New(cfg *queueConfig.QueueConfig, service *services.Services) *Queues {
@@ -40,13 +42,29 @@ func New(cfg *queueConfig.QueueConfig, service *services.Services) *Queues {
 		log.Fatal().Err(err).Msg("error while creating UnbondingStakingQueueClient")
 	}
 
+	withdrawableStakingQueueClient, err := client.NewQueueClient(
+		cfg, client.WithdrawableStakingQueueName,
+	)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error while creating WithdrawableStakingQueueClient")
+	}
+
+	withdrawnStakingQueueClient, err := client.NewQueueClient(
+		cfg, client.WithdrawnStakingQueueName,
+	)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error while creating WithdrawnStakingQueueClient")
+	}
+
 	handlers := v2queuehandler.NewV2QueueHandler(service)
 	return &Queues{
-		Handlers:                    handlers,
-		processingTimeout:           cfg.QueueProcessingTimeout,
-		maxRetryAttempts:            cfg.MsgMaxRetryAttempts,
-		ActiveStakingQueueClient:    activeStakingQueueClient,
-		UnbondingStakingQueueClient: unbondingStakingQueueClient,
+		Handlers:                       handlers,
+		processingTimeout:              cfg.QueueProcessingTimeout,
+		maxRetryAttempts:               cfg.MsgMaxRetryAttempts,
+		ActiveStakingQueueClient:       activeStakingQueueClient,
+		UnbondingStakingQueueClient:    unbondingStakingQueueClient,
+		WithdrawableStakingQueueClient: withdrawableStakingQueueClient,
+		WithdrawnStakingQueueClient:    withdrawnStakingQueueClient,
 	}
 }
 
@@ -63,10 +81,19 @@ func (q *Queues) StartReceivingMessages() {
 		q.Handlers.UnbondingStakingHandler, q.Handlers.HandleUnprocessedMessage,
 		q.maxRetryAttempts, q.processingTimeout,
 	)
+	startQueueMessageProcessing(
+		q.WithdrawableStakingQueueClient,
+		q.Handlers.WithdrawableStakingHandler, q.Handlers.HandleUnprocessedMessage,
+		q.maxRetryAttempts, q.processingTimeout,
+	)
+	startQueueMessageProcessing(
+		q.WithdrawnStakingQueueClient,
+		q.Handlers.WithdrawnStakingHandler, q.Handlers.HandleUnprocessedMessage,
+		q.maxRetryAttempts, q.processingTimeout,
+	)
 	// ...add more queues here
 }
 
-// Turn off all message processing
 func (q *Queues) StopReceivingMessages() {
 	activeQueueErr := q.ActiveStakingQueueClient.Stop()
 	if activeQueueErr != nil {
@@ -78,6 +105,18 @@ func (q *Queues) StopReceivingMessages() {
 	if unbondingQueueErr != nil {
 		log.Error().Err(unbondingQueueErr).
 			Str("queueName", q.UnbondingStakingQueueClient.GetQueueName()).
+			Msg("error while stopping queue")
+	}
+	withdrawableQueueErr := q.WithdrawableStakingQueueClient.Stop()
+	if withdrawableQueueErr != nil {
+		log.Error().Err(withdrawableQueueErr).
+			Str("queueName", q.WithdrawableStakingQueueClient.GetQueueName()).
+			Msg("error while stopping queue")
+	}
+	withdrawnQueueErr := q.WithdrawnStakingQueueClient.Stop()
+	if withdrawnQueueErr != nil {
+		log.Error().Err(withdrawnQueueErr).
+			Str("queueName", q.WithdrawnStakingQueueClient.GetQueueName()).
 			Msg("error while stopping queue")
 	}
 	// ...add more queues here
@@ -195,9 +234,11 @@ func (q *Queues) IsConnectionHealthy() error {
 
 	checkQueue("ActiveStakingQueueClient", q.ActiveStakingQueueClient)
 	checkQueue("UnbondingStakingQueueClient", q.UnbondingStakingQueueClient)
+	checkQueue("WithdrawableStakingQueueClient", q.WithdrawableStakingQueueClient)
+	checkQueue("WithdrawnStakingQueueClient", q.WithdrawnStakingQueueClient)
 
 	if len(errorMessages) > 0 {
-		return fmt.Errorf(strings.Join(errorMessages, "; "))
+		return fmt.Errorf("queue health check failed: " + strings.Join(errorMessages, "; "))
 	}
 	return nil
 }
