@@ -21,11 +21,17 @@ type V2DBClient interface {
 	SubtractOverallStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
-	IncrementStakerStats(
+	HandleActiveStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 	) error
-	SubtractStakerStats(
-		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	HandleUnbondingStakerStats(
+		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
+	) error
+	HandleWithdrawableStakerStats(
+		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
+	) error
+	HandleWithdrawnStakerStats(
+		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 	) error
 	IncrementFinalityProviderStats(
 		ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64,

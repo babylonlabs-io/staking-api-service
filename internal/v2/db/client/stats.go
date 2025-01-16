@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
+	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -117,7 +119,7 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 
 	// Define the work to be done in the transaction
 	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonded.ToString(), "overall_stats")
+		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonding.ToString(), "overall_stats")
 		if err != nil {
 			return nil, err
 		}
@@ -210,9 +212,9 @@ func constructStatsLockId(stakingTxHashHex, state string) string {
 	return stakingTxHashHex + ":" + state
 }
 
-// IncrementStakerStats increments the staker stats for the given staking tx hash
+// HandleActiveStakerStats handles the active event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) IncrementStakerStats(
+func (v2dbclient *V2Database) HandleActiveStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
 	upsertUpdate := bson.M{
@@ -221,21 +223,198 @@ func (v2dbclient *V2Database) IncrementStakerStats(
 			"active_delegations": 1,
 		},
 	}
-	return v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	err := v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	if err != nil {
+		return err
+	}
+
+	// Log the final stats
+	// TODO: Remove this after testing
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling active")
+	return nil
 }
 
-// SubtractStakerStats decrements the staker stats for the given staking tx hash
+// HandleUnbondingStakerStats handles the unbonding event for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
-func (v2dbclient *V2Database) SubtractStakerStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+func (v2dbclient *V2Database) HandleUnbondingStakerStats(
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 ) error {
+	// Check if we should process this state change
+	for _, state := range stateHistory {
+		stateLower := strings.ToLower(state)
+		if stateLower == types.Withdrawn.ToString() || stateLower == types.Withdrawable.ToString() {
+			// This may happen when Active -> Withdrawn -> Slashed or Active -> Withdrawable -> Slashed
+			// Stats already handled by ProcessWithdrawnDelegationStats or ProcessWithdrawableDelegationStats
+			return nil
+		}
+	}
+
+	// It is certain the active event is emitted by the indexer
+	// so we need to decrement the active stats
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
-			"active_tvl":         -int64(amount),
-			"active_delegations": -1,
+			"active_tvl":            -int64(amount),
+			"active_delegations":    -1,
+			"unbonding_tvl":         int64(amount),
+			"unbonding_delegations": 1,
 		},
 	}
-	return v2dbclient.updateStakerStats(ctx, types.Unbonded.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	err := v2dbclient.updateStakerStats(ctx, types.Unbonding.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
+	if err != nil {
+		return err
+	}
+
+	// Log the final stats
+	// TODO: Remove this after testing
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling unbonding")
+	return nil
+}
+
+// HandleWithdrawableStakerStats handles the withdrawable event for the given staking tx hash
+// This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
+func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
+) error {
+	if len(stateHistory) < 1 {
+		return fmt.Errorf("state history should have at least 1 state")
+	}
+
+	statsUpdates := bson.M{
+		"withdrawable_tvl":         int64(amount),
+		"withdrawable_delegations": 1,
+	}
+
+	var hasUnbondingState bool
+	for _, state := range stateHistory {
+		if strings.ToLower(state) == types.Unbonding.ToString() {
+			hasUnbondingState = true
+			break
+		}
+	}
+
+	if hasUnbondingState {
+		statsUpdates["unbonding_tvl"] = -int64(amount)
+		statsUpdates["unbonding_delegations"] = -1
+	} else {
+		statsUpdates["active_tvl"] = -int64(amount)
+		statsUpdates["active_delegations"] = -1
+	}
+
+	// Apply the stats updates atomically
+	upsertUpdate := bson.M{
+		"$inc": statsUpdates,
+	}
+
+	if err := v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate); err != nil {
+		return err
+	}
+
+	// Log the final stats
+	// TODO: Remove this after testing
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling withdrawable")
+	return nil
+}
+
+// HandleWithdrawnStakerStats handles the withdrawn event for the given staking tx hash
+// This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
+func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
+	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
+) error {
+	if len(stateHistory) < 1 {
+		return fmt.Errorf("state history should have at least 1 state")
+	}
+
+	// Initialize empty stats updates map
+	statsUpdates := bson.M{}
+
+	var (
+		hasWithdrawableState bool
+		hasUnbondingState    bool
+	)
+
+	for _, state := range stateHistory {
+		switch strings.ToLower(state) {
+		case types.Withdrawable.ToString():
+			hasWithdrawableState = true
+		case types.Unbonding.ToString():
+			hasUnbondingState = true
+		}
+	}
+
+	// Handle stats updates based on state transition history:
+	//
+	// 1. If both withdrawable and unbonding occurred:
+	//    - Decrement withdrawable stats since it was the final state before withdrawn
+	// 2. If neither withdrawable nor unbonding occurred:
+	//    - Decrement active stats since delegation was withdrawn directly from active state
+	// 3. If only unbonding occurred (no withdrawable):
+	//    - Decrement unbonding stats since delegation was withdrawn from unbonding state
+	// 4. If only withdrawable occurred (no unbonding):
+	//    - Decrement both withdrawable and active stats since delegation transitioned
+	//      directly from active to withdrawn
+	switch {
+	case hasWithdrawableState && hasUnbondingState:
+		statsUpdates["withdrawable_tvl"] = -int64(amount)
+		statsUpdates["withdrawable_delegations"] = -1
+	case !hasWithdrawableState && !hasUnbondingState:
+		statsUpdates["active_tvl"] = -int64(amount)
+		statsUpdates["active_delegations"] = -1
+	case !hasWithdrawableState && hasUnbondingState:
+		statsUpdates["unbonding_tvl"] = -int64(amount)
+		statsUpdates["unbonding_delegations"] = -1
+	case hasWithdrawableState && !hasUnbondingState:
+		statsUpdates["withdrawable_tvl"] = -int64(amount)
+		statsUpdates["withdrawable_delegations"] = -1
+		statsUpdates["active_tvl"] = -int64(amount)
+		statsUpdates["active_delegations"] = -1
+	}
+
+	// Apply the stats updates atomically
+	upsertUpdate := bson.M{
+		"$inc": statsUpdates,
+	}
+
+	if err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate); err != nil {
+		return err
+	}
+
+	// Log the final stats
+	// TODO: Remove this after testing
+	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
+	if err != nil {
+		return err
+	}
+	log.Debug().
+		Str("stakerPkHex", stakerPkHex).
+		Str("stakingTxHashHex", stakingTxHashHex).
+		Interface("stakerStats", stakerStats).
+		Msg("Staker stats after handling withdrawn")
+	return nil
 }
 
 func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {
@@ -359,7 +538,7 @@ func (v2dbclient *V2Database) SubtractFinalityProviderStats(
 
 	return v2dbclient.updateFinalityProviderStats(
 		ctx,
-		types.Unbonded.ToString(),
+		types.Unbonding.ToString(),
 		stakingTxHashHex,
 		operations,
 	)
