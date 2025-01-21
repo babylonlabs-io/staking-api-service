@@ -188,7 +188,7 @@ func (s *V1Service) GetOverallStats(
 
 	// Only fetch BTC price if ExternalAPIs are configured
 	var btcPrice *float64
-	if s.cfg.ExternalAPIs != nil && s.cfg.ExternalAPIs.CoinMarketCap != nil {
+	if s.Cfg.ExternalAPIs != nil && s.Cfg.ExternalAPIs.CoinMarketCap != nil {
 		price, err := s.GetLatestBtcPriceUsd(ctx)
 		if err != nil {
 			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
