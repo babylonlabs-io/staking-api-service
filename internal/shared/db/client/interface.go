@@ -32,4 +32,9 @@ type DBClient interface {
 	SaveUnprocessableMessage(ctx context.Context, messageBody, receipt string) error
 	FindUnprocessableMessages(ctx context.Context) ([]dbmodel.UnprocessableMessageDocument, error)
 	DeleteUnprocessableMessage(ctx context.Context, Receipt interface{}) error
+
+	// GetLatestBtcPrice fetches the BTC price from the database.
+	GetLatestBtcPrice(ctx context.Context) (*dbmodel.BtcPrice, error)
+	// SetBtcPrice sets the latest BTC price in the database.
+	SetBtcPrice(ctx context.Context, price float64) error
 }

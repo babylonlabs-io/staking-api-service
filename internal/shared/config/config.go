@@ -53,6 +53,13 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
+	// ExternalAPIs is optional
+	if cfg.ExternalAPIs != nil {
+		if err := cfg.ExternalAPIs.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
