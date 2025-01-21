@@ -21,11 +21,7 @@ func (cfg *ExternalAPIsConfig) Validate() error {
 		return fmt.Errorf("missing coinmarketcap config")
 	}
 
-	if err := cfg.CoinMarketCap.Validate(); err != nil {
-		return err
-	}
-
-	return nil
+	return cfg.CoinMarketCap.Validate()
 }
 
 func (cfg *CoinMarketCapConfig) Validate() error {

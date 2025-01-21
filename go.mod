@@ -12,6 +12,7 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0
+	github.com/miguelmota/go-coinmarketcap v0.1.8
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/viper v1.19.0
 	github.com/swaggo/swag v1.16.3

@@ -164,9 +164,7 @@ func (s *V1Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	unconfirmedTvl := uint64(0)
-	confirmedTvl := uint64(0)
-	pendingTvl := uint64(0)
+	var unconfirmedTvl, confirmedTvl, pendingTvl uint64
 
 	btcInfo, err := s.Service.DbClients.V1DBClient.GetLatestBtcInfo(ctx)
 	if err != nil {
@@ -192,7 +190,6 @@ func (s *V1Service) GetOverallStats(
 		price, err := s.GetLatestBtcPriceUsd(ctx)
 		if err != nil {
 			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
-			btcPrice = nil // return empty field if error
 		} else {
 			roundedPrice := math.Round(price*100) / 100
 			btcPrice = &roundedPrice
