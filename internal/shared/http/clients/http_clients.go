@@ -2,6 +2,7 @@ package clients
 
 import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/coinmarketcap"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/ordinals"
 )
 

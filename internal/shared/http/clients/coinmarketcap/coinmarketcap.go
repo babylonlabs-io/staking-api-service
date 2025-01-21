@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
