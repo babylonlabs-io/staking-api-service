@@ -17,6 +17,7 @@ type Config struct {
 	Metrics              *MetricsConfig              `mapstructure:"metrics"`
 	Assets               *AssetsConfig               `mapstructure:"assets"`
 	DelegationTransition *DelegationTransitionConfig `mapstructure:"delegation-transition"`
+	ExternalAPIs         *ExternalAPIsConfig         `mapstructure:"external_apis"`
 }
 
 func (cfg *Config) Validate() error {
