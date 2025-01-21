@@ -7,9 +7,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (s *Services) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
+func (s *Service) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 	// Try to get price from MongoDB first
-	btcPrice, err := s.DbClient.GetLatestBtcPrice(ctx)
+	db := s.DbClients.SharedDBClient
+	btcPrice, err := db.GetLatestBtcPrice(ctx)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			// Document not found, fetch from CoinMarketCap
@@ -18,7 +19,7 @@ func (s *Services) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 				return 0, fmt.Errorf("failed to fetch price from CoinMarketCap: %w", err)
 			}
 			// Store in MongoDB with TTL
-			if err := s.DbClient.SetBtcPrice(ctx, price); err != nil {
+			if err := db.SetBtcPrice(ctx, price); err != nil {
 				return 0, fmt.Errorf("failed to cache btc price: %w", err)
 			}
 			return price, nil
