@@ -24,6 +24,8 @@ import (
 func (db *V2Database) GetOrCreateStatsLock(
 	ctx context.Context, stakingTxHashHex string, txType string,
 ) (*v2dbmodel.V2StatsLockDocument, error) {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+
 	client := db.Client.Database(db.DbName).Collection(dbmodel.V2StatsLockCollection)
 	id := constructStatsLockId(stakingTxHashHex, txType)
 	filter := bson.M{"_id": id}
@@ -50,8 +52,10 @@ func (db *V2Database) GetOrCreateStatsLock(
 // IncrementOverallStats increments the overall stats for the given staking tx hash.
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) IncrementOverallStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	ctx context.Context, stakingTxHashHex, _ string, amount uint64,
 ) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+
 	overallStatsClient := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2OverallStatsCollection)
 
 	// Start a session
@@ -90,18 +94,16 @@ func (v2dbclient *V2Database) IncrementOverallStats(
 
 	// Execute the transaction
 	_, txErr := session.WithTransaction(ctx, transactionWork)
-	if txErr != nil {
-		return txErr
-	}
-
-	return nil
+	return txErr
 }
 
 // SubtractOverallStats decrements the overall stats for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) SubtractOverallStats(
-	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+	ctx context.Context, stakingTxHashHex, _ string, amount uint64,
 ) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
 			"active_tvl":         -int64(amount),
@@ -217,6 +219,9 @@ func constructStatsLockId(stakingTxHashHex, state string) string {
 func (v2dbclient *V2Database) HandleActiveStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
 ) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+	stakerPkHex = strings.ToLower(stakerPkHex)
+
 	upsertUpdate := bson.M{
 		"$inc": bson.M{
 			"active_tvl":         int64(amount),
@@ -247,6 +252,9 @@ func (v2dbclient *V2Database) HandleActiveStakerStats(
 func (v2dbclient *V2Database) HandleUnbondingStakerStats(
 	ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string,
 ) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+	stakerPkHex = strings.ToLower(stakerPkHex)
+
 	// Check if we should process this state change
 	for _, state := range stateHistory {
 		stateLower := strings.ToLower(state)
@@ -295,6 +303,9 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	if len(stateHistory) < 1 {
 		return fmt.Errorf("state history should have at least 1 state")
 	}
+
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+	stakerPkHex = strings.ToLower(stakerPkHex)
 
 	statsUpdates := bson.M{
 		"withdrawable_tvl":         int64(amount),
@@ -348,6 +359,9 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 	if len(stateHistory) < 1 {
 		return fmt.Errorf("state history should have at least 1 state")
 	}
+
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+	stakerPkHex = strings.ToLower(stakerPkHex)
 
 	// Initialize empty stats updates map
 	statsUpdates := bson.M{}
@@ -418,6 +432,9 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 }
 
 func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+	stakerPkHex = strings.ToLower(stakerPkHex)
+
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
 
 	// Start a session
@@ -450,6 +467,8 @@ func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stak
 func (v2dbclient *V2Database) GetStakerStats(
 	ctx context.Context, stakerPkHex string,
 ) (*v2dbmodel.V2StakerStatsDocument, error) {
+	stakerPkHex = strings.ToLower(stakerPkHex)
+
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2StakerStatsCollection)
 	filter := bson.M{"_id": stakerPkHex}
 	var result v2dbmodel.V2StakerStatsDocument
@@ -492,6 +511,8 @@ func (v2dbclient *V2Database) IncrementFinalityProviderStats(
 	fpPkHexes []string,
 	amount uint64,
 ) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+
 	// Create bulk write operations for each FP
 	var operations []mongo.WriteModel
 	for _, fpPkHex := range fpPkHexes {
@@ -521,6 +542,8 @@ func (v2dbclient *V2Database) SubtractFinalityProviderStats(
 	fpPkHexes []string,
 	amount uint64,
 ) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+
 	// Create bulk write operations for each FP
 	var operations []mongo.WriteModel
 	for _, fpPkHex := range fpPkHexes {
@@ -550,6 +573,8 @@ func (v2dbclient *V2Database) updateFinalityProviderStats(
 	stakingTxHashHex string,
 	operations []mongo.WriteModel,
 ) error {
+	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
+
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
 
 	session, sessionErr := v2dbclient.Client.StartSession()
