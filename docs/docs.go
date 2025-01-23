@@ -43,13 +43,14 @@ const docTemplate = `{
         },
         "/v1/delegation": {
             "get": {
-                "description": "Retrieves a delegation by a given transaction hash",
+                "description": "[DEPRECATED] Retrieves a delegation by a given transaction hash. Please use /v2/delegation instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -77,14 +78,15 @@ const docTemplate = `{
         },
         "/v1/finality-providers": {
             "get": {
-                "description": "Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order.",
+                "description": "[DEPRECATED] Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order. Please use /v2/finality-providers instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Active Finality Providers",
+                "summary": "Get Active Finality Providers (Deprecated)",
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -111,14 +113,14 @@ const docTemplate = `{
         },
         "/v1/global-params": {
             "get": {
-                "description": "Retrieves the global parameters for Babylon, including finality provider details.",
+                "description": "[DEPRECATED] Retrieves the global parameters for Babylon, including finality provider details. Please use /v2/network-info instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Babylon global parameters",
+                "deprecated": true,
                 "responses": {
                     "200": {
                         "description": "Global parameters",
@@ -131,12 +133,12 @@ const docTemplate = `{
         },
         "/v1/staker/delegation/check": {
             "get": {
-                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day",
+                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit).\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "v1"
+                    "shared"
                 ],
                 "parameters": [
                     {
@@ -174,7 +176,7 @@ const docTemplate = `{
         },
         "/v1/staker/delegations": {
             "get": {
-                "description": "Retrieves delegations for a given staker",
+                "description": "Retrieves phase-1 delegations for a given staker. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.\nThis endpoint is only used to show legacy phase-1 delegations for the purpose of unbonding or registering into phase-2.",
                 "produces": [
                     "application/json"
                 ],
@@ -220,13 +222,14 @@ const docTemplate = `{
         },
         "/v1/staker/pubkey-lookup": {
             "get": {
-                "description": "Retrieves public keys for the given BTC addresses. This endpoint",
+                "description": "Retrieves public keys for the given BTC addresses. This endpoint\nonly returns public keys for addresses that have associated delegations in\nthe system. If an address has no associated delegation, it will not be\nincluded in the response. Supports both Taproot and Native Segwit addresses.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "v1"
+                    "shared"
                 ],
+                "summary": "Get stakers' public keys",
                 "parameters": [
                     {
                         "type": "array",
@@ -244,7 +247,7 @@ const docTemplate = `{
                     "200": {
                         "description": "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)",
                         "schema": {
-                            "$ref": "#/definitions/handler.Result"
+                            "$ref": "#/definitions/handler.PublicResponse-map_string_string"
                         }
                     },
                     "400": {
@@ -264,14 +267,15 @@ const docTemplate = `{
         },
         "/v1/stats": {
             "get": {
-                "description": "Fetches overall stats for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.",
+                "description": "[DEPRECATED] Fetches overall stats for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers. Please use /v2/stats instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Overall Stats",
+                "summary": "Get Overall Stats (Deprecated)",
+                "deprecated": true,
                 "responses": {
                     "200": {
                         "description": "Overall stats for babylon staking",
@@ -284,14 +288,15 @@ const docTemplate = `{
         },
         "/v1/stats/staker": {
             "get": {
-                "description": "Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations.\nIf staker_btc_pk query parameter is provided, it will return stats for the specific staker.\nOtherwise, it will return the top stakers ranked by active tvl.",
+                "description": "[DEPRECATED] Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations. Please use /v2/staker/stats instead.\nIf staker_btc_pk query parameter is provided, it will return stats for the specific staker.\nOtherwise, it will return the top stakers ranked by active tvl.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Staker Stats",
+                "summary": "Get Staker Stats (Deprecated)",
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -324,7 +329,7 @@ const docTemplate = `{
         },
         "/v1/unbonding": {
             "post": {
-                "description": "Unbonds a delegation by processing the provided transaction details. This is an async operation.",
+                "description": "Unbonds a phase-1 delegation by processing the provided transaction details. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.\nThis is an async operation.",
                 "consumes": [
                     "application/json"
                 ],
@@ -334,7 +339,7 @@ const docTemplate = `{
                 "tags": [
                     "v1"
                 ],
-                "summary": "Unbond delegation",
+                "summary": "Unbond phase-1 delegation",
                 "parameters": [
                     {
                         "description": "Unbonding Request Payload",
@@ -361,7 +366,7 @@ const docTemplate = `{
         },
         "/v1/unbonding/eligibility": {
             "get": {
-                "description": "Checks if a delegation identified by its staking transaction hash is eligible for unbonding.",
+                "description": "Checks if a delegation identified by its staking transaction hash is eligible for unbonding. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.",
                 "produces": [
                     "application/json"
                 ],
@@ -710,6 +715,17 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.PublicResponse-map_string_string": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/map_string_string"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
         "handler.PublicResponse-v1service_DelegationPublic": {
             "type": "object",
             "properties": {
@@ -773,15 +789,6 @@ const docTemplate = `{
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
-                }
-            }
-        },
-        "handler.Result": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "status": {
-                    "type": "integer"
                 }
             }
         },
@@ -861,6 +868,12 @@ const docTemplate = `{
                 "version": {
                     "type": "integer"
                 }
+            }
+        },
+        "map_string_string": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
             }
         },
         "types.ErrorCode": {
@@ -1402,7 +1415,21 @@ const docTemplate = `{
                 "StateEarlyUnbondingSlashingWithdrawn"
             ]
         }
-    }
+    },
+    "tags": [
+        {
+            "description": "Shared API endpoints",
+            "name": "shared"
+        },
+        {
+            "description": "Babylon Phase-2 API endpoints",
+            "name": "v2"
+        },
+        {
+            "description": "Babylon Phase-1 API endpoints (Deprecated)",
+            "name": "v1"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

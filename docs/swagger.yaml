@@ -52,6 +52,13 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-map_string_string:
+    properties:
+      data:
+        $ref: '#/definitions/map_string_string'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-v1service_DelegationPublic:
     properties:
       data:
@@ -93,12 +100,6 @@ definitions:
         $ref: '#/definitions/v2service.StakerStatsPublic'
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
-    type: object
-  handler.Result:
-    properties:
-      data: {}
-      status:
-        type: integer
     type: object
   handler.paginationResponse:
     properties:
@@ -150,6 +151,10 @@ definitions:
         type: integer
       version:
         type: integer
+    type: object
+  map_string_string:
+    additionalProperties:
+      type: string
     type: object
   types.ErrorCode:
     enum:
@@ -543,7 +548,9 @@ paths:
       - shared
   /v1/delegation:
     get:
-      description: Retrieves a delegation by a given transaction hash
+      deprecated: true
+      description: '[DEPRECATED] Retrieves a delegation by a given transaction hash.
+        Please use /v2/delegation instead.'
       parameters:
       - description: Staking transaction hash in hex format
         in: query
@@ -565,8 +572,10 @@ paths:
       - v1
   /v1/finality-providers:
     get:
-      description: Fetches details of all active finality providers sorted by their
-        active total value locked (ActiveTvl) in descending order.
+      deprecated: true
+      description: '[DEPRECATED] Fetches details of all active finality providers
+        sorted by their active total value locked (ActiveTvl) in descending order.
+        Please use /v2/finality-providers instead.'
       parameters:
       - description: Public key of the finality provider to fetch
         in: query
@@ -584,13 +593,14 @@ paths:
             order
           schema:
             $ref: '#/definitions/handler.PublicResponse-array_v1service_FpDetailsPublic'
-      summary: Get Active Finality Providers
+      summary: Get Active Finality Providers (Deprecated)
       tags:
       - v1
   /v1/global-params:
     get:
-      description: Retrieves the global parameters for Babylon, including finality
-        provider details.
+      deprecated: true
+      description: '[DEPRECATED] Retrieves the global parameters for Babylon, including
+        finality provider details. Please use /v2/network-info instead.'
       produces:
       - application/json
       responses:
@@ -598,13 +608,12 @@ paths:
           description: Global parameters
           schema:
             $ref: '#/definitions/handler.PublicResponse-v1service_GlobalParamsPublic'
-      summary: Get Babylon global parameters
       tags:
       - v1
   /v1/staker/delegation/check:
     get:
       description: |-
-        Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)
+        Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit).
         Optionally, you can provide a timeframe to check if the delegation is active within the provided timeframe
         The available timeframe is "today" which checks after UTC 12AM of the current day
       parameters:
@@ -631,10 +640,12 @@ paths:
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
       tags:
-      - v1
+      - shared
   /v1/staker/delegations:
     get:
-      description: Retrieves delegations for a given staker
+      description: |-
+        Retrieves phase-1 delegations for a given staker. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
+        This endpoint is only used to show legacy phase-1 delegations for the purpose of unbonding or registering into phase-2.
       parameters:
       - description: Staker BTC Public Key
         in: query
@@ -665,7 +676,11 @@ paths:
       - v1
   /v1/staker/pubkey-lookup:
     get:
-      description: Retrieves public keys for the given BTC addresses. This endpoint
+      description: |-
+        Retrieves public keys for the given BTC addresses. This endpoint
+        only returns public keys for addresses that have associated delegations in
+        the system. If an address has no associated delegation, it will not be
+        included in the response. Supports both Taproot and Native Segwit addresses.
       parameters:
       - collectionFormat: multi
         description: List of BTC addresses to look up (up to 10), currently only supports
@@ -683,7 +698,7 @@ paths:
           description: A map of BTC addresses to their corresponding public keys (only
             addresses with delegations are returned)
           schema:
-            $ref: '#/definitions/handler.Result'
+            $ref: '#/definitions/handler.PublicResponse-map_string_string'
         "400":
           description: 'Bad Request: Invalid input parameters'
           schema:
@@ -692,12 +707,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get stakers' public keys
       tags:
-      - v1
+      - shared
   /v1/stats:
     get:
-      description: Fetches overall stats for babylon staking including tvl, total
-        delegations, active tvl, active delegations and total stakers.
+      deprecated: true
+      description: '[DEPRECATED] Fetches overall stats for babylon staking including
+        tvl, total delegations, active tvl, active delegations and total stakers.
+        Please use /v2/stats instead.'
       produces:
       - application/json
       responses:
@@ -705,13 +723,14 @@ paths:
           description: Overall stats for babylon staking
           schema:
             $ref: '#/definitions/handler.PublicResponse-v1service_OverallStatsPublic'
-      summary: Get Overall Stats
+      summary: Get Overall Stats (Deprecated)
       tags:
       - v1
   /v1/stats/staker:
     get:
+      deprecated: true
       description: |-
-        Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations.
+        [DEPRECATED] Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations. Please use /v2/staker/stats instead.
         If staker_btc_pk query parameter is provided, it will return stats for the specific staker.
         Otherwise, it will return the top stakers ranked by active tvl.
       parameters:
@@ -734,14 +753,15 @@ paths:
           description: 'Error: Bad Request'
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get Staker Stats
+      summary: Get Staker Stats (Deprecated)
       tags:
       - v1
   /v1/unbonding:
     post:
       consumes:
       - application/json
-      description: Unbonds a delegation by processing the provided transaction details.
+      description: |-
+        Unbonds a phase-1 delegation by processing the provided transaction details. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
         This is an async operation.
       parameters:
       - description: Unbonding Request Payload
@@ -759,13 +779,14 @@ paths:
           description: Invalid request payload
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Unbond delegation
+      summary: Unbond phase-1 delegation
       tags:
       - v1
   /v1/unbonding/eligibility:
     get:
       description: Checks if a delegation identified by its staking transaction hash
-        is eligible for unbonding.
+        is eligible for unbonding. This endpoint will be deprecated once all phase-1
+        delegations are either withdrawn or registered into phase-2.
       parameters:
       - description: Staking Transaction Hash Hex
         in: query
@@ -942,3 +963,10 @@ paths:
       tags:
       - v2
 swagger: "2.0"
+tags:
+- description: Shared API endpoints
+  name: shared
+- description: Babylon Phase-2 API endpoints
+  name: v2
+- description: Babylon Phase-1 API endpoints (Deprecated)
+  name: v1

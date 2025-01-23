@@ -18,15 +18,16 @@ const (
 	MAX_NUM_PK_LOOKUP_ADDRESSES = 10
 )
 
-// GetPubKeys @Summary Get stakers' public keys
+// GetPubKeys godoc
+// @Summary Get stakers' public keys
 // @Description Retrieves public keys for the given BTC addresses. This endpoint
-// only returns public keys for addresses that have associated delegations in
-// the system. If an address has no associated delegation, it will not be
-// included in the response. Supports both Taproot and Native Segwit addresses.
+// @Description only returns public keys for addresses that have associated delegations in
+// @Description the system. If an address has no associated delegation, it will not be
+// @Description included in the response. Supports both Taproot and Native Segwit addresses.
 // @Produce json
-// @Tags v1
+// @Tags shared
 // @Param address query []string true "List of BTC addresses to look up (up to 10), currently only supports Taproot and Native Segwit addresses" collectionFormat(multi)
-// @Success 200 {object} handler.Result[map[string]string] "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)"
+// @Success 200 {object} handler.PublicResponse[map[string]string] "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)"
 // @Failure 400 {object} types.Error "Bad Request: Invalid input parameters"
 // @Failure 500 {object} types.Error "Internal Server Error"
 // @Router /v1/staker/pubkey-lookup [get]

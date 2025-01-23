@@ -13,8 +13,9 @@ type DelegationCheckPublicResponse struct {
 	Code int  `json:"code"`
 }
 
-// GetStakerDelegations @Summary Get staker delegations
-// @Description Retrieves delegations for a given staker
+// GetStakerDelegations @Summary Get phase-1 staker delegations
+// @Description Retrieves phase-1 delegations for a given staker. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
+// @Description This endpoint is only used to show legacy phase-1 delegations for the purpose of unbonding or registering into phase-2.
 // @Produce json
 // @Tags v1
 // @Param staker_btc_pk query string true "Staker BTC Public Key"
@@ -57,11 +58,11 @@ func (h *V1Handler) GetStakerDelegations(request *http.Request) (*handler.Result
 }
 
 // CheckStakerDelegationExist @Summary Check if a staker has an active delegation
-// @Description Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)
+// @Description Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit).
 // @Description Optionally, you can provide a timeframe to check if the delegation is active within the provided timeframe
 // @Description The available timeframe is "today" which checks after UTC 12AM of the current day
 // @Produce json
-// @Tags v1
+// @Tags shared
 // @Param address query string true "Staker BTC address in Taproot/Native Segwit format"
 // @Param timeframe query string false "Check if the delegation is active within the provided timeframe" Enums(today)
 // @Success 200 {object} DelegationCheckPublicResponse "Delegation check result"
