@@ -6,6 +6,7 @@ import (
 	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
 	v2dbclient "github.com/babylonlabs-io/staking-api-service/internal/v2/db/client"
 	"github.com/rs/zerolog/log"
@@ -34,11 +35,13 @@ func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
 
 	v1dbClient, err := v1dbclient.New(ctx, stakingMongoClient, cfg.StakingDb)
 	if err != nil {
+		metrics.RecordServiceCrash("db.New")
 		log.Ctx(ctx).Fatal().Err(err).Msg("error while creating v1 db client")
 		return nil, err
 	}
 	v2dbClient, err := v2dbclient.New(ctx, stakingMongoClient, cfg.StakingDb)
 	if err != nil {
+		metrics.RecordServiceCrash("db.New")
 		log.Ctx(ctx).Fatal().Err(err).Msg("error while creating v2 db client")
 		return nil, err
 	}
@@ -50,6 +53,7 @@ func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
 
 	indexerDbClient, err := indexerdbclient.New(ctx, indexerMongoClient, cfg.IndexerDb)
 	if err != nil {
+		metrics.RecordServiceCrash("db.New")
 		log.Ctx(ctx).Fatal().Err(err).Msg("error while creating indexer db client")
 		return nil, err
 	}
