@@ -12,6 +12,7 @@ const (
 	Withdrawable       DelegationState = "withdrawable"
 	Withdrawn          DelegationState = "withdrawn"
 	Transitioned       DelegationState = "transitioned"
+	Slashed            DelegationState = "slashed"
 )
 
 func (s DelegationState) ToString() string {

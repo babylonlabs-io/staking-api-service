@@ -303,7 +303,8 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 
 	var hasUnbondingState bool
 	for _, state := range stateHistory {
-		if strings.ToLower(state) == types.Unbonding.ToString() {
+		if strings.ToLower(state) == types.Unbonding.ToString() || strings.ToLower(state) == types.Slashed.ToString() {
+			// Slashed events are also pushed into unbonding queue, so they affect the same stats
 			hasUnbondingState = true
 			break
 		}
@@ -361,7 +362,7 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		switch strings.ToLower(state) {
 		case types.Withdrawable.ToString():
 			hasWithdrawableState = true
-		case types.Unbonding.ToString():
+		case types.Unbonding.ToString(), types.Slashed.ToString():
 			hasUnbondingState = true
 		}
 	}
