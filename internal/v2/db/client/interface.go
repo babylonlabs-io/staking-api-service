@@ -17,10 +17,10 @@ type V2DBClient interface {
 		ctx context.Context, stakingTxHashHex string, state string,
 	) (*v2dbmodel.V2StatsLockDocument, error)
 	IncrementOverallStats(
-		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+		ctx context.Context, stakingTxHashHex string, amount uint64,
 	) error
 	SubtractOverallStats(
-		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,
+		ctx context.Context, stakingTxHashHex string, amount uint64,
 	) error
 	HandleActiveStakerStats(
 		ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64,

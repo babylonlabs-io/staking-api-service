@@ -52,7 +52,7 @@ func (db *V2Database) GetOrCreateStatsLock(
 // IncrementOverallStats increments the overall stats for the given staking tx hash.
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) IncrementOverallStats(
-	ctx context.Context, stakingTxHashHex, _ string, amount uint64,
+	ctx context.Context, stakingTxHashHex string, amount uint64,
 ) error {
 	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
 
@@ -100,7 +100,7 @@ func (v2dbclient *V2Database) IncrementOverallStats(
 // SubtractOverallStats decrements the overall stats for the given staking tx hash
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 func (v2dbclient *V2Database) SubtractOverallStats(
-	ctx context.Context, stakingTxHashHex, _ string, amount uint64,
+	ctx context.Context, stakingTxHashHex string, amount uint64,
 ) error {
 	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
 
@@ -516,6 +516,7 @@ func (v2dbclient *V2Database) IncrementFinalityProviderStats(
 	// Create bulk write operations for each FP
 	var operations []mongo.WriteModel
 	for _, fpPkHex := range fpPkHexes {
+		fpPkHex = strings.ToLower(fpPkHex)
 		operation := mongo.NewUpdateOneModel().
 			SetFilter(bson.M{"_id": fpPkHex}).
 			SetUpdate(bson.M{
@@ -547,6 +548,7 @@ func (v2dbclient *V2Database) SubtractFinalityProviderStats(
 	// Create bulk write operations for each FP
 	var operations []mongo.WriteModel
 	for _, fpPkHex := range fpPkHexes {
+		fpPkHex = strings.ToLower(fpPkHex)
 		operation := mongo.NewUpdateOneModel().
 			SetFilter(bson.M{"_id": fpPkHex}).
 			SetUpdate(bson.M{
