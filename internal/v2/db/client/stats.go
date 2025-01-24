@@ -304,10 +304,11 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 	var hasUnbondingState bool
 	for _, state := range stateHistory {
 		if strings.ToLower(state) == types.Unbonding.ToString() || strings.ToLower(state) == types.Slashed.ToString() {
-			// Currently both slashed and unbonding events are pushed into the same unbonding queue,
-			// so they affect the same stats and we treat them identically.
-			// TODO: Consider pushing slashed events to a separate queue to avoid confusion and
-			// allow tracking slashed stats independently from unbonding stats.
+			// Both slashed and unbonding events are pushed into the unbonding queue since they affect
+			// the same stats. We use the same stats lock key to prevent double counting when both events
+			// occur.
+			// TODO: Consider using a separate queue for slashed events to avoid confusion, in that case
+			// if we have separate lock key for slashed we need to ensure we don't double count.
 			hasUnbondingState = true
 			break
 		}
@@ -366,10 +367,11 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		case types.Withdrawable.ToString():
 			hasWithdrawableState = true
 		case types.Unbonding.ToString(), types.Slashed.ToString():
-			// Currently both slashed and unbonding events are pushed into the same unbonding queue,
-			// so they affect the same stats and we treat them identically.
-			// TODO: Consider pushing slashed events to a separate queue to avoid confusion and
-			// allow tracking slashed stats independently from unbonding stats.
+			// Both slashed and unbonding events are pushed into the unbonding queue since they affect
+			// the same stats. We use the same stats lock key to prevent double counting when both events
+			// occur.
+			// TODO: Consider using a separate queue for slashed events to avoid confusion, in that case
+			// if we have separate lock key for slashed we need to ensure we don't double count.
 			hasUnbondingState = true
 		}
 	}
