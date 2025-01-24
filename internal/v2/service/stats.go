@@ -126,7 +126,7 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	// on staker stats.
 	if !statsLockDocument.OverallStats {
 		err = s.DbClients.V2DBClient.IncrementOverallStats(
-			ctx, stakingTxHashHex, stakerPkHex, amount,
+			ctx, stakingTxHashHex, amount,
 		)
 		if err != nil {
 			if db.IsNotFoundError(err) {
@@ -207,7 +207,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 	// on staker stats.
 	if !statsLockDocument.OverallStats {
 		err = s.DbClients.V2DBClient.SubtractOverallStats(
-			ctx, stakingTxHashHex, stakerPkHex, amount,
+			ctx, stakingTxHashHex, amount,
 		)
 		if err != nil {
 			if db.IsNotFoundError(err) {
