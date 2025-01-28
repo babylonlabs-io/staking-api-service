@@ -19,7 +19,7 @@ func (_m *CoinMarketCapClientInterface) GetLatestBtcPrice(ctx context.Context) (
 	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetLatestBtcPrice")
+		panic("no return value specified for GetLatestPrice")
 	}
 
 	var r0 float64

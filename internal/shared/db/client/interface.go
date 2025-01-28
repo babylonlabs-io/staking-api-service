@@ -33,8 +33,8 @@ type DBClient interface {
 	FindUnprocessableMessages(ctx context.Context) ([]dbmodel.UnprocessableMessageDocument, error)
 	DeleteUnprocessableMessage(ctx context.Context, Receipt interface{}) error
 
-	// GetLatestBtcPrice fetches the BTC price from the database.
-	GetLatestBtcPrice(ctx context.Context) (*dbmodel.BtcPrice, error)
-	// SetBtcPrice sets the latest BTC price in the database.
-	SetBtcPrice(ctx context.Context, price float64) error
+	// GetLatestPrice fetches symbol price from the database
+	GetLatestPrice(ctx context.Context, symbol string) (float64, error)
+	// SetLatestPrice sets the latest symbol price in the database
+	SetLatestPrice(ctx context.Context, symbol string, price float64) error
 }

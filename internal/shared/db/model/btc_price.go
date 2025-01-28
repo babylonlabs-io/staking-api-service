@@ -2,10 +2,10 @@ package dbmodel
 
 import "time"
 
-const BtcPriceDocID = "btc_price"
+const SymbolBTC = "btc"
 
-type BtcPrice struct {
-	ID        string    `bson:"_id"` // primary key, will always be "btc_price" to ensure single document
+type CoinPrice struct {
+	ID        string    `bson:"_id"` // symbol
 	Price     float64   `bson:"price"`
 	CreatedAt time.Time `bson:"created_at"` // TTL index will be on this field
 }

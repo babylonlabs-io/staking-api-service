@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	coinmarketcap "github.com/miguelmota/go-coinmarketcap/pro/v1"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -11,7 +12,7 @@ import (
 func (s *Service) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 	// Try to get price from MongoDB first
 	db := s.DbClients.SharedDBClient
-	btcPrice, err := db.GetLatestBtcPrice(ctx)
+	price, err := db.GetLatestPrice(ctx, dbmodel.SymbolBTC)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			// Document not found, fetch from CoinMarketCap
@@ -27,7 +28,7 @@ func (s *Service) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 			}
 			price := value.(float64)
 			// Store in MongoDB with TTL
-			if err := db.SetBtcPrice(ctx, price); err != nil {
+			if err := db.SetLatestPrice(ctx, dbmodel.SymbolBTC, price); err != nil {
 				return 0, fmt.Errorf("failed to cache btc price: %w", err)
 			}
 			return price, nil
@@ -35,7 +36,7 @@ func (s *Service) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 		// Handle other database errors
 		return 0, fmt.Errorf("database error: %w", err)
 	}
-	return btcPrice.Price, nil
+	return price, nil
 }
 
 func (s *Service) getLatestBTCPrice() (float64, error) {

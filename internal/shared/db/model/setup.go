@@ -27,7 +27,7 @@ const (
 	V1UnbondingCollection             = "unbonding_queue"
 	V1BtcInfoCollection               = "btc_info"
 	V1UnprocessableMsgCollection      = "unprocessable_messages"
-	BtcPriceCollection                = "btc_price"
+	PriceCollection                   = "prices"
 	// V2
 	V2StatsLockCollection             = "v2_stats_lock"
 	V2OverallStatsCollection          = "v2_overall_stats"
@@ -147,7 +147,7 @@ func createIndex(ctx context.Context, database *mongo.Database, collectionName s
 }
 
 func createTTLIndexes(ctx context.Context, database *mongo.Database, cacheTTL time.Duration) error {
-	collection := database.Collection(BtcPriceCollection)
+	collection := database.Collection(PriceCollection)
 	// First, drop the existing TTL index if it exists
 	_, err := collection.Indexes().DropOne(ctx, "created_at_1")
 	if err != nil && !strings.Contains(err.Error(), "not found") {

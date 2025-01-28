@@ -338,29 +338,27 @@ func (_m *V1DBClient) GetLatestBtcInfo(ctx context.Context) (*v1dbmodel.BtcInfo,
 	return r0, r1
 }
 
-// GetLatestBtcPrice provides a mock function with given fields: ctx
-func (_m *V1DBClient) GetLatestBtcPrice(ctx context.Context) (*dbmodel.BtcPrice, error) {
-	ret := _m.Called(ctx)
+// GetLatestPrice provides a mock function with given fields: ctx, symbol
+func (_m *V1DBClient) GetLatestPrice(ctx context.Context, symbol string) (float64, error) {
+	ret := _m.Called(ctx, symbol)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetLatestBtcPrice")
+		panic("no return value specified for GetLatestPrice")
 	}
 
-	var r0 *dbmodel.BtcPrice
+	var r0 float64
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*dbmodel.BtcPrice, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (float64, error)); ok {
+		return rf(ctx, symbol)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) *dbmodel.BtcPrice); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) float64); ok {
+		r0 = rf(ctx, symbol)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*dbmodel.BtcPrice)
-		}
+		r0 = ret.Get(0).(float64)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, symbol)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -650,17 +648,17 @@ func (_m *V1DBClient) ScanDelegationsPaginated(ctx context.Context, paginationTo
 	return r0, r1
 }
 
-// SetBtcPrice provides a mock function with given fields: ctx, price
-func (_m *V1DBClient) SetBtcPrice(ctx context.Context, price float64) error {
-	ret := _m.Called(ctx, price)
+// SetLatestPrice provides a mock function with given fields: ctx, symbol, price
+func (_m *V1DBClient) SetLatestPrice(ctx context.Context, symbol string, price float64) error {
+	ret := _m.Called(ctx, symbol, price)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SetBtcPrice")
+		panic("no return value specified for SetLatestPrice")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, float64) error); ok {
-		r0 = rf(ctx, price)
+	if rf, ok := ret.Get(0).(func(context.Context, string, float64) error); ok {
+		r0 = rf(ctx, symbol, price)
 	} else {
 		r0 = ret.Error(0)
 	}

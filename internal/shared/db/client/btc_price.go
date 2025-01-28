@@ -5,28 +5,35 @@ import (
 	model "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"strings"
 	"time"
 )
 
-func (db *Database) GetLatestBtcPrice(ctx context.Context) (*model.BtcPrice, error) {
-	client := db.Client.Database(db.DbName).Collection(model.BtcPriceCollection)
-	var btcPrice model.BtcPrice
-	err := client.FindOne(ctx, bson.M{"_id": model.BtcPriceDocID}).Decode(&btcPrice)
+func (db *Database) GetLatestPrice(ctx context.Context, symbol string) (float64, error) {
+	symbol = strings.ToLower(symbol)
+
+	client := db.Client.Database(db.DbName).Collection(model.PriceCollection)
+	var doc model.CoinPrice
+	err := client.FindOne(ctx, bson.M{"_id": symbol}).Decode(&doc)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return &btcPrice, nil
+	return doc.Price, nil
 }
-func (db *Database) SetBtcPrice(ctx context.Context, price float64) error {
-	client := db.Client.Database(db.DbName).Collection(model.BtcPriceCollection)
-	btcPrice := model.BtcPrice{
-		ID:        model.BtcPriceDocID, // Fixed ID for single document
+
+func (db *Database) SetLatestPrice(ctx context.Context, symbol string, price float64) error {
+	symbol = strings.ToLower(symbol)
+
+	doc := model.CoinPrice{
+		ID:        symbol,
 		Price:     price,
 		CreatedAt: time.Now(), // For TTL index
 	}
 	opts := options.Update().SetUpsert(true)
-	filter := bson.M{"_id": model.BtcPriceDocID}
-	update := bson.M{"$set": btcPrice}
+	filter := bson.M{"_id": symbol}
+	update := bson.M{"$set": doc}
+
+	client := db.Client.Database(db.DbName).Collection(model.PriceCollection)
 	_, err := client.UpdateOne(ctx, filter, update, opts)
 	return err
 }
