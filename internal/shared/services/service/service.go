@@ -10,7 +10,6 @@ import (
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"golang.org/x/sync/singleflight"
 )
 
 // Services layer contains the business logic and is used to interact with
@@ -21,8 +20,6 @@ type Service struct {
 	Cfg               *config.Config
 	Params            *types.GlobalParams
 	FinalityProviders []types.FinalityProviderDetails
-
-	singleFlightGroup *singleflight.Group
 }
 
 func New(
@@ -39,7 +36,6 @@ func New(
 		Cfg:               cfg,
 		Params:            globalParams,
 		FinalityProviders: finalityProviders,
-		singleFlightGroup: &singleflight.Group{},
 	}, nil
 }
 

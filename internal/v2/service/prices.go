@@ -1,15 +1,30 @@
-package service
+package v2service
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	coinmarketcap "github.com/miguelmota/go-coinmarketcap/pro/v1"
 	"go.mongodb.org/mongo-driver/mongo"
+	"strings"
 )
 
-func (s *Service) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
+func (s *V2Service) GetLatestPrices(ctx context.Context) (map[string]float64, *types.Error) {
+	btcPrice, err := s.getLatestBTCPrice(ctx)
+	if err != nil {
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	// for now we get only btc prices
+	btcSymbol := strings.ToUpper(dbmodel.SymbolBTC)
+	return map[string]float64{
+		btcSymbol: btcPrice,
+	}, nil
+}
+
+func (s *V2Service) getLatestBTCPrice(ctx context.Context) (float64, error) {
 	// Try to get price from MongoDB first
 	db := s.DbClients.SharedDBClient
 	price, err := db.GetLatestPrice(ctx, dbmodel.SymbolBTC)
@@ -21,7 +36,7 @@ func (s *Service) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 			// here we will make just 1 request, other goroutines will wait and receive whatever first one get
 			// note that key in .Do call below is not very important unless we use the same string
 			value, err, _ := s.singleFlightGroup.Do("fetch_btc", func() (any, error) {
-				return s.getLatestBTCPrice()
+				return s.doGetLatestBTCPrice()
 			})
 			if err != nil {
 				return 0, fmt.Errorf("failed to fetch price from CoinMarketCap: %w", err)
@@ -39,7 +54,7 @@ func (s *Service) GetLatestBtcPriceUsd(ctx context.Context) (float64, error) {
 	return price, nil
 }
 
-func (s *Service) getLatestBTCPrice() (float64, error) {
+func (s *V2Service) doGetLatestBTCPrice() (float64, error) {
 	quotes, err := s.Clients.CoinMarketCap.Cryptocurrency.LatestQuotes(&coinmarketcap.QuoteOptions{
 		Symbol: "BTC",
 	})

@@ -44,3 +44,12 @@ func (h *V2Handler) GetOverallStats(request *http.Request) (*handler.Result, *ty
 	}
 	return handler.NewResult(stats), nil
 }
+
+func (h *V2Handler) GetPrices(request *http.Request) (*handler.Result, *types.Error) {
+	prices, err := h.Service.GetLatestPrices(request.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.NewResult(prices), nil
+}
