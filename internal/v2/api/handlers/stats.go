@@ -3,6 +3,7 @@ package v2handlers
 import (
 	"net/http"
 
+	"errors"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
@@ -46,6 +47,12 @@ func (h *V2Handler) GetOverallStats(request *http.Request) (*handler.Result, *ty
 }
 
 func (h *V2Handler) GetPrices(request *http.Request) (*handler.Result, *types.Error) {
+	// Only fetch BTC price if ExternalAPIs are configured
+	if h.Config.ExternalAPIs == nil || h.Config.ExternalAPIs.CoinMarketCap == nil {
+		err := errors.New("coin market cap API is not configured")
+		return nil, types.NewInternalServiceError(err)
+	}
+
 	prices, err := h.Service.GetLatestPrices(request.Context())
 	if err != nil {
 		return nil, err

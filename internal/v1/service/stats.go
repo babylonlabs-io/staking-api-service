@@ -8,7 +8,6 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
-	"math"
 )
 
 type OverallStatsPublic struct {
@@ -184,18 +183,6 @@ func (s *V1Service) GetOverallStats(
 		pendingTvl = unconfirmedTvl - confirmedTvl
 	}
 
-	// Only fetch BTC price if ExternalAPIs are configured
-	var btcPrice *float64
-	if s.Cfg.ExternalAPIs != nil && s.Cfg.ExternalAPIs.CoinMarketCap != nil {
-		price, err := s.GetLatestBtcPriceUsd(ctx)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
-		} else {
-			roundedPrice := math.Round(price*100) / 100
-			btcPrice = &roundedPrice
-		}
-	}
-
 	return &OverallStatsPublic{
 		ActiveTvl:         int64(confirmedTvl),
 		TotalTvl:          stats.TotalTvl,
@@ -204,7 +191,6 @@ func (s *V1Service) GetOverallStats(
 		TotalStakers:      stats.TotalStakers,
 		UnconfirmedTvl:    unconfirmedTvl,
 		PendingTvl:        pendingTvl,
-		BtcPriceUsd:       btcPrice,
 	}, nil
 }
 
