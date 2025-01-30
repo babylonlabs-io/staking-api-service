@@ -52,6 +52,13 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-map_string_float64:
+    properties:
+      data:
+        $ref: '#/definitions/map_string_float64'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-v1service_DelegationPublic:
     properties:
       data:
@@ -150,6 +157,10 @@ definitions:
         type: integer
       version:
         type: integer
+    type: object
+  map_string_float64:
+    additionalProperties:
+      type: number
     type: object
   types.ErrorCode:
     enum:
@@ -274,6 +285,9 @@ definitions:
         type: integer
       active_tvl:
         type: integer
+      btc_price_usd:
+        description: Optional field
+        type: number
       pending_tvl:
         type: integer
       total_delegations:
@@ -887,6 +901,22 @@ paths:
           description: Network info
           schema:
             $ref: '#/definitions/v2service.NetworkInfoPublic'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      tags:
+      - v2
+  /v2/prices:
+    get:
+      description: Get latest prices for all available symbols
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-map_string_float64'
         "400":
           description: 'Error: Bad Request'
           schema:

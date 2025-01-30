@@ -554,6 +554,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/prices": {
+            "get": {
+                "description": "Get latest prices for all available symbols",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-map_string_float64"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v2/staker/stats": {
             "get": {
                 "description": "Fetches staker stats for babylon staking including active tvl and active delegations.",
@@ -704,6 +729,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/v2service.FinalityProviderStatsPublic"
                     }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-map_string_float64": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/map_string_float64"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -861,6 +897,12 @@ const docTemplate = `{
                 "version": {
                     "type": "integer"
                 }
+            }
+        },
+        "map_string_float64": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "number"
             }
         },
         "types.ErrorCode": {
@@ -1043,6 +1085,10 @@ const docTemplate = `{
                 },
                 "active_tvl": {
                     "type": "integer"
+                },
+                "btc_price_usd": {
+                    "description": "Optional field",
+                    "type": "number"
                 },
                 "pending_tvl": {
                     "type": "integer"
