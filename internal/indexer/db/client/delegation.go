@@ -81,7 +81,7 @@ func (indexerdbclient *IndexerDatabase) CheckDelegationExistByStakerPk(
 ) (bool, error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 	filter := buildAdditionalDelegationFilter(
-		bson.M{"_id": stakerPk}, extraFilter,
+		bson.M{"staker_btc_pk_hex": stakerPk}, extraFilter,
 	)
 	var delegation indexerdbmodel.IndexerDelegationDetails
 	err := client.FindOne(ctx, filter).Decode(&delegation)
