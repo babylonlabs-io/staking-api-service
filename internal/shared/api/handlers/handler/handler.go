@@ -12,6 +12,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
+	"strings"
 )
 
 type Handler struct {
@@ -86,6 +87,8 @@ func ParsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (st
 
 func ParseTxHashQuery(r *http.Request, queryName string) (string, *types.Error) {
 	txHashHex := r.URL.Query().Get(queryName)
+	txHashHex = strings.ToLower(txHashHex)
+
 	if txHashHex == "" {
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, queryName+" is required",

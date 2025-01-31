@@ -182,6 +182,34 @@ func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context) ([]*v2dbmode
 	return r0, r1
 }
 
+// GetLatestPrice provides a mock function with given fields: ctx, symbol
+func (_m *V2DBClient) GetLatestPrice(ctx context.Context, symbol string) (float64, error) {
+	ret := _m.Called(ctx, symbol)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLatestPrice")
+	}
+
+	var r0 float64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (float64, error)); ok {
+		return rf(ctx, symbol)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) float64); ok {
+		r0 = rf(ctx, symbol)
+	} else {
+		r0 = ret.Get(0).(float64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, symbol)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOrCreateStatsLock provides a mock function with given fields: ctx, stakingTxHashHex, state
 func (_m *V2DBClient) GetOrCreateStatsLock(ctx context.Context, stakingTxHashHex string, state string) (*v2dbmodel.V2StatsLockDocument, error) {
 	ret := _m.Called(ctx, stakingTxHashHex, state)
@@ -427,6 +455,24 @@ func (_m *V2DBClient) SaveUnprocessableMessage(ctx context.Context, messageBody 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
 		r0 = rf(ctx, messageBody, receipt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SetLatestPrice provides a mock function with given fields: ctx, symbol, price
+func (_m *V2DBClient) SetLatestPrice(ctx context.Context, symbol string, price float64) error {
+	ret := _m.Called(ctx, symbol, price)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetLatestPrice")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, float64) error); ok {
+		r0 = rf(ctx, symbol, price)
 	} else {
 		r0 = ret.Error(0)
 	}

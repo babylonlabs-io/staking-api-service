@@ -338,6 +338,34 @@ func (_m *V1DBClient) GetLatestBtcInfo(ctx context.Context) (*v1dbmodel.BtcInfo,
 	return r0, r1
 }
 
+// GetLatestPrice provides a mock function with given fields: ctx, symbol
+func (_m *V1DBClient) GetLatestPrice(ctx context.Context, symbol string) (float64, error) {
+	ret := _m.Called(ctx, symbol)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLatestPrice")
+	}
+
+	var r0 float64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (float64, error)); ok {
+		return rf(ctx, symbol)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) float64); ok {
+		r0 = rf(ctx, symbol)
+	} else {
+		r0 = ret.Get(0).(float64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, symbol)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetOrCreateStatsLock provides a mock function with given fields: ctx, stakingTxHashHex, state
 func (_m *V1DBClient) GetOrCreateStatsLock(ctx context.Context, stakingTxHashHex string, state string) (*v1dbmodel.StatsLockDocument, error) {
 	ret := _m.Called(ctx, stakingTxHashHex, state)
@@ -618,6 +646,24 @@ func (_m *V1DBClient) ScanDelegationsPaginated(ctx context.Context, paginationTo
 	}
 
 	return r0, r1
+}
+
+// SetLatestPrice provides a mock function with given fields: ctx, symbol, price
+func (_m *V1DBClient) SetLatestPrice(ctx context.Context, symbol string, price float64) error {
+	ret := _m.Called(ctx, symbol, price)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetLatestPrice")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, float64) error); ok {
+		r0 = rf(ctx, symbol, price)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // SubtractFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHex, amount

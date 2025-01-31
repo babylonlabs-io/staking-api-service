@@ -44,3 +44,19 @@ func (h *V2Handler) GetOverallStats(request *http.Request) (*handler.Result, *ty
 	}
 	return handler.NewResult(stats), nil
 }
+
+// GetPrices @Summary Get latest prices for all available symbols
+// @Description Get latest prices for all available symbols
+// @Produce json
+// @Tags v2
+// @Success 200 {object} handler.PublicResponse[map[string]float64] ""
+// @Failure 400 {object} types.Error "Error: Bad Request"
+// @Router /v2/prices [get]
+func (h *V2Handler) GetPrices(request *http.Request) (*handler.Result, *types.Error) {
+	prices, err := h.Service.GetLatestPrices(request.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.NewResult(prices), nil
+}

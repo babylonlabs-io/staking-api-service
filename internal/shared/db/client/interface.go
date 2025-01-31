@@ -32,4 +32,9 @@ type DBClient interface {
 	SaveUnprocessableMessage(ctx context.Context, messageBody, receipt string) error
 	FindUnprocessableMessages(ctx context.Context) ([]dbmodel.UnprocessableMessageDocument, error)
 	DeleteUnprocessableMessage(ctx context.Context, Receipt interface{}) error
+
+	// GetLatestPrice fetches symbol price from the database
+	GetLatestPrice(ctx context.Context, symbol string) (float64, error)
+	// SetLatestPrice sets the latest symbol price in the database
+	SetLatestPrice(ctx context.Context, symbol string, price float64) error
 }
