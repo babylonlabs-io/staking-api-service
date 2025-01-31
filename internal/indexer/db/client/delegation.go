@@ -86,7 +86,7 @@ func (indexerdbclient *IndexerDatabase) CheckDelegationExistByStakerPk(
 	var delegation indexerdbmodel.IndexerDelegationDetails
 	err := client.FindOne(ctx, filter).Decode(&delegation)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return false, nil
 		}
 		return false, err
@@ -98,13 +98,15 @@ func buildAdditionalDelegationFilter(
 	baseFilter primitive.M,
 	filters *DelegationFilter,
 ) primitive.M {
-	if filters != nil {
-		if filters.States != nil {
-			baseFilter["state"] = bson.M{"$in": filters.States}
-		}
-		if filters.AfterTimestamp != 0 {
-			baseFilter["staking_btc_timestamp"] = bson.M{"$gte": filters.AfterTimestamp}
-		}
+	if filters == nil {
+		return baseFilter
+	}
+
+	if filters.States != nil {
+		baseFilter["state"] = bson.M{"$in": filters.States}
+	}
+	if filters.AfterTimestamp != 0 {
+		baseFilter["staking_btc_timestamp"] = bson.M{"$gte": filters.AfterTimestamp}
 	}
 	return baseFilter
 }
