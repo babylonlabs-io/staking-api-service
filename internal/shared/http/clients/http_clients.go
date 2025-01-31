@@ -8,7 +8,7 @@ import (
 
 type Clients struct {
 	Ordinals      ordinals.OrdinalsClient
-	CoinMarketCap *cmc.Client // todo for review: move to another location?
+	CoinMarketCap *cmc.Client
 }
 
 func New(cfg *config.Config) *Clients {

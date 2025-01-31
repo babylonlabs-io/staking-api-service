@@ -12,6 +12,12 @@ import (
 )
 
 func (s *V2Service) GetLatestPrices(ctx context.Context) (map[string]float64, *types.Error) {
+	// it happens in case config doesn't contain values to initialize coinmarketcap client
+	if s.Clients.CoinMarketCap == nil {
+		err := errors.New("coin market cap API is not configured")
+		return nil, types.NewInternalServiceError(err)
+	}
+
 	btcPrice, err := s.getLatestBTCPrice(ctx)
 	if err != nil {
 		return nil, types.NewInternalServiceError(err)
