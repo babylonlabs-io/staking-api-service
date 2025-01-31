@@ -8,7 +8,6 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/middlewares"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/go-chi/chi"
 	"github.com/rs/zerolog"
@@ -28,8 +27,7 @@ func New(
 
 	logLevel, err := zerolog.ParseLevel(cfg.Server.LogLevel)
 	if err != nil {
-		metrics.RecordServiceCrash("server.New")
-		log.Fatal().Err(err).Msg("error while parsing log level")
+		return nil, fmt.Errorf("error while parsing log level: %w", err)
 	}
 	zerolog.SetGlobalLevel(logLevel)
 
@@ -48,14 +46,12 @@ func New(
 	}
 
 	if err != nil {
-		metrics.RecordServiceCrash("server.New")
-		log.Fatal().Err(err).Msg("error while setting up handlers")
+		return nil, fmt.Errorf("error while setting up handlers: %w", err)
 	}
 
 	handlers, err := handlers.New(ctx, cfg, services)
 	if err != nil {
-		metrics.RecordServiceCrash("server.New")
-		log.Fatal().Err(err).Msg("error while setting up handlers")
+		return nil, fmt.Errorf("error while setting up handlers: %w", err)
 	}
 
 	server := &Server{

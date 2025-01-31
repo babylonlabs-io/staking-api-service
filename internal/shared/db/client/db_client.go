@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -26,6 +27,7 @@ func NewMongoClient(ctx context.Context, cfg *config.DbConfig) (*mongo.Client, e
 func (db *Database) Ping(ctx context.Context) error {
 	err := db.Client.Ping(ctx, nil)
 	if err != nil {
+		metrics.RecordDbError("ping")
 		return err
 	}
 	return nil
