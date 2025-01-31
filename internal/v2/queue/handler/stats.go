@@ -26,8 +26,12 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 		return types.NewError(http.StatusInternalServerError, types.InternalServiceError, err)
 	}
 
-	// TODO: Perform the address lookup conversion
-	// https://github.com/babylonlabs-io/staking-api-service/issues/162
+	// Perform the address lookup conversion
+	addErr := h.Services.V1Service.ProcessAndSaveBtcAddresses(ctx, activeStakingEvent.StakerBtcPkHex)
+	if addErr != nil {
+		log.Ctx(ctx).Error().Err(addErr).Msg("Failed to process and save btc addresses")
+		return addErr
+	}
 
 	statsErr := h.Services.V2Service.ProcessActiveDelegationStats(
 		ctx,

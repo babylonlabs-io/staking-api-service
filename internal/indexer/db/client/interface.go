@@ -22,4 +22,12 @@ type IndexerDBClient interface {
 	GetDelegations(ctx context.Context, stakerPKHex string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)
 	// GetLastProcessedBbnHeight retrieves the last processed BBN height.
 	GetLastProcessedBbnHeight(ctx context.Context) (lastProcessedHeight uint64, err error)
+	CheckDelegationExistByStakerPk(
+		ctx context.Context, address string, extraFilter *DelegationFilter,
+	) (bool, error)
+}
+
+type DelegationFilter struct {
+	AfterTimestamp int64
+	States         []indexertypes.DelegationState
 }
