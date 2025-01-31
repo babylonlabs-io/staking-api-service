@@ -4,6 +4,7 @@ import (
 	"context"
 
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -20,6 +21,7 @@ func (db *Database) InsertPkAddressMappings(
 	}
 	_, err := client.InsertOne(ctx, addressMapping)
 	if err != nil && !mongo.IsDuplicateKeyError(err) {
+		metrics.RecordDbError("insert_pk_address_mappings")
 		return err
 	}
 	return nil
@@ -34,10 +36,12 @@ func (db *Database) FindPkMappingsByTaprootAddress(
 	addressMapping := []*dbmodel.PkAddressMapping{}
 	cursor, err := client.Find(ctx, filter)
 	if err != nil {
+		metrics.RecordDbError("find_pk_mappings_by_taproot_address")
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 	if err = cursor.All(ctx, &addressMapping); err != nil {
+		metrics.RecordDbError("find_pk_mappings_by_taproot_address")
 		return nil, err
 	}
 	return addressMapping, nil
@@ -57,10 +61,12 @@ func (db *Database) FindPkMappingsByNativeSegwitAddress(
 	addressMapping := []*dbmodel.PkAddressMapping{}
 	cursor, err := client.Find(ctx, filter)
 	if err != nil {
+		metrics.RecordDbError("find_pk_mappings_by_native_segwit_address")
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 	if err = cursor.All(ctx, &addressMapping); err != nil {
+		metrics.RecordDbError("find_pk_mappings_by_native_segwit_address")
 		return nil, err
 	}
 	return addressMapping, nil

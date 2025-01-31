@@ -3,12 +3,12 @@ package dbclients
 import (
 	"context"
 
+	"fmt"
 	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
 	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
 	v2dbclient "github.com/babylonlabs-io/staking-api-service/internal/v2/db/client"
-	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -34,24 +34,21 @@ func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
 
 	v1dbClient, err := v1dbclient.New(ctx, stakingMongoClient, cfg.StakingDb)
 	if err != nil {
-		log.Ctx(ctx).Fatal().Err(err).Msg("error while creating v1 db client")
-		return nil, err
+		return nil, fmt.Errorf("error while creating v1 db client: %w", err)
 	}
 	v2dbClient, err := v2dbclient.New(ctx, stakingMongoClient, cfg.StakingDb)
 	if err != nil {
-		log.Ctx(ctx).Fatal().Err(err).Msg("error while creating v2 db client")
-		return nil, err
+		return nil, fmt.Errorf("error while creating v2 db client: %w", err)
 	}
 
 	indexerMongoClient, err := dbclient.NewMongoClient(ctx, cfg.IndexerDb)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while creating indexer mongo client: %w", err)
 	}
 
 	indexerDbClient, err := indexerdbclient.New(ctx, indexerMongoClient, cfg.IndexerDb)
 	if err != nil {
-		log.Ctx(ctx).Fatal().Err(err).Msg("error while creating indexer db client")
-		return nil, err
+		return nil, fmt.Errorf("error while creating indexer db client: %w", err)
 	}
 
 	dbClients := DbClients{

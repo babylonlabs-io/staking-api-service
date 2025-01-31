@@ -33,6 +33,19 @@ func init() {
 // @license.name    API Access License
 // @license.url     https://docs.babylonlabs.io/assets/files/api-access-license.pdf
 // @contact.email   contact@babylonlabs.io
+
+// @tag.name shared
+// @tag.description Shared API endpoints
+// @tag.order 1
+
+// @tag.name v2
+// @tag.description Babylon Phase-2 API endpoints
+// @tag.order 2
+
+// @tag.name v1
+// @tag.description Babylon Phase-1 API endpoints (Deprecated)
+// @tag.deprecated
+// @tag.order 2
 func main() {
 	ctx := context.Background()
 
@@ -70,6 +83,7 @@ func main() {
 
 	dbClients, err := dbclients.New(ctx, cfg)
 	if err != nil {
+		metrics.RecordServiceCrash("database")
 		log.Fatal().Err(err).Msg("error while setting up staking db clients")
 	}
 
@@ -113,6 +127,7 @@ func main() {
 
 	apiServer, err := api.New(ctx, cfg, services)
 	if err != nil {
+		metrics.RecordServiceCrash("api")
 		log.Fatal().Err(err).Msg("error while setting up staking api service")
 	}
 	if err = apiServer.Start(); err != nil {
