@@ -12,7 +12,6 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
-	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -228,23 +227,7 @@ func (v2dbclient *V2Database) HandleActiveStakerStats(
 			"active_delegations": 1,
 		},
 	}
-	err := v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
-	if err != nil {
-		return err
-	}
-
-	// Log the final stats
-	// TODO: Remove this after testing
-	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
-	if err != nil {
-		return err
-	}
-	log.Debug().
-		Str("stakerPkHex", stakerPkHex).
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Interface("stakerStats", stakerStats).
-		Msg("Staker stats after handling active")
-	return nil
+	return v2dbclient.updateStakerStats(ctx, types.Active.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
 // HandleUnbondingStakerStats handles the unbonding event for the given staking tx hash
@@ -275,24 +258,7 @@ func (v2dbclient *V2Database) HandleUnbondingStakerStats(
 			"unbonding_delegations": 1,
 		},
 	}
-	err := v2dbclient.updateStakerStats(ctx, types.Unbonding.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
-	if err != nil {
-		return err
-	}
-
-	// Log the final stats
-	// TODO: Remove this after testing
-	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
-	if err != nil {
-		return err
-	}
-
-	log.Debug().
-		Str("stakerPkHex", stakerPkHex).
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Interface("stakerStats", stakerStats).
-		Msg("Staker stats after handling unbonding")
-	return nil
+	return v2dbclient.updateStakerStats(ctx, types.Unbonding.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
 // HandleWithdrawableStakerStats handles the withdrawable event for the given staking tx hash
@@ -338,22 +304,7 @@ func (v2dbclient *V2Database) HandleWithdrawableStakerStats(
 		"$inc": statsUpdates,
 	}
 
-	if err := v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate); err != nil {
-		return err
-	}
-
-	// Log the final stats
-	// TODO: Remove this after testing
-	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
-	if err != nil {
-		return err
-	}
-	log.Debug().
-		Str("stakerPkHex", stakerPkHex).
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Interface("stakerStats", stakerStats).
-		Msg("Staker stats after handling withdrawable")
-	return nil
+	return v2dbclient.updateStakerStats(ctx, types.Withdrawable.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
 // HandleWithdrawnStakerStats handles the withdrawn event for the given staking tx hash
@@ -423,22 +374,7 @@ func (v2dbclient *V2Database) HandleWithdrawnStakerStats(
 		"$inc": statsUpdates,
 	}
 
-	if err := v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate); err != nil {
-		return err
-	}
-
-	// Log the final stats
-	// TODO: Remove this after testing
-	stakerStats, err := v2dbclient.GetStakerStats(ctx, stakerPkHex)
-	if err != nil {
-		return err
-	}
-	log.Debug().
-		Str("stakerPkHex", stakerPkHex).
-		Str("stakingTxHashHex", stakingTxHashHex).
-		Interface("stakerStats", stakerStats).
-		Msg("Staker stats after handling withdrawn")
-	return nil
+	return v2dbclient.updateStakerStats(ctx, types.Withdrawn.ToString(), stakingTxHashHex, stakerPkHex, upsertUpdate)
 }
 
 func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stakingTxHashHex, stakerPkHex string, upsertUpdate primitive.M) error {
