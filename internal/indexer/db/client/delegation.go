@@ -8,6 +8,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -71,4 +72,39 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
 		indexerdbmodel.BuildDelegationPaginationToken,
 	)
+}
+
+// CheckDelegationExistByStakerPk checks if a staker has any
+// delegation in the specified states by the staker's public key
+func (indexerdbclient *IndexerDatabase) CheckDelegationExistByStakerPk(
+	ctx context.Context, stakerPk string, extraFilter *DelegationFilter,
+) (bool, error) {
+	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
+	filter := buildAdditionalDelegationFilter(
+		bson.M{"_id": stakerPk}, extraFilter,
+	)
+	var delegation indexerdbmodel.IndexerDelegationDetails
+	err := client.FindOne(ctx, filter).Decode(&delegation)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+func buildAdditionalDelegationFilter(
+	baseFilter primitive.M,
+	filters *DelegationFilter,
+) primitive.M {
+	if filters != nil {
+		if filters.States != nil {
+			baseFilter["state"] = bson.M{"$in": filters.States}
+		}
+		if filters.AfterTimestamp != 0 {
+			baseFilter["staking_btc_timestamp"] = bson.M{"$gte": filters.AfterTimestamp}
+		}
+	}
+	return baseFilter
 }

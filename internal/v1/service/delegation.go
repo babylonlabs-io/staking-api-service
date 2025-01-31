@@ -4,7 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
@@ -140,11 +142,11 @@ func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*Deleg
 func (s *V1Service) CheckStakerHasActiveDelegationByPk(
 	ctx context.Context, stakerPk string, afterTimestamp int64,
 ) (bool, *types.Error) {
-	filter := &v1dbclient.DelegationFilter{
-		States:         []types.DelegationState{types.Active},
+	filter := &indexerdbclient.DelegationFilter{
+		States:         []indexertypes.DelegationState{indexertypes.StateActive},
 		AfterTimestamp: afterTimestamp,
 	}
-	hasDelegation, err := s.Service.DbClients.V1DBClient.CheckDelegationExistByStakerPk(
+	hasDelegation, err := s.Service.DbClients.IndexerDBClient.CheckDelegationExistByStakerPk(
 		ctx, stakerPk, filter,
 	)
 	if err != nil {
