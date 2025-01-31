@@ -35,6 +35,7 @@ var (
 	httpResponseWriteFailureCounter  *prometheus.CounterVec
 	clientRequestDurationHistogram   *prometheus.HistogramVec
 	serviceCrashCounter              *prometheus.CounterVec
+	dbErrorsCounter                  *prometheus.CounterVec
 )
 
 // Init initializes the metrics package.
@@ -132,6 +133,13 @@ func registerMetrics() {
 		},
 		[]string{"type"},
 	)
+	dbErrorsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "db_errors",
+			Help: "",
+		},
+		[]string{"method"},
+	)
 
 	prometheus.MustRegister(
 		httpRequestDurationHistogram,
@@ -201,4 +209,8 @@ func StartClientRequestDurationTimer(baseUrl, method, path string) func(statusCo
 // RecordServiceCrash increments the service crash counter.
 func RecordServiceCrash(service string) {
 	serviceCrashCounter.WithLabelValues(service).Inc()
+}
+
+func RecordDbError(method string) {
+	dbErrorsCounter.WithLabelValues(method).Inc()
 }

@@ -83,6 +83,7 @@ func main() {
 
 	dbClients, err := dbclients.New(ctx, cfg)
 	if err != nil {
+		metrics.RecordServiceCrash("database")
 		log.Fatal().Err(err).Msg("error while setting up staking db clients")
 	}
 
@@ -126,6 +127,7 @@ func main() {
 
 	apiServer, err := api.New(ctx, cfg, services)
 	if err != nil {
+		metrics.RecordServiceCrash("api")
 		log.Fatal().Err(err).Msg("error while setting up staking api service")
 	}
 	if err = apiServer.Start(); err != nil {
