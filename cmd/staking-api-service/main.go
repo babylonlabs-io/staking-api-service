@@ -93,7 +93,11 @@ func main() {
 	}
 
 	// Start the event queue processing
-	v2queues := v2queue.New(cfg.Queue, services)
+	v2queues, err := v2queue.New(cfg.Queue, services)
+	if err != nil {
+		metrics.RecordServiceCrash("queue")
+		log.Fatal().Err(err).Msg("error while setting up queue service")
+	}
 
 	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
@@ -118,7 +122,10 @@ func main() {
 	metrics.Init(metricsPort)
 
 	// Start the event queue processing
-	v2queues.StartReceivingMessages()
+	err = v2queues.StartReceivingMessages()
+	if err != nil {
+		log.Fatal().Err(err).Msg("error while starting queue service")
+	}
 
 	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, v2queues, cfg.Server.HealthCheckInterval)
 	if healthcheckErr != nil {
