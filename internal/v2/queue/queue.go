@@ -27,33 +27,33 @@ type Queues struct {
 	WithdrawnStakingQueueClient    client.QueueClient
 }
 
-func New(cfg *queueConfig.QueueConfig, service *services.Services) *Queues {
+func New(cfg *queueConfig.QueueConfig, service *services.Services) (*Queues, error) {
 	activeStakingQueueClient, err := client.NewQueueClient(
 		cfg, client.ActiveStakingQueueName,
 	)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error while creating ActiveStakingQueueClient")
+		return nil, fmt.Errorf("error while creating ActiveStakingQueueClient: %w", err)
 	}
 
 	unbondingStakingQueueClient, err := client.NewQueueClient(
 		cfg, client.UnbondingStakingQueueName,
 	)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error while creating UnbondingStakingQueueClient")
+		return nil, fmt.Errorf("error while creating UnbondingStakingQueueClient: %w", err)
 	}
 
 	withdrawableStakingQueueClient, err := client.NewQueueClient(
 		cfg, client.WithdrawableStakingQueueName,
 	)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error while creating WithdrawableStakingQueueClient")
+		return nil, fmt.Errorf("error while creating WithdrawableStakingQueueClient: %w", err)
 	}
 
 	withdrawnStakingQueueClient, err := client.NewQueueClient(
 		cfg, client.WithdrawnStakingQueueName,
 	)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error while creating WithdrawnStakingQueueClient")
+		return nil, fmt.Errorf("error while creating WithdrawnStakingQueueClient: %w", err)
 	}
 
 	handlers := v2queuehandler.NewV2QueueHandler(service)
@@ -65,33 +65,49 @@ func New(cfg *queueConfig.QueueConfig, service *services.Services) *Queues {
 		UnbondingStakingQueueClient:    unbondingStakingQueueClient,
 		WithdrawableStakingQueueClient: withdrawableStakingQueueClient,
 		WithdrawnStakingQueueClient:    withdrawnStakingQueueClient,
-	}
+	}, nil
 }
 
 // Start all message processing
-func (q *Queues) StartReceivingMessages() {
+func (q *Queues) StartReceivingMessages() error {
 	// start processing messages from the active staking queue
-	startQueueMessageProcessing(
-		q.ActiveStakingQueueClient,
-		q.Handlers.ActiveStakingHandler, q.Handlers.HandleUnprocessedMessage,
-		q.maxRetryAttempts, q.processingTimeout,
-	)
-	startQueueMessageProcessing(
-		q.UnbondingStakingQueueClient,
-		q.Handlers.UnbondingStakingHandler, q.Handlers.HandleUnprocessedMessage,
-		q.maxRetryAttempts, q.processingTimeout,
-	)
-	startQueueMessageProcessing(
-		q.WithdrawableStakingQueueClient,
-		q.Handlers.WithdrawableStakingHandler, q.Handlers.HandleUnprocessedMessage,
-		q.maxRetryAttempts, q.processingTimeout,
-	)
-	startQueueMessageProcessing(
-		q.WithdrawnStakingQueueClient,
-		q.Handlers.WithdrawnStakingHandler, q.Handlers.HandleUnprocessedMessage,
-		q.maxRetryAttempts, q.processingTimeout,
-	)
-	// ...add more queues here
+	queues := []struct {
+		client               client.QueueClient
+		handler              v2queuehandler.MessageHandler
+		unprocessableHandler v2queuehandler.UnprocessableMessageHandler
+	}{
+		{
+			q.ActiveStakingQueueClient,
+			q.Handlers.ActiveStakingHandler, q.Handlers.HandleUnprocessedMessage,
+		},
+		{
+			q.UnbondingStakingQueueClient,
+			q.Handlers.UnbondingStakingHandler, q.Handlers.HandleUnprocessedMessage,
+		},
+		{
+			q.WithdrawableStakingQueueClient,
+			q.Handlers.WithdrawableStakingHandler, q.Handlers.HandleUnprocessedMessage,
+		},
+		{
+			q.WithdrawnStakingQueueClient,
+			q.Handlers.WithdrawnStakingHandler, q.Handlers.HandleUnprocessedMessage,
+		},
+		// ...add more queues here
+	}
+
+	for _, queue := range queues {
+		if err := startQueueMessageProcessing(
+			queue.client,
+			queue.handler,
+			queue.unprocessableHandler,
+			q.maxRetryAttempts,
+			q.processingTimeout,
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (q *Queues) StopReceivingMessages() {
@@ -127,11 +143,11 @@ func startQueueMessageProcessing(
 	handler v2queuehandler.MessageHandler,
 	unprocessableHandler v2queuehandler.UnprocessableMessageHandler,
 	maxRetryAttempts int32, processingTimeout time.Duration,
-) {
+) error {
 	messagesChan, err := queueClient.ReceiveMessages()
 	log.Info().Str("queueName", queueClient.GetQueueName()).Msg("start receiving messages from queue")
 	if err != nil {
-		log.Fatal().Err(err).Str("queueName", queueClient.GetQueueName()).Msg("error setting up message channel from queue")
+		return fmt.Errorf("error setting up message channel from queue %q: %w", queueClient.GetQueueName(), err)
 	}
 
 	go func() {
@@ -199,6 +215,8 @@ func startQueueMessageProcessing(
 		}
 		log.Info().Str("queueName", queueClient.GetQueueName()).Msg("stopped receiving messages from queue")
 	}()
+
+	return nil
 }
 
 func attachLoggerContext(ctx context.Context, message client.QueueMessage, queueClient client.QueueClient) context.Context {
