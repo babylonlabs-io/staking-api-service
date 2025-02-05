@@ -17,6 +17,7 @@ type Config struct {
 	Metrics              *MetricsConfig              `mapstructure:"metrics"`
 	Assets               *AssetsConfig               `mapstructure:"assets"`
 	DelegationTransition *DelegationTransitionConfig `mapstructure:"delegation-transition"`
+	ExternalAPIs         *ExternalAPIsConfig         `mapstructure:"external_apis"`
 }
 
 func (cfg *Config) Validate() error {
@@ -49,6 +50,13 @@ func (cfg *Config) Validate() error {
 
 	if cfg.DelegationTransition != nil {
 		if err := cfg.DelegationTransition.Validate(); err != nil {
+			return err
+		}
+	}
+
+	// ExternalAPIs is optional
+	if cfg.ExternalAPIs != nil {
+		if err := cfg.ExternalAPIs.Validate(); err != nil {
 			return err
 		}
 	}

@@ -15,6 +15,7 @@ type V2ServiceProvider interface {
 	GetDelegations(ctx context.Context, stakerPKHex string, paginationKey string) ([]*DelegationPublic, string, *types.Error)
 	MarkV1DelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) *types.Error
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
+	GetLatestPrices(ctx context.Context) (map[string]float64, *types.Error)
 	GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error)
 	ProcessAndSaveBtcAddresses(ctx context.Context, stakerPkHex string) *types.Error
 	SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error

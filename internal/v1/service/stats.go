@@ -11,13 +11,14 @@ import (
 )
 
 type OverallStatsPublic struct {
-	ActiveTvl         int64  `json:"active_tvl"`
-	TotalTvl          int64  `json:"total_tvl"`
-	ActiveDelegations int64  `json:"active_delegations"`
-	TotalDelegations  int64  `json:"total_delegations"`
-	TotalStakers      uint64 `json:"total_stakers"`
-	UnconfirmedTvl    uint64 `json:"unconfirmed_tvl"`
-	PendingTvl        uint64 `json:"pending_tvl"`
+	ActiveTvl         int64    `json:"active_tvl"`
+	TotalTvl          int64    `json:"total_tvl"`
+	ActiveDelegations int64    `json:"active_delegations"`
+	TotalDelegations  int64    `json:"total_delegations"`
+	TotalStakers      uint64   `json:"total_stakers"`
+	UnconfirmedTvl    uint64   `json:"unconfirmed_tvl"`
+	PendingTvl        uint64   `json:"pending_tvl"`
+	BtcPriceUsd       *float64 `json:"btc_price_usd,omitempty"` // Optional field
 }
 
 type StakerStatsPublic struct {
@@ -162,9 +163,7 @@ func (s *V1Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	unconfirmedTvl := uint64(0)
-	confirmedTvl := uint64(0)
-	pendingTvl := uint64(0)
+	var unconfirmedTvl, confirmedTvl, pendingTvl uint64
 
 	btcInfo, err := s.Service.DbClients.V1DBClient.GetLatestBtcInfo(ctx)
 	if err != nil {
