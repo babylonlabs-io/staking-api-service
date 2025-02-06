@@ -10,7 +10,7 @@ import (
 )
 
 func TestCMC(t *testing.T) {
-	t.Skip("test for manual testing")
+	t.Skip("manual test")
 
 	const envVarName = "COINMARKETCAP_API_KEY"
 	apiKey, found := os.LookupEnv(envVarName)
