@@ -10,14 +10,15 @@ import (
 )
 
 type Config struct {
-	Server               *ServerConfig               `mapstructure:"server"`
-	StakingDb            *DbConfig                   `mapstructure:"staking-db"`
-	IndexerDb            *DbConfig                   `mapstructure:"indexer-db"`
-	Queue                *queue.QueueConfig          `mapstructure:"queue"`
-	Metrics              *MetricsConfig              `mapstructure:"metrics"`
-	Assets               *AssetsConfig               `mapstructure:"assets"`
-	DelegationTransition *DelegationTransitionConfig `mapstructure:"delegation-transition"`
-	ExternalAPIs         *ExternalAPIsConfig         `mapstructure:"external_apis"`
+	Server                 *ServerConfig               `mapstructure:"server"`
+	StakingDb              *DbConfig                   `mapstructure:"staking-db"`
+	IndexerDb              *DbConfig                   `mapstructure:"indexer-db"`
+	Queue                  *queue.QueueConfig          `mapstructure:"queue"`
+	Metrics                *MetricsConfig              `mapstructure:"metrics"`
+	Assets                 *AssetsConfig               `mapstructure:"assets"`
+	DelegationTransition   *DelegationTransitionConfig `mapstructure:"delegation-transition"`
+	ExternalAPIs           *ExternalAPIsConfig         `mapstructure:"external_apis"`
+	TermsAcceptanceLogging *TermsAcceptanceConfig      `mapstructure:"terms_acceptance_logging"`
 }
 
 func (cfg *Config) Validate() error {
