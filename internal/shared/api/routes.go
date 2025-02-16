@@ -21,7 +21,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 		r.Post("/v1/ordinals/verify-utxos", registerHandler(handlers.SharedHandler.VerifyUTXOs))
 	}
 
-	if a.cfg.TermsAcceptanceLogging.Enabled {
+	if a.cfg.TermsAcceptanceLogging != nil && a.cfg.TermsAcceptanceLogging.Enabled {
 		r.Post("/log-terms-acceptance", registerHandler(handlers.SharedHandler.LogTermsAcceptance))
 	}
 
