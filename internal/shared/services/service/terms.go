@@ -11,5 +11,5 @@ func (s *Service) AcceptTerms(ctx context.Context, address, publicKey string) er
 		PublicKey: publicKey,
 	}
 
-	return s.DbClients.SaveTermsAcceptance(ctx, termsAcceptance)
+	return s.DbClients.SharedDBClient.SaveTermsAcceptance(ctx, termsAcceptance)
 }
