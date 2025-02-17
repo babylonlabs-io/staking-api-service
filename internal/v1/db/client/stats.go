@@ -78,7 +78,7 @@ func (v1dbclient *V1Database) IncrementOverallStats(
 		}
 
 		// The order of the overall stats and staker stats update is important.
-		// The staker stats colleciton will need to be processed first to determine if the staker is new
+		// The staker stats collection will need to be processed first to determine if the staker is new
 		// If the staker stats is the first delegation for the staker, we need to increment the total stakers
 		var stakerStats v1dbmodel.StakerStatsDocument
 		stakerStatsFilter := bson.M{"_id": stakerPkHex}
@@ -410,7 +410,7 @@ func (v1dbclient *V1Database) FindTopStakersByTvl(ctx context.Context, paginatio
 
 	opts := options.Find().SetSort(bson.D{{Key: "active_tvl", Value: -1}})
 	var filter bson.M
-	// Decode the pagination token first if it exist
+	// Decode the pagination token first if it exists
 	if paginationToken != "" {
 		decodedToken, err := dbmodel.DecodePaginationToken[v1dbmodel.StakerStatsByStakerPagination](paginationToken)
 		if err != nil {
