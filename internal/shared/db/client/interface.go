@@ -37,4 +37,5 @@ type DBClient interface {
 	GetLatestPrice(ctx context.Context, symbol string) (float64, error)
 	// SetLatestPrice sets the latest symbol price in the database
 	SetLatestPrice(ctx context.Context, symbol string, price float64) error
+	SaveTermsAcceptance(ctx context.Context, termsAcceptance *dbmodel.TermsAcceptance) error
 }

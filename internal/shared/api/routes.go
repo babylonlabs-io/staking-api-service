@@ -21,6 +21,10 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 		r.Post("/v1/ordinals/verify-utxos", registerHandler(handlers.SharedHandler.VerifyUTXOs))
 	}
 
+	if a.cfg.TermsAcceptanceLogging != nil && a.cfg.TermsAcceptanceLogging.Enabled {
+		r.Post("/log-terms-acceptance", registerHandler(handlers.SharedHandler.LogTermsAcceptance))
+	}
+
 	// V2 API
 	r.Get("/v2/network-info", registerHandler(handlers.V2Handler.GetNetworkInfo))
 	r.Get("/v2/finality-providers", registerHandler(handlers.V2Handler.GetFinalityProviders))
