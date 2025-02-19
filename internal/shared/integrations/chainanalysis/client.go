@@ -7,7 +7,7 @@ import (
 )
 
 type Interface interface {
-	AssessAddress(address string) (any, error)
+	AssessAddress(address string) (*AddressAssessment, error)
 }
 
 type Client struct {
@@ -20,8 +20,13 @@ func NewClient(apiKey string, host string) *Client {
 	}
 }
 
-func (c *Client) AssessAddress(address string) (any, error) {
-	// todo change type to string
+type AddressAssessment struct {
+	Risk        string
+	RiskReason  *string
+	AddressType string
+}
+
+func (c *Client) AssessAddress(address string) (*AddressAssessment, error) {
 	resp, err := c.impl.EntityAddressRetrieve(address)
 	if err != nil {
 		metrics.RecordChainAnalysisCall(true)
@@ -34,5 +39,14 @@ func (c *Client) AssessAddress(address string) (any, error) {
 	}
 
 	metrics.RecordChainAnalysisCall(false)
-	return resp.Risk, nil
+
+	var riskReason *string
+	if resp.RiskReason != "" {
+		riskReason = &resp.RiskReason
+	}
+	return &AddressAssessment{
+		Risk:        resp.Risk,
+		RiskReason:  riskReason,
+		AddressType: resp.AddressType,
+	}, nil
 }

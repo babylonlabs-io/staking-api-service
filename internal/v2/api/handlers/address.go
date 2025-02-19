@@ -6,14 +6,13 @@ import (
 	"net/http"
 )
 
-// AddressScreening gets staker stats for babylon staking
-// todo change
-// @Summary Get Staker Stats
-// @Description Fetches staker stats for babylon staking including active tvl and active delegations.
+// AddressScreening checks address risk agains chainanalysis provider
+// @Summary Checks address risk
+// @Description Checks address risk
 // @Produce json
 // @Tags v2
 // @Param address query string true "Address to check"
-// @Success 200 {object} handler.PublicResponse[v2service.StakerStatsPublic] "Staker stats"
+// @Success 200 {object} handler.PublicResponse[string] "Risk of provided address"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Failure 404 {object} types.Error "Error: Not Found"
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
@@ -29,5 +28,6 @@ func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *t
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "error assessing address")
 	}
 
-	return handler.NewResult(result), nil
+	// todo for review exposing only risk is ok ?
+	return handler.NewResult(result.Risk), nil
 }
