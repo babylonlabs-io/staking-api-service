@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// AddressScreening checks address risk agains chainanalysis provider
+// AddressScreening checks address risk against chainanalysis provider
 // @Summary Checks address risk
 // @Description Checks address risk
 // @Produce json
