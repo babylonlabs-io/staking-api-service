@@ -396,6 +396,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/address/screening": {
+            "get": {
+                "description": "Checks address risk",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Checks address risk",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Address to check",
+                        "name": "address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Risk of provided address",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v2/delegation": {
             "get": {
                 "description": "Retrieves a delegation by a given transaction hash",
@@ -756,6 +803,17 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/map_string_string"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-string": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
