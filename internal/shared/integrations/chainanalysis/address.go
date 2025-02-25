@@ -26,7 +26,6 @@ type riskEntityResponse struct {
 }
 
 func (c *Client) AssessAddress(ctx context.Context, address string) (*AddressAssessment, error) {
-	// urlEntityRetrieveAddress = ""
 	resp, err := c.testMe(ctx, address)
 	if err != nil {
 		metrics.RecordChainAnalysisCall(true)
