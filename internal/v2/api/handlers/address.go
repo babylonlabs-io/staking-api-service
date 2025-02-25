@@ -29,7 +29,7 @@ func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *t
 		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "btc_address is required")
 	}
 
-	result, err := h.Service.AssessAddress(btcAddress)
+	result, err := h.Service.AssessAddress(nil, btcAddress)
 	if err != nil {
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "error assessing address")
 	}

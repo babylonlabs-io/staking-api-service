@@ -11,24 +11,27 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
+	"slices"
 )
 
-var ALLOWED_METHODS = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}
+var allowedMethods = []string{
+	http.MethodPost,
+	http.MethodGet,
+	http.MethodPut,
+	http.MethodDelete,
+	http.MethodPatch,
+	http.MethodOptions,
+}
+
+func isAllowedMethod(method string) bool {
+	return slices.Contains(allowedMethods, method)
+}
 
 type HttpClientOptions struct {
 	Timeout      int
 	Path         string
 	TemplatePath string // Metrics purpose
 	Headers      map[string]string
-}
-
-func isAllowedMethod(method string) bool {
-	for _, allowedMethod := range ALLOWED_METHODS {
-		if method == allowedMethod {
-			return true
-		}
-	}
-	return false
 }
 
 func sendRequest[I any, R any](
