@@ -2,7 +2,6 @@ package chainanalysis
 
 import (
 	"context"
-	"errors"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"net/http"
@@ -26,15 +25,10 @@ type riskEntityResponse struct {
 }
 
 func (c *Client) AssessAddress(ctx context.Context, address string) (*AddressAssessment, error) {
-	resp, err := c.testMe(ctx, address)
+	resp, err := c.doAccessAddress(ctx, address)
 	if err != nil {
 		metrics.RecordChainAnalysisCall(true)
 		return nil, err
-	}
-
-	if resp.Message != "" {
-		metrics.RecordChainAnalysisCall(true)
-		return nil, errors.New(resp.Message)
 	}
 
 	metrics.RecordChainAnalysisCall(false)
@@ -49,7 +43,7 @@ func (c *Client) AssessAddress(ctx context.Context, address string) (*AddressAss
 	}, nil
 }
 
-func (c *Client) testMe(ctx context.Context, address string) (*riskEntityResponse, error) {
+func (c *Client) doAccessAddress(ctx context.Context, address string) (*riskEntityResponse, error) {
 	const endpoint = "/api/risk/v2/entities/"
 	path := endpoint + address
 

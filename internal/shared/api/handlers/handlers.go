@@ -25,7 +25,7 @@ func New(ctx context.Context, config *config.Config, services *services.Services
 	if err != nil {
 		return nil, err
 	}
-	v2Handler, err := v2handler.New(ctx, sharedHandler, services.V2Service)
+	v2Handler, err := v2handler.New(sharedHandler, services.V2Service)
 	if err != nil {
 		return nil, err
 	}

@@ -1,15 +1,15 @@
 package v2service
 
 import (
-	"testing"
 	"context"
-	"github.com/stretchr/testify/require"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
-	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"slices"
+	"testing"
 )
 
 func TestGetNetworkInfo(t *testing.T) {
@@ -28,7 +28,7 @@ func TestGetNetworkInfo(t *testing.T) {
 		indexerDB.On("GetBbnStakingParams", ctx).Return(bbnStakingParams, nil).Once()
 		indexerDB.On("GetBtcCheckpointParams", ctx).Return(nil, nil).Once()
 
-		service, err := New(ctx, &config.Config{}, nil, &dbclients.DbClients{
+		service, err := New(&config.Config{}, nil, &dbclients.DbClients{
 			IndexerDBClient: indexerDB,
 		})
 		require.NoError(t, err)
