@@ -51,7 +51,7 @@ func (c *Client) AssessAddress(ctx context.Context, address string) (*AddressAss
 
 func (c *Client) testMe(ctx context.Context, address string) (*riskEntityResponse, error) {
 	const endpoint = "/api/risk/v2/entities/"
-	path := c.baseURL + endpoint + address
+	path := endpoint + address
 
 	opts := &client.HttpClientOptions{
 		Path:         path,
@@ -62,7 +62,12 @@ func (c *Client) testMe(ctx context.Context, address string) (*riskEntityRespons
 		},
 	}
 
-	return client.SendRequest[empty, riskEntityResponse](
+	resp, err := client.SendRequest[empty, riskEntityResponse](
 		ctx, c, http.MethodGet, opts, &empty{},
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

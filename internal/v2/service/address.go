@@ -12,5 +12,5 @@ func (s *V2Service) AssessAddress(ctx context.Context, address string) (*chainan
 		return nil, errors.New("ChainAnalysis client is not initialized")
 	}
 
-	return s.Clients.ChainAnalysis.AssessAddress(nil, address)
+	return s.Clients.ChainAnalysis.AssessAddress(ctx, address)
 }
