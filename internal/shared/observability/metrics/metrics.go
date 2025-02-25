@@ -184,9 +184,9 @@ func StartEventProcessingDurationTimer(queuename string, attempts int32) func(st
 	}
 }
 
-func RecordChainAnalysisCall(faillure bool) {
+func RecordChainAnalysisCall(failure bool) {
 	status := Success
-	if faillure {
+	if failure {
 		status = Error
 	}
 
