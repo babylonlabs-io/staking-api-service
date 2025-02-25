@@ -33,7 +33,10 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v2/stats", registerHandler(handlers.V2Handler.GetOverallStats))
 	r.Get("/v2/staker/stats", registerHandler(handlers.V2Handler.GetStakerStats))
 	r.Get("/v2/prices", registerHandler(handlers.V2Handler.GetPrices))
-	r.Get("/v2/address/screening", registerHandler(handlers.V2Handler.AddressScreening))
+
+	if a.cfg.AddressScreeningConfig != nil && a.cfg.AddressScreeningConfig.Enabled {
+		r.Get("/address/screening", registerHandler(handlers.V2Handler.AddressScreening))
+	}
 
 	// Legacy endpoints needed to support phase-1 delegations to unbond.
 	// These will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.

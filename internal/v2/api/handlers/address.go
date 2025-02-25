@@ -6,28 +6,35 @@ import (
 	"net/http"
 )
 
-// AddressScreening checks address risk against chainanalysis provider
+type AddressScreeningResponse struct {
+	BTCAddress struct {
+		Risk string `json:"risk"`
+	} `json:"btc_address"`
+}
+
+// AddressScreening checks address risk against address screening providers
 // @Summary Checks address risk
 // @Description Checks address risk
 // @Produce json
 // @Tags v2
-// @Param address query string true "Address to check"
-// @Success 200 {object} handler.PublicResponse[string] "Risk of provided address"
+// @Param btc_address query string true "BTC address to check"
+// @Success 200 {object} handler.PublicResponse[AddressScreeningResponse] "Risk of provided address"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Failure 404 {object} types.Error "Error: Not Found"
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
-// @Router /v2/address/screening [get]
+// @Router /address/screening [get]
 func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *types.Error) {
-	address := request.URL.Query().Get("address")
-	if address == "" {
-		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "address is required")
+	btcAddress := request.URL.Query().Get("btc_address")
+	if btcAddress == "" {
+		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "btc_address is required")
 	}
 
-	result, err := h.Service.AssessAddress(address)
+	result, err := h.Service.AssessAddress(btcAddress)
 	if err != nil {
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "error assessing address")
 	}
 
-	// todo for review exposing only risk is ok ?
-	return handler.NewResult(result.Risk), nil
+	var data AddressScreeningResponse
+	data.BTCAddress.Risk = result.Risk
+	return handler.NewResult(data), nil
 }

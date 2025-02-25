@@ -23,10 +23,6 @@ type ChainAnalysisConfig struct {
 }
 
 func (cfg *ExternalAPIsConfig) Validate() error {
-	if cfg.CoinMarketCap == nil && cfg.ChainAnalysis == nil {
-		return fmt.Errorf("missing external api configuration")
-	}
-
 	if cfg.CoinMarketCap != nil {
 		err := cfg.CoinMarketCap.Validate()
 		if err != nil {

@@ -19,6 +19,7 @@ type Config struct {
 	DelegationTransition   *DelegationTransitionConfig `mapstructure:"delegation-transition"`
 	ExternalAPIs           *ExternalAPIsConfig         `mapstructure:"external_apis"`
 	TermsAcceptanceLogging *TermsAcceptanceConfig      `mapstructure:"terms_acceptance_logging"`
+	AddressScreeningConfig *AddressScreeningConfig     `mapstructure:"address_screening"`
 }
 
 func (cfg *Config) Validate() error {
