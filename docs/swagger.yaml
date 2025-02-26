@@ -87,6 +87,13 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-v2handlers_AddressScreeningResponse:
+    properties:
+      data:
+        $ref: '#/definitions/v2handlers.AddressScreeningResponse'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-v2service_DelegationPublic:
     properties:
       data:
@@ -363,6 +370,14 @@ definitions:
       version:
         type: integer
     type: object
+  v2handlers.AddressScreeningResponse:
+    properties:
+      btc_address:
+        properties:
+          risk:
+            type: string
+        type: object
+    type: object
   v2service.CovenantSignature:
     properties:
       covenant_btc_pk_hex:
@@ -547,6 +562,37 @@ info:
   title: Babylon Staking API
   version: "2.0"
 paths:
+  /address/screening:
+    get:
+      description: Checks address risk
+      parameters:
+      - description: BTC address to check
+        in: query
+        name: btc_address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Risk of provided address
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-v2handlers_AddressScreeningResponse'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+        "404":
+          description: 'Error: Not Found'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+        "500":
+          description: 'Error: Internal Server Error'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Checks address risk
+      tags:
+      - v2
   /healthcheck:
     get:
       description: Health check the service, including ping database connection

@@ -3,12 +3,14 @@ package clients
 import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/ordinals"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainanalysis"
 	cmc "github.com/miguelmota/go-coinmarketcap/pro/v1"
 )
 
 type Clients struct {
 	Ordinals      ordinals.OrdinalsClient
 	CoinMarketCap *cmc.Client
+	ChainAnalysis *chainanalysis.Client
 }
 
 func New(cfg *config.Config) *Clients {
@@ -25,8 +27,17 @@ func New(cfg *config.Config) *Clients {
 		})
 	}
 
+	var chainAnalysisClient *chainanalysis.Client
+	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.ChainAnalysis != nil {
+		chainAnalysisClient = chainanalysis.NewClient(
+			cfg.ExternalAPIs.ChainAnalysis.APIKey,
+			cfg.ExternalAPIs.ChainAnalysis.BaseURL,
+		)
+	}
+
 	return &Clients{
 		Ordinals:      ordinalsClient,
 		CoinMarketCap: cmcClient,
+		ChainAnalysis: chainAnalysisClient,
 	}
 }

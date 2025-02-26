@@ -36,6 +36,7 @@ var (
 	clientRequestDurationHistogram   *prometheus.HistogramVec
 	serviceCrashCounter              *prometheus.CounterVec
 	dbErrorsCounter                  *prometheus.CounterVec
+	chainAnalysisCallsCounter        *prometheus.CounterVec
 )
 
 // Init initializes the metrics package.
@@ -140,6 +141,12 @@ func registerMetrics() {
 		},
 		[]string{"method"},
 	)
+	chainAnalysisCallsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "chain_analysis_calls",
+		},
+		[]string{"status"},
+	)
 
 	prometheus.MustRegister(
 		httpRequestDurationHistogram,
@@ -149,6 +156,7 @@ func registerMetrics() {
 		httpResponseWriteFailureCounter,
 		clientRequestDurationHistogram,
 		serviceCrashCounter,
+		chainAnalysisCallsCounter,
 	)
 }
 
@@ -174,6 +182,15 @@ func StartEventProcessingDurationTimer(queuename string, attempts int32) func(st
 			fmt.Sprintf("%d", attempts),
 		).Observe(duration)
 	}
+}
+
+func RecordChainAnalysisCall(failure bool) {
+	status := Success
+	if failure {
+		status = Error
+	}
+
+	chainAnalysisCallsCounter.WithLabelValues(status.String()).Inc()
 }
 
 // RecordUnprocessableEntity increments the unprocessable entity counter.

@@ -78,6 +78,10 @@ func main() {
 		log.Fatal().Err(err).Msg("error while setting up staking db model")
 	}
 
+	// initialize metrics with the metrics port from config
+	metricsPort := cfg.Metrics.GetMetricsPort()
+	metrics.Init(metricsPort)
+
 	// initialize clients package which is used to interact with external services
 	clients := clients.New(cfg)
 
@@ -116,10 +120,6 @@ func main() {
 		}
 		return
 	}
-
-	// initialize metrics with the metrics port from config
-	metricsPort := cfg.Metrics.GetMetricsPort()
-	metrics.Init(metricsPort)
 
 	// Start the event queue processing
 	err = v2queues.StartReceivingMessages()

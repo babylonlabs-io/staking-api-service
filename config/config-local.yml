@@ -40,10 +40,15 @@ assets:
     port: 8888
     timeout: 5000
 terms_acceptance_logging:
-  enabled: ${TERMS_ACCEPTANCE_LOGGING_ENABLED}
+  enabled: true
+address_screening:
+  enabled: true
 external_apis:
   coinmarketcap:
-    api_key: ${COINMARKETCAP_API_KEY}
+    api_key: "coinmarketcap_api_key"
     base_url: "https://pro-api.coinmarketcap.com/v1"
     timeout: 10s  # http client timeout
     cache_ttl: 300s  # mongodb ttl
+  chainanalysis:
+    api_key: "chainanalysis_api_key"
+    base_url: "https://api.chainalysis.com"
