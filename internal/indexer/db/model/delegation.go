@@ -33,6 +33,7 @@ type IndexerDelegationDetails struct {
 	ParamsVersion                uint32                          `bson:"params_version"`
 	FinalityProviderBtcPksHex    []string                        `bson:"finality_provider_btc_pks_hex"`
 	StakerBtcPkHex               string                          `bson:"staker_btc_pk_hex"`
+	StakerBabylonAddress         string                          `bson:"staker_babylon_address"`
 	StakingTimeLock              uint32                          `bson:"staking_time"`
 	StakingAmount                uint64                          `bson:"staking_amount"`
 	StakingOutputPkScript        string                          `bson:"staking_output_pk_script"`

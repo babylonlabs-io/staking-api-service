@@ -139,7 +139,7 @@ func (_m *IndexerDBClient) GetDelegation(ctx context.Context, stakingTxHashHex s
 }
 
 // GetDelegations provides a mock function with given fields: ctx, stakerPKHex, paginationToken
-func (_m *IndexerDBClient) GetDelegations(ctx context.Context, stakerPKHex string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
+func (_m *IndexerDBClient) GetDelegations(ctx context.Context, stakerPKHex string, paginationToken string, key string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
 	ret := _m.Called(ctx, stakerPKHex, paginationToken)
 
 	if len(ret) == 0 {
