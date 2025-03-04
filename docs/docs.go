@@ -510,6 +510,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Babylon address",
+                        "name": "babylon_address",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Pagination key to fetch the next page of delegations",
                         "name": "pagination_key",
                         "in": "query"

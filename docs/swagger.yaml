@@ -906,6 +906,10 @@ paths:
         name: staker_pk_hex
         required: true
         type: string
+      - description: Babylon address
+        in: query
+        name: babylon_address
+        type: string
       - description: Pagination key to fetch the next page of delegations
         in: query
         name: pagination_key

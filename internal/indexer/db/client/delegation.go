@@ -30,13 +30,14 @@ func (indexerdbclient *IndexerDatabase) GetDelegation(ctx context.Context, staki
 	return &delegation, nil
 }
 
-func (indexerdbclient *IndexerDatabase) GetDelegations(
-	ctx context.Context, stakerPKHex string, paginationToken string,
-) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
+func (indexerdbclient *IndexerDatabase) GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 
 	// Base filter with stakingTxHashHex
 	filter := bson.M{"staker_btc_pk_hex": stakerPKHex}
+	if stakerBabylonAddress != nil {
+		filter["staker_babylon_address"] = *stakerBabylonAddress
+	}
 
 	// Default sort by start_height for stable sorting
 	options := options.Find().SetSort(bson.D{
