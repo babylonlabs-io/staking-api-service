@@ -37,7 +37,7 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 // @Produce json
 // @Tags v2
 // @Param staker_pk_hex query string true "Staker public key in hex format"
-// @Param babylon_address query string true "Babylon address"
+// @Param babylon_address query string false "Babylon address"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
 // @Success 200 {object} handler.PublicResponse[[]v2service.DelegationPublic]{array} "List of staker delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
@@ -55,12 +55,10 @@ func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *typ
 		return nil, err
 	}
 
+	var bbnAddress *string
 	const bbnAddressKey = "babylon_address"
-	bbnAddress := request.URL.Query().Get(bbnAddressKey)
-	if bbnAddress == "" {
-		return nil, types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, bbnAddressKey+" is required",
-		)
+	if address := request.URL.Query().Get(bbnAddressKey); address != "" {
+		bbnAddress = &address
 	}
 
 	delegations, paginationToken, err := h.Service.GetDelegations(request.Context(), stakerPKHex, bbnAddress, paginationKey)

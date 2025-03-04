@@ -512,8 +512,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Babylon address",
                         "name": "babylon_address",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",

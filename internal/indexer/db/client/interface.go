@@ -19,7 +19,7 @@ type IndexerDBClient interface {
 	GetFinalityProviderByPk(ctx context.Context, fpPk string) (*indexerdbmodel.IndexerFinalityProviderDetails, error)
 	// Staker Delegations
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error)
-	GetDelegations(ctx context.Context, stakerPKHex, stakerBabylonAddress, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)
+	GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)
 	// GetLastProcessedBbnHeight retrieves the last processed BBN height.
 	GetLastProcessedBbnHeight(ctx context.Context) (lastProcessedHeight uint64, err error)
 	CheckDelegationExistByStakerPk(
