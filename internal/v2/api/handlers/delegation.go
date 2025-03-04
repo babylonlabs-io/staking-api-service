@@ -58,6 +58,12 @@ func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *typ
 	var bbnAddress *string
 	const bbnAddressKey = "babylon_address"
 	if address := request.URL.Query().Get(bbnAddressKey); address != "" {
+		err := handler.ValidateBabylonAddress(address)
+		if err != nil {
+			return nil, types.NewErrorWithMsg(
+				http.StatusBadRequest, types.BadRequest, bbnAddressKey+" is invalid",
+			)
+		}
 		bbnAddress = &address
 	}
 
