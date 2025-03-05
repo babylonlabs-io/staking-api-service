@@ -12,6 +12,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strings"
 )
 
@@ -64,6 +65,11 @@ func ParsePaginationQuery(r *http.Request) (string, *types.Error) {
 		)
 	}
 	return pageKey, nil
+}
+
+func ValidateBabylonAddress(address string) error {
+	_, err := sdk.AccAddressFromBech32(address)
+	return err
 }
 
 func ParsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
