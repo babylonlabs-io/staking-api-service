@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"errors"
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
@@ -68,8 +69,17 @@ func ParsePaginationQuery(r *http.Request) (string, *types.Error) {
 }
 
 func ValidateBabylonAddress(address string) error {
-	_, err := sdk.AccAddressFromBech32(address)
-	return err
+	if len(strings.TrimSpace(address)) == 0 {
+		return errors.New("empty address string is not allowed")
+	}
+
+	const babylonPrefix = "bbn"
+	bz, err := sdk.GetFromBech32(address, babylonPrefix)
+	if err != nil {
+		return err
+	}
+
+	return sdk.VerifyAddressFormat(bz)
 }
 
 func ParsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
