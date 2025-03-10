@@ -2,15 +2,15 @@ package api
 
 import (
 	_ "github.com/babylonlabs-io/staking-api-service/docs"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/go-chi/chi"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func (a *Server) SetupRoutes(r *chi.Mux) {
 	handlers := a.handlers
 	// Common routes
 	r.Get("/healthcheck", registerHandler(handlers.SharedHandler.HealthCheck))
-	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	r.Get("/swagger/doc.json", handler.SwaggerDoc)
 	r.Get("/v1/staker/pubkey-lookup", registerHandler(handlers.V1Handler.GetPubKeys))
 	r.Get("/v1/staker/delegation/check", registerHandler(handlers.V1Handler.CheckStakerDelegationExist))
 
