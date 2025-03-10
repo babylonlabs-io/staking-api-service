@@ -38,6 +38,8 @@ limit, header limit, request caching, and DDOS protection:
 
 - **Asynchronous Communication**: Enables decoupled, non-blocking inter-service 
 interactions, aside from the unbonding pipeline which follows a different interaction pattern.
+- **Environment-Based Configuration**: Supports different deployment environments with hardcoded 
+parameters based on the environment, which is set via the `BABYLON_ENVIRONMENT` environment variable.
 - **Fault Tolerance**: Utilizes RabbitMQ's message retry mechanism for resilience 
 against transient failures.
 - **Horizontal Scalability**: Supports increasing system capacity by 
@@ -87,6 +89,35 @@ handles statistical updates, adjusts the staking state, and inserts a record int
 MongoDB and emits an [expired event](https://github.com/babylonlabs-io/staking-queue-client/blob/main/client/schema.go#L130) 
 to RabbitMQ for the staking-api-service to process. This marks completed staking 
 transactions as `unbonded`. This status displays to the user that the staking transaction is ready for withdrawal.
+
+## Environment Configuration
+
+The service supports different deployment environments, each with its own set of hardcoded parameters. 
+The environment is determined by the `BABYLON_ENVIRONMENT` environment variable.
+
+Supported environments:
+- `mock-mainnet`
+- `phase-2-devnet`
+- `phase-2-testnet`
+- `phase-2-private-mainnet`
+
+Each environment has hardcoded values for delegation transition parameters:
+
+| Environment | EligibleBeforeBtcHeight | AllowListExpirationHeight |
+|-------------|-------------------------|---------------------------|
+| mock-mainnet | 882251 | 8844 |
+| phase-2-devnet | 227490 | 1440 |
+| phase-2-testnet | 198663 | 26124 |
+| phase-2-private-mainnet | 882251 | 8844 |
+
+Example usage in Docker Compose:
+```yaml
+services:
+  staking-api-service:
+    image: staking-api-service:latest
+    environment:
+      - BABYLON_ENVIRONMENT=phase-2-private-mainnet
+```
 
 ## Getting Started
 

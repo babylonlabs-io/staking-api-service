@@ -10,6 +10,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/environment"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/healthcheck"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
@@ -60,6 +61,11 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading config file: %s", cfgPath))
 	}
+
+	// Apply environment-specific configuration
+	envService := environment.NewService()
+	log.Info().Str("environment", envService.GetEnvironmentName()).Msg("Using environment")
+	envService.ApplyDelegationTransitionParams(cfg)
 
 	paramsPath := cli.GetGlobalParamsPath()
 	params, err := types.NewGlobalParams(paramsPath)
