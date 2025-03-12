@@ -7,7 +7,7 @@ import (
 
 type ExternalAPIsConfig struct {
 	CoinMarketCap *CoinMarketCapConfig `mapstructure:"coinmarketcap"`
-	ChainAnalysis *ChainAnalysisConfig `mapstructure:"chainanalysis"`
+	Chainalysis   *ChainAnalysisConfig `mapstructure:"chainalysis"`
 }
 
 type CoinMarketCapConfig struct {
@@ -30,8 +30,8 @@ func (cfg *ExternalAPIsConfig) Validate() error {
 		}
 	}
 
-	if cfg.ChainAnalysis != nil {
-		err := cfg.ChainAnalysis.Validate()
+	if cfg.Chainalysis != nil {
+		err := cfg.Chainalysis.Validate()
 		if err != nil {
 			return err
 		}
@@ -62,11 +62,11 @@ func (cfg *CoinMarketCapConfig) Validate() error {
 
 func (cfg *ChainAnalysisConfig) Validate() error {
 	if cfg.APIKey == "" {
-		return fmt.Errorf("missing chainanalysis api key")
+		return fmt.Errorf("missing chainalysis api key")
 	}
 
 	if cfg.BaseURL == "" {
-		return fmt.Errorf("missing chainanalysis base url")
+		return fmt.Errorf("missing chainalysis base url")
 	}
 
 	return nil

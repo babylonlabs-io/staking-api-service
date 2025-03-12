@@ -1,4 +1,4 @@
-package chainanalysis
+package chainalysis
 
 import (
 	"context"

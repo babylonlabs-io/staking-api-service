@@ -3,14 +3,14 @@ package clients
 import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/ordinals"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainanalysis"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainalysis"
 	cmc "github.com/miguelmota/go-coinmarketcap/pro/v1"
 )
 
 type Clients struct {
 	Ordinals      ordinals.OrdinalsClient
 	CoinMarketCap *cmc.Client
-	ChainAnalysis *chainanalysis.Client
+	Chainalysis   *chainalysis.Client
 }
 
 func New(cfg *config.Config) *Clients {
@@ -27,17 +27,17 @@ func New(cfg *config.Config) *Clients {
 		})
 	}
 
-	var chainAnalysisClient *chainanalysis.Client
-	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.ChainAnalysis != nil {
-		chainAnalysisClient = chainanalysis.NewClient(
-			cfg.ExternalAPIs.ChainAnalysis.APIKey,
-			cfg.ExternalAPIs.ChainAnalysis.BaseURL,
+	var chainalysisClient *chainalysis.Client
+	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.Chainalysis != nil {
+		chainalysisClient = chainalysis.NewClient(
+			cfg.ExternalAPIs.Chainalysis.APIKey,
+			cfg.ExternalAPIs.Chainalysis.BaseURL,
 		)
 	}
 
 	return &Clients{
 		Ordinals:      ordinalsClient,
 		CoinMarketCap: cmcClient,
-		ChainAnalysis: chainAnalysisClient,
+		Chainalysis:   chainalysisClient,
 	}
 }

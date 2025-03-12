@@ -3,14 +3,14 @@ package v2service
 import (
 	"context"
 	"errors"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainanalysis"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainalysis"
 )
 
-func (s *V2Service) AssessAddress(ctx context.Context, address string) (*chainanalysis.AddressAssessment, error) {
+func (s *V2Service) AssessAddress(ctx context.Context, address string) (*chainalysis.AddressAssessment, error) {
 	// only possible if corresponding config is empty
-	if s.Clients.ChainAnalysis == nil {
-		return nil, errors.New("ChainAnalysis client is not initialized")
+	if s.Clients.Chainalysis == nil {
+		return nil, errors.New("Chainalysis client is not initialized")
 	}
 
-	return s.Clients.ChainAnalysis.AssessAddress(ctx, address)
+	return s.Clients.Chainalysis.AssessAddress(ctx, address)
 }
