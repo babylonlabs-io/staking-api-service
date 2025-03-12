@@ -1,9 +1,9 @@
-package chainanalysis_test
+package chainalysis_test
 
 import (
 	"context"
 	"fmt"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainanalysis"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainalysis"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,13 +29,13 @@ func TestClient(t *testing.T) {
 	srv := setupTestServer(t, apiKey, map[string]string{riskAddress: `{"address":"12NpCkhddSNiDkD9rRYUCHsTT9ReMNiJjG","risk":"Severe","cluster":{},"riskReason":"Identified as Sanctioned Entity","addressType":"PRIVATE_WALLET","addressIdentifications":[],"exposures":[],"triggers":[],"status":"COMPLETE"}`})
 
 	t.Run("Invalid api key", func(t *testing.T) {
-		client := chainanalysis.NewClient("invalid_api_key", srv.URL)
+		client := chainalysis.NewClient("invalid_api_key", srv.URL)
 		resp, err := client.AssessAddress(ctx, noRiskAddress)
 		assert.Error(t, err)
 		assert.Nil(t, resp)
 	})
 	t.Run("Low risk address", func(t *testing.T) {
-		client := chainanalysis.NewClient(apiKey, srv.URL)
+		client := chainalysis.NewClient(apiKey, srv.URL)
 		resp, err := client.AssessAddress(ctx, noRiskAddress)
 		require.NoError(t, err)
 
@@ -43,7 +43,7 @@ func TestClient(t *testing.T) {
 		assert.Nil(t, resp.RiskReason)
 	})
 	t.Run("Severe risk address", func(t *testing.T) {
-		client := chainanalysis.NewClient(apiKey, srv.URL)
+		client := chainalysis.NewClient(apiKey, srv.URL)
 		resp, err := client.AssessAddress(ctx, riskAddress)
 		require.NoError(t, err)
 
@@ -53,14 +53,14 @@ func TestClient(t *testing.T) {
 	t.Run("Internal server error", func(t *testing.T) {
 		// mind nil as last parameter - it will trigger 5xx
 		srv := setupTestServer(t, apiKey, nil)
-		client := chainanalysis.NewClient(apiKey, srv.URL)
+		client := chainalysis.NewClient(apiKey, srv.URL)
 		resp, err := client.AssessAddress(ctx, noRiskAddress)
 		assert.Error(t, err)
 		assert.Nil(t, resp)
 	})
 }
 
-// setupTestServer starts http server for tests that tries to mimic chainanalysis API
+// setupTestServer starts http server for tests that tries to mimic chainalysis API
 // expectedToken is token that should be used in the request
 // responses is map of address to response that should be returned for that address, if it's nil server returns 500 error
 func setupTestServer(t *testing.T, expectedToken string, responses map[string]string) *httptest.Server {

@@ -49,6 +49,6 @@ external_apis:
     base_url: "https://pro-api.coinmarketcap.com/v1"
     timeout: 10s  # http client timeout
     cache_ttl: 300s  # mongodb ttl
-  chainanalysis:
-    api_key: "chainanalysis_api_key"
+  chainalysis:
+    api_key: "chainalysis_api_key"
     base_url: "https://api.chainalysis.com"

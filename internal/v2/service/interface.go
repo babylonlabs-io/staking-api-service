@@ -3,12 +3,12 @@ package v2service
 import (
 	"context"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainanalysis"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainalysis"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
 type V2ServiceProvider interface {
-	chainanalysis.Interface
+	chainalysis.Interface
 
 	GetFinalityProvidersWithStats(ctx context.Context) (
 		[]*FinalityProviderStatsPublic, *types.Error,
