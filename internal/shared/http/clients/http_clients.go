@@ -10,7 +10,7 @@ import (
 type Clients struct {
 	Ordinals      ordinals.OrdinalsClient
 	CoinMarketCap *cmc.Client
-	ChainAnalysis *chainalysis.Client
+	Chainalysis   *chainalysis.Client
 }
 
 func New(cfg *config.Config) *Clients {
@@ -27,17 +27,17 @@ func New(cfg *config.Config) *Clients {
 		})
 	}
 
-	var chainAnalysisClient *chainalysis.Client
-	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.ChainAnalysis != nil {
-		chainAnalysisClient = chainalysis.NewClient(
-			cfg.ExternalAPIs.ChainAnalysis.APIKey,
-			cfg.ExternalAPIs.ChainAnalysis.BaseURL,
+	var chainalysisClient *chainalysis.Client
+	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.Chainalysis != nil {
+		chainalysisClient = chainalysis.NewClient(
+			cfg.ExternalAPIs.Chainalysis.APIKey,
+			cfg.ExternalAPIs.Chainalysis.BaseURL,
 		)
 	}
 
 	return &Clients{
 		Ordinals:      ordinalsClient,
 		CoinMarketCap: cmcClient,
-		ChainAnalysis: chainAnalysisClient,
+		Chainalysis:   chainalysisClient,
 	}
 }

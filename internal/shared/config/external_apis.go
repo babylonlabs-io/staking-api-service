@@ -7,7 +7,7 @@ import (
 
 type ExternalAPIsConfig struct {
 	CoinMarketCap *CoinMarketCapConfig `mapstructure:"coinmarketcap"`
-	ChainAnalysis *ChainAnalysisConfig `mapstructure:"chainalysis"`
+	Chainalysis   *ChainAnalysisConfig `mapstructure:"chainalysis"`
 }
 
 type CoinMarketCapConfig struct {
@@ -30,8 +30,8 @@ func (cfg *ExternalAPIsConfig) Validate() error {
 		}
 	}
 
-	if cfg.ChainAnalysis != nil {
-		err := cfg.ChainAnalysis.Validate()
+	if cfg.Chainalysis != nil {
+		err := cfg.Chainalysis.Validate()
 		if err != nil {
 			return err
 		}

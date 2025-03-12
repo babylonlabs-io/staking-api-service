@@ -8,9 +8,9 @@ import (
 
 func (s *V2Service) AssessAddress(ctx context.Context, address string) (*chainalysis.AddressAssessment, error) {
 	// only possible if corresponding config is empty
-	if s.Clients.ChainAnalysis == nil {
-		return nil, errors.New("ChainAnalysis client is not initialized")
+	if s.Clients.Chainalysis == nil {
+		return nil, errors.New("Chainalysis client is not initialized")
 	}
 
-	return s.Clients.ChainAnalysis.AssessAddress(ctx, address)
+	return s.Clients.Chainalysis.AssessAddress(ctx, address)
 }
