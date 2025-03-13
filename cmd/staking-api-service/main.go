@@ -105,12 +105,13 @@ func main() {
 
 	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
-		log.Info().Msg("Replay flag is set. Starting replay of unprocessable messages.")
+		log.Info().Msg("Replay flag is set. Starting to process unprocessable messages.")
 
 		err := scripts.ReplayUnprocessableMessages(ctx, cfg, v2queues, dbClients.SharedDBClient)
 		if err != nil {
-			log.Fatal().Err(err).Msg("error while replaying unprocessable messages")
+    			log.Fatal().Err(err).Msg("Failed to replay unprocessable messages")
 		}
+
 		return
 	} else if cli.GetBackfillPubkeyAddressFlag() {
 		log.Info().Msg("Backfill pubkey address flag is set. Starting backfill of pubkey address mappings.")
