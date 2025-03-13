@@ -9,6 +9,7 @@ import (
 	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 )
 
+//go:generate mockery --name=V1DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_v1_db_client.go
 type V1DBClient interface {
 	dbclient.DBClient
 	SaveActiveStakingDelegation(
@@ -30,6 +31,7 @@ type V1DBClient interface {
 		ctx context.Context, stakingTxHashHex, unbondingTxHashHex, txHex, signatureHex string,
 	) error
 	FindDelegationByTxHashHex(ctx context.Context, txHashHex string) (*v1dbmodel.DelegationDocument, error)
+	TransitionToTransitionedState(ctx context.Context, stakingTxHashHex string) error
 	SaveTimeLockExpireCheck(ctx context.Context, stakingTxHashHex string, expireHeight uint64, txType string) error
 	TransitionToUnbondedState(
 		ctx context.Context, stakingTxHashHex string, eligiblePreviousState []types.DelegationState,

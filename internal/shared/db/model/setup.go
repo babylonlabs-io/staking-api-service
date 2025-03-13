@@ -11,11 +11,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"strings"
 )
 
 const (
 	// Shared
 	PkAddressMappingsCollection = "pk_address_mappings"
+	TermsAcceptanceCollection   = "terms_acceptance"
 	// V1
 	V1StatsLockCollection             = "stats_lock"
 	V1OverallStatsCollection          = "overall_stats"
@@ -26,6 +28,7 @@ const (
 	V1UnbondingCollection             = "unbonding_queue"
 	V1BtcInfoCollection               = "btc_info"
 	V1UnprocessableMsgCollection      = "unprocessable_messages"
+	PriceCollection                   = "prices"
 	// V2
 	V2StatsLockCollection             = "v2_stats_lock"
 	V2OverallStatsCollection          = "v2_overall_stats"
@@ -45,6 +48,7 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"native_segwit_odd": 1}, Unique: true},
 		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
 	},
+	TermsAcceptanceCollection: {{Indexes: map[string]int{}}},
 	// V1
 	V1StatsLockCollection:             {{Indexes: map[string]int{}}},
 	V1OverallStatsCollection:          {{Indexes: map[string]int{}}},
@@ -59,9 +63,9 @@ var collections = map[string][]index{
 	V1BtcInfoCollection:          {{Indexes: map[string]int{}}},
 	// V2
 	V2StatsLockCollection:             {{Indexes: map[string]int{}}},
-	V2StakerStatsCollection:           {{Indexes: map[string]int{}}},
-	V2FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
 	V2OverallStatsCollection:          {{Indexes: map[string]int{}}},
+	V2FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
+	V2StakerStatsCollection:           {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {
@@ -90,6 +94,14 @@ func Setup(ctx context.Context, cfg *config.Config) error {
 	for name, idxs := range collections {
 		for _, idx := range idxs {
 			createIndex(ctx, database, name, idx)
+		}
+	}
+
+	// If external APIs are configured, create TTL index for BTC price collection
+	if cfg.ExternalAPIs != nil {
+		if err := createTTLIndexes(ctx, database, cfg.ExternalAPIs.CoinMarketCap.CacheTTL); err != nil {
+			log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
+			return err
 		}
 	}
 
@@ -134,4 +146,25 @@ func createIndex(ctx context.Context, database *mongo.Database, collectionName s
 	}
 
 	log.Debug().Msg("Index created successfully on collection: " + collectionName)
+}
+
+func createTTLIndexes(ctx context.Context, database *mongo.Database, cacheTTL time.Duration) error {
+	collection := database.Collection(PriceCollection)
+	// First, drop the existing TTL index if it exists
+	_, err := collection.Indexes().DropOne(ctx, "created_at_1")
+	if err != nil && !strings.Contains(err.Error(), "not found") {
+		return fmt.Errorf("failed to drop existing TTL index: %w", err)
+	}
+	// Create new TTL index
+	model := mongo.IndexModel{
+		Keys: bson.D{{Key: "created_at", Value: 1}},
+		Options: options.Index().
+			SetExpireAfterSeconds(int32(cacheTTL.Seconds())).
+			SetName("created_at_1"),
+	}
+	_, err = collection.Indexes().CreateOne(ctx, model)
+	if err != nil {
+		return fmt.Errorf("failed to create TTL index: %w", err)
+	}
+	return nil
 }

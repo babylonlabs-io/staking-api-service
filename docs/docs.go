@@ -21,6 +21,53 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/address/screening": {
+            "get": {
+                "description": "Checks address risk",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Checks address risk",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "BTC address to check",
+                        "name": "btc_address",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Risk of provided address",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-v2handlers_AddressScreeningResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Error: Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/healthcheck": {
             "get": {
                 "description": "Health check the service, including ping database connection",
@@ -43,13 +90,14 @@ const docTemplate = `{
         },
         "/v1/delegation": {
             "get": {
-                "description": "Retrieves a delegation by a given transaction hash",
+                "description": "[DEPRECATED] Retrieves a delegation by a given transaction hash. Please use /v2/delegation instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -77,14 +125,15 @@ const docTemplate = `{
         },
         "/v1/finality-providers": {
             "get": {
-                "description": "Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order.",
+                "description": "[DEPRECATED] Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order. Please use /v2/finality-providers instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Active Finality Providers",
+                "summary": "Get Active Finality Providers (Deprecated)",
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -111,14 +160,14 @@ const docTemplate = `{
         },
         "/v1/global-params": {
             "get": {
-                "description": "Retrieves the global parameters for Babylon, including finality provider details.",
+                "description": "[DEPRECATED] Retrieves the global parameters for Babylon, including finality provider details. Please use /v2/network-info instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Babylon global parameters",
+                "deprecated": true,
                 "responses": {
                     "200": {
                         "description": "Global parameters",
@@ -131,12 +180,12 @@ const docTemplate = `{
         },
         "/v1/staker/delegation/check": {
             "get": {
-                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day",
+                "description": "Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit).\nOptionally, you can provide a timeframe to check if the delegation is active within the provided timeframe\nThe available timeframe is \"today\" which checks after UTC 12AM of the current day",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "v1"
+                    "shared"
                 ],
                 "parameters": [
                     {
@@ -174,14 +223,13 @@ const docTemplate = `{
         },
         "/v1/staker/delegations": {
             "get": {
-                "description": "Retrieves delegations for a given staker",
+                "description": "Retrieves phase-1 delegations for a given staker. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.\nThis endpoint is only used to show legacy phase-1 delegations for the purpose of unbonding or registering into phase-2.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -191,16 +239,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "enum": [
-                            "active",
-                            "unbonding_requested",
-                            "unbonding",
-                            "unbonded",
-                            "withdrawn"
-                        ],
-                        "type": "string",
-                        "description": "Filter by state",
-                        "name": "state",
+                        "type": "boolean",
+                        "description": "Only return delegations with pending actions which include active, unbonding, unbonding_requested, unbonded",
+                        "name": "pending_action",
                         "in": "query"
                     },
                     {
@@ -228,13 +269,14 @@ const docTemplate = `{
         },
         "/v1/staker/pubkey-lookup": {
             "get": {
-                "description": "Retrieves public keys for the given BTC addresses. This endpoint",
+                "description": "Retrieves public keys for the given BTC addresses. This endpoint\nonly returns public keys for addresses that have associated delegations in\nthe system. If an address has no associated delegation, it will not be\nincluded in the response. Supports both Taproot and Native Segwit addresses.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "v1"
+                    "shared"
                 ],
+                "summary": "Get stakers' public keys",
                 "parameters": [
                     {
                         "type": "array",
@@ -252,7 +294,7 @@ const docTemplate = `{
                     "200": {
                         "description": "A map of BTC addresses to their corresponding public keys (only addresses with delegations are returned)",
                         "schema": {
-                            "$ref": "#/definitions/handler.Result"
+                            "$ref": "#/definitions/handler.PublicResponse-map_string_string"
                         }
                     },
                     "400": {
@@ -272,14 +314,15 @@ const docTemplate = `{
         },
         "/v1/stats": {
             "get": {
-                "description": "Fetches overall stats for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.",
+                "description": "[DEPRECATED] Fetches overall stats for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers. Please use /v2/stats instead.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Overall Stats",
+                "summary": "Get Overall Stats (Deprecated)",
+                "deprecated": true,
                 "responses": {
                     "200": {
                         "description": "Overall stats for babylon staking",
@@ -292,14 +335,15 @@ const docTemplate = `{
         },
         "/v1/stats/staker": {
             "get": {
-                "description": "Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations.\nIf staker_btc_pk query parameter is provided, it will return stats for the specific staker.\nOtherwise, it will return the top stakers ranked by active tvl.",
+                "description": "[DEPRECATED] Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations. Please use /v2/staker/stats instead.\nIf staker_btc_pk query parameter is provided, it will return stats for the specific staker.\nOtherwise, it will return the top stakers ranked by active tvl.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v1"
                 ],
-                "summary": "Get Staker Stats",
+                "summary": "Get Staker Stats (Deprecated)",
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -332,7 +376,7 @@ const docTemplate = `{
         },
         "/v1/unbonding": {
             "post": {
-                "description": "Unbonds a delegation by processing the provided transaction details. This is an async operation.",
+                "description": "Unbonds a phase-1 delegation by processing the provided transaction details. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.\nThis is an async operation.",
                 "consumes": [
                     "application/json"
                 ],
@@ -342,7 +386,7 @@ const docTemplate = `{
                 "tags": [
                     "v1"
                 ],
-                "summary": "Unbond delegation",
+                "summary": "Unbond phase-1 delegation",
                 "parameters": [
                     {
                         "description": "Unbonding Request Payload",
@@ -369,7 +413,7 @@ const docTemplate = `{
         },
         "/v1/unbonding/eligibility": {
             "get": {
-                "description": "Checks if a delegation identified by its staking transaction hash is eligible for unbonding.",
+                "description": "Checks if a delegation identified by its staking transaction hash is eligible for unbonding. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.",
                 "produces": [
                     "application/json"
                 ],
@@ -422,7 +466,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Staker delegation",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-v2service_StakerDelegationPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-v2service_DelegationPublic"
                         }
                     },
                     "400": {
@@ -466,6 +510,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Babylon address",
+                        "name": "babylon_address",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Pagination key to fetch the next page of delegations",
                         "name": "pagination_key",
                         "in": "query"
@@ -475,7 +525,7 @@ const docTemplate = `{
                     "200": {
                         "description": "List of staker delegations and pagination token",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_DelegationPublic"
                         }
                     },
                     "400": {
@@ -501,7 +551,7 @@ const docTemplate = `{
         },
         "/v2/finality-providers": {
             "get": {
-                "description": "Fetches finality providers with optional filtering and pagination",
+                "description": "Fetches finality providers with its stats, currently does not support pagination",
                 "produces": [
                     "application/json"
                 ],
@@ -509,45 +559,27 @@ const docTemplate = `{
                     "v2"
                 ],
                 "summary": "List Finality Providers",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Pagination key to fetch the next page",
-                        "name": "pagination_key",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "active",
-                            "standby"
-                        ],
-                        "type": "string",
-                        "description": "Filter by state",
-                        "name": "state",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "List of finality providers and pagination token",
+                        "description": "List of finality providers with its stats",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderStatsPublic"
                         }
                     },
                     "400": {
-                        "description": "Error: Bad Request",
+                        "description": "Invalid parameters or malformed request",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
                     },
                     "404": {
-                        "description": "Error: Not Found",
+                        "description": "No finality providers found",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
                     },
                     "500": {
-                        "description": "Error: Internal Server Error",
+                        "description": "Internal server error occurred",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
@@ -555,31 +587,49 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/params": {
+        "/v2/network-info": {
             "get": {
-                "description": "Fetches system parameters for babylon chain and BTC chain",
+                "description": "Get network info, including staking status and param",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "v2"
                 ],
-                "summary": "Get Parameters",
                 "responses": {
                     "200": {
-                        "description": "Parameters",
+                        "description": "Network info",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-v2service_ParamsPublic"
+                            "$ref": "#/definitions/v2service.NetworkInfoPublic"
                         }
                     },
-                    "404": {
-                        "description": "Error: Not Found",
+                    "400": {
+                        "description": "Error: Bad Request",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
+                    }
+                }
+            }
+        },
+        "/v2/prices": {
+            "get": {
+                "description": "Get latest prices for all available symbols",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-map_string_float64"
+                        }
                     },
-                    "500": {
-                        "description": "Error: Internal Server Error",
+                    "400": {
+                        "description": "Error: Bad Request",
                         "schema": {
                             "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
@@ -597,6 +647,15 @@ const docTemplate = `{
                     "v2"
                 ],
                 "summary": "Get Staker Stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Public key of the staker to fetch",
+                        "name": "staker_pk_hex",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Staker stats",
@@ -706,13 +765,13 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_FinalityProviderPublic": {
+        "handler.PublicResponse-array_v2service_DelegationPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.FinalityProviderPublic"
+                        "$ref": "#/definitions/v2service.DelegationPublic"
                     }
                 },
                 "pagination": {
@@ -720,14 +779,36 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_StakerDelegationPublic": {
+        "handler.PublicResponse-array_v2service_FinalityProviderStatsPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.StakerDelegationPublic"
+                        "$ref": "#/definitions/v2service.FinalityProviderStatsPublic"
                     }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-map_string_float64": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/map_string_float64"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-map_string_string": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/map_string_string"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -767,33 +848,33 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.PublicResponse-v2handlers_AddressScreeningResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/v2handlers.AddressScreeningResponse"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-v2service_DelegationPublic": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/v2service.DelegationPublic"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
         "handler.PublicResponse-v2service_OverallStatsPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "$ref": "#/definitions/v2service.OverallStatsPublic"
-                },
-                "pagination": {
-                    "$ref": "#/definitions/handler.paginationResponse"
-                }
-            }
-        },
-        "handler.PublicResponse-v2service_ParamsPublic": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/v2service.ParamsPublic"
-                },
-                "pagination": {
-                    "$ref": "#/definitions/handler.paginationResponse"
-                }
-            }
-        },
-        "handler.PublicResponse-v2service_StakerDelegationPublic": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/v2service.StakerDelegationPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -811,15 +892,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.Result": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "status": {
-                    "type": "integer"
-                }
-            }
-        },
         "handler.paginationResponse": {
             "type": "object",
             "properties": {
@@ -831,6 +903,12 @@ const docTemplate = `{
         "indexertypes.BbnStakingParams": {
             "type": "object",
             "properties": {
+                "allow_list_expiration_height": {
+                    "type": "integer"
+                },
+                "btc_activation_height": {
+                    "type": "integer"
+                },
                 "covenant_pks": {
                     "type": "array",
                     "items": {
@@ -864,9 +942,6 @@ const docTemplate = `{
                 "min_staking_value_sat": {
                     "type": "integer"
                 },
-                "min_unbonding_time_blocks": {
-                    "type": "integer"
-                },
                 "slashing_pk_script": {
                     "type": "string"
                 },
@@ -874,6 +949,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "unbonding_fee_sat": {
+                    "type": "integer"
+                },
+                "unbonding_time_blocks": {
                     "type": "integer"
                 },
                 "version": {
@@ -892,26 +970,17 @@ const docTemplate = `{
                 }
             }
         },
-        "indexertypes.DelegationState": {
-            "type": "string",
-            "enum": [
-                "PENDING",
-                "VERIFIED",
-                "ACTIVE",
-                "UNBONDING",
-                "WITHDRAWABLE",
-                "WITHDRAWN",
-                "SLASHED"
-            ],
-            "x-enum-varnames": [
-                "StatePending",
-                "StateVerified",
-                "StateActive",
-                "StateUnbonding",
-                "StateWithdrawable",
-                "StateWithdrawn",
-                "StateSlashed"
-            ]
+        "map_string_float64": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "number"
+            }
+        },
+        "map_string_string": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
         },
         "types.ErrorCode": {
             "type": "string",
@@ -999,7 +1068,13 @@ const docTemplate = `{
                 "finality_provider_pk_hex": {
                     "type": "string"
                 },
+                "is_eligible_for_transition": {
+                    "type": "boolean"
+                },
                 "is_overflow": {
+                    "type": "boolean"
+                },
+                "is_slashed": {
                     "type": "boolean"
                 },
                 "staker_pk_hex": {
@@ -1087,6 +1162,10 @@ const docTemplate = `{
                 },
                 "active_tvl": {
                     "type": "integer"
+                },
+                "btc_price_usd": {
+                    "description": "Optional field",
+                    "type": "number"
                 },
                 "pending_tvl": {
                     "type": "integer"
@@ -1195,6 +1274,19 @@ const docTemplate = `{
                 }
             }
         },
+        "v2handlers.AddressScreeningResponse": {
+            "type": "object",
+            "properties": {
+                "btc_address": {
+                    "type": "object",
+                    "properties": {
+                        "risk": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "v2service.CovenantSignature": {
             "type": "object",
             "properties": {
@@ -1206,16 +1298,51 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.DelegationPublic": {
+            "type": "object",
+            "properties": {
+                "delegation_staking": {
+                    "$ref": "#/definitions/v2service.DelegationStaking"
+                },
+                "delegation_unbonding": {
+                    "$ref": "#/definitions/v2service.DelegationUnbonding"
+                },
+                "finality_provider_btc_pks_hex": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "params_version": {
+                    "type": "integer"
+                },
+                "staker_btc_pk_hex": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/v2types.DelegationState"
+                }
+            }
+        },
         "v2service.DelegationStaking": {
             "type": "object",
             "properties": {
+                "bbn_inception_height": {
+                    "type": "integer"
+                },
+                "bbn_inception_time": {
+                    "type": "string"
+                },
                 "end_height": {
                     "type": "integer"
+                },
+                "slashing": {
+                    "$ref": "#/definitions/v2service.StakingSlashing"
                 },
                 "staking_amount": {
                     "type": "integer"
                 },
-                "staking_time": {
+                "staking_timelock": {
                     "type": "integer"
                 },
                 "staking_tx_hash_hex": {
@@ -1238,7 +1365,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/v2service.CovenantSignature"
                     }
                 },
-                "unbonding_time": {
+                "slashing": {
+                    "$ref": "#/definitions/v2service.UnbondingSlashing"
+                },
+                "unbonding_timelock": {
                     "type": "integer"
                 },
                 "unbonding_tx": {
@@ -1246,7 +1376,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v2service.FinalityProviderPublic": {
+        "v2service.FinalityProviderStatsPublic": {
             "type": "object",
             "properties": {
                 "active_delegations": {
@@ -1266,21 +1396,23 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                }
+            }
+        },
+        "v2service.NetworkInfoPublic": {
+            "type": "object",
+            "properties": {
+                "params": {
+                    "$ref": "#/definitions/v2service.ParamsPublic"
                 },
-                "total_delegations": {
-                    "type": "integer"
-                },
-                "total_tvl": {
-                    "type": "integer"
+                "staking_status": {
+                    "$ref": "#/definitions/v2service.StakingStatusPublic"
                 }
             }
         },
         "v2service.OverallStatsPublic": {
             "type": "object",
             "properties": {
-                "_id": {
-                    "type": "string"
-                },
                 "active_delegations": {
                     "type": "integer"
                 },
@@ -1293,16 +1425,7 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
-                "total_delegations": {
-                    "type": "integer"
-                },
                 "total_finality_providers": {
-                    "type": "integer"
-                },
-                "total_stakers": {
-                    "type": "integer"
-                },
-                "total_tvl": {
                     "type": "integer"
                 }
             }
@@ -1324,48 +1447,22 @@ const docTemplate = `{
                 }
             }
         },
-        "v2service.StakerDelegationPublic": {
-            "type": "object",
-            "properties": {
-                "delegation_staking": {
-                    "$ref": "#/definitions/v2service.DelegationStaking"
-                },
-                "delegation_unbonding": {
-                    "$ref": "#/definitions/v2service.DelegationUnbonding"
-                },
-                "finality_provider_btc_pks_hex": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "params_version": {
-                    "type": "integer"
-                },
-                "staker_btc_pk_hex": {
-                    "type": "string"
-                },
-                "state": {
-                    "$ref": "#/definitions/indexertypes.DelegationState"
-                }
-            }
-        },
         "v2service.StakerStatsPublic": {
             "type": "object",
             "properties": {
-                "_id": {
-                    "type": "string"
-                },
                 "active_delegations": {
                     "type": "integer"
                 },
                 "active_tvl": {
                     "type": "integer"
                 },
-                "slashed_delegations": {
+                "staker_pk_hex": {
+                    "type": "string"
+                },
+                "unbonding_delegations": {
                     "type": "integer"
                 },
-                "slashed_tvl": {
+                "unbonding_tvl": {
                     "type": "integer"
                 },
                 "withdrawable_delegations": {
@@ -1375,18 +1472,97 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "v2service.StakingSlashing": {
+            "type": "object",
+            "properties": {
+                "slashing_tx_hex": {
+                    "type": "string"
+                },
+                "spending_height": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v2service.StakingStatusPublic": {
+            "type": "object",
+            "properties": {
+                "is_staking_open": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "v2service.UnbondingSlashing": {
+            "type": "object",
+            "properties": {
+                "spending_height": {
+                    "type": "integer"
+                },
+                "unbonding_slashing_tx_hex": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2types.DelegationState": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "VERIFIED",
+                "ACTIVE",
+                "SLASHED",
+                "TIMELOCK_UNBONDING",
+                "EARLY_UNBONDING",
+                "TIMELOCK_WITHDRAWABLE",
+                "EARLY_UNBONDING_WITHDRAWABLE",
+                "TIMELOCK_SLASHING_WITHDRAWABLE",
+                "EARLY_UNBONDING_SLASHING_WITHDRAWABLE",
+                "TIMELOCK_WITHDRAWN",
+                "EARLY_UNBONDING_WITHDRAWN",
+                "TIMELOCK_SLASHING_WITHDRAWN",
+                "EARLY_UNBONDING_SLASHING_WITHDRAWN"
+            ],
+            "x-enum-varnames": [
+                "StatePending",
+                "StateVerified",
+                "StateActive",
+                "StateSlashed",
+                "StateTimelockUnbonding",
+                "StateEarlyUnbonding",
+                "StateTimelockWithdrawable",
+                "StateEarlyUnbondingWithdrawable",
+                "StateTimelockSlashingWithdrawable",
+                "StateEarlyUnbondingSlashingWithdrawable",
+                "StateTimelockWithdrawn",
+                "StateEarlyUnbondingWithdrawn",
+                "StateTimelockSlashingWithdrawn",
+                "StateEarlyUnbondingSlashingWithdrawn"
+            ]
         }
-    }
+    },
+    "tags": [
+        {
+            "description": "Shared API endpoints",
+            "name": "shared"
+        },
+        {
+            "description": "Babylon Phase-2 API endpoints",
+            "name": "v2"
+        },
+        {
+            "description": "Babylon Phase-1 API endpoints (Deprecated)",
+            "name": "v1"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "2.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Babylon Staking API",
-	Description:      "The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.\nYour access and use is governed by the API Access License linked to below.",
+	Description:      "The Babylon Staking API offers information about the state of the Babylon BTC Staking system.\nYour access and use is governed by the API Access License linked to below.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -5,30 +5,38 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
+
+	"slices"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
 )
 
-var ALLOWED_METHODS = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}
+// Limit the amount of data read from the response body
+const maxResponseSize = 10 * 1024 * 1024 // 10 MB
+
+var allowedMethods = []string{
+	http.MethodPost,
+	http.MethodGet,
+	http.MethodPut,
+	http.MethodDelete,
+	http.MethodPatch,
+	http.MethodOptions,
+}
+
+func isAllowedMethod(method string) bool {
+	return slices.Contains(allowedMethods, method)
+}
 
 type HttpClientOptions struct {
 	Timeout      int
 	Path         string
 	TemplatePath string // Metrics purpose
 	Headers      map[string]string
-}
-
-func isAllowedMethod(method string) bool {
-	for _, allowedMethod := range ALLOWED_METHODS {
-		if method == allowedMethod {
-			return true
-		}
-	}
-	return false
 }
 
 func sendRequest[I any, R any](
@@ -103,8 +111,10 @@ func sendRequest[I any, R any](
 		)
 	}
 
+	limitedReader := io.LimitReader(resp.Body, maxResponseSize)
+
 	var output R
-	if err := json.NewDecoder(resp.Body).Decode(&output); err != nil {
+	if err := json.NewDecoder(limitedReader).Decode(&output); err != nil {
 		return nil, types.NewErrorWithMsg(
 			http.StatusInternalServerError,
 			types.InternalServiceError,

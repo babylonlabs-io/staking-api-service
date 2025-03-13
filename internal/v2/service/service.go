@@ -1,33 +1,25 @@
 package v2service
 
 import (
-	"context"
-
-	service "github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"golang.org/x/sync/singleflight"
 )
 
 type V2Service struct {
-	*service.Service
+	DbClients *dbclients.DbClients
+	Clients   *clients.Clients
+	Cfg       *config.Config
+
+	singleFlightGroup *singleflight.Group
 }
 
-func New(
-	ctx context.Context,
-	cfg *config.Config,
-	globalParams *types.GlobalParams,
-	finalityProviders []types.FinalityProviderDetails,
-	clients *clients.Clients,
-	dbClients *dbclients.DbClients,
-) (*V2Service, error) {
-	service, err := service.New(ctx, cfg, globalParams, finalityProviders, clients, dbClients)
-	if err != nil {
-		return nil, err
-	}
-
+func New(cfg *config.Config, clients *clients.Clients, dbClients *dbclients.DbClients) (*V2Service, error) {
 	return &V2Service{
-		service,
+		DbClients:         dbClients,
+		Clients:           clients,
+		Cfg:               cfg,
+		singleFlightGroup: &singleflight.Group{},
 	}, nil
 }

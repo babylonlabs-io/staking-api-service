@@ -27,7 +27,7 @@ func New(
 
 	logLevel, err := zerolog.ParseLevel(cfg.Server.LogLevel)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error while parsing log level")
+		return nil, fmt.Errorf("error while parsing log level: %w", err)
 	}
 	zerolog.SetGlobalLevel(logLevel)
 
@@ -46,12 +46,12 @@ func New(
 	}
 
 	if err != nil {
-		log.Fatal().Err(err).Msg("error while setting up handlers")
+		return nil, fmt.Errorf("error while setting up handlers: %w", err)
 	}
 
 	handlers, err := handlers.New(ctx, cfg, services)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error while setting up handlers")
+		return nil, fmt.Errorf("error while setting up handlers: %w", err)
 	}
 
 	server := &Server{

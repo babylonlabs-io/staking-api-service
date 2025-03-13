@@ -10,12 +10,16 @@ import (
 )
 
 type Config struct {
-	Server    *ServerConfig      `mapstructure:"server"`
-	StakingDb *DbConfig          `mapstructure:"staking-db"`
-	IndexerDb *DbConfig          `mapstructure:"indexer-db"`
-	Queue     *queue.QueueConfig `mapstructure:"queue"`
-	Metrics   *MetricsConfig     `mapstructure:"metrics"`
-	Assets    *AssetsConfig      `mapstructure:"assets"`
+	Server                 *ServerConfig               `mapstructure:"server"`
+	StakingDb              *DbConfig                   `mapstructure:"staking-db"`
+	IndexerDb              *DbConfig                   `mapstructure:"indexer-db"`
+	Queue                  *queue.QueueConfig          `mapstructure:"queue"`
+	Metrics                *MetricsConfig              `mapstructure:"metrics"`
+	Assets                 *AssetsConfig               `mapstructure:"assets"`
+	DelegationTransition   *DelegationTransitionConfig `mapstructure:"delegation-transition"`
+	ExternalAPIs           *ExternalAPIsConfig         `mapstructure:"external_apis"`
+	TermsAcceptanceLogging *TermsAcceptanceConfig      `mapstructure:"terms_acceptance_logging"`
+	AddressScreeningConfig *AddressScreeningConfig     `mapstructure:"address_screening"`
 }
 
 func (cfg *Config) Validate() error {
@@ -42,6 +46,19 @@ func (cfg *Config) Validate() error {
 	// Assets is optional
 	if cfg.Assets != nil {
 		if err := cfg.Assets.Validate(); err != nil {
+			return err
+		}
+	}
+
+	if cfg.DelegationTransition != nil {
+		if err := cfg.DelegationTransition.Validate(); err != nil {
+			return err
+		}
+	}
+
+	// ExternalAPIs is optional
+	if cfg.ExternalAPIs != nil {
+		if err := cfg.ExternalAPIs.Validate(); err != nil {
 			return err
 		}
 	}

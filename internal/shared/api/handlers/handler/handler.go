@@ -6,12 +6,15 @@ import (
 	"net/http"
 	"regexp"
 
+	"errors"
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"strings"
 )
 
 type Handler struct {
@@ -65,6 +68,20 @@ func ParsePaginationQuery(r *http.Request) (string, *types.Error) {
 	return pageKey, nil
 }
 
+func ValidateBabylonAddress(address string) error {
+	if len(strings.TrimSpace(address)) == 0 {
+		return errors.New("empty address string is not allowed")
+	}
+
+	const babylonPrefix = "bbn"
+	bz, err := sdk.GetFromBech32(address, babylonPrefix)
+	if err != nil {
+		return err
+	}
+
+	return sdk.VerifyAddressFormat(bz)
+}
+
 func ParsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {
 	pkHex := r.URL.Query().Get(queryName)
 	if pkHex == "" {
@@ -86,6 +103,8 @@ func ParsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (st
 
 func ParseTxHashQuery(r *http.Request, queryName string) (string, *types.Error) {
 	txHashHex := r.URL.Query().Get(queryName)
+	txHashHex = strings.ToLower(txHashHex)
+
 	if txHashHex == "" {
 		return "", types.NewErrorWithMsg(
 			http.StatusBadRequest, types.BadRequest, queryName+" is required",
@@ -155,18 +174,46 @@ func ParseBtcAddressesQuery(
 // If the state is not provided, it returns an empty string
 func ParseStateFilterQuery(
 	r *http.Request, queryName string,
-) (types.DelegationState, *types.Error) {
-	state := r.URL.Query().Get(queryName)
-	if state == "" {
-		return "", nil
+) ([]types.DelegationState, *types.Error) {
+	states := r.URL.Query()[queryName]
+	if len(states) == 0 {
+		return nil, nil
 	}
-	stateEnum, err := types.FromStringToDelegationState(state)
-	if err != nil {
-		return "", types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, err.Error(),
+
+	var stateEnums []types.DelegationState
+	for _, state := range states {
+		stateEnum, err := types.FromStringToDelegationState(state)
+		if err != nil {
+			return nil, types.NewErrorWithMsg(
+				http.StatusBadRequest, types.BadRequest, err.Error(),
+			)
+		}
+		stateEnums = append(stateEnums, stateEnum)
+	}
+	return stateEnums, nil
+}
+
+// ParseBooleanQuery parses the boolean query and returns the boolean value
+// If the boolean is not provided, it returns false
+// If the boolean is not valid, it returns an error
+func ParseBooleanQuery(
+	r *http.Request, queryName string, isOptional bool,
+) (bool, *types.Error) {
+	value := r.URL.Query().Get(queryName)
+	if value == "" {
+		if isOptional {
+			return false, nil
+		}
+		return false, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, queryName+" is required",
 		)
 	}
-	return stateEnum, nil
+	if value != "true" && value != "false" {
+		return false, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, "invalid "+queryName,
+		)
+	}
+	return value == "true", nil
 }
 
 func ParseFPSearchQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {

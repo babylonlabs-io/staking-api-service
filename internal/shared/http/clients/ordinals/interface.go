@@ -7,6 +7,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
+//go:generate mockery --name=OrdinalsClient --output=../../../../../tests/mocks --outpkg=mocks --filename=mock_ordinal_client.go
 type OrdinalsClient interface {
 	GetBaseURL() string
 	GetDefaultRequestTimeout() int

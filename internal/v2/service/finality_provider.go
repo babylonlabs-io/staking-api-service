@@ -7,70 +7,89 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"github.com/rs/zerolog/log"
 )
 
-type FinalityProviderPublic struct {
+type FinalityProviderStatsPublic struct {
 	BtcPk             string                              `json:"btc_pk"`
 	State             types.FinalityProviderQueryingState `json:"state"`
 	Description       types.FinalityProviderDescription   `json:"description"`
 	Commission        string                              `json:"commission"`
 	ActiveTvl         int64                               `json:"active_tvl"`
-	TotalTvl          int64                               `json:"total_tvl"`
 	ActiveDelegations int64                               `json:"active_delegations"`
-	TotalDelegations  int64                               `json:"total_delegations"`
 }
 
-type FinalityProvidersPublic struct {
-	FinalityProviders []FinalityProviderPublic `json:"finality_providers"`
+type FinalityProvidersStatsPublic struct {
+	FinalityProviders []FinalityProviderStatsPublic `json:"finality_providers"`
 }
 
-func mapToFinalityProviderPublic(provider indexerdbmodel.IndexerFinalityProviderDetails) *FinalityProviderPublic {
-	return &FinalityProviderPublic{
-		BtcPk:       provider.BtcPk,
-		State:       types.FinalityProviderQueryingState(provider.State),
-		Description: types.FinalityProviderDescription(provider.Description),
-		Commission:  provider.Commission,
-		// TODO: add active_tvl, total_tvl, active_delegations, total_delegations from statistic data field
-		ActiveTvl:         0,
-		TotalTvl:          0,
-		ActiveDelegations: 0,
-		TotalDelegations:  0,
+func mapToFinalityProviderStatsPublic(
+	provider indexerdbmodel.IndexerFinalityProviderDetails,
+	fpStats *v2dbmodel.V2FinalityProviderStatsDocument,
+) *FinalityProviderStatsPublic {
+	return &FinalityProviderStatsPublic{
+		BtcPk:             provider.BtcPk,
+		State:             types.FinalityProviderQueryingState(provider.State),
+		Description:       types.FinalityProviderDescription(provider.Description),
+		Commission:        provider.Commission,
+		ActiveTvl:         fpStats.ActiveTvl,
+		ActiveDelegations: fpStats.ActiveDelegations,
 	}
 }
 
-// GetFinalityProviders gets a list of finality providers with optional filters
-func (s *V2Service) GetFinalityProviders(ctx context.Context, state types.FinalityProviderQueryingState, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
-	resultMap, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx, state, paginationKey)
+// GetFinalityProvidersWithStats retrieves all finality providers and their associated statistics
+func (s *V2Service) GetFinalityProvidersWithStats(
+	ctx context.Context,
+) ([]*FinalityProviderStatsPublic, *types.Error) {
+	finalityProviders, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("Finality providers not found")
-			return nil, "", types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "finality providers not found, please retry")
+			log.Ctx(ctx).Warn().Err(err).Msg("No finality providers found")
+			return nil, types.NewErrorWithMsg(
+				http.StatusNotFound,
+				types.NotFound,
+				"finality providers not found, please retry",
+			)
 		}
-		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get finality providers")
+		return nil, types.NewErrorWithMsg(
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			"failed to get finality providers",
+		)
 	}
 
-	providersPublic := make([]*FinalityProviderPublic, 0, len(resultMap.Data))
-	for _, provider := range resultMap.Data {
-		providersPublic = append(providersPublic, mapToFinalityProviderPublic(provider))
-	}
-	return providersPublic, resultMap.PaginationToken, nil
-}
-
-// SearchFinalityProviders searches for finality providers with optional filters
-func (s *V2Service) SearchFinalityProviders(ctx context.Context, searchQuery string, paginationKey string) ([]*FinalityProviderPublic, string, *types.Error) {
-	resultMap, err := s.DbClients.IndexerDBClient.SearchFinalityProviders(ctx, searchQuery, paginationKey)
+	providerStats, err := s.DbClients.V2DBClient.GetFinalityProviderStats(ctx)
 	if err != nil {
-		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Warn().Err(err).Str("searchQuery", searchQuery).Msg("Finality providers not found")
-			return nil, "", types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "finality providers not found, please retry")
-		}
-		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to search finality providers")
+		return nil, types.NewErrorWithMsg(
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			"failed to get finality provider stats",
+		)
 	}
 
-	providersPublic := make([]*FinalityProviderPublic, 0, len(resultMap.Data))
-	for _, provider := range resultMap.Data {
-		providersPublic = append(providersPublic, mapToFinalityProviderPublic(provider))
+	statsLookup := make(map[string]*v2dbmodel.V2FinalityProviderStatsDocument)
+	for _, stats := range providerStats {
+		statsLookup[stats.FinalityProviderPkHex] = stats
 	}
-	return providersPublic, resultMap.PaginationToken, nil
+
+	finalityProvidersWithStats := make([]*FinalityProviderStatsPublic, 0, len(finalityProviders))
+
+	for _, provider := range finalityProviders {
+		providerStats, hasStats := statsLookup[provider.BtcPk]
+		if !hasStats {
+			providerStats = &v2dbmodel.V2FinalityProviderStatsDocument{
+				ActiveTvl:         0,
+				ActiveDelegations: 0,
+			}
+			log.Ctx(ctx).Debug().
+				Str("finality_provider_pk_hex", provider.BtcPk).
+				Msg("Initializing finality provider with default stats")
+		}
+		finalityProvidersWithStats = append(
+			finalityProvidersWithStats,
+			mapToFinalityProviderStatsPublic(*provider, providerStats),
+		)
+	}
+	return finalityProvidersWithStats, nil
 }

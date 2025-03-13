@@ -9,10 +9,11 @@ import (
 )
 
 // GetFinalityProviders gets active finality providers sorted by ActiveTvl.
-// @Summary Get Active Finality Providers
-// @Description Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order.
+// @Summary Get Active Finality Providers (Deprecated)
+// @Description [DEPRECATED] Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order. Please use /v2/finality-providers instead.
 // @Produce json
 // @Tags v1
+// @Deprecated
 // @Param fp_btc_pk query string false "Public key of the finality provider to fetch"
 // @Param pagination_key query string false "Pagination key to fetch the next page of finality providers"
 // @Success 200 {object} handler.PublicResponse[[]v1service.FpDetailsPublic] "A list of finality providers sorted by ActiveTvl in descending order"

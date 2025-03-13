@@ -34,21 +34,35 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
-  handler.PublicResponse-array_v2service_FinalityProviderPublic:
+  handler.PublicResponse-array_v2service_DelegationPublic:
     properties:
       data:
         items:
-          $ref: '#/definitions/v2service.FinalityProviderPublic'
+          $ref: '#/definitions/v2service.DelegationPublic'
         type: array
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
-  handler.PublicResponse-array_v2service_StakerDelegationPublic:
+  handler.PublicResponse-array_v2service_FinalityProviderStatsPublic:
     properties:
       data:
         items:
-          $ref: '#/definitions/v2service.StakerDelegationPublic'
+          $ref: '#/definitions/v2service.FinalityProviderStatsPublic'
         type: array
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
+  handler.PublicResponse-map_string_float64:
+    properties:
+      data:
+        $ref: '#/definitions/map_string_float64'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
+  handler.PublicResponse-map_string_string:
+    properties:
+      data:
+        $ref: '#/definitions/map_string_string'
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
@@ -73,24 +87,24 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-v2handlers_AddressScreeningResponse:
+    properties:
+      data:
+        $ref: '#/definitions/v2handlers.AddressScreeningResponse'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
+  handler.PublicResponse-v2service_DelegationPublic:
+    properties:
+      data:
+        $ref: '#/definitions/v2service.DelegationPublic'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-v2service_OverallStatsPublic:
     properties:
       data:
         $ref: '#/definitions/v2service.OverallStatsPublic'
-      pagination:
-        $ref: '#/definitions/handler.paginationResponse'
-    type: object
-  handler.PublicResponse-v2service_ParamsPublic:
-    properties:
-      data:
-        $ref: '#/definitions/v2service.ParamsPublic'
-      pagination:
-        $ref: '#/definitions/handler.paginationResponse'
-    type: object
-  handler.PublicResponse-v2service_StakerDelegationPublic:
-    properties:
-      data:
-        $ref: '#/definitions/v2service.StakerDelegationPublic'
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
@@ -101,12 +115,6 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
-  handler.Result:
-    properties:
-      data: {}
-      status:
-        type: integer
-    type: object
   handler.paginationResponse:
     properties:
       next_key:
@@ -114,6 +122,10 @@ definitions:
     type: object
   indexertypes.BbnStakingParams:
     properties:
+      allow_list_expiration_height:
+        type: integer
+      btc_activation_height:
+        type: integer
       covenant_pks:
         items:
           type: string
@@ -136,13 +148,13 @@ definitions:
         type: integer
       min_staking_value_sat:
         type: integer
-      min_unbonding_time_blocks:
-        type: integer
       slashing_pk_script:
         type: string
       slashing_rate:
         type: string
       unbonding_fee_sat:
+        type: integer
+      unbonding_time_blocks:
         type: integer
       version:
         type: integer
@@ -154,24 +166,14 @@ definitions:
       version:
         type: integer
     type: object
-  indexertypes.DelegationState:
-    enum:
-    - PENDING
-    - VERIFIED
-    - ACTIVE
-    - UNBONDING
-    - WITHDRAWABLE
-    - WITHDRAWN
-    - SLASHED
-    type: string
-    x-enum-varnames:
-    - StatePending
-    - StateVerified
-    - StateActive
-    - StateUnbonding
-    - StateWithdrawable
-    - StateWithdrawn
-    - StateSlashed
+  map_string_float64:
+    additionalProperties:
+      type: number
+    type: object
+  map_string_string:
+    additionalProperties:
+      type: string
+    type: object
   types.ErrorCode:
     enum:
     - INTERNAL_SERVICE_ERROR
@@ -233,7 +235,11 @@ definitions:
     properties:
       finality_provider_pk_hex:
         type: string
+      is_eligible_for_transition:
+        type: boolean
       is_overflow:
+        type: boolean
+      is_slashed:
         type: boolean
       staker_pk_hex:
         type: string
@@ -291,6 +297,9 @@ definitions:
         type: integer
       active_tvl:
         type: integer
+      btc_price_usd:
+        description: Optional field
+        type: number
       pending_tvl:
         type: integer
       total_delegations:
@@ -361,6 +370,14 @@ definitions:
       version:
         type: integer
     type: object
+  v2handlers.AddressScreeningResponse:
+    properties:
+      btc_address:
+        properties:
+          risk:
+            type: string
+        type: object
+    type: object
   v2service.CovenantSignature:
     properties:
       covenant_btc_pk_hex:
@@ -368,84 +385,7 @@ definitions:
       signature_hex:
         type: string
     type: object
-  v2service.DelegationStaking:
-    properties:
-      end_height:
-        type: integer
-      staking_amount:
-        type: integer
-      staking_time:
-        type: integer
-      staking_tx_hash_hex:
-        type: string
-      staking_tx_hex:
-        type: string
-      start_height:
-        type: integer
-    type: object
-  v2service.DelegationUnbonding:
-    properties:
-      covenant_unbonding_signatures:
-        items:
-          $ref: '#/definitions/v2service.CovenantSignature'
-        type: array
-      unbonding_time:
-        type: integer
-      unbonding_tx:
-        type: string
-    type: object
-  v2service.FinalityProviderPublic:
-    properties:
-      active_delegations:
-        type: integer
-      active_tvl:
-        type: integer
-      btc_pk:
-        type: string
-      commission:
-        type: string
-      description:
-        $ref: '#/definitions/types.FinalityProviderDescription'
-      state:
-        $ref: '#/definitions/types.FinalityProviderQueryingState'
-      total_delegations:
-        type: integer
-      total_tvl:
-        type: integer
-    type: object
-  v2service.OverallStatsPublic:
-    properties:
-      _id:
-        type: string
-      active_delegations:
-        type: integer
-      active_finality_providers:
-        type: integer
-      active_stakers:
-        type: integer
-      active_tvl:
-        type: integer
-      total_delegations:
-        type: integer
-      total_finality_providers:
-        type: integer
-      total_stakers:
-        type: integer
-      total_tvl:
-        type: integer
-    type: object
-  v2service.ParamsPublic:
-    properties:
-      bbn:
-        items:
-          $ref: '#/definitions/indexertypes.BbnStakingParams'
-        type: array
-      btc:
-        items:
-          $ref: '#/definitions/indexertypes.BtcCheckpointParams'
-        type: array
-    type: object
-  v2service.StakerDelegationPublic:
+  v2service.DelegationPublic:
     properties:
       delegation_staking:
         $ref: '#/definitions/v2service.DelegationStaking'
@@ -460,37 +400,199 @@ definitions:
       staker_btc_pk_hex:
         type: string
       state:
-        $ref: '#/definitions/indexertypes.DelegationState'
+        $ref: '#/definitions/v2types.DelegationState'
     type: object
-  v2service.StakerStatsPublic:
+  v2service.DelegationStaking:
     properties:
-      _id:
+      bbn_inception_height:
+        type: integer
+      bbn_inception_time:
         type: string
+      end_height:
+        type: integer
+      slashing:
+        $ref: '#/definitions/v2service.StakingSlashing'
+      staking_amount:
+        type: integer
+      staking_timelock:
+        type: integer
+      staking_tx_hash_hex:
+        type: string
+      staking_tx_hex:
+        type: string
+      start_height:
+        type: integer
+    type: object
+  v2service.DelegationUnbonding:
+    properties:
+      covenant_unbonding_signatures:
+        items:
+          $ref: '#/definitions/v2service.CovenantSignature'
+        type: array
+      slashing:
+        $ref: '#/definitions/v2service.UnbondingSlashing'
+      unbonding_timelock:
+        type: integer
+      unbonding_tx:
+        type: string
+    type: object
+  v2service.FinalityProviderStatsPublic:
+    properties:
       active_delegations:
         type: integer
       active_tvl:
         type: integer
-      slashed_delegations:
+      btc_pk:
+        type: string
+      commission:
+        type: string
+      description:
+        $ref: '#/definitions/types.FinalityProviderDescription'
+      state:
+        $ref: '#/definitions/types.FinalityProviderQueryingState'
+    type: object
+  v2service.NetworkInfoPublic:
+    properties:
+      params:
+        $ref: '#/definitions/v2service.ParamsPublic'
+      staking_status:
+        $ref: '#/definitions/v2service.StakingStatusPublic'
+    type: object
+  v2service.OverallStatsPublic:
+    properties:
+      active_delegations:
         type: integer
-      slashed_tvl:
+      active_finality_providers:
+        type: integer
+      active_stakers:
+        type: integer
+      active_tvl:
+        type: integer
+      total_finality_providers:
+        type: integer
+    type: object
+  v2service.ParamsPublic:
+    properties:
+      bbn:
+        items:
+          $ref: '#/definitions/indexertypes.BbnStakingParams'
+        type: array
+      btc:
+        items:
+          $ref: '#/definitions/indexertypes.BtcCheckpointParams'
+        type: array
+    type: object
+  v2service.StakerStatsPublic:
+    properties:
+      active_delegations:
+        type: integer
+      active_tvl:
+        type: integer
+      staker_pk_hex:
+        type: string
+      unbonding_delegations:
+        type: integer
+      unbonding_tvl:
         type: integer
       withdrawable_delegations:
         type: integer
       withdrawable_tvl:
         type: integer
     type: object
+  v2service.StakingSlashing:
+    properties:
+      slashing_tx_hex:
+        type: string
+      spending_height:
+        type: integer
+    type: object
+  v2service.StakingStatusPublic:
+    properties:
+      is_staking_open:
+        type: boolean
+    type: object
+  v2service.UnbondingSlashing:
+    properties:
+      spending_height:
+        type: integer
+      unbonding_slashing_tx_hex:
+        type: string
+    type: object
+  v2types.DelegationState:
+    enum:
+    - PENDING
+    - VERIFIED
+    - ACTIVE
+    - SLASHED
+    - TIMELOCK_UNBONDING
+    - EARLY_UNBONDING
+    - TIMELOCK_WITHDRAWABLE
+    - EARLY_UNBONDING_WITHDRAWABLE
+    - TIMELOCK_SLASHING_WITHDRAWABLE
+    - EARLY_UNBONDING_SLASHING_WITHDRAWABLE
+    - TIMELOCK_WITHDRAWN
+    - EARLY_UNBONDING_WITHDRAWN
+    - TIMELOCK_SLASHING_WITHDRAWN
+    - EARLY_UNBONDING_SLASHING_WITHDRAWN
+    type: string
+    x-enum-varnames:
+    - StatePending
+    - StateVerified
+    - StateActive
+    - StateSlashed
+    - StateTimelockUnbonding
+    - StateEarlyUnbonding
+    - StateTimelockWithdrawable
+    - StateEarlyUnbondingWithdrawable
+    - StateTimelockSlashingWithdrawable
+    - StateEarlyUnbondingSlashingWithdrawable
+    - StateTimelockWithdrawn
+    - StateEarlyUnbondingWithdrawn
+    - StateTimelockSlashingWithdrawn
+    - StateEarlyUnbondingSlashingWithdrawn
 info:
   contact:
     email: contact@babylonlabs.io
   description: |-
-    The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.
+    The Babylon Staking API offers information about the state of the Babylon BTC Staking system.
     Your access and use is governed by the API Access License linked to below.
   license:
     name: API Access License
     url: https://docs.babylonlabs.io/assets/files/api-access-license.pdf
   title: Babylon Staking API
-  version: "1.0"
+  version: "2.0"
 paths:
+  /address/screening:
+    get:
+      description: Checks address risk
+      parameters:
+      - description: BTC address to check
+        in: query
+        name: btc_address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Risk of provided address
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-v2handlers_AddressScreeningResponse'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+        "404":
+          description: 'Error: Not Found'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+        "500":
+          description: 'Error: Internal Server Error'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Checks address risk
+      tags:
+      - v2
   /healthcheck:
     get:
       description: Health check the service, including ping database connection
@@ -506,7 +608,9 @@ paths:
       - shared
   /v1/delegation:
     get:
-      description: Retrieves a delegation by a given transaction hash
+      deprecated: true
+      description: '[DEPRECATED] Retrieves a delegation by a given transaction hash.
+        Please use /v2/delegation instead.'
       parameters:
       - description: Staking transaction hash in hex format
         in: query
@@ -528,8 +632,10 @@ paths:
       - v1
   /v1/finality-providers:
     get:
-      description: Fetches details of all active finality providers sorted by their
-        active total value locked (ActiveTvl) in descending order.
+      deprecated: true
+      description: '[DEPRECATED] Fetches details of all active finality providers
+        sorted by their active total value locked (ActiveTvl) in descending order.
+        Please use /v2/finality-providers instead.'
       parameters:
       - description: Public key of the finality provider to fetch
         in: query
@@ -547,13 +653,14 @@ paths:
             order
           schema:
             $ref: '#/definitions/handler.PublicResponse-array_v1service_FpDetailsPublic'
-      summary: Get Active Finality Providers
+      summary: Get Active Finality Providers (Deprecated)
       tags:
       - v1
   /v1/global-params:
     get:
-      description: Retrieves the global parameters for Babylon, including finality
-        provider details.
+      deprecated: true
+      description: '[DEPRECATED] Retrieves the global parameters for Babylon, including
+        finality provider details. Please use /v2/network-info instead.'
       produces:
       - application/json
       responses:
@@ -561,13 +668,12 @@ paths:
           description: Global parameters
           schema:
             $ref: '#/definitions/handler.PublicResponse-v1service_GlobalParamsPublic'
-      summary: Get Babylon global parameters
       tags:
       - v1
   /v1/staker/delegation/check:
     get:
       description: |-
-        Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit)
+        Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit).
         Optionally, you can provide a timeframe to check if the delegation is active within the provided timeframe
         The available timeframe is "today" which checks after UTC 12AM of the current day
       parameters:
@@ -594,27 +700,23 @@ paths:
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
       tags:
-      - v1
+      - shared
   /v1/staker/delegations:
     get:
-      deprecated: true
-      description: Retrieves delegations for a given staker
+      description: |-
+        Retrieves phase-1 delegations for a given staker. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
+        This endpoint is only used to show legacy phase-1 delegations for the purpose of unbonding or registering into phase-2.
       parameters:
       - description: Staker BTC Public Key
         in: query
         name: staker_btc_pk
         required: true
         type: string
-      - description: Filter by state
-        enum:
-        - active
-        - unbonding_requested
-        - unbonding
-        - unbonded
-        - withdrawn
+      - description: Only return delegations with pending actions which include active,
+          unbonding, unbonding_requested, unbonded
         in: query
-        name: state
-        type: string
+        name: pending_action
+        type: boolean
       - description: Pagination key to fetch the next page of delegations
         in: query
         name: pagination_key
@@ -634,7 +736,11 @@ paths:
       - v1
   /v1/staker/pubkey-lookup:
     get:
-      description: Retrieves public keys for the given BTC addresses. This endpoint
+      description: |-
+        Retrieves public keys for the given BTC addresses. This endpoint
+        only returns public keys for addresses that have associated delegations in
+        the system. If an address has no associated delegation, it will not be
+        included in the response. Supports both Taproot and Native Segwit addresses.
       parameters:
       - collectionFormat: multi
         description: List of BTC addresses to look up (up to 10), currently only supports
@@ -652,7 +758,7 @@ paths:
           description: A map of BTC addresses to their corresponding public keys (only
             addresses with delegations are returned)
           schema:
-            $ref: '#/definitions/handler.Result'
+            $ref: '#/definitions/handler.PublicResponse-map_string_string'
         "400":
           description: 'Bad Request: Invalid input parameters'
           schema:
@@ -661,12 +767,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get stakers' public keys
       tags:
-      - v1
+      - shared
   /v1/stats:
     get:
-      description: Fetches overall stats for babylon staking including tvl, total
-        delegations, active tvl, active delegations and total stakers.
+      deprecated: true
+      description: '[DEPRECATED] Fetches overall stats for babylon staking including
+        tvl, total delegations, active tvl, active delegations and total stakers.
+        Please use /v2/stats instead.'
       produces:
       - application/json
       responses:
@@ -674,13 +783,14 @@ paths:
           description: Overall stats for babylon staking
           schema:
             $ref: '#/definitions/handler.PublicResponse-v1service_OverallStatsPublic'
-      summary: Get Overall Stats
+      summary: Get Overall Stats (Deprecated)
       tags:
       - v1
   /v1/stats/staker:
     get:
+      deprecated: true
       description: |-
-        Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations.
+        [DEPRECATED] Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations. Please use /v2/staker/stats instead.
         If staker_btc_pk query parameter is provided, it will return stats for the specific staker.
         Otherwise, it will return the top stakers ranked by active tvl.
       parameters:
@@ -703,14 +813,15 @@ paths:
           description: 'Error: Bad Request'
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get Staker Stats
+      summary: Get Staker Stats (Deprecated)
       tags:
       - v1
   /v1/unbonding:
     post:
       consumes:
       - application/json
-      description: Unbonds a delegation by processing the provided transaction details.
+      description: |-
+        Unbonds a phase-1 delegation by processing the provided transaction details. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
         This is an async operation.
       parameters:
       - description: Unbonding Request Payload
@@ -728,13 +839,14 @@ paths:
           description: Invalid request payload
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Unbond delegation
+      summary: Unbond phase-1 delegation
       tags:
       - v1
   /v1/unbonding/eligibility:
     get:
       description: Checks if a delegation identified by its staking transaction hash
-        is eligible for unbonding.
+        is eligible for unbonding. This endpoint will be deprecated once all phase-1
+        delegations are either withdrawn or registered into phase-2.
       parameters:
       - description: Staking Transaction Hash Hex
         in: query
@@ -768,7 +880,7 @@ paths:
         "200":
           description: Staker delegation
           schema:
-            $ref: '#/definitions/handler.PublicResponse-v2service_StakerDelegationPublic'
+            $ref: '#/definitions/handler.PublicResponse-v2service_DelegationPublic'
         "400":
           description: 'Error: Bad Request'
           schema:
@@ -794,6 +906,10 @@ paths:
         name: staker_pk_hex
         required: true
         type: string
+      - description: Babylon address
+        in: query
+        name: babylon_address
+        type: string
       - description: Pagination key to fetch the next page of delegations
         in: query
         name: pagination_key
@@ -804,7 +920,7 @@ paths:
         "200":
           description: List of staker delegations and pagination token
           schema:
-            $ref: '#/definitions/handler.PublicResponse-array_v2service_StakerDelegationPublic'
+            $ref: '#/definitions/handler.PublicResponse-array_v2service_DelegationPublic'
         "400":
           description: 'Error: Bad Request'
           schema:
@@ -822,66 +938,72 @@ paths:
       - v2
   /v2/finality-providers:
     get:
-      description: Fetches finality providers with optional filtering and pagination
-      parameters:
-      - description: Pagination key to fetch the next page
-        in: query
-        name: pagination_key
-        type: string
-      - description: Filter by state
-        enum:
-        - active
-        - standby
-        in: query
-        name: state
-        type: string
+      description: Fetches finality providers with its stats, currently does not support
+        pagination
       produces:
       - application/json
       responses:
         "200":
-          description: List of finality providers and pagination token
+          description: List of finality providers with its stats
           schema:
-            $ref: '#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic'
+            $ref: '#/definitions/handler.PublicResponse-array_v2service_FinalityProviderStatsPublic'
         "400":
-          description: 'Error: Bad Request'
+          description: Invalid parameters or malformed request
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
         "404":
-          description: 'Error: Not Found'
+          description: No finality providers found
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
         "500":
-          description: 'Error: Internal Server Error'
+          description: Internal server error occurred
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
       summary: List Finality Providers
       tags:
       - v2
-  /v2/params:
+  /v2/network-info:
     get:
-      description: Fetches system parameters for babylon chain and BTC chain
+      description: Get network info, including staking status and param
       produces:
       - application/json
       responses:
         "200":
-          description: Parameters
+          description: Network info
           schema:
-            $ref: '#/definitions/handler.PublicResponse-v2service_ParamsPublic'
-        "404":
-          description: 'Error: Not Found'
-          schema:
-            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-        "500":
-          description: 'Error: Internal Server Error'
+            $ref: '#/definitions/v2service.NetworkInfoPublic'
+        "400":
+          description: 'Error: Bad Request'
           schema:
             $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get Parameters
+      tags:
+      - v2
+  /v2/prices:
+    get:
+      description: Get latest prices for all available symbols
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-map_string_float64'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
       tags:
       - v2
   /v2/staker/stats:
     get:
       description: Fetches staker stats for babylon staking including active tvl and
         active delegations.
+      parameters:
+      - description: Public key of the staker to fetch
+        in: query
+        name: staker_pk_hex
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -921,3 +1043,10 @@ paths:
       tags:
       - v2
 swagger: "2.0"
+tags:
+- description: Shared API endpoints
+  name: shared
+- description: Babylon Phase-2 API endpoints
+  name: v2
+- description: Babylon Phase-1 API endpoints (Deprecated)
+  name: v1

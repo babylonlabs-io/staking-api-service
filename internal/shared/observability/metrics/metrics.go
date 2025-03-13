@@ -35,6 +35,8 @@ var (
 	httpResponseWriteFailureCounter  *prometheus.CounterVec
 	clientRequestDurationHistogram   *prometheus.HistogramVec
 	serviceCrashCounter              *prometheus.CounterVec
+	dbErrorsCounter                  *prometheus.CounterVec
+	chainAnalysisCallsCounter        *prometheus.CounterVec
 )
 
 // Init initializes the metrics package.
@@ -132,6 +134,19 @@ func registerMetrics() {
 		},
 		[]string{"type"},
 	)
+	dbErrorsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "db_errors",
+			Help: "",
+		},
+		[]string{"method"},
+	)
+	chainAnalysisCallsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "chain_analysis_calls",
+		},
+		[]string{"status"},
+	)
 
 	prometheus.MustRegister(
 		httpRequestDurationHistogram,
@@ -141,6 +156,7 @@ func registerMetrics() {
 		httpResponseWriteFailureCounter,
 		clientRequestDurationHistogram,
 		serviceCrashCounter,
+		chainAnalysisCallsCounter,
 	)
 }
 
@@ -166,6 +182,15 @@ func StartEventProcessingDurationTimer(queuename string, attempts int32) func(st
 			fmt.Sprintf("%d", attempts),
 		).Observe(duration)
 	}
+}
+
+func RecordChainAnalysisCall(failure bool) {
+	status := Success
+	if failure {
+		status = Error
+	}
+
+	chainAnalysisCallsCounter.WithLabelValues(status.String()).Inc()
 }
 
 // RecordUnprocessableEntity increments the unprocessable entity counter.
@@ -201,4 +226,8 @@ func StartClientRequestDurationTimer(baseUrl, method, path string) func(statusCo
 // RecordServiceCrash increments the service crash counter.
 func RecordServiceCrash(service string) {
 	serviceCrashCounter.WithLabelValues(service).Inc()
+}
+
+func RecordDbError(method string) {
+	dbErrorsCounter.WithLabelValues(method).Inc()
 }

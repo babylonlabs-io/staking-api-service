@@ -13,9 +13,9 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/healthcheck"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
-	queueclients "github.com/babylonlabs-io/staking-api-service/internal/shared/queue/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v2queue "github.com/babylonlabs-io/staking-api-service/internal/v2/queue"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
@@ -27,12 +27,25 @@ func init() {
 }
 
 // @title           Babylon Staking API
-// @version         1.0
-// @description     The Babylon Staking API offers information about the state of the Phase-1 BTC Staking system.
+// @version         2.0
+// @description     The Babylon Staking API offers information about the state of the Babylon BTC Staking system.
 // @description     Your access and use is governed by the API Access License linked to below.
 // @license.name    API Access License
 // @license.url     https://docs.babylonlabs.io/assets/files/api-access-license.pdf
 // @contact.email   contact@babylonlabs.io
+
+// @tag.name shared
+// @tag.description Shared API endpoints
+// @tag.order 1
+
+// @tag.name v2
+// @tag.description Babylon Phase-2 API endpoints
+// @tag.order 2
+
+// @tag.name v1
+// @tag.description Babylon Phase-1 API endpoints (Deprecated)
+// @tag.deprecated
+// @tag.order 2
 func main() {
 	ctx := context.Background()
 
@@ -60,20 +73,21 @@ func main() {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading finality providers file: %s", finalityProvidersPath))
 	}
 
-	// initialize metrics with the metrics port from config
-	metricsPort := cfg.Metrics.GetMetricsPort()
-	metrics.Init(metricsPort)
-
 	err = dbmodel.Setup(ctx, cfg)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking db model")
 	}
+
+	// initialize metrics with the metrics port from config
+	metricsPort := cfg.Metrics.GetMetricsPort()
+	metrics.Init(metricsPort)
 
 	// initialize clients package which is used to interact with external services
 	clients := clients.New(cfg)
 
 	dbClients, err := dbclients.New(ctx, cfg)
 	if err != nil {
+		metrics.RecordServiceCrash("database")
 		log.Fatal().Err(err).Msg("error while setting up staking db clients")
 	}
 
@@ -83,13 +97,17 @@ func main() {
 	}
 
 	// Start the event queue processing
-	queueClients := queueclients.New(ctx, cfg.Queue, services)
+	v2queues, err := v2queue.New(cfg.Queue, services)
+	if err != nil {
+		metrics.RecordServiceCrash("queue")
+		log.Fatal().Err(err).Msg("error while setting up queue service")
+	}
 
 	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
 		log.Info().Msg("Replay flag is set. Starting to process unprocessable messages.")
 
-		err := scripts.ReplayUnprocessableMessages(ctx, cfg, queueClients, dbClients.SharedDBClient)
+		err := scripts.ReplayUnprocessableMessages(ctx, cfg, v2queues, dbClients.SharedDBClient)
 		if err != nil {
     			log.Fatal().Err(err).Msg("Failed to replay unprocessable messages")
 		}
@@ -104,15 +122,20 @@ func main() {
 		return
 	}
 
-	queueClients.StartReceivingMessages()
+	// Start the event queue processing
+	err = v2queues.StartReceivingMessages()
+	if err != nil {
+		log.Fatal().Err(err).Msg("error while starting queue service")
+	}
 
-	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, queueClients, cfg.Server.HealthCheckInterval)
+	healthcheckErr := healthcheck.StartHealthCheckCron(ctx, v2queues, cfg.Server.HealthCheckInterval)
 	if healthcheckErr != nil {
 		log.Fatal().Err(healthcheckErr).Msg("error while starting health check cron")
 	}
 
 	apiServer, err := api.New(ctx, cfg, services)
 	if err != nil {
+		metrics.RecordServiceCrash("api")
 		log.Fatal().Err(err).Msg("error while setting up staking api service")
 	}
 	if err = apiServer.Start(); err != nil {

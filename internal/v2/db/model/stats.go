@@ -1,7 +1,5 @@
 package v2dbmodel
 
-import dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
-
 // StatsLockDocument represents the document in the stats lock collection
 // It's used as a lock to prevent concurrent stats calculation for the same staking tx hash
 // As well as to prevent the same staking tx hash + txType to be processed multiple times
@@ -25,67 +23,23 @@ func NewV2StatsLockDocument(
 }
 
 type V2OverallStatsDocument struct {
-	Id                      string `bson:"_id"`
-	ActiveTvl               int64  `bson:"active_tvl"`
-	TotalTvl                int64  `bson:"total_tvl"`
-	ActiveDelegations       int64  `bson:"active_delegations"`
-	TotalDelegations        int64  `bson:"total_delegations"`
-	ActiveStakers           uint64 `bson:"active_stakers"`
-	TotalStakers            uint64 `bson:"total_stakers"`
-	ActiveFinalityProviders uint64 `bson:"active_finality_providers"`
-	TotalFinalityProviders  uint64 `bson:"total_finality_providers"`
-}
-
-type V2FinalityProviderStatsDocument struct {
-	FinalityProviderPkHex string `bson:"_id"` // FinalityProviderPkHex
-	ActiveTvl             int64  `bson:"active_tvl"`
-	TotalTvl              int64  `bson:"total_tvl"`
-	ActiveDelegations     int64  `bson:"active_delegations"`
-	TotalDelegations      int64  `bson:"total_delegations"`
-}
-
-type V2FinalityProviderStatsPagination struct {
-	FinalityProviderPkHex string `json:"finality_provider_pk_hex"`
-	ActiveTvl             int64  `json:"active_tvl"`
-}
-
-func BuildV2FinalityProviderStatsPaginationToken(d *V2FinalityProviderStatsDocument) (string, error) {
-	page := V2FinalityProviderStatsPagination{
-		ActiveTvl:             d.ActiveTvl,
-		FinalityProviderPkHex: d.FinalityProviderPkHex,
-	}
-	token, err := dbmodel.GetPaginationToken(page)
-	if err != nil {
-		return "", err
-	}
-	return token, nil
+	Id                string `bson:"_id"`
+	ActiveTvl         int64  `bson:"active_tvl"`
+	ActiveDelegations int64  `bson:"active_delegations"`
 }
 
 type V2StakerStatsDocument struct {
-	StakerPkHex             string      `bson:"_id"` // StakerPkHex
-	ActiveTvl               int64       `bson:"active_tvl"`
-	WithdrawableTvl         int64       `bson:"withdrawable_tvl"`
-	SlashedTvl              int64       `bson:"slashed_tvl"`
-	ActiveDelegations       uint32      `bson:"active_delegations"`
-	WithdrawableDelegations uint32      `bson:"withdrawable_delegations"`
-	SlashedDelegations      uint32      `bson:"slashed_delegations"`
+	StakerPkHex             string `bson:"_id"`
+	ActiveTvl               int64  `bson:"active_tvl"`
+	ActiveDelegations       int64  `bson:"active_delegations"`
+	UnbondingTvl            int64  `bson:"unbonding_tvl"`
+	UnbondingDelegations    int64  `bson:"unbonding_delegations"`
+	WithdrawableTvl         int64  `bson:"withdrawable_tvl"`
+	WithdrawableDelegations int64  `bson:"withdrawable_delegations"`
 }
 
-// StakerStatsByStakerPagination is used to paginate the top stakers by active tvl
-// ActiveTvl is used as the sorting key, whereas StakerPkHex is used as the secondary sorting key
-type V2StakerStatsByStakerPagination struct {
-	StakerPkHex string `json:"staker_pk_hex"`
-	ActiveTvl   int64  `json:"active_tvl"`
-}
-
-func BuildV2StakerStatsByStakerPaginationToken(d *V2StakerStatsDocument) (string, error) {
-	page := V2StakerStatsByStakerPagination{
-		StakerPkHex: d.StakerPkHex,
-		ActiveTvl:   d.ActiveTvl,
-	}
-	token, err := dbmodel.GetPaginationToken(page)
-	if err != nil {
-		return "", err
-	}
-	return token, nil
+type V2FinalityProviderStatsDocument struct {
+	FinalityProviderPkHex string `bson:"_id"`
+	ActiveTvl             int64  `bson:"active_tvl"`
+	ActiveDelegations     int64  `bson:"active_delegations"`
 }

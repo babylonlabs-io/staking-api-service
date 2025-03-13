@@ -12,6 +12,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 )
 
@@ -153,6 +154,16 @@ func (v1dbclient *V1Database) ScanDelegationsPaginated(
 	return db.FindWithPagination(
 		ctx, client, filter, options, v1dbclient.Cfg.MaxPaginationLimit,
 		v1dbmodel.BuildDelegationScanPaginationToken,
+	)
+}
+
+// TransitionToTransitionedState marks an existing delegation as transitioned
+func (v1dbclient *V1Database) TransitionToTransitionedState(
+	ctx context.Context, stakingTxHashHex string,
+) error {
+	return v1dbclient.transitionState(
+		ctx, stakingTxHashHex, types.Transitioned.ToString(),
+		utils.QualifiedStatesToTransitioned(), nil,
 	)
 }
 

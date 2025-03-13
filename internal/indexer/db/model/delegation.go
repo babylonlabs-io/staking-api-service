@@ -21,17 +21,24 @@ type BTCDelegationCreatedBbnBlock struct {
 	Timestamp int64 `bson:"timestamp"` // epoch time in seconds
 }
 
+type SlashingTx struct {
+	SlashingTxHex          string `bson:"slashing_tx_hex"`
+	UnbondingSlashingTxHex string `bson:"unbonding_slashing_tx_hex"`
+	SpendingHeight         uint32 `bson:"spending_height"`
+}
+
 type IndexerDelegationDetails struct {
 	StakingTxHashHex             string                          `bson:"_id"` // Primary key
 	StakingTxHex                 string                          `bson:"staking_tx_hex"`
 	ParamsVersion                uint32                          `bson:"params_version"`
 	FinalityProviderBtcPksHex    []string                        `bson:"finality_provider_btc_pks_hex"`
 	StakerBtcPkHex               string                          `bson:"staker_btc_pk_hex"`
-	StakingTime                  uint32                          `bson:"staking_time"`
+	StakerBabylonAddress         string                          `bson:"staker_babylon_address"`
+	StakingTimeLock              uint32                          `bson:"staking_time"`
 	StakingAmount                uint64                          `bson:"staking_amount"`
 	StakingOutputPkScript        string                          `bson:"staking_output_pk_script"`
 	StakingOutputIdx             uint32                          `bson:"staking_output_idx"`
-	UnbondingTime                uint32                          `bson:"unbonding_time"`
+	UnbondingTimeLock            uint32                          `bson:"unbonding_time"`
 	UnbondingTx                  string                          `bson:"unbonding_tx"`
 	State                        indexertypes.DelegationState    `bson:"state"`
 	SubState                     indexertypes.DelegationSubState `bson:"sub_state,omitempty"`
@@ -39,6 +46,7 @@ type IndexerDelegationDetails struct {
 	EndHeight                    uint32                          `bson:"end_height"`
 	CovenantUnbondingSignatures  []CovenantSignature             `bson:"covenant_unbonding_signatures"`
 	BTCDelegationCreatedBbnBlock BTCDelegationCreatedBbnBlock    `bson:"btc_delegation_created_bbn_block"`
+	SlashingTx                   SlashingTx                      `bson:"slashing_tx"`
 }
 
 func BuildDelegationPaginationToken(d IndexerDelegationDetails) (string, error) {

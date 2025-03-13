@@ -5,16 +5,15 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v1model "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 )
 
 type V1ServiceProvider interface {
 	service.SharedServiceProvider
 	// Delegation
-	DelegationsByStakerPk(ctx context.Context, stakerPk string, state types.DelegationState, pageToken string) ([]DelegationPublic, string, *types.Error)
+	DelegationsByStakerPk(ctx context.Context, stakerPk string, states []types.DelegationState, pageToken string) ([]*DelegationPublic, string, *types.Error)
 	SaveActiveStakingDelegation(ctx context.Context, txHashHex, stakerPkHex, finalityProviderPkHex string, value, startHeight uint64, stakingTimestamp int64, timeLock, stakingOutputIndex uint64, stakingTxHex string, isOverflow bool) *types.Error
 	IsDelegationPresent(ctx context.Context, txHashHex string) (bool, *types.Error)
-	GetDelegation(ctx context.Context, txHashHex string) (*v1model.DelegationDocument, *types.Error)
+	GetDelegation(ctx context.Context, txHashHex string) (*DelegationPublic, *types.Error)
 	CheckStakerHasActiveDelegationByPk(ctx context.Context, stakerPkHex string, afterTimestamp int64) (bool, *types.Error)
 	TransitionToUnbondingState(ctx context.Context, txHashHex string, startHeight, timelock, outputIndex uint64, txHex string, startTimestamp int64) *types.Error
 	TransitionToWithdrawnState(ctx context.Context, txHashHex string) *types.Error

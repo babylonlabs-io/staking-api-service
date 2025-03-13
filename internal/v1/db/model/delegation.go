@@ -1,8 +1,8 @@
 package v1dbmodel
 
 import (
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
 type TimelockTransaction struct {

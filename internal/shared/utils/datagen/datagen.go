@@ -3,8 +3,6 @@ package datagen
 import (
 	"bytes"
 	"encoding/hex"
-	"fmt"
-	"log"
 	"math/rand"
 	"time"
 
@@ -31,18 +29,6 @@ func RandomPk() (string, error) {
 	}
 	fpPk := fpPirvKey.PubKey()
 	return hex.EncodeToString(schnorr.SerializePubKey(fpPk)), nil
-}
-
-func GeneratePks(numOfKeys int) []string {
-	var pks []string
-	for i := 0; i < numOfKeys; i++ {
-		k, err := RandomPk()
-		if err != nil {
-			log.Fatalf("Failed to generate random pk: %v", err)
-		}
-		pks = append(pks, k)
-	}
-	return pks
 }
 
 // RandomPostiveFloat64 generates a random float64 value greater than 0.
@@ -144,55 +130,9 @@ func GenerateRandomTimestamp(afterTimestamp, beforeTimestamp int64) int64 {
 	return afterTimestamp + rand.Int63n(beforeTimestamp-afterTimestamp)
 }
 
-// GenerateRandomFinalityProviderDetail generates a random number of finality providers
-func GenerateRandomFinalityProviderDetail(r *rand.Rand, numOfFps uint64) []types.FinalityProviderDetails {
-	var finalityProviders []types.FinalityProviderDetails
-
-	for i := uint64(0); i < numOfFps; i++ {
-		fpPkInHex, err := RandomPk()
-		if err != nil {
-			log.Fatalf("failed to generate random public key: %v", err)
-		}
-
-		randomStr := RandomString(r, 10)
-		finalityProviders = append(finalityProviders, types.FinalityProviderDetails{
-			Description: types.FinalityProviderDescription{
-				Moniker:         "Moniker" + randomStr,
-				Identity:        "Identity" + randomStr,
-				Website:         "Website" + randomStr,
-				SecurityContact: "SecurityContact" + randomStr,
-				Details:         "Details" + randomStr,
-			},
-			Commission: fmt.Sprintf("%f", RandomPostiveFloat64(r)),
-			BtcPk:      fpPkInHex,
-		})
-	}
-	return finalityProviders
-}
-
 func RandomFinalityProviderState(r *rand.Rand) types.FinalityProviderQueryingState {
 	states := []types.FinalityProviderQueryingState{types.FinalityProviderStateActive, types.FinalityProviderStateStandby}
 	return states[r.Intn(len(states))]
-}
-
-func GenerateRandomBabylonParams(r *rand.Rand) indexertypes.BbnStakingParams {
-	return indexertypes.BbnStakingParams{
-		Version:                      uint32(r.Intn(10)),
-		CovenantPks:                  GeneratePks(r.Intn(10)),
-		CovenantQuorum:               uint32(r.Intn(10)),
-		MinStakingValueSat:           int64(r.Intn(10)),
-		MaxStakingValueSat:           int64(r.Intn(10)),
-		MinStakingTimeBlocks:         uint32(r.Intn(10)),
-		MaxStakingTimeBlocks:         uint32(r.Intn(10)),
-		SlashingPkScript:             RandomString(r, 10),
-		MinSlashingTxFeeSat:          int64(r.Intn(10)),
-		SlashingRate:                 fmt.Sprintf("%f", RandomPostiveFloat64(r)),
-		MinUnbondingTimeBlocks:       uint32(r.Intn(10)),
-		UnbondingFeeSat:              int64(r.Intn(10)),
-		MinCommissionRate:            fmt.Sprintf("%f", RandomPostiveFloat64(r)),
-		MaxActiveFinalityProviders:   uint32(r.Intn(10)),
-		DelegationCreationBaseGasFee: uint64(r.Intn(10)),
-	}
 }
 
 func GenerateRandomBTCParams(r *rand.Rand) indexertypes.BtcCheckpointParams {
