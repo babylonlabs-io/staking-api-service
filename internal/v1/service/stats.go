@@ -2,12 +2,17 @@ package v1service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	coinmarketcap "github.com/miguelmota/go-coinmarketcap/pro/v1"
 	"github.com/rs/zerolog/log"
+	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/sync/singleflight"
 )
 
 type OverallStatsPublic struct {
@@ -28,6 +33,9 @@ type StakerStatsPublic struct {
 	ActiveDelegations int64  `json:"active_delegations"`
 	TotalDelegations  int64  `json:"total_delegations"`
 }
+
+// Add a singleflight group to the V1Service struct to prevent multiple concurrent requests
+var singleFlightGroup singleflight.Group
 
 // ProcessStakingStatsCalculation calculates the staking stats and updates the database.
 // This method tolerates duplicated calls, only the first call will be processed.
@@ -183,6 +191,17 @@ func (s *V1Service) GetOverallStats(
 		pendingTvl = unconfirmedTvl - confirmedTvl
 	}
 
+	// Fetch BTC price for backward compatibility with phase-1 API
+	var btcPrice *float64
+	if s.Service.Clients.CoinMarketCap != nil {
+		price, err := s.getLatestBTCPrice(ctx)
+		if err != nil {
+			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
+		} else {
+			btcPrice = &price
+		}
+	}
+
 	return &OverallStatsPublic{
 		ActiveTvl:         int64(confirmedTvl),
 		TotalTvl:          stats.TotalTvl,
@@ -191,7 +210,61 @@ func (s *V1Service) GetOverallStats(
 		TotalStakers:      stats.TotalStakers,
 		UnconfirmedTvl:    unconfirmedTvl,
 		PendingTvl:        pendingTvl,
+		BtcPriceUsd:       btcPrice,
 	}, nil
+}
+
+// getLatestBTCPrice fetches the latest BTC price, first trying from MongoDB cache
+// and falling back to CoinMarketCap if needed
+func (s *V1Service) getLatestBTCPrice(ctx context.Context) (float64, error) {
+	// Try to get price from MongoDB first
+	db := s.Service.DbClients.SharedDBClient
+	price, err := db.GetLatestPrice(ctx, dbmodel.SymbolBTC)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			// Document not found, fetch from CoinMarketCap
+
+			// singleflight prevents sending multiple requests for btc quote from multiple goroutines
+			// here we will make just 1 request, other goroutines will wait and receive whatever first one gets
+			value, err, _ := singleFlightGroup.Do("fetch_btc", func() (interface{}, error) {
+				return s.doGetLatestBTCPrice()
+			})
+			if err != nil {
+				return 0, fmt.Errorf("failed to fetch price from CoinMarketCap: %w", err)
+			}
+			price := value.(float64)
+			// Store in MongoDB with TTL
+			if err := db.SetLatestPrice(ctx, dbmodel.SymbolBTC, price); err != nil {
+				return 0, fmt.Errorf("failed to cache btc price: %w", err)
+			}
+			return price, nil
+		}
+		// Handle other database errors
+		return 0, fmt.Errorf("database error: %w", err)
+	}
+	return price, nil
+}
+
+// doGetLatestBTCPrice fetches the latest BTC price directly from CoinMarketCap
+func (s *V1Service) doGetLatestBTCPrice() (float64, error) {
+	quotes, err := s.Service.Clients.CoinMarketCap.Cryptocurrency.LatestQuotes(&coinmarketcap.QuoteOptions{
+		Symbol: "BTC",
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	if len(quotes) != 1 {
+		return 0, fmt.Errorf("number of quotes from coinmarketcap != 1")
+	}
+	btcLatestQuote := quotes[0]
+
+	btcToUsdQuote := btcLatestQuote.Quote["USD"]
+	if btcToUsdQuote == nil {
+		return 0, fmt.Errorf("USD quote not found in coinmarketcap response")
+	}
+
+	return btcToUsdQuote.Price, nil
 }
 
 func (s *V1Service) GetStakerStats(
