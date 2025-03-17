@@ -4,10 +4,6 @@ import (
 	"context"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
-	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
 type V1Service struct {
@@ -16,18 +12,9 @@ type V1Service struct {
 
 func New(
 	ctx context.Context,
-	cfg *config.Config,
-	globalParams *types.GlobalParams,
-	finalityProviders []types.FinalityProviderDetails,
-	clients *clients.Clients,
-	dbClients *dbclients.DbClients,
+	sharedService *service.Service,
 ) (*V1Service, error) {
-	service, err := service.New(ctx, cfg, globalParams, finalityProviders, clients, dbClients)
-	if err != nil {
-		return nil, err
-	}
-
 	return &V1Service{
-		service,
+		Service: sharedService,
 	}, nil
 }
