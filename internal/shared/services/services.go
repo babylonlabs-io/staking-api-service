@@ -34,7 +34,8 @@ func New(
 	if err != nil {
 		return nil, err
 	}
-	v2Service, err := v2service.New(cfg, clients, dbClients)
+
+	v2Service, err := v2service.New(cfg, clients, dbClients, v1Service.Service)
 	if err != nil {
 		return nil, err
 	}

@@ -4,22 +4,26 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
-	"golang.org/x/sync/singleflight"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 )
 
 type V2Service struct {
 	DbClients *dbclients.DbClients
 	Clients   *clients.Clients
 	Cfg       *config.Config
-
-	singleFlightGroup *singleflight.Group
+	service   *service.Service
 }
 
-func New(cfg *config.Config, clients *clients.Clients, dbClients *dbclients.DbClients) (*V2Service, error) {
+func New(
+	cfg *config.Config,
+	clients *clients.Clients,
+	dbClients *dbclients.DbClients,
+	service *service.Service,
+) (*V2Service, error) {
 	return &V2Service{
-		DbClients:         dbClients,
-		Clients:           clients,
-		Cfg:               cfg,
-		singleFlightGroup: &singleflight.Group{},
+		DbClients: dbClients,
+		Clients:   clients,
+		Cfg:       cfg,
+		service:   service,
 	}, nil
 }
