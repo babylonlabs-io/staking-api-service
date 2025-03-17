@@ -3,11 +3,11 @@ package v2service
 import (
 	"context"
 
+	"cmp"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
 	"slices"
-	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
-	"cmp"
 )
 
 type StakingStatusPublic struct {
@@ -33,13 +33,13 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 
 	// Default to true if there is no rules for delegation transition
 	status := true
-	if s.Cfg.DelegationTransition != nil {
-		bbnHeight, dbError := s.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+	if s.cfg.DelegationTransition != nil {
+		bbnHeight, dbError := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
 		if dbError != nil {
 			log.Ctx(ctx).Error().Err(dbError).Msg("Failed to get last processed BBN height")
 			return nil, types.NewInternalServiceError(err)
 		}
-		status = bbnHeight >= s.Cfg.DelegationTransition.AllowListExpirationHeight
+		status = bbnHeight >= s.cfg.DelegationTransition.AllowListExpirationHeight
 	}
 
 	// sort (asc) babylon params according to their version

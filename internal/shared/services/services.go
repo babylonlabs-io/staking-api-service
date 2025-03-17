@@ -26,22 +26,23 @@ func New(
 	clients *clients.Clients,
 	dbClients *dbclients.DbClients,
 ) (*Services, error) {
-	service, err := service.New(ctx, cfg, globalParams, finalityProviders, clients, dbClients)
-	if err != nil {
-		return nil, err
-	}
-	v1Service, err := v1service.New(ctx, cfg, globalParams, finalityProviders, clients, dbClients)
+	sharedService, err := service.New(ctx, cfg, globalParams, finalityProviders, clients, dbClients)
 	if err != nil {
 		return nil, err
 	}
 
-	v2Service, err := v2service.New(cfg, clients, dbClients, v1Service.Service)
+	v1Service, err := v1service.New(ctx, sharedService)
+	if err != nil {
+		return nil, err
+	}
+
+	v2Service, err := v2service.New(sharedService)
 	if err != nil {
 		return nil, err
 	}
 
 	services := Services{
-		SharedService: service,
+		SharedService: sharedService,
 		V1Service:     v1Service,
 		V2Service:     v2Service,
 	}
