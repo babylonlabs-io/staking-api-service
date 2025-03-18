@@ -42,7 +42,7 @@ func mapToFinalityProviderStatsPublic(
 func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
 ) ([]*FinalityProviderStatsPublic, *types.Error) {
-	finalityProviders, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("No finality providers found")
@@ -59,7 +59,7 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		)
 	}
 
-	providerStats, err := s.DbClients.V2DBClient.GetFinalityProviderStats(ctx)
+	providerStats, err := s.dbClients.V2DBClient.GetFinalityProviderStats(ctx)
 	if err != nil {
 		return nil, types.NewErrorWithMsg(
 			http.StatusInternalServerError,

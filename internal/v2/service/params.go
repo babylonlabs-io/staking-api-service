@@ -32,7 +32,7 @@ func (s *V2Service) GetParams(ctx context.Context) (*ParamsPublic, *types.Error)
 }
 
 func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, *types.Error) {
-	params, err := s.DbClients.IndexerDBClient.GetBbnStakingParams(ctx)
+	params, err := s.dbClients.IndexerDBClient.GetBbnStakingParams(ctx)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("Babylon params not found")
@@ -48,7 +48,7 @@ func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.Bb
 }
 
 func (s *V2Service) getBtcCheckpointParams(ctx context.Context) ([]*indexertypes.BtcCheckpointParams, *types.Error) {
-	params, err := s.DbClients.IndexerDBClient.GetBtcCheckpointParams(ctx)
+	params, err := s.dbClients.IndexerDBClient.GetBtcCheckpointParams(ctx)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("BTC params not found")

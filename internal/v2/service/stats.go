@@ -28,21 +28,21 @@ type StakerStatsPublic struct {
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
-	overallStats, err := s.DbClients.V2DBClient.GetOverallStats(ctx)
+	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
 		return nil, types.NewInternalServiceError(err)
 	}
 
 	// TODO: count fetch will affect the performance of the API
-	activeStakersCount, err := s.DbClients.V2DBClient.GetActiveStakersCount(ctx)
+	activeStakersCount, err := s.dbClients.V2DBClient.GetActiveStakersCount(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
 		return nil, types.NewInternalServiceError(err)
 	}
 
 	// TODO: ideally this should not be fetched from the indexer db
-	finalityProviders, err := s.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching finality providers")
 		return nil, types.NewInternalServiceError(err)
@@ -65,7 +65,7 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 }
 
 func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error) {
-	stakerStats, err := s.DbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
+	stakerStats, err := s.dbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
 		return nil, types.NewInternalServiceError(err)
@@ -85,7 +85,7 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 // ProcessActiveDelegationStats calculates the active delegation stats and updates the database.
 func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error {
 	// Fetch existing or initialize the stats lock document if not exist
-	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
+	statsLockDocument, err := s.dbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx, stakingTxHashHex, types.Active.ToString(),
 	)
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	}
 
 	if !statsLockDocument.FinalityProviderStats {
-		err = s.DbClients.V2DBClient.IncrementFinalityProviderStats(
+		err = s.dbClients.V2DBClient.IncrementFinalityProviderStats(
 			ctx, stakingTxHashHex, fpBtcPkHexes, amount,
 		)
 		if err != nil {
@@ -109,7 +109,7 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	}
 
 	if !statsLockDocument.StakerStats {
-		err = s.DbClients.V2DBClient.HandleActiveStakerStats(
+		err = s.dbClients.V2DBClient.HandleActiveStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
 		)
 		if err != nil {
@@ -125,7 +125,7 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	// The overall stats should be the last to be updated as it has dependency
 	// on staker stats.
 	if !statsLockDocument.OverallStats {
-		err = s.DbClients.V2DBClient.IncrementOverallStats(
+		err = s.dbClients.V2DBClient.IncrementOverallStats(
 			ctx, stakingTxHashHex, amount,
 		)
 		if err != nil {
@@ -156,7 +156,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 	amount uint64,
 	stateHistory []string,
 ) *types.Error {
-	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
+	statsLockDocument, err := s.dbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
 		stakingTxHashHex,
 		types.Unbonding.ToString(), // use same state for both slashed and unbonding
@@ -171,7 +171,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 
 	// Subtract from the finality stats
 	if !statsLockDocument.FinalityProviderStats {
-		err = s.DbClients.V2DBClient.SubtractFinalityProviderStats(
+		err = s.dbClients.V2DBClient.SubtractFinalityProviderStats(
 			ctx, stakingTxHashHex, fpBtcPkHexes, amount,
 		)
 		if err != nil {
@@ -190,7 +190,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 			Str("event_type", "unbonding").
 			Msg("Handling unbonding staker stats")
 
-		err = s.DbClients.V2DBClient.HandleUnbondingStakerStats(
+		err = s.dbClients.V2DBClient.HandleUnbondingStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory,
 		)
 		if err != nil {
@@ -206,7 +206,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 	// The overall stats should be the last to be updated as it has dependency
 	// on staker stats.
 	if !statsLockDocument.OverallStats {
-		err = s.DbClients.V2DBClient.SubtractOverallStats(
+		err = s.dbClients.V2DBClient.SubtractOverallStats(
 			ctx, stakingTxHashHex, amount,
 		)
 		if err != nil {
@@ -235,7 +235,7 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 	amount uint64,
 	stateHistory []string,
 ) *types.Error {
-	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
+	statsLockDocument, err := s.dbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
 		stakingTxHashHex,
 		types.Withdrawable.ToString(),
@@ -253,7 +253,7 @@ func (s *V2Service) ProcessWithdrawableDelegationStats(
 			Str("stakingTxHashHex", stakingTxHashHex).
 			Str("stakerPkHex", stakerPkHex).
 			Msg("Handling withdrawable staker stats")
-		err = s.DbClients.V2DBClient.HandleWithdrawableStakerStats(
+		err = s.dbClients.V2DBClient.HandleWithdrawableStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory,
 		)
 		if err != nil {
@@ -284,7 +284,7 @@ func (s *V2Service) ProcessWithdrawnDelegationStats(
 	amount uint64,
 	stateHistory []string,
 ) *types.Error {
-	statsLockDocument, err := s.DbClients.V2DBClient.GetOrCreateStatsLock(
+	statsLockDocument, err := s.dbClients.V2DBClient.GetOrCreateStatsLock(
 		ctx,
 		stakingTxHashHex,
 		types.Withdrawn.ToString(),
@@ -302,7 +302,7 @@ func (s *V2Service) ProcessWithdrawnDelegationStats(
 			Str("stakingTxHashHex", stakingTxHashHex).
 			Str("stakerPkHex", stakerPkHex).
 			Msg("Handling withdrawn staker stats")
-		err = s.DbClients.V2DBClient.HandleWithdrawnStakerStats(
+		err = s.dbClients.V2DBClient.HandleWithdrawnStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount, stateHistory,
 		)
 		if err != nil {

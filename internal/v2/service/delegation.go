@@ -103,7 +103,7 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 }
 
 func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error) {
-	delegation, err := s.DbClients.IndexerDBClient.GetDelegation(ctx, stakingTxHashHex)
+	delegation, err := s.dbClients.IndexerDBClient.GetDelegation(ctx, stakingTxHashHex)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHashHex", stakingTxHashHex).Msg("Staking delegation not found")
@@ -116,7 +116,7 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 }
 
 func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, stakerBabylonAddress *string, paginationKey string) ([]*DelegationPublic, string, *types.Error) {
-	resultMap, err := s.DbClients.IndexerDBClient.GetDelegations(ctx, stakerPkHex, stakerBabylonAddress, paginationKey)
+	resultMap, err := s.dbClients.IndexerDBClient.GetDelegations(ctx, stakerPkHex, stakerBabylonAddress, paginationKey)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHashHex", stakerPkHex).Msg("Staking delegations not found")
@@ -149,7 +149,7 @@ func getUnbondingSignatures(covenantSignatures []indexerdbmodel.CovenantSignatur
 }
 
 func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error {
-	err := s.DbClients.V2DBClient.SaveUnprocessableMessage(ctx, messageBody, receipt)
+	err := s.dbClients.V2DBClient.SaveUnprocessableMessage(ctx, messageBody, receipt)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while saving unprocessable message")
 		return types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "error while saving unprocessable message")
@@ -161,7 +161,7 @@ func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, 
 func (s *V2Service) MarkV1DelegationAsTransitioned(
 	ctx context.Context, stakingTxHashHex string,
 ) *types.Error {
-	err := s.DbClients.V1DBClient.TransitionToTransitionedState(ctx, stakingTxHashHex)
+	err := s.dbClients.V1DBClient.TransitionToTransitionedState(ctx, stakingTxHashHex)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			// If the delegation is not found, it means it has already been transitioned
