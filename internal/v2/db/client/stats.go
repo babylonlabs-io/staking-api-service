@@ -85,10 +85,7 @@ func (v2dbclient *V2Database) IncrementOverallStats(
 		upsertFilter := bson.M{"_id": shardId}
 
 		_, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
+		return nil, err
 	}
 
 	// Execute the transaction
@@ -119,7 +116,7 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 	defer session.EndSession(ctx)
 
 	// Define the work to be done in the transaction
-	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+	transactionWork := func(sessCtx mongo.SessionContext) (any, error) {
 		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, types.Unbonding.ToString(), "overall_stats")
 		if err != nil {
 			return nil, err
@@ -132,19 +129,12 @@ func (v2dbclient *V2Database) SubtractOverallStats(
 		upsertFilter := bson.M{"_id": shardId}
 
 		_, err = overallStatsClient.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
+		return nil, err
 	}
 
 	// Execute the transaction
 	_, txErr := session.WithTransaction(ctx, transactionWork)
-	if txErr != nil {
-		return txErr
-	}
-
-	return nil
+	return txErr
 }
 
 // GetOverallStats fetches the overall stats from all the shards and sums them up
@@ -390,7 +380,7 @@ func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stak
 	}
 	defer session.EndSession(ctx)
 
-	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+	transactionWork := func(sessCtx mongo.SessionContext) (any, error) {
 		err := v2dbclient.updateStatsLockByFieldName(sessCtx, stakingTxHashHex, state, "staker_stats")
 		if err != nil {
 			return nil, err
@@ -399,10 +389,7 @@ func (v2dbclient *V2Database) updateStakerStats(ctx context.Context, state, stak
 		upsertFilter := bson.M{"_id": stakerPkHex}
 
 		_, err = client.UpdateOne(sessCtx, upsertFilter, upsertUpdate, options.Update().SetUpsert(true))
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
+		return nil, err
 	}
 
 	// Execute the transaction
@@ -546,11 +533,7 @@ func (v2dbclient *V2Database) updateFinalityProviderStats(
 		// Execute all updates in a single bulk write
 		opts := options.BulkWrite().SetOrdered(true)
 		_, err = client.BulkWrite(sessCtx, operations, opts)
-		if err != nil {
-			return nil, err
-		}
-
-		return nil, nil
+		return nil, err
 	}
 
 	_, txErr := session.WithTransaction(ctx, transactionWork)
