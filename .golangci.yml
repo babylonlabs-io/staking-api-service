@@ -57,9 +57,10 @@ linters-settings:
   exhaustruct:
     include: []
 
-  gosec:
-    excludes:
-      - G115 #TODO: remove after fixing https://github.com/securego/gosec/issues/1212
+# enable after golangci-lint update to 1.63
+#  gosec:
+#    excludes:
+#      - G115 #TODO: remove after fixing https://github.com/securego/gosec/issues/1212
 
 linters:
   disable-all: true
