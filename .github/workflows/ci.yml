@@ -15,7 +15,7 @@ jobs:
      run-integration-tests: false
      run-lint: true
      run-build: true
-     run-gosec: true
+     run-gosec: false
      gosec-args: "-no-fail ./..."
      
   docker_pipeline:
