@@ -78,12 +78,12 @@ linters:
     - usestdlibvars
     - unparam
     - goprintffuncname
-    - gosec
     - ineffassign
     - noctx
     - typecheck
     - tparallel
   # todo enable after golangci-lint update to 1.63
+#    - gosec
   #    - prealloc
   #    - mnd
   #    - unused
