@@ -63,6 +63,8 @@ test:
 	./bin/local-startup.sh;
 	go test -v -cover -p 1 ./... -count=1
 
+lint:
+	golangci-lint run
 
 build-swagger:
 	swag init --parseDependency --parseInternal -d cmd/staking-api-service,internal/shared/api,internal/shared/types,internal/v1/api/handlers,internal/v2/api/handlers
