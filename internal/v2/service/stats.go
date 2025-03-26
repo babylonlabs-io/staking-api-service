@@ -36,18 +36,11 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	var activeStakersCount int64
-
-	const cacheKey = "active_stakers"
-	if cachedValue := s.cache.Get(cacheKey); cachedValue != nil && !cachedValue.IsExpired() {
-		activeStakersCount = cachedValue.Value()
-	} else {
-		var err error
-		activeStakersCount, err = s.dbClients.V2DBClient.GetActiveStakersCount(ctx)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
-			return nil, types.NewInternalServiceError(err)
-		}
+	const cacheTTL = 5 * time.Minute
+	activeStakersCount, err := s.getActiveStakersCount(ctx, cacheTTL)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
+		return nil, types.NewInternalServiceError(err)
 	}
 
 	// TODO: ideally this should not be fetched from the indexer db
