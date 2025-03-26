@@ -51,20 +51,35 @@ func TestGetActiveStakersCount(t *testing.T) {
 		assert.Equal(t, baseCount, doc)
 	})
 	t.Run("ok (expired)", func(t *testing.T) {
+		// this subtest tests 2 things:
+		// 1. Cache expiration takes place
+		// 2. TTL of stored item is not updated with each access
+		//    otherwise if there is 1 request per TTL period cached item won't expire at all
 		baseCount := int64(888)
 
 		db := mocks.NewV2DBClient(t)
-		db.On("GetActiveStakersCount", ctx).Return(baseCount, nil).Twice()
+		db.On("GetActiveStakersCount", ctx).Return(baseCount, nil).Twice() // only 2 db accesses are expected
 
 		s := newService(db)
 
 		const ttl = time.Second
+		const halfTTL = ttl / 2
+
+		// 1. we reach db and store item in cache
 		doc, err := s.getActiveStakersCount(ctx, ttl)
 		require.NoError(t, err)
 		assert.Equal(t, baseCount, doc)
 
-		time.Sleep(ttl)
+		// 2. we first wait for half of TTL (explained later)
+		// and then call the function again (this time it will use cache only)
+		time.Sleep(halfTTL)
+		doc, err = s.getActiveStakersCount(ctx, ttl)
+		require.NoError(t, err)
+		assert.Equal(t, baseCount, doc)
 
+		// 3. again we wait for half of TTL (by that time TTL + some additional time will pass which means
+		// cached item must be expired already) and call the function again (this time it will reach db)
+		time.Sleep(halfTTL)
 		doc, err = s.getActiveStakersCount(ctx, ttl)
 		require.NoError(t, err)
 		assert.Equal(t, baseCount, doc)
