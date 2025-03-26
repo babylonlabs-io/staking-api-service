@@ -44,5 +44,4 @@ func (s *V1Service) TransitionToUnbondedState(
 		return types.NewInternalServiceError(err)
 	}
 	return nil
-
 }

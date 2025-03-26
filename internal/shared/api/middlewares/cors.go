@@ -51,7 +51,7 @@ func CorsMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 				w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS, POST")
 				if r.Method == http.MethodOptions {
 					// This is a preflight request, respond with 204 immediately
-					w.WriteHeader(204)
+					w.WriteHeader(http.StatusNoContent)
 				}
 			}
 			// Serve the request with the CORS handler
