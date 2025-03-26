@@ -3,15 +3,12 @@ package datagen
 import (
 	"bytes"
 	"encoding/hex"
-	"math/rand"
-	"time"
-
-	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
+	"math/rand"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -106,51 +103,7 @@ func GenerateRandomTx(
 	return tx, txHex, nil
 }
 
-// GenerateRandomTxWithOutput generates a random transaction with random values
-// for each field.
-func RandomBytes(r *rand.Rand, n uint64) ([]byte, string) {
-	randomBytes := GenRandomByteArray(r, n)
-	return randomBytes, hex.EncodeToString(randomBytes)
-}
-
-// GenerateRandomTimestamp generates a random timestamp before the specified timestamp.
-// If beforeTimestamp is 0, then the current time is used.
-func GenerateRandomTimestamp(afterTimestamp, beforeTimestamp int64) int64 {
-	timeNow := time.Now().Unix()
-	if beforeTimestamp == 0 && afterTimestamp == 0 {
-		return timeNow
-	}
-	if beforeTimestamp == 0 {
-		return afterTimestamp + rand.Int63n(timeNow-afterTimestamp)
-	} else if afterTimestamp == 0 {
-		// Generate a reasonable timestamp between 1 second to 6 months in the past
-		sixMonthsInSeconds := int64(6 * 30 * 24 * 60 * 60)
-		return beforeTimestamp - rand.Int63n(sixMonthsInSeconds)
-	}
-	return afterTimestamp + rand.Int63n(beforeTimestamp-afterTimestamp)
-}
-
-func RandomFinalityProviderState(r *rand.Rand) types.FinalityProviderQueryingState {
-	states := []types.FinalityProviderQueryingState{types.FinalityProviderStateActive, types.FinalityProviderStateStandby}
-	return states[r.Intn(len(states))]
-}
-
-func GenerateRandomBTCParams(r *rand.Rand) indexertypes.BtcCheckpointParams {
-	return indexertypes.BtcCheckpointParams{
-		Version:              uint32(r.Intn(10)),
-		BtcConfirmationDepth: uint64(r.Intn(10)),
-	}
-}
-
 func RandomDelegationState(r *rand.Rand) types.DelegationState {
 	states := []types.DelegationState{types.Active, types.UnbondingRequested, types.Unbonding, types.Unbonded, types.Withdrawn}
 	return states[r.Intn(len(states))]
-}
-
-func RandomTransactionInfo(r *rand.Rand) types.TransactionInfo {
-	_, txHex, _ := GenerateRandomTx(r, nil)
-	return types.TransactionInfo{
-		TxHex:       txHex,
-		OutputIndex: r.Intn(100),
-	}
 }
