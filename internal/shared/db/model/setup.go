@@ -63,9 +63,12 @@ var collections = map[string][]index{
 	V1BtcInfoCollection:          {{Indexes: map[string]int{}}},
 	// V2
 	V2StatsLockCollection:             {{Indexes: map[string]int{}}},
-	V2OverallStatsCollection:          {{Indexes: map[string]int{}}}, // todo add index here
+	V2OverallStatsCollection:          {{Indexes: map[string]int{}}},
 	V2FinalityProviderStatsCollection: {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
-	V2StakerStatsCollection:           {{Indexes: map[string]int{"active_tvl": -1}, Unique: false}},
+	V2StakerStatsCollection: {
+		{Indexes: map[string]int{"active_tvl": -1}, Unique: false},
+		{Indexes: map[string]int{"active_delegations": 1}, Unique: false},
+	},
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {

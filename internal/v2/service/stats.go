@@ -6,7 +6,9 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/rs/zerolog/log"
+	"time"
 )
 
 type OverallStatsPublic struct {
@@ -28,17 +30,24 @@ type StakerStatsPublic struct {
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
-	overallStats, err := s.overallStatsService.getOverallStatsFromDB(ctx)
+	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	// TODO: count fetch will affect the performance of the API
-	activeStakersCount, err := s.dbClients.V2DBClient.GetActiveStakersCount(ctx)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
-		return nil, types.NewInternalServiceError(err)
+	var activeStakersCount int64
+
+	const cacheKey = "active_stakers"
+	if cachedValue := s.cache.Get(cacheKey); cachedValue != nil && !cachedValue.IsExpired() {
+		activeStakersCount = cachedValue.Value()
+	} else {
+		var err error
+		activeStakersCount, err = s.dbClients.V2DBClient.GetActiveStakersCount(ctx)
+		if err != nil {
+			log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
+			return nil, types.NewInternalServiceError(err)
+		}
 	}
 
 	// TODO: ideally this should not be fetched from the indexer db
@@ -62,6 +71,24 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
 		TotalFinalityProviders:  uint64(len(finalityProviders)),
 	}, nil
+}
+
+func (s *V2Service) getActiveStakersCount(ctx context.Context, ttl time.Duration) (int64, error) {
+	const cacheKey = "active_stakers"
+
+	disableTouch := ttlcache.WithDisableTouchOnHit[string, int64]()
+	if item := s.cache.Get(cacheKey, disableTouch); item != nil && !item.IsExpired() {
+		// all good
+		return item.Value(), nil
+	}
+
+	count, err := s.dbClients.V2DBClient.GetActiveStakersCount(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	item := s.cache.Set(cacheKey, count, ttl)
+	return item.Value(), nil
 }
 
 func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error) {
