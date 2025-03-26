@@ -28,7 +28,7 @@ type StakerStatsPublic struct {
 }
 
 func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
-	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
+	overallStats, err := s.overallStatsService.getOverallStatsFromDB(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
 		return nil, types.NewInternalServiceError(err)
