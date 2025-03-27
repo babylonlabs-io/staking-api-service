@@ -26,17 +26,18 @@ func (O Outcome) String() string {
 }
 
 var (
-	once                             sync.Once
-	metricsRouter                    *chi.Mux
-	httpRequestDurationHistogram     *prometheus.HistogramVec
-	eventProcessingDurationHistogram *prometheus.HistogramVec
-	unprocessableEntityCounter       *prometheus.CounterVec
-	queueOperationFailureCounter     *prometheus.CounterVec
-	httpResponseWriteFailureCounter  *prometheus.CounterVec
-	clientRequestDurationHistogram   *prometheus.HistogramVec
-	serviceCrashCounter              *prometheus.CounterVec
-	dbErrorsCounter                  *prometheus.CounterVec
-	chainAnalysisCallsCounter        *prometheus.CounterVec
+	once                              sync.Once
+	metricsRouter                     *chi.Mux
+	httpRequestDurationHistogram      *prometheus.HistogramVec
+	eventProcessingDurationHistogram  *prometheus.HistogramVec
+	unprocessableEntityCounter        *prometheus.CounterVec
+	queueOperationFailureCounter      *prometheus.CounterVec
+	httpResponseWriteFailureCounter   *prometheus.CounterVec
+	clientRequestDurationHistogram    *prometheus.HistogramVec
+	serviceCrashCounter               *prometheus.CounterVec
+	dbErrorsCounter                   *prometheus.CounterVec
+	chainAnalysisCallsCounter         *prometheus.CounterVec
+	manualInterventionRequiredCounter *prometheus.CounterVec
 )
 
 // Init initializes the metrics package.
@@ -148,6 +149,13 @@ func registerMetrics() {
 		[]string{"status"},
 	)
 
+	manualInterventionRequiredCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "manual_intervention_required",
+		},
+		[]string{"type"},
+	)
+
 	prometheus.MustRegister(
 		httpRequestDurationHistogram,
 		eventProcessingDurationHistogram,
@@ -157,6 +165,7 @@ func registerMetrics() {
 		clientRequestDurationHistogram,
 		serviceCrashCounter,
 		chainAnalysisCallsCounter,
+		manualInterventionRequiredCounter,
 	)
 }
 
@@ -221,6 +230,10 @@ func StartClientRequestDurationTimer(baseUrl, method, path string) func(statusCo
 			fmt.Sprintf("%d", statusCode),
 		).Observe(duration)
 	}
+}
+
+func RecordManualInterventionRequired(manualInterventionType string) {
+	manualInterventionRequiredCounter.WithLabelValues(manualInterventionType).Inc()
 }
 
 // RecordServiceCrash increments the service crash counter.
