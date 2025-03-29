@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -71,6 +72,21 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(ctx context.Context, stak
 
 	return db.FindWithPagination(
 		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
+		indexerdbmodel.BuildDelegationPaginationToken,
+	)
+}
+
+func (indexerdbclient *IndexerDatabase) GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
+	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
+
+	// Base filter with stakingTxHashHex
+	filter := bson.M{
+		"staker_btc_pk_hex": stakerPKHex,
+		"state":             bson.M{"$in": states},
+	}
+
+	return db.FindWithPagination(
+		ctx, client, filter, options.Find(), indexerdbclient.Cfg.MaxPaginationLimit,
 		indexerdbmodel.BuildDelegationPaginationToken,
 	)
 }

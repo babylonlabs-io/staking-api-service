@@ -4,10 +4,13 @@ import (
 	"context"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
 )
+
+const checkStakerStats = true
 
 type OverallStatsPublic struct {
 	ActiveTvl               int64  `json:"active_tvl"`
@@ -65,21 +68,64 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 }
 
 func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error) {
-	stakerStats, err := s.dbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
+	states := []indexertypes.DelegationState{
+		indexertypes.StateActive,
+		indexertypes.StateUnbonding,
+		indexertypes.StateWithdrawable,
+		indexertypes.StateSlashed, // do we need slashed here ?
+	}
+	delegations, err := s.dbClients.IndexerDBClient.GetDelegationsInStates(ctx, stakerPKHex, states)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	return &StakerStatsPublic{
-		StakerPkHex:             stakerStats.StakerPkHex,
-		ActiveTvl:               stakerStats.ActiveTvl,
-		ActiveDelegations:       stakerStats.ActiveDelegations,
-		UnbondingTvl:            stakerStats.UnbondingTvl,
-		UnbondingDelegations:    stakerStats.UnbondingDelegations,
-		WithdrawableTvl:         stakerStats.WithdrawableTvl,
-		WithdrawableDelegations: stakerStats.WithdrawableDelegations,
-	}, nil
+	var stats StakerStatsPublic
+	stats.StakerPkHex = stakerPKHex
+
+	for _, delegation := range delegations.Data {
+		amount := int64(delegation.StakingAmount)
+
+		switch delegation.State {
+		case indexertypes.StateActive:
+			stats.ActiveTvl += amount
+			stats.ActiveDelegations++
+		case indexertypes.StateUnbonding:
+			stats.UnbondingTvl += amount
+			stats.UnbondingDelegations++
+		case indexertypes.StateWithdrawn:
+			stats.WithdrawableTvl += amount
+			stats.WithdrawableDelegations++
+		}
+	}
+
+	if checkStakerStats {
+		go func() {
+			stakerStats, err := s.dbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
+			if err != nil {
+				log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
+				return
+			}
+
+			oldStats := StakerStatsPublic{
+				StakerPkHex:             stakerStats.StakerPkHex,
+				ActiveTvl:               stakerStats.ActiveTvl,
+				ActiveDelegations:       stakerStats.ActiveDelegations,
+				UnbondingTvl:            stakerStats.UnbondingTvl,
+				UnbondingDelegations:    stakerStats.UnbondingDelegations,
+				WithdrawableTvl:         stakerStats.WithdrawableTvl,
+				WithdrawableDelegations: stakerStats.WithdrawableDelegations,
+			}
+			if oldStats != stats {
+				log.Ctx(ctx).Warn().Str("stakerPkHex", stakerPKHex).
+					Interface("oldStats", oldStats).
+					Interface("newStats", stats).
+					Msg("Old stats do not match the new stats")
+			}
+		}()
+	}
+
+	return &stats, nil
 }
 
 // ProcessActiveDelegationStats calculates the active delegation stats and updates the database.
