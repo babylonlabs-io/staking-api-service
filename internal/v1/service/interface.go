@@ -31,7 +31,7 @@ type V1ServiceProvider interface {
 	ProcessAndSaveBtcAddresses(ctx context.Context, stakerPkHex string) *types.Error
 	GetStakerPublicKeysByAddresses(ctx context.Context, addresses []string) (map[string]string, *types.Error)
 	// Stats
-	ProcessStakingStatsCalculation(ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string, state types.DelegationState, amount uint64) *types.Error
+	ProcessLegacyStatsDeduction(ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string, amount uint64) *types.Error
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
 	GetStakerStats(ctx context.Context, stakerPkHex string) (*StakerStatsPublic, *types.Error)
 	GetTopStakersByActiveTvl(ctx context.Context, pageToken string) ([]StakerStatsPublic, string, *types.Error)

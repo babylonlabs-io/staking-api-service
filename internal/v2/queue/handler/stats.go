@@ -21,7 +21,13 @@ func (h *V2QueueHandler) ActiveStakingHandler(ctx context.Context, messageBody s
 	}
 
 	// Mark as v1 delegation as transitioned if it exists
-	if err := h.Services.V2Service.MarkV1DelegationAsTransitioned(ctx, activeStakingEvent.StakingTxHashHex); err != nil {
+	if err := h.Services.V2Service.MarkV1DelegationAsTransitioned(
+		ctx,
+		activeStakingEvent.StakingTxHashHex,
+		activeStakingEvent.StakerBtcPkHex,
+		activeStakingEvent.FinalityProviderBtcPksHex[0], // only a single FP is supported for now
+		activeStakingEvent.StakingAmount,
+	); err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to mark v1 delegation as transitioned")
 		return types.NewError(http.StatusInternalServerError, types.InternalServiceError, err)
 	}

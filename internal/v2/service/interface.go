@@ -16,7 +16,11 @@ type V2ServiceProvider interface {
 	GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error)
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error)
 	GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationKey string) ([]*DelegationPublic, string, *types.Error)
-	MarkV1DelegationAsTransitioned(ctx context.Context, stakingTxHashHex string) *types.Error
+	MarkV1DelegationAsTransitioned(
+		ctx context.Context,
+		stakingTxHashHex, stakerPkHex, fpPkHex string,
+		stakingValue uint64,
+	) *types.Error
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
 	GetLatestPrices(ctx context.Context) (map[string]float64, *types.Error)
 	GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error)

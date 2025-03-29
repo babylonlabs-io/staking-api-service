@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/rs/zerolog/log"
@@ -80,6 +81,35 @@ func (s *V1Service) UnbondDelegation(
 		log.Ctx(ctx).Error().Err(err).Msg("failed to save unbonding tx")
 		return types.NewError(http.StatusInternalServerError, types.InternalServiceError, err)
 	}
+
+	// This is a temporary solution to keep phase-1 stats up to date with the
+	// unbonding triggered by the staker. Ideally, the stats should only be
+	// calculated when the actual unbonding tx is confirmed on BTC. But API service
+	// does not have visibility into this. and considering this is a temporary
+	// solution in which the whole phase-1 stats will be removed right after phase-2
+	// is launched, we will process the stats calculation here based on the assumption
+	// that all requested unbonding will be processed eventually.
+	statsErr := s.Service.ProcessLegacyStatsDeduction(
+		ctx, stakingTxHashHex,
+		delegationDoc.StakerPkHex,
+		delegationDoc.FinalityProviderPkHex,
+		delegationDoc.StakingValue,
+	)
+	if statsErr != nil {
+		log.Ctx(ctx).Error().Err(statsErr).
+			Str("stakingTxHashHex", stakingTxHashHex).
+			Str("stakerPkHex", delegationDoc.StakerPkHex).
+			Str("fpPkHex", delegationDoc.FinalityProviderPkHex).
+			Uint64("stakingValue", delegationDoc.StakingValue).
+			Msg("failed to process legacy stats deduction")
+		// We will not block the unbonding request even if the stats deduction fails.
+		// This is a temporary solution and will be removed after phase-2 is launched.
+		// A dedicated metric will be emitted for alerts, manual intervention will be
+		// required to fix the stats.
+		metrics.RecordManualInterventionRequired("legacy_stats_deduction_failed")
+	}
+
+	// 4. transition the delegation state to `unbonding_requested`
 	return nil
 }
 

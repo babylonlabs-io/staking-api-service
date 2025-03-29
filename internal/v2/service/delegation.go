@@ -6,6 +6,7 @@ import (
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	v2types "github.com/babylonlabs-io/staking-api-service/internal/v2/types"
@@ -159,7 +160,9 @@ func (s *V2Service) SaveUnprocessableMessages(ctx context.Context, messageBody, 
 
 // MarkV1DelegationAsTransitioned marks a v1 delegation as transitioned
 func (s *V2Service) MarkV1DelegationAsTransitioned(
-	ctx context.Context, stakingTxHashHex string,
+	ctx context.Context,
+	stakingTxHashHex, stakerPkHex, fpPkHex string,
+	stakingValue uint64,
 ) *types.Error {
 	err := s.dbClients.V1DBClient.TransitionToTransitionedState(ctx, stakingTxHashHex)
 	if err != nil {
@@ -170,6 +173,23 @@ func (s *V2Service) MarkV1DelegationAsTransitioned(
 		}
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to transition v1 delegation to transitioned state")
 		return types.NewInternalServiceError(err)
+	}
+	// Deduce the stats for the newly registered delegation from phase-1 stats
+	statsErr := s.sharedService.ProcessLegacyStatsDeduction(
+		ctx, stakingTxHashHex, stakerPkHex, fpPkHex, stakingValue,
+	)
+	if statsErr != nil {
+		log.Ctx(ctx).Error().Err(statsErr).
+			Str("stakingTxHashHex", stakingTxHashHex).
+			Str("stakerPkHex", stakerPkHex).
+			Str("fpPkHex", fpPkHex).
+			Uint64("stakingValue", stakingValue).
+			Msg("failed to process legacy stats deduction for newly registered delegation")
+		// We will not block the unbonding request even if the stats deduction fails.
+		// This is a temporary solution and will be removed after phase-2 is launched.
+		// A dedicated metric will be emitted for alerts, manual intervention will be
+		// required to fix the stats.
+		metrics.RecordManualInterventionRequired("legacy_stats_deduction_failed")
 	}
 	return nil
 }
