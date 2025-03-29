@@ -46,26 +46,6 @@ func (s *V1Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	var unconfirmedTvl, confirmedTvl, pendingTvl uint64
-
-	btcInfo, err := s.Service.DbClients.V1DBClient.GetLatestBtcInfo(ctx)
-	if err != nil {
-		// Handle missing BTC information, which may occur during initial setup.
-		// Default the unconfirmed TVL to 0; this will be updated automatically
-		// after processing new BTC blocks, all subsequent requests will be served
-		// with the correct value.
-		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Error().Err(err).Msg("latest btc info not found")
-		} else {
-			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc info")
-			return nil, types.NewInternalServiceError(err)
-		}
-	} else {
-		unconfirmedTvl = btcInfo.UnconfirmedTvl
-		confirmedTvl = btcInfo.ConfirmedTvl
-		pendingTvl = unconfirmedTvl - confirmedTvl
-	}
-
 	// Fetch BTC price for backward compatibility with phase-1 API
 	var btcPrice *float64
 	if s.Service.Clients.CoinMarketCap != nil {
@@ -78,13 +58,13 @@ func (s *V1Service) GetOverallStats(
 	}
 
 	return &OverallStatsPublic{
-		ActiveTvl:         int64(confirmedTvl),
+		ActiveTvl:         stats.ActiveTvl,
 		TotalTvl:          stats.TotalTvl,
 		ActiveDelegations: stats.ActiveDelegations,
 		TotalDelegations:  stats.TotalDelegations,
 		TotalStakers:      stats.TotalStakers,
-		UnconfirmedTvl:    unconfirmedTvl,
-		PendingTvl:        pendingTvl,
+		UnconfirmedTvl:    0, // No longer relevant in phase-2
+		PendingTvl:        0, // No longer relevant in phase-2
 		BtcPriceUsd:       btcPrice,
 	}, nil
 }

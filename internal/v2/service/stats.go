@@ -15,6 +15,12 @@ type OverallStatsPublic struct {
 	ActiveStakers           uint64 `json:"active_stakers"`
 	ActiveFinalityProviders uint64 `json:"active_finality_providers"`
 	TotalFinalityProviders  uint64 `json:"total_finality_providers"`
+	// This represents the total active tvl on BTC chain which includes
+	// both phase-1 and phase-2 active tvl
+	TotalActiveTvl int64 `json:"total_active_tvl"`
+	// This represents the total active delegations on BTC chain which includes
+	// both phase-1 and phase-2 active delegations
+	TotalActiveDelegations int64 `json:"total_active_delegations"`
 }
 
 type StakerStatsPublic struct {
@@ -27,7 +33,9 @@ type StakerStatsPublic struct {
 	WithdrawableDelegations int64  `json:"withdrawable_delegations"`
 }
 
-func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error) {
+func (s *V2Service) GetOverallStats(
+	ctx context.Context,
+) (*OverallStatsPublic, *types.Error) {
 	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
@@ -55,9 +63,20 @@ func (s *V2Service) GetOverallStats(ctx context.Context) (*OverallStatsPublic, *
 		}
 	}
 
+	// Fetch phase-1 overall stats to calculate the total active tvl and
+	// total active delegations
+	phase1Stats, err := s.dbClients.V1DBClient.GetOverallStats(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().
+			Err(err).Msg("error while fetching phase-1 overall stats")
+		return nil, types.NewInternalServiceError(err)
+	}
+
 	return &OverallStatsPublic{
 		ActiveTvl:               overallStats.ActiveTvl,
 		ActiveDelegations:       overallStats.ActiveDelegations,
+		TotalActiveTvl:          overallStats.ActiveTvl + phase1Stats.ActiveTvl,
+		TotalActiveDelegations:  overallStats.ActiveDelegations + phase1Stats.ActiveDelegations,
 		ActiveStakers:           uint64(activeStakersCount),
 		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
 		TotalFinalityProviders:  uint64(len(finalityProviders)),
