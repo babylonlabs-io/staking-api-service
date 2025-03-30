@@ -31,6 +31,27 @@ func (indexerdbclient *IndexerDatabase) GetDelegation(ctx context.Context, staki
 	return &delegation, nil
 }
 
+func (i *IndexerDatabase) GetAllDelegations(ctx context.Context) ([]indexerdbmodel.IndexerDelegationDetails, error) {
+	client := i.Client.Database(i.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
+
+	// Base filter with stakingTxHashHex
+	filter := bson.M{}
+	opts := options.Find().SetLimit(1000).SetSkip(500)
+
+	cursor, err := client.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var result []indexerdbmodel.IndexerDelegationDetails
+	if err = cursor.All(ctx, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (indexerdbclient *IndexerDatabase) GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 
@@ -76,7 +97,7 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(ctx context.Context, stak
 	)
 }
 
-func (indexerdbclient *IndexerDatabase) GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
+func (indexerdbclient *IndexerDatabase) GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) ([]indexerdbmodel.IndexerDelegationDetails, error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 
 	// Base filter with stakingTxHashHex
@@ -85,10 +106,18 @@ func (indexerdbclient *IndexerDatabase) GetDelegationsInStates(ctx context.Conte
 		"state":             bson.M{"$in": states},
 	}
 
-	return db.FindWithPagination(
-		ctx, client, filter, options.Find(), indexerdbclient.Cfg.MaxPaginationLimit,
-		indexerdbmodel.BuildDelegationPaginationToken,
-	)
+	cursor, err := client.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var result []indexerdbmodel.IndexerDelegationDetails
+	if err = cursor.All(ctx, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // CheckDelegationExistByStakerPk checks if a staker has any

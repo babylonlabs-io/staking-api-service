@@ -45,6 +45,11 @@ func New(
 		Handler:      r,
 	}
 
+	err = services.V2Service.SelfCheck(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	handlers, err := handlers.New(ctx, cfg, services)
 	if err != nil {
 		return nil, fmt.Errorf("error while setting up handlers: %w", err)
