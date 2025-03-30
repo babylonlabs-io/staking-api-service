@@ -19,9 +19,9 @@ import (
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/staker/stats [get]
 func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *types.Error) {
-	stakerPKHex := request.URL.Query().Get("staker_pk_hex")
-	if stakerPKHex == "" {
-		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "staker_pk_hex is required")
+	stakerPKHex, err := handler.ParsePublicKeyQuery(request, "staker_pk_hex", false)
+	if err != nil {
+		return nil, err
 	}
 	stats, err := h.Service.GetStakerStats(request.Context(), stakerPKHex)
 	if err != nil {
