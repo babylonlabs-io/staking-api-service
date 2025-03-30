@@ -73,7 +73,7 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 	}
 	delegations, err := s.dbClients.IndexerDBClient.GetDelegationsInStates(ctx, stakerPKHex, states)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats from indexer db")
+		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
 		return nil, types.NewInternalServiceError(err)
 	}
 
