@@ -72,6 +72,7 @@ var collections = map[string][]index{
 }
 
 func Setup(ctx context.Context, cfg *config.Config) error {
+	return nil
 	credential := options.Credential{
 		Username: cfg.StakingDb.Username,
 		Password: cfg.StakingDb.Password,

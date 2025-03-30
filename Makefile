@@ -39,10 +39,10 @@ stop-service:
 	docker compose down
 	
 run-local:
-	./bin/local-startup.sh;
-	sleep 5;
+#	./bin/local-startup.sh;
+#	sleep 5;
 	go run cmd/staking-api-service/main.go \
-		--config config/config-local.yml \
+		--config config/config-remote.yml \
 		--params config/global-params.json \
 		--finality-providers config/finality-providers.json
 
