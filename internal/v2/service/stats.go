@@ -10,8 +10,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const checkStakerStats = true
-
 type OverallStatsPublic struct {
 	ActiveTvl               int64  `json:"active_tvl"`
 	ActiveDelegations       int64  `json:"active_delegations"`
@@ -96,32 +94,6 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 			stats.WithdrawableTvl += amount
 			stats.WithdrawableDelegations++
 		}
-	}
-
-	if checkStakerStats {
-		go func() {
-			stakerStats, err := s.dbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
-			if err != nil {
-				log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats from v2 db")
-				return
-			}
-
-			oldStats := StakerStatsPublic{
-				StakerPkHex:             stakerStats.StakerPkHex,
-				ActiveTvl:               stakerStats.ActiveTvl,
-				ActiveDelegations:       stakerStats.ActiveDelegations,
-				UnbondingTvl:            stakerStats.UnbondingTvl,
-				UnbondingDelegations:    stakerStats.UnbondingDelegations,
-				WithdrawableTvl:         stakerStats.WithdrawableTvl,
-				WithdrawableDelegations: stakerStats.WithdrawableDelegations,
-			}
-			if oldStats != stats {
-				log.Ctx(ctx).Warn().Str("stakerPkHex", stakerPKHex).
-					Interface("oldStats", oldStats).
-					Interface("newStats", stats).
-					Msg("Old stats do not match the new stats")
-			}
-		}()
 	}
 
 	return &stats, nil
