@@ -72,18 +72,17 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 		indexertypes.StateActive,
 		indexertypes.StateUnbonding,
 		indexertypes.StateWithdrawable,
-		indexertypes.StateSlashed, // do we need slashed here ?
 	}
 	delegations, err := s.dbClients.IndexerDBClient.GetDelegationsInStates(ctx, stakerPKHex, states)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
+		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats from indexer db")
 		return nil, types.NewInternalServiceError(err)
 	}
 
 	var stats StakerStatsPublic
 	stats.StakerPkHex = stakerPKHex
 
-	for _, delegation := range delegations.Data {
+	for _, delegation := range delegations {
 		amount := int64(delegation.StakingAmount)
 
 		switch delegation.State {
@@ -93,7 +92,7 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 		case indexertypes.StateUnbonding:
 			stats.UnbondingTvl += amount
 			stats.UnbondingDelegations++
-		case indexertypes.StateWithdrawn:
+		case indexertypes.StateWithdrawable:
 			stats.WithdrawableTvl += amount
 			stats.WithdrawableDelegations++
 		}
@@ -103,7 +102,7 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 		go func() {
 			stakerStats, err := s.dbClients.V2DBClient.GetStakerStats(ctx, stakerPKHex)
 			if err != nil {
-				log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
+				log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats from v2 db")
 				return
 			}
 

@@ -25,7 +25,7 @@ type IndexerDBClient interface {
 	CheckDelegationExistByStakerPk(
 		ctx context.Context, address string, extraFilter *DelegationFilter,
 	) (bool, error)
-	GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)
+	GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) ([]indexerdbmodel.IndexerDelegationDetails, error)
 }
 
 type DelegationFilter struct {
