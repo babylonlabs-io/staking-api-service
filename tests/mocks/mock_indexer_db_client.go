@@ -168,6 +168,36 @@ func (_m *IndexerDBClient) GetDelegations(ctx context.Context, stakerPKHex strin
 	return r0, r1
 }
 
+// GetDelegationsInStates provides a mock function with given fields: ctx, stakerPKHex, states
+func (_m *IndexerDBClient) GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
+	ret := _m.Called(ctx, stakerPKHex, states)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDelegationsInStates")
+	}
+
+	var r0 *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []indexertypes.DelegationState) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)); ok {
+		return rf(ctx, stakerPKHex, states)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, []indexertypes.DelegationState) *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]); ok {
+		r0 = rf(ctx, stakerPKHex, states)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails])
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, []indexertypes.DelegationState) error); ok {
+		r1 = rf(ctx, stakerPKHex, states)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFinalityProviderByPk provides a mock function with given fields: ctx, fpPk
 func (_m *IndexerDBClient) GetFinalityProviderByPk(ctx context.Context, fpPk string) (*indexerdbmodel.IndexerFinalityProviderDetails, error) {
 	ret := _m.Called(ctx, fpPk)
