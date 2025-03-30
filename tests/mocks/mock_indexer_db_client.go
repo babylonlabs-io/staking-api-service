@@ -169,23 +169,23 @@ func (_m *IndexerDBClient) GetDelegations(ctx context.Context, stakerPKHex strin
 }
 
 // GetDelegationsInStates provides a mock function with given fields: ctx, stakerPKHex, states
-func (_m *IndexerDBClient) GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
+func (_m *IndexerDBClient) GetDelegationsInStates(ctx context.Context, stakerPKHex string, states []indexertypes.DelegationState) ([]indexerdbmodel.IndexerDelegationDetails, error) {
 	ret := _m.Called(ctx, stakerPKHex, states)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetDelegationsInStates")
 	}
 
-	var r0 *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]
+	var r0 []indexerdbmodel.IndexerDelegationDetails
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, []indexertypes.DelegationState) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, []indexertypes.DelegationState) ([]indexerdbmodel.IndexerDelegationDetails, error)); ok {
 		return rf(ctx, stakerPKHex, states)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, []indexertypes.DelegationState) *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, []indexertypes.DelegationState) []indexerdbmodel.IndexerDelegationDetails); ok {
 		r0 = rf(ctx, stakerPKHex, states)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails])
+			r0 = ret.Get(0).([]indexerdbmodel.IndexerDelegationDetails)
 		}
 	}
 
