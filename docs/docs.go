@@ -639,7 +639,7 @@ const docTemplate = `{
         },
         "/v2/staker/stats": {
             "get": {
-                "description": "Fetches staker stats for babylon staking including active tvl and active delegations.",
+                "description": "Fetches staker stats for babylon staking including active tvl,",
                 "produces": [
                     "application/json"
                 ],
@@ -654,6 +654,12 @@ const docTemplate = `{
                         "name": "staker_pk_hex",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Babylon address of the staker to fetch",
+                        "name": "babylon_address",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1425,6 +1431,14 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
+                "total_active_delegations": {
+                    "description": "This represents the total active delegations on BTC chain which includes\nboth phase-1 and phase-2 active delegations",
+                    "type": "integer"
+                },
+                "total_active_tvl": {
+                    "description": "This represents the total active tvl on BTC chain which includes\nboth phase-1 and phase-2 active tvl",
+                    "type": "integer"
+                },
                 "total_finality_providers": {
                     "type": "integer"
                 }
@@ -1456,8 +1470,11 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
-                "staker_pk_hex": {
-                    "type": "string"
+                "slashed_delegations": {
+                    "type": "integer"
+                },
+                "slashed_tvl": {
+                    "type": "integer"
                 },
                 "unbonding_delegations": {
                     "type": "integer"

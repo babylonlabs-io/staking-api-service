@@ -468,6 +468,16 @@ definitions:
         type: integer
       active_tvl:
         type: integer
+      total_active_delegations:
+        description: |-
+          This represents the total active delegations on BTC chain which includes
+          both phase-1 and phase-2 active delegations
+        type: integer
+      total_active_tvl:
+        description: |-
+          This represents the total active tvl on BTC chain which includes
+          both phase-1 and phase-2 active tvl
+        type: integer
       total_finality_providers:
         type: integer
     type: object
@@ -488,8 +498,10 @@ definitions:
         type: integer
       active_tvl:
         type: integer
-      staker_pk_hex:
-        type: string
+      slashed_delegations:
+        type: integer
+      slashed_tvl:
+        type: integer
       unbonding_delegations:
         type: integer
       unbonding_tvl:
@@ -996,13 +1008,16 @@ paths:
       - v2
   /v2/staker/stats:
     get:
-      description: Fetches staker stats for babylon staking including active tvl and
-        active delegations.
+      description: Fetches staker stats for babylon staking including active tvl,
       parameters:
       - description: Public key of the staker to fetch
         in: query
         name: staker_pk_hex
         required: true
+        type: string
+      - description: Babylon address of the staker to fetch
+        in: query
+        name: babylon_address
         type: string
       produces:
       - application/json

@@ -5,7 +5,6 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"github.com/rs/zerolog/log"
 )
 
 // GetDelegation @Summary Get a delegation
@@ -56,20 +55,16 @@ func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *typ
 		return nil, err
 	}
 
-	var bbnAddress *string
-	const bbnAddressKey = "babylon_address"
-	if address := request.URL.Query().Get(bbnAddressKey); address != "" {
-		err := handler.ValidateBabylonAddress(address)
-		if err != nil {
-			log.Err(err).Str(bbnAddressKey, address).Msg("failed to validate babylon address")
-			return nil, types.NewErrorWithMsg(
-				http.StatusBadRequest, types.BadRequest, bbnAddressKey+" is invalid",
-			)
-		}
-		bbnAddress = &address
+	bbnAddress, err := handler.ParseBabylonAddressQuery(
+		request, "babylon_address", true,
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	delegations, paginationToken, err := h.Service.GetDelegations(request.Context(), stakerPKHex, bbnAddress, paginationKey)
+	delegations, paginationToken, err := h.Service.GetDelegations(
+		request.Context(), stakerPKHex, bbnAddress, paginationKey,
+	)
 	if err != nil {
 		return nil, err
 	}

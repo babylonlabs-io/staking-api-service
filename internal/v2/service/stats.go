@@ -25,13 +25,14 @@ type OverallStatsPublic struct {
 }
 
 type StakerStatsPublic struct {
-	StakerPkHex             string `json:"staker_pk_hex"`
-	ActiveTvl               int64  `json:"active_tvl"`
-	ActiveDelegations       int64  `json:"active_delegations"`
-	UnbondingTvl            int64  `json:"unbonding_tvl"`
-	UnbondingDelegations    int64  `json:"unbonding_delegations"`
-	WithdrawableTvl         int64  `json:"withdrawable_tvl"`
-	WithdrawableDelegations int64  `json:"withdrawable_delegations"`
+	ActiveTvl               int64 `json:"active_tvl"`
+	ActiveDelegations       int64 `json:"active_delegations"`
+	UnbondingTvl            int64 `json:"unbonding_tvl"`
+	UnbondingDelegations    int64 `json:"unbonding_delegations"`
+	WithdrawableTvl         int64 `json:"withdrawable_tvl"`
+	WithdrawableDelegations int64 `json:"withdrawable_delegations"`
+	SlashedTvl              int64 `json:"slashed_tvl"`
+	SlashedDelegations      int64 `json:"slashed_delegations"`
 }
 
 func (s *V2Service) GetOverallStats(
@@ -84,20 +85,34 @@ func (s *V2Service) GetOverallStats(
 	}, nil
 }
 
-func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error) {
+func (s *V2Service) GetStakerStats(
+	ctx context.Context,
+	stakerPKHex string,
+	stakerBabylonAddress *string,
+) (*StakerStatsPublic, *types.Error) {
 	states := []indexertypes.DelegationState{
 		indexertypes.StateActive,
 		indexertypes.StateUnbonding,
 		indexertypes.StateWithdrawable,
+		indexertypes.StateSlashed,
 	}
-	delegations, err := s.dbClients.IndexerDBClient.GetDelegationsInStates(ctx, stakerPKHex, states)
+	delegations, err := s.dbClients.IndexerDBClient.GetDelegationsInStates(
+		ctx, stakerPKHex, stakerBabylonAddress, states,
+	)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Str("stakerPKHex", stakerPKHex).Msg("error while fetching staker stats")
+		logEvent := log.Ctx(ctx).Error().Err(err).
+			Str("stakerPKHex", stakerPKHex)
+
+		// Safely add babylon address to log if it exists
+		if stakerBabylonAddress != nil {
+			logEvent = logEvent.Str("stakerBabylonAddress", *stakerBabylonAddress)
+		}
+
+		logEvent.Msg("error while fetching staker stats")
 		return nil, types.NewInternalServiceError(err)
 	}
 
 	var stats StakerStatsPublic
-	stats.StakerPkHex = stakerPKHex
 
 	for _, delegation := range delegations {
 		amount := int64(delegation.StakingAmount)
@@ -112,6 +127,9 @@ func (s *V2Service) GetStakerStats(ctx context.Context, stakerPKHex string) (*St
 		case indexertypes.StateWithdrawable:
 			stats.WithdrawableTvl += amount
 			stats.WithdrawableDelegations++
+		case indexertypes.StateSlashed:
+			stats.SlashedTvl += amount
+			stats.SlashedDelegations++
 		}
 	}
 
