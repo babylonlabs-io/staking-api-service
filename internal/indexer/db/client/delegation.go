@@ -64,18 +64,24 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 			}
 		}
 
-		filter = bson.M{
-			"$or": []bson.M{
-				{
-					"staker_btc_pk_hex":                       stakerPKHex,
-					"btc_delegation_created_bbn_block.height": bson.M{"$lt": decodedToken.StartHeight},
-				},
-				{
-					"staker_btc_pk_hex":                       stakerPKHex,
-					"btc_delegation_created_bbn_block.height": decodedToken.StartHeight,
-					"_id": bson.M{"$gt": decodedToken.StakingTxHashHex},
-				},
+		orConditions := []bson.M{
+			{
+				"staker_btc_pk_hex":                       stakerPKHex,
+				"btc_delegation_created_bbn_block.height": bson.M{"$lt": decodedToken.StartHeight},
 			},
+			{
+				"staker_btc_pk_hex":                       stakerPKHex,
+				"btc_delegation_created_bbn_block.height": decodedToken.StartHeight,
+				"_id": bson.M{"$gt": decodedToken.StakingTxHashHex},
+			},
+		}
+		if stakerBabylonAddress != nil {
+			addr := *stakerBabylonAddress
+			orConditions[0]["staker_babylon_address"] = addr
+			orConditions[1]["staker_babylon_address"] = addr
+		}
+		filter = bson.M{
+			"$or": orConditions,
 		}
 	}
 
