@@ -116,8 +116,15 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 	return FromDelegationDocument(*delegation)
 }
 
-func (s *V2Service) GetDelegations(ctx context.Context, stakerPkHex string, stakerBabylonAddress *string, paginationKey string) ([]*DelegationPublic, string, *types.Error) {
-	resultMap, err := s.dbClients.IndexerDBClient.GetDelegations(ctx, stakerPkHex, stakerBabylonAddress, paginationKey)
+func (s *V2Service) GetDelegations(
+	ctx context.Context,
+	stakerPkHex string,
+	stakerBabylonAddress *string,
+	paginationKey string,
+) ([]*DelegationPublic, string, *types.Error) {
+	resultMap, err := s.dbClients.IndexerDBClient.GetDelegations(
+		ctx, stakerPkHex, stakerBabylonAddress, paginationKey,
+	)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHashHex", stakerPkHex).Msg("Staking delegations not found")

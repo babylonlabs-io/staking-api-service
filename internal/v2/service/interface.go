@@ -23,7 +23,16 @@ type V2ServiceProvider interface {
 	) *types.Error
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
 	GetLatestPrices(ctx context.Context) (map[string]float64, *types.Error)
-	GetStakerStats(ctx context.Context, stakerPKHex string) (*StakerStatsPublic, *types.Error)
+	/*
+		Returns the staker stats for the given staker PK hex and babylon address.
+		If the babylon address is not provided, the stats will be calculated for
+		all the delegations.
+	*/
+	GetStakerStats(
+		ctx context.Context,
+		stakerPKHex string,
+		stakerBabylonAddress *string,
+	) (*StakerStatsPublic, *types.Error)
 	ProcessAndSaveBtcAddresses(ctx context.Context, stakerPkHex string) *types.Error
 	SaveUnprocessableMessages(ctx context.Context, messageBody, receipt string) *types.Error
 	ProcessActiveDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error

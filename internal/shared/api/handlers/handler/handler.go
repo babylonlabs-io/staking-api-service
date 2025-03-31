@@ -7,6 +7,8 @@ import (
 	"regexp"
 
 	"errors"
+	"strings"
+
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
@@ -14,7 +16,6 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"strings"
 )
 
 type Handler struct {
@@ -80,6 +81,27 @@ func ValidateBabylonAddress(address string) error {
 	}
 
 	return sdk.VerifyAddressFormat(bz)
+}
+
+func ParseBabylonAddressQuery(
+	r *http.Request, queryName string, isOptional bool,
+) (*string, *types.Error) {
+	address := r.URL.Query().Get(queryName)
+	if address == "" {
+		if isOptional {
+			return nil, nil
+		}
+		return nil, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, queryName+" is required",
+		)
+	}
+	err := ValidateBabylonAddress(address)
+	if err != nil {
+		return nil, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, "invalid "+queryName,
+		)
+	}
+	return &address, nil
 }
 
 func ParsePublicKeyQuery(r *http.Request, queryName string, isOptional bool) (string, *types.Error) {

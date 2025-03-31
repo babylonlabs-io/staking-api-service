@@ -9,10 +9,15 @@ import (
 
 // GetStakerStats gets staker stats for babylon staking
 // @Summary Get Staker Stats
-// @Description Fetches staker stats for babylon staking including active tvl and active delegations.
+// @Description Fetches staker stats for babylon staking including active tvl,
+// active delegations, unbonding tvl, unbonding delegations, withdrawable tvl,
+// withdrawable delegations, slashed tvl and slashed delegations. If the babylon
+// address is not provided, the stats will be calculated for all the delegations
+// of the staker based on the staker's BTC public key.
 // @Produce json
 // @Tags v2
 // @Param staker_pk_hex query string true "Public key of the staker to fetch"
+// @Param babylon_address query string false "Babylon address of the staker to fetch"
 // @Success 200 {object} handler.PublicResponse[v2service.StakerStatsPublic] "Staker stats"
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Failure 404 {object} types.Error "Error: Not Found"
@@ -23,7 +28,17 @@ func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *typ
 	if err != nil {
 		return nil, err
 	}
-	stats, err := h.Service.GetStakerStats(request.Context(), stakerPKHex)
+
+	bbnAddress, err := handler.ParseBabylonAddressQuery(
+		request, "babylon_address", true,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	stats, err := h.Service.GetStakerStats(
+		request.Context(), stakerPKHex, bbnAddress,
+	)
 	if err != nil {
 		return nil, err
 	}
