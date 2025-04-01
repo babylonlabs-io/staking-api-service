@@ -132,6 +132,10 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 			TotalValue int64 `bson:"totalValue"`
 		}
 
+		// This struct is to accomodate the result from the aggregate query
+		// in which the facet is used to group the results by the state
+		// and the result is an array of results. But we only expect a single
+		// result
 		var results struct {
 			Total  []groupResult `bson:"total"`
 			Active []groupResult `bson:"active"`
@@ -144,17 +148,22 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 			}
 		}
 
-		// Set total values
-		if len(results.Total) > 0 {
-			totalDelegations = uint64(results.Total[0].Count)
-			totalTvl = uint64(results.Total[0].TotalValue)
+		if err := aggregateResult.Err(); err != nil {
+			return nil, err
 		}
 
-		// Set active values
-		if len(results.Active) > 0 {
-			activeDelegations = uint64(results.Active[0].Count)
-			activeTvl = uint64(results.Active[0].TotalValue)
+		// Check if the results are empty
+		if len(results.Total) == 0 || len(results.Active) == 0 {
+			return nil, errors.New("no results found")
 		}
+
+		// Set total values
+		totalDelegations = uint64(results.Total[0].Count)
+		totalTvl = uint64(results.Total[0].TotalValue)
+
+		// Set active values
+		activeDelegations = uint64(results.Active[0].Count)
+		activeTvl = uint64(results.Active[0].TotalValue)
 
 		// WARNING: Delete all records in the overall stats collection
 		_, deletionErr := overallStatsClient.DeleteMany(sessCtx, bson.M{})
@@ -162,7 +171,9 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 			return nil, deletionErr
 		}
 
-		// Insert the new record
+		// Hardcoded to shard 0 as we have wiped all other shards.
+		// This is needed to ensure the legacy stats are updated correctly as it
+		// was spread across multiple shards at random previously.
 		shardId := "0"
 		newDoc := v1dbmodel.OverallStatsDocument{
 			Id:                shardId,
@@ -170,7 +181,7 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 			TotalTvl:          int64(totalTvl),
 			ActiveDelegations: int64(activeDelegations),
 			TotalDelegations:  int64(totalDelegations),
-			TotalStakers:      uint64(totalStakers),
+			TotalStakers:      totalStakers,
 		}
 
 		_, err = overallStatsClient.InsertOne(sessCtx, newDoc)
