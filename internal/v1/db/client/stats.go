@@ -46,6 +46,145 @@ func (db *V1Database) GetOrCreateStatsLock(
 	return &result, nil
 }
 
+// UpdateLegacyOverallStats updates the legacy overall stats for babylon staking
+// This is a temporary method run the the ad-hoc script to update stats in a
+// single run
+func (v1dbclient *V1Database) UpdateLegacyOverallStats(
+	ctx context.Context,
+	activeTvl, totalTvl uint64,
+	activeDelegations, totalDelegations uint64,
+	totalStakers uint64,
+) (*v1dbmodel.OverallStatsDocument, error) {
+	overallStatsClient := v1dbclient.Client.Database(
+		v1dbclient.DbName,
+	).Collection(dbmodel.V1OverallStatsCollection)
+	stakerStatsClient := v1dbclient.Client.Database(
+		v1dbclient.DbName,
+	).Collection(dbmodel.V1StakerStatsCollection)
+	delegationClient := v1dbclient.Client.Database(
+		v1dbclient.DbName,
+	).Collection(dbmodel.V1DelegationCollection)
+
+	// Start a session for transaction
+	session, sessionErr := v1dbclient.Client.StartSession()
+	if sessionErr != nil {
+		return nil, sessionErr
+	}
+	defer session.EndSession(ctx)
+
+	// Define the work to be done in the transaction
+	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// Calculate the total stakers
+		// Count total number of stakers in the staker stats collection
+		totalStakersCount, err := stakerStatsClient.CountDocuments(
+			sessCtx,
+			bson.M{},
+		)
+		if err != nil {
+			return nil, err
+		}
+		totalStakers = uint64(totalStakersCount)
+
+		// Count total number of delegations and sum their staking values
+		aggregateResult, err := delegationClient.Aggregate(
+			sessCtx,
+			[]bson.M{
+				{
+					"$facet": bson.M{
+						"total": []bson.M{
+							{
+								"$group": bson.M{
+									"_id":        nil,
+									"count":      bson.M{"$sum": 1},
+									"totalValue": bson.M{"$sum": "$staking_value"},
+								},
+							},
+						},
+						"active": []bson.M{
+							{
+								"$match": bson.M{
+									"state": "active",
+								},
+							},
+							{
+								"$group": bson.M{
+									"_id":        nil,
+									"count":      bson.M{"$sum": 1},
+									"totalValue": bson.M{"$sum": "$staking_value"},
+								},
+							},
+						},
+					},
+				},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		type groupResult struct {
+			Count      int64 `bson:"count"`
+			TotalValue int64 `bson:"totalValue"`
+		}
+
+		var results struct {
+			Total  []groupResult `bson:"total"`
+			Active []groupResult `bson:"active"`
+		}
+
+		// Get the single result
+		if aggregateResult.Next(sessCtx) {
+			if err := aggregateResult.Decode(&results); err != nil {
+				return nil, err
+			}
+		}
+
+		// Set total values
+		if len(results.Total) > 0 {
+			totalDelegations = uint64(results.Total[0].Count)
+			totalTvl = uint64(results.Total[0].TotalValue)
+		}
+
+		// Set active values
+		if len(results.Active) > 0 {
+			activeDelegations = uint64(results.Active[0].Count)
+			activeTvl = uint64(results.Active[0].TotalValue)
+		}
+
+		// WARNING: Delete all records in the overall stats collection
+		_, deletionErr := overallStatsClient.DeleteMany(sessCtx, bson.M{})
+		if deletionErr != nil {
+			return nil, deletionErr
+		}
+
+		// Insert the new record
+		shardId := "0"
+		newDoc := v1dbmodel.OverallStatsDocument{
+			Id:                shardId,
+			ActiveTvl:         int64(activeTvl),
+			TotalTvl:          int64(totalTvl),
+			ActiveDelegations: int64(activeDelegations),
+			TotalDelegations:  int64(totalDelegations),
+			TotalStakers:      uint64(totalStakers),
+		}
+
+		_, err = overallStatsClient.InsertOne(sessCtx, newDoc)
+		if err != nil {
+			return nil, err
+		}
+
+		return &newDoc, nil
+	}
+
+	// Execute the transaction
+	result, txErr := session.WithTransaction(ctx, transactionWork)
+	if txErr != nil {
+		return nil, txErr
+	}
+
+	return result.(*v1dbmodel.OverallStatsDocument), nil
+}
+
 // IncrementOverallStats increments the overall stats for the given staking tx hash.
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 // Refer to the README.md in this directory for more information on the sharding logic
