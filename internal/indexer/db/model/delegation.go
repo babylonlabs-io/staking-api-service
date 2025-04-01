@@ -52,7 +52,7 @@ type IndexerDelegationDetails struct {
 func BuildDelegationPaginationToken(d IndexerDelegationDetails) (string, error) {
 	page := &IndexerDelegationPagination{
 		StakingTxHashHex: d.StakingTxHashHex,
-		StartHeight:      d.StartHeight,
+		StartHeight:      uint32(d.BTCDelegationCreatedBbnBlock.Height),
 	}
 	token, err := dbmodel.GetPaginationToken(page)
 	if err != nil {
