@@ -1,8 +1,6 @@
 module github.com/babylonlabs-io/staking-api-service
 
-go 1.23.1
-
-toolchain go1.23.3
+go 1.23.4
 
 require (
 	github.com/babylonlabs-io/babylon v1.0.0-rc.7
