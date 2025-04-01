@@ -93,6 +93,11 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 					"$facet": bson.M{
 						"total": []bson.M{
 							{
+								"$match": bson.M{
+									"is_overflow": false,
+								},
+							},
+							{
 								"$group": bson.M{
 									"_id":        nil,
 									"count":      bson.M{"$sum": 1},
@@ -103,7 +108,8 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 						"active": []bson.M{
 							{
 								"$match": bson.M{
-									"state": "active",
+									"state":       "active",
+									"is_overflow": false,
 								},
 							},
 							{
