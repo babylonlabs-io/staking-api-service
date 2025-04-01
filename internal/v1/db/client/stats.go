@@ -51,10 +51,9 @@ func (db *V1Database) GetOrCreateStatsLock(
 // single run
 func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 	ctx context.Context,
-	activeTvl, totalTvl uint64,
-	activeDelegations, totalDelegations uint64,
-	totalStakers uint64,
 ) (*v1dbmodel.OverallStatsDocument, error) {
+	var totalDelegations, totalTvl, activeDelegations, activeTvl uint64
+
 	overallStatsClient := v1dbclient.Client.Database(
 		v1dbclient.DbName,
 	).Collection(dbmodel.V1OverallStatsCollection)
@@ -83,7 +82,7 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 		if err != nil {
 			return nil, err
 		}
-		totalStakers = uint64(totalStakersCount)
+		totalStakers := uint64(totalStakersCount)
 
 		// Count total number of delegations and sum their staking values
 		aggregateResult, err := delegationClient.Aggregate(

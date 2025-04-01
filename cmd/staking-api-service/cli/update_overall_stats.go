@@ -11,11 +11,10 @@ import (
 
 func UpdateLegacyOverallStatsCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "update-legacy-overall-stats",
-		Run: updateLegacyOverallStats,
+		Use:   "update-legacy-overall-stats",
+		Short: "Update legacy overall stats",
+		Run:   updateLegacyOverallStats,
 	}
-
-	cmd.Flags().Bool("dry-run", false, "Run in simulation mode without making changes")
 
 	return cmd
 }
@@ -35,11 +34,6 @@ func updateLegacyOverallStats(cmd *cobra.Command, args []string) {
 func updateLegacyOverallStatsE(cmd *cobra.Command, _ []string) error {
 	ctx := cmd.Context()
 
-	dryRun, err := cmd.Flags().GetBool("dry-run")
-	if err != nil {
-		return err
-	}
-
 	cfg, err := config.New(GetConfigPath())
 	if err != nil {
 		return err
@@ -50,15 +44,13 @@ func updateLegacyOverallStatsE(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	stats, err := dbClients.V1DBClient.GetOverallStats(ctx)
+	log.Info().Msg("Updating overall stats")
+	stats, err := dbClients.V1DBClient.UpdateLegacyOverallStats(ctx)
 	if err != nil {
 		return err
 	}
-	_ = stats
-	_ = dryRun // don't do any modifications if dryRun is passed
 
-	// which query
-	// dbClients.V2DBClient.IncrementOverallStats()
+	log.Info().Msgf("Updated overall stats: %+v", stats)
 
 	return nil
 }
