@@ -16,10 +16,12 @@ func (s *Service) ProcessLegacyStatsDeduction(
 	ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string, amount uint64,
 ) *types.Error {
 	// Fetch existing or initialize the stats lock document if not exist
-	// same type "unbonding" is used for unbonding and migration as staker can
+	// same type "unbonded" is used for unbonding and migration as staker can
 	// only one action on the same delegation
+	// Note: due to legacy data was using "unbonded" as the identified for
+	// unbonding transaction in lock db. We will continue to use it for now.
 	statsLockDocument, err := s.DbClients.V1DBClient.GetOrCreateStatsLock(
-		ctx, stakingTxHashHex, types.Unbonding.ToString(),
+		ctx, stakingTxHashHex, types.Unbonded.ToString(),
 	)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
