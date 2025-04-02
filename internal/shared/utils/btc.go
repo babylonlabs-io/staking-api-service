@@ -245,13 +245,14 @@ func DeriveAddressesFromNoCoordPk(
 	if err != nil {
 		return nil, err
 	}
-	nativeSegwitOdd, err := bip322.PubkeyToP2WPKHAddress(
+
+	nativeSegwitOdd, err := pubkeyToP2WPKHAddress(
 		pkWithCoordinates.odd, netParams,
 	)
 	if err != nil {
 		return nil, err
 	}
-	nativeSegwitEven, err := bip322.PubkeyToP2WPKHAddress(
+	nativeSegwitEven, err := pubkeyToP2WPKHAddress(
 		pkWithCoordinates.even, netParams,
 	)
 	if err != nil {
@@ -320,4 +321,19 @@ func CheckBtcAddressType(
 	default:
 		return "", fmt.Errorf("unsupported btc address type")
 	}
+}
+
+func pubkeyToP2WPKHAddress(
+	p *btcec.PublicKey, net *chaincfg.Params,
+) (*btcutil.AddressWitnessPubKeyHash, error) {
+	witnessAddr, err := btcutil.NewAddressWitnessPubKeyHash(
+		btcutil.Hash160(p.SerializeCompressed()),
+		net,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return witnessAddr, nil
 }

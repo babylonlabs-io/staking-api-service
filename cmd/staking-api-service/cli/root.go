@@ -65,11 +65,9 @@ func Setup() error {
 		false,
 		"Backfill pubkey address mappings",
 	)
-	if err := rootCmd.Execute(); err != nil {
-		return err
-	}
+	rootCmd.AddCommand(UpdateLegacyOverallStatsCmd())
 
-	return nil
+	return rootCmd.Execute()
 }
 
 func getDefaultConfigFile(homePath, filename string) string {

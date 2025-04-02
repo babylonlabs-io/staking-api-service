@@ -63,6 +63,9 @@ test:
 	./bin/local-startup.sh;
 	go test -v -cover -p 1 ./... -count=1
 
+test-integration:
+	go test -v -cover -tags=integration ./internal/indexer/db/...
+
 lint:
 	golangci-lint run
 
