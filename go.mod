@@ -3,7 +3,7 @@ module github.com/babylonlabs-io/staking-api-service
 go 1.23.4
 
 require (
-	github.com/babylonlabs-io/babylon v1.0.0-rc.7
+	github.com/babylonlabs-io/babylon v1.0.0
 	github.com/babylonlabs-io/babylon-staking-indexer v1.0.0
 	github.com/babylonlabs-io/networks/parameters v0.2.2
 	github.com/babylonlabs-io/staking-queue-client v1.0.0
