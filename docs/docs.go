@@ -1425,9 +1425,6 @@ const docTemplate = `{
                 "active_finality_providers": {
                     "type": "integer"
                 },
-                "active_stakers": {
-                    "type": "integer"
-                },
                 "active_tvl": {
                     "type": "integer"
                 },
