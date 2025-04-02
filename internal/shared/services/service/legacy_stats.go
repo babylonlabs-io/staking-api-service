@@ -15,6 +15,21 @@ import (
 func (s *Service) ProcessLegacyStatsDeduction(
 	ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string, amount uint64,
 ) *types.Error {
+	// Skip if the staking tx is not found or is overflowed
+	// The overflowed delegation are not included in the stats calculation
+	stakingTx, err := s.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, stakingTxHashHex)
+	if err != nil {
+		if db.IsNotFoundError(err) {
+			// If the staking tx is not found, skip
+			return nil
+		}
+		return types.NewInternalServiceError(err)
+	}
+	if stakingTx.IsOverflow {
+		// If the staking tx is overflowed, skip
+		return nil
+	}
+
 	// Fetch existing or initialize the stats lock document if not exist
 	// same type "unbonded" is used for unbonding and migration as staker can
 	// only one action on the same delegation
