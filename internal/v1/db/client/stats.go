@@ -153,17 +153,20 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 		}
 
 		// Check if the results are empty
-		if len(results.Total) == 0 || len(results.Active) == 0 {
+		if len(results.Total) == 0 {
 			return nil, errors.New("no results found")
+		}
+		if len(results.Active) == 0 {
+			activeDelegations = 0
+			activeTvl = 0
+		} else {
+			activeDelegations = uint64(results.Active[0].Count)
+			activeTvl = uint64(results.Active[0].TotalValue)
 		}
 
 		// Set total values
 		totalDelegations = uint64(results.Total[0].Count)
 		totalTvl = uint64(results.Total[0].TotalValue)
-
-		// Set active values
-		activeDelegations = uint64(results.Active[0].Count)
-		activeTvl = uint64(results.Active[0].TotalValue)
 
 		// WARNING: Delete all records in the overall stats collection
 		_, deletionErr := overallStatsClient.DeleteMany(sessCtx, bson.M{})
