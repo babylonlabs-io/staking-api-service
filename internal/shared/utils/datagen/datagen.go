@@ -3,12 +3,13 @@ package datagen
 import (
 	"bytes"
 	"encoding/hex"
+	"math/rand"
+
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
-	"math/rand"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

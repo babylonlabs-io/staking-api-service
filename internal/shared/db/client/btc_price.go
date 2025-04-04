@@ -2,11 +2,12 @@ package dbclient
 
 import (
 	"context"
+	"strings"
+	"time"
+
 	model "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"strings"
-	"time"
 )
 
 func (db *Database) GetLatestPrice(ctx context.Context, symbol string) (float64, error) {

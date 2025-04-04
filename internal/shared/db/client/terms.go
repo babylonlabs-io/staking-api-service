@@ -2,6 +2,7 @@ package dbclient
 
 import (
 	"context"
+
 	model "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 )
 

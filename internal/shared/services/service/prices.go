@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	coinmarketcap "github.com/miguelmota/go-coinmarketcap/pro/v1"
 	"go.mongodb.org/mongo-driver/mongo"

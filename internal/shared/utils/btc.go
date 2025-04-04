@@ -95,7 +95,6 @@ func VerifyUnbondingRequest(
 	// 2. validate that un-bonding tx hash is valid and matches the hash of the
 	// provided unbonding tx
 	unbondingTxHash, err := chainhash.NewHashFromStr(unbondingTxHashHex)
-
 	if err != nil {
 		return fmt.Errorf("failed to decode unbonding tx hash from hex: %w", err)
 	}

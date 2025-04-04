@@ -3,9 +3,10 @@ package v2service
 import (
 	"context"
 	"errors"
+	"strings"
+
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"strings"
 )
 
 func (s *V2Service) GetLatestPrices(ctx context.Context) (map[string]float64, *types.Error) {
