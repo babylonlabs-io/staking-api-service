@@ -85,6 +85,7 @@ type V1DBClient interface {
 		ctx context.Context,
 		paginationToken string,
 	) (*db.DbResultMap[v1dbmodel.DelegationDocument], error)
+	UpdateLegacyOverallStats(ctx context.Context) (*v1dbmodel.OverallStatsDocument, error)
 }
 
 type DelegationFilter struct {

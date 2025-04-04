@@ -46,6 +46,164 @@ func (db *V1Database) GetOrCreateStatsLock(
 	return &result, nil
 }
 
+// UpdateLegacyOverallStats updates the legacy overall stats for babylon staking
+// This is a temporary method run the the ad-hoc script to update stats in a
+// single run
+func (v1dbclient *V1Database) UpdateLegacyOverallStats(
+	ctx context.Context,
+) (*v1dbmodel.OverallStatsDocument, error) {
+	var totalDelegations, totalTvl, activeDelegations, activeTvl uint64
+
+	overallStatsClient := v1dbclient.Client.Database(
+		v1dbclient.DbName,
+	).Collection(dbmodel.V1OverallStatsCollection)
+	stakerStatsClient := v1dbclient.Client.Database(
+		v1dbclient.DbName,
+	).Collection(dbmodel.V1StakerStatsCollection)
+	delegationClient := v1dbclient.Client.Database(
+		v1dbclient.DbName,
+	).Collection(dbmodel.V1DelegationCollection)
+
+	// Start a session for transaction
+	session, sessionErr := v1dbclient.Client.StartSession()
+	if sessionErr != nil {
+		return nil, sessionErr
+	}
+	defer session.EndSession(ctx)
+
+	// Define the work to be done in the transaction
+	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
+		// Calculate the total stakers
+		// Count total number of stakers in the staker stats collection
+		totalStakersCount, err := stakerStatsClient.CountDocuments(
+			sessCtx,
+			bson.M{},
+		)
+		if err != nil {
+			return nil, err
+		}
+		totalStakers := uint64(totalStakersCount)
+
+		// Count total number of delegations and sum their staking values
+		aggregateResult, err := delegationClient.Aggregate(
+			sessCtx,
+			[]bson.M{
+				{
+					"$facet": bson.M{
+						"total": []bson.M{
+							{
+								"$match": bson.M{
+									"is_overflow": false,
+								},
+							},
+							{
+								"$group": bson.M{
+									"_id":        nil,
+									"count":      bson.M{"$sum": 1},
+									"totalValue": bson.M{"$sum": "$staking_value"},
+								},
+							},
+						},
+						"active": []bson.M{
+							{
+								"$match": bson.M{
+									"state":       "active",
+									"is_overflow": false,
+								},
+							},
+							{
+								"$group": bson.M{
+									"_id":        nil,
+									"count":      bson.M{"$sum": 1},
+									"totalValue": bson.M{"$sum": "$staking_value"},
+								},
+							},
+						},
+					},
+				},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		type groupResult struct {
+			Count      int64 `bson:"count"`
+			TotalValue int64 `bson:"totalValue"`
+		}
+
+		// This struct is to accommodate the result from the aggregate query
+		// in which the facet is used to group the results by the state
+		// and the result is an array of results. But we only expect a single
+		// result
+		var results struct {
+			Total  []groupResult `bson:"total"`
+			Active []groupResult `bson:"active"`
+		}
+
+		// Get the single result
+		if aggregateResult.Next(sessCtx) {
+			if err := aggregateResult.Decode(&results); err != nil {
+				return nil, err
+			}
+		}
+
+		if err := aggregateResult.Err(); err != nil {
+			return nil, err
+		}
+
+		// Check if the results are empty
+		if len(results.Total) == 0 {
+			return nil, errors.New("no results found")
+		}
+		if len(results.Active) == 0 {
+			activeDelegations = 0
+			activeTvl = 0
+		} else {
+			activeDelegations = uint64(results.Active[0].Count)
+			activeTvl = uint64(results.Active[0].TotalValue)
+		}
+
+		// Set total values
+		totalDelegations = uint64(results.Total[0].Count)
+		totalTvl = uint64(results.Total[0].TotalValue)
+
+		// WARNING: Delete all records in the overall stats collection
+		_, deletionErr := overallStatsClient.DeleteMany(sessCtx, bson.M{})
+		if deletionErr != nil {
+			return nil, deletionErr
+		}
+
+		// Hardcoded to shard 0 as we have wiped all other shards.
+		// This is needed to ensure the legacy stats are updated correctly as it
+		// was spread across multiple shards at random previously.
+		shardId := "0"
+		newDoc := v1dbmodel.OverallStatsDocument{
+			Id:                shardId,
+			ActiveTvl:         int64(activeTvl),
+			TotalTvl:          int64(totalTvl),
+			ActiveDelegations: int64(activeDelegations),
+			TotalDelegations:  int64(totalDelegations),
+			TotalStakers:      totalStakers,
+		}
+
+		_, err = overallStatsClient.InsertOne(sessCtx, newDoc)
+		if err != nil {
+			return nil, err
+		}
+
+		return &newDoc, nil
+	}
+
+	// Execute the transaction
+	result, txErr := session.WithTransaction(ctx, transactionWork)
+	if txErr != nil {
+		return nil, txErr
+	}
+
+	return result.(*v1dbmodel.OverallStatsDocument), nil
+}
+
 // IncrementOverallStats increments the overall stats for the given staking tx hash.
 // This method is idempotent, only the first call will be processed. Otherwise it will return a notFoundError for duplicates
 // Refer to the README.md in this directory for more information on the sharding logic

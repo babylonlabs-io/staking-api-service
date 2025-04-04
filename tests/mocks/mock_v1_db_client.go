@@ -810,6 +810,36 @@ func (_m *V1DBClient) TransitionToWithdrawnState(ctx context.Context, txHashHex 
 	return r0
 }
 
+// UpdateLegacyOverallStats provides a mock function with given fields: ctx
+func (_m *V1DBClient) UpdateLegacyOverallStats(ctx context.Context) (*v1dbmodel.OverallStatsDocument, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateLegacyOverallStats")
+	}
+
+	var r0 *v1dbmodel.OverallStatsDocument
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*v1dbmodel.OverallStatsDocument, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *v1dbmodel.OverallStatsDocument); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1dbmodel.OverallStatsDocument)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpsertLatestBtcInfo provides a mock function with given fields: ctx, height, confirmedTvl, unconfirmedTvl
 func (_m *V1DBClient) UpsertLatestBtcInfo(ctx context.Context, height uint64, confirmedTvl uint64, unconfirmedTvl uint64) error {
 	ret := _m.Called(ctx, height, confirmedTvl, unconfirmedTvl)

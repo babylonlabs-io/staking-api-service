@@ -6,6 +6,7 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
 )
@@ -13,7 +14,6 @@ import (
 type OverallStatsPublic struct {
 	ActiveTvl               int64  `json:"active_tvl"`
 	ActiveDelegations       int64  `json:"active_delegations"`
-	ActiveStakers           uint64 `json:"active_stakers"`
 	ActiveFinalityProviders uint64 `json:"active_finality_providers"`
 	TotalFinalityProviders  uint64 `json:"total_finality_providers"`
 	// This represents the total active tvl on BTC chain which includes
@@ -44,13 +44,6 @@ func (s *V2Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	// TODO: count fetch will affect the performance of the API
-	activeStakersCount, err := s.dbClients.V2DBClient.GetActiveStakersCount(ctx)
-	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("error while fetching active stakers count")
-		return nil, types.NewInternalServiceError(err)
-	}
-
 	// TODO: ideally this should not be fetched from the indexer db
 	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
@@ -74,12 +67,21 @@ func (s *V2Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
+	if phase1Stats.ActiveTvl < 0 || phase1Stats.ActiveDelegations < 0 {
+		log.Ctx(ctx).Error().
+			Err(err).Msg("phase-1 overall stats are negative")
+		metrics.RecordManualInterventionRequired("negative_stats_error")
+		// Set the stats to 0 if they are negative as we do not want to
+		// show negative stats in the UI.
+		phase1Stats.ActiveTvl = 0
+		phase1Stats.ActiveDelegations = 0
+	}
+
 	return &OverallStatsPublic{
 		ActiveTvl:               overallStats.ActiveTvl,
 		ActiveDelegations:       overallStats.ActiveDelegations,
 		TotalActiveTvl:          overallStats.ActiveTvl + phase1Stats.ActiveTvl,
 		TotalActiveDelegations:  overallStats.ActiveDelegations + phase1Stats.ActiveDelegations,
-		ActiveStakers:           uint64(activeStakersCount),
 		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
 		TotalFinalityProviders:  uint64(len(finalityProviders)),
 	}, nil

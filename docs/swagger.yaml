@@ -464,8 +464,6 @@ definitions:
         type: integer
       active_finality_providers:
         type: integer
-      active_stakers:
-        type: integer
       active_tvl:
         type: integer
       total_active_delegations:
