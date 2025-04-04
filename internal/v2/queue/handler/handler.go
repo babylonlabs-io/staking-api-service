@@ -11,8 +11,10 @@ type V2QueueHandler struct {
 	Services *services.Services
 }
 
-type MessageHandler func(ctx context.Context, messageBody string) *types.Error
-type UnprocessableMessageHandler func(ctx context.Context, messageBody, receipt string) *types.Error
+type (
+	MessageHandler              func(ctx context.Context, messageBody string) *types.Error
+	UnprocessableMessageHandler func(ctx context.Context, messageBody, receipt string) *types.Error
+)
 
 func NewV2QueueHandler(services *services.Services) *V2QueueHandler {
 	return &V2QueueHandler{

@@ -140,8 +140,7 @@ func (v1dbclient *V1Database) ScanDelegationsPaginated(
 	options.SetSort(bson.M{"_id": 1})
 	// Decode the pagination token if it exists
 	if paginationToken != "" {
-		decodedToken, err :=
-			dbmodel.DecodePaginationToken[v1dbmodel.DelegationScanPagination](paginationToken)
+		decodedToken, err := dbmodel.DecodePaginationToken[v1dbmodel.DelegationScanPagination](paginationToken)
 		if err != nil {
 			return nil, &db.InvalidPaginationTokenError{
 				Message: "Invalid pagination token",

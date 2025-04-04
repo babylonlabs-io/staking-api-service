@@ -66,10 +66,9 @@ func (s *V1Service) GetFinalityProvidersFromGlobalParams() []*FpParamsPublic {
 func (s *V1Service) GetFinalityProvider(
 	ctx context.Context, fpPkHex string,
 ) (*FpDetailsPublic, *types.Error) {
-	fpStatsByPks, err :=
-		s.Service.DbClients.V1DBClient.FindFinalityProviderStatsByFinalityProviderPkHex(
-			ctx, []string{fpPkHex},
-		)
+	fpStatsByPks, err := s.Service.DbClients.V1DBClient.FindFinalityProviderStatsByFinalityProviderPkHex(
+		ctx, []string{fpPkHex},
+	)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).
 			Msg("Error while fetching finality provider from DB")

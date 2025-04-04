@@ -3,6 +3,7 @@ package v2service
 import (
 	"context"
 	"errors"
+
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainalysis"
 )
 

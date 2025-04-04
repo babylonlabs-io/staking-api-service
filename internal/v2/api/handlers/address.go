@@ -1,9 +1,10 @@
 package v2handlers
 
 import (
+	"net/http"
+
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"net/http"
 )
 
 type AddressScreeningResponse struct {

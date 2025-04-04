@@ -2,8 +2,8 @@ package dbclients
 
 import (
 	"context"
-
 	"fmt"
+
 	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"

@@ -5,13 +5,14 @@ package indexerdbclient_test
 import (
 	"context"
 	"encoding/json"
+	"path/filepath"
+	"testing"
+
 	model "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"github.com/cometbft/cometbft/libs/os"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"path/filepath"
-	"testing"
 )
 
 func TestDelegations(t *testing.T) {
@@ -72,7 +73,6 @@ func TestDelegations(t *testing.T) {
 		// for now 3 is just hardcoded number of records with this babylon address
 		assert.Equal(t, 3, numOfFoundRecords)
 	})
-
 }
 
 func loadTestData(t *testing.T, filename string) []any {

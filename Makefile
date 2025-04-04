@@ -69,5 +69,8 @@ test-integration:
 lint:
 	golangci-lint run
 
+format:
+	gofumpt -l -w .
+
 build-swagger:
 	swag init --parseDependency --parseInternal -d cmd/staking-api-service,internal/shared/api,internal/shared/types,internal/v1/api/handlers,internal/v2/api/handlers

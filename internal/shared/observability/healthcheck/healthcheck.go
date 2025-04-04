@@ -30,7 +30,6 @@ func StartHealthCheckCron(ctx context.Context, queues *v2queue.Queues, cronTime 
 	_, err := c.AddFunc(cronSpec, func() {
 		queueHealthCheck(queues)
 	})
-
 	if err != nil {
 		return err
 	}

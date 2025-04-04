@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
-	"encoding/json"
+	"github.com/btcsuite/btcd/chaincfg"
 )
 
 type TermsAcceptanceLoggingRequest struct {

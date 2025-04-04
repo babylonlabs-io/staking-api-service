@@ -79,8 +79,8 @@ func New(cfgFile string) (*Config, error) {
 	/*
 		Below code will replace nested fields in yml into `_` and any `-` into `__` when you try to override this config via env variable
 		To give an example:
-		1. `some.config.a` can be overriden by `SOME_CONFIG_A`
-		2. `some.config-a` can be overriden by `SOME_CONFIG__A`
+		1. `some.config.a` can be overridden by `SOME_CONFIG_A`
+		2. `some.config-a` can be overridden by `SOME_CONFIG__A`
 		This is to avoid using `-` in the environment variable as it's not supported in all os terminal/bash
 		Note: vipner package use `.` as delimitter by default. Read more here: https://pkg.go.dev/github.com/spf13/viper#readme-accessing-nested-keys
 	*/
