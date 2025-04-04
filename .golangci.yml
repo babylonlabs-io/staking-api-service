@@ -22,7 +22,7 @@ linters-settings:
       - whyNoLint
       - unnamedResult
   gocyclo:
-    min-complexity: 15
+    min-complexity: 18
   goimports:
     local-prefixes: github.com/golangci/golangci-lint
   mnd:
@@ -84,6 +84,8 @@ linters:
     - tparallel
     - gofumpt
     - misspell
+    - nilerr
+    - gocyclo
   # todo enable after golangci-lint update to 1.63
 #    - gosec
   #    - prealloc
@@ -95,12 +97,10 @@ linters:
   # - nilnesserr
   # - usetesting
   # - exhaustruct
-  # - nilerr
   # - lll
   # - stylecheck
   # - dupl
   # - funlen
-  # - gocyclo
   # - gocritic
 
   # don't enable:
