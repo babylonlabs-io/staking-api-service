@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/babylonlabs-io/staking-api-service/docs"
 	"github.com/swaggo/swag"
-	"net/http"
 )
 
 func SwaggerDoc(w http.ResponseWriter, req *http.Request) {

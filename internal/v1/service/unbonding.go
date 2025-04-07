@@ -20,7 +20,8 @@ func (s *V1Service) UnbondDelegation(
 	stakingTxHashHex,
 	unbondingTxHashHex,
 	unbondingTxHex,
-	signatureHex string) *types.Error {
+	signatureHex string,
+) *types.Error {
 	// 1. check the delegation is eligible for unbonding
 	delegationDoc, err := s.Service.DbClients.V1DBClient.FindDelegationByTxHashHex(ctx, stakingTxHashHex)
 	if err != nil {

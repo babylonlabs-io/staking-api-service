@@ -7,9 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
-
 	"slices"
+	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"

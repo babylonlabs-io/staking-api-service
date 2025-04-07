@@ -21,7 +21,6 @@ import (
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
 	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context())
-
 	if err != nil {
 		return nil, err
 	}

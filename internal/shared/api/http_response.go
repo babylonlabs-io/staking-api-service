@@ -33,7 +33,6 @@ func registerHandler(handlerFunc func(*http.Request) (*handler.Result, *types.Er
 
 		// Handle the actual business logic
 		result, err := handlerFunc(r)
-
 		if err != nil {
 			if http.StatusText(err.StatusCode) == "" {
 				logger.Ctx(r.Context()).Error().Err(err).Int("status_code", err.StatusCode).Msg("invalid status code")
@@ -71,7 +70,6 @@ func registerHandler(handlerFunc func(*http.Request) (*handler.Result, *types.Er
 // Write and return response
 func writeResponse(w http.ResponseWriter, r *http.Request, statusCode int, res interface{}) {
 	respBytes, err := json.Marshal(res)
-
 	if err != nil {
 		logger.Ctx(r.Context()).Err(err).Msg("failed to marshal error response")
 		http.Error(w, "Failed to process the request. Please try again later.", http.StatusInternalServerError)
