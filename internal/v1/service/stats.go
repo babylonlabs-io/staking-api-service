@@ -57,8 +57,14 @@ func (s *V1Service) GetOverallStats(
 		}
 	}
 
+	overallStatsV2, err := s.Service.DbClients.V2DBClient.GetOverallStats(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching v2 overall stats")
+		return nil, types.NewInternalServiceError(err)
+	}
+
 	return &OverallStatsPublic{
-		ActiveTvl:         stats.ActiveTvl,
+		ActiveTvl:         stats.ActiveTvl + overallStatsV2.ActiveTvl,
 		TotalTvl:          stats.TotalTvl,
 		ActiveDelegations: stats.ActiveDelegations,
 		TotalDelegations:  stats.TotalDelegations,
