@@ -18,7 +18,7 @@ type AddressAssessment struct {
 }
 
 type Cluster struct {
-	Name string `json:"string"`
+	Name string `json:"name"`
 }
 
 // not all fields presented here
