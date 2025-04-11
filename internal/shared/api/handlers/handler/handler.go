@@ -2,11 +2,10 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
-
-	"errors"
 	"strings"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"

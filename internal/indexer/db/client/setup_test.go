@@ -5,9 +5,9 @@ package indexerdbclient_test
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	"fmt"
 	model "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"go.mongodb.org/mongo-driver/bson"

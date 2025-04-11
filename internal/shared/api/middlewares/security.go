@@ -33,8 +33,8 @@ func SecurityHeadersMiddleware() func(http.Handler) http.Handler {
 				FrameDeny:             true, // Equivalent to X-Frame-Options: DENY
 				ContentTypeNosniff:    true, // Equivalent to X-Content-Type-Options: nosniff
 				BrowserXssFilter:      true, // Equivalent to X-XSS-Protection: 1; mode=block
-				ContentSecurityPolicy:  csp,
-				ReferrerPolicy: "strict-origin-when-cross-origin", // Setting Referrer-Policy
+				ContentSecurityPolicy: csp,
+				ReferrerPolicy:        "strict-origin-when-cross-origin", // Setting Referrer-Policy
 			})
 
 			// Apply the secure middleware

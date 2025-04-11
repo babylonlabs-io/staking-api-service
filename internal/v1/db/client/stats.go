@@ -132,7 +132,7 @@ func (v1dbclient *V1Database) UpdateLegacyOverallStats(
 			TotalValue int64 `bson:"totalValue"`
 		}
 
-		// This struct is to accomodate the result from the aggregate query
+		// This struct is to accommodate the result from the aggregate query
 		// in which the facet is used to group the results by the state
 		// and the result is an array of results. But we only expect a single
 		// result

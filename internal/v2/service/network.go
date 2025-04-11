@@ -1,13 +1,13 @@
 package v2service
 
 import (
-	"context"
-
 	"cmp"
+	"context"
+	"slices"
+
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
-	"slices"
 )
 
 type StakingStatusPublic struct {
