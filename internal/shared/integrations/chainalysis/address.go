@@ -3,6 +3,7 @@ package chainalysis
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
@@ -16,13 +17,18 @@ type AddressAssessment struct {
 	RiskReason *string
 }
 
+type Cluster struct {
+	Name string `json:"string"`
+}
+
 // not all fields presented here
 type riskEntityResponse struct {
 	Message string `json:"message"`
 
-	Address    string `json:"address"`
-	Risk       string `json:"risk"` // Severe, High, Medium, Low
-	RiskReason string `json:"riskReason"`
+	Address    string   `json:"address"`
+	Risk       string   `json:"risk"` // Severe, High, Medium, Low
+	RiskReason string   `json:"riskReason"`
+	Cluster    *Cluster `json:"cluster"`
 }
 
 func (c *Client) AssessAddress(ctx context.Context, address string) (*AddressAssessment, error) {
@@ -33,6 +39,17 @@ func (c *Client) AssessAddress(ctx context.Context, address string) (*AddressAss
 	}
 
 	metrics.RecordChainAnalysisCall(false)
+	metrics.RecordAssessAddress(resp.Risk)
+
+	// based on discussion with chainalysis we allow xverse.app addresses, but only
+	// those that don't contain "Identified" in the risk reason
+	isXverse := resp.Cluster != nil && resp.Cluster.Name == "Xverse.app"
+	reasonContainsIdentified := strings.Contains(resp.RiskReason, "Identified")
+	if isXverse && !reasonContainsIdentified {
+		return &AddressAssessment{
+			Risk: "Low",
+		}, nil
+	}
 
 	var riskReason *string
 	if resp.RiskReason != "" {
