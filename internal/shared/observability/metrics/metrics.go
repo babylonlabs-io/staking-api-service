@@ -38,6 +38,7 @@ var (
 	dbErrorsCounter                   *prometheus.CounterVec
 	chainAnalysisCallsCounter         *prometheus.CounterVec
 	manualInterventionRequiredCounter *prometheus.CounterVec
+	assessAddressCounter              *prometheus.CounterVec
 )
 
 // Init initializes the metrics package.
@@ -156,6 +157,13 @@ func registerMetrics() {
 		[]string{"type"},
 	)
 
+	assessAddressCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "assess_address",
+		},
+		[]string{"risk"},
+	)
+
 	prometheus.MustRegister(
 		httpRequestDurationHistogram,
 		eventProcessingDurationHistogram,
@@ -166,6 +174,7 @@ func registerMetrics() {
 		serviceCrashCounter,
 		chainAnalysisCallsCounter,
 		manualInterventionRequiredCounter,
+		assessAddressCounter,
 	)
 }
 
@@ -234,6 +243,10 @@ func StartClientRequestDurationTimer(baseUrl, method, path string) func(statusCo
 
 func RecordManualInterventionRequired(manualInterventionType string) {
 	manualInterventionRequiredCounter.WithLabelValues(manualInterventionType).Inc()
+}
+
+func RecordAssessAddress(risk string) {
+	assessAddressCounter.WithLabelValues(risk).Inc()
 }
 
 // RecordServiceCrash increments the service crash counter.
