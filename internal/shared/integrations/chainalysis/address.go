@@ -3,10 +3,10 @@ package chainalysis
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
-	"strings"
 )
 
 // empty is auxiliary type that is used for sending empty request body in the request
