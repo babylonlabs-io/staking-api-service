@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
@@ -36,8 +35,6 @@ func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *t
 	if err != nil {
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "error assessing address")
 	}
-
-	metrics.RecordAssessAddress(result.Risk)
 
 	var data AddressScreeningResponse
 	data.BTCAddress.Risk = result.Risk
