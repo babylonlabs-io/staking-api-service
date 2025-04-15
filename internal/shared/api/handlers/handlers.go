@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"context"
-
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
@@ -16,12 +14,12 @@ type Handlers struct {
 	V2Handler     *v2handler.V2Handler
 }
 
-func New(ctx context.Context, config *config.Config, services *services.Services) (*Handlers, error) {
-	sharedHandler, err := handler.New(ctx, config, services.SharedService)
+func New(config *config.Config, services *services.Services) (*Handlers, error) {
+	sharedHandler, err := handler.New(config, services.SharedService)
 	if err != nil {
 		return nil, err
 	}
-	v1Handler, err := v1handler.New(ctx, sharedHandler, services.V1Service)
+	v1Handler, err := v1handler.New(sharedHandler, services.V1Service)
 	if err != nil {
 		return nil, err
 	}

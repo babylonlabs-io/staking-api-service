@@ -16,7 +16,7 @@ func BackfillPubkeyAddressesMappings(ctx context.Context, cfg *config.Config) er
 	if err != nil {
 		return fmt.Errorf("failed to create db client: %w", err)
 	}
-	v1dbClient, err := v1dbclient.New(ctx, client, cfg.StakingDb)
+	v1dbClient, err := v1dbclient.New(client, cfg.StakingDb)
 	if err != nil {
 		return fmt.Errorf("failed to create db client: %w", err)
 	}

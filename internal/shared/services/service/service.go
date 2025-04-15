@@ -26,7 +26,6 @@ type Service struct {
 }
 
 func New(
-	ctx context.Context,
 	cfg *config.Config,
 	globalParams *types.GlobalParams,
 	finalityProviders []types.FinalityProviderDetails,
