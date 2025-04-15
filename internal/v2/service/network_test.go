@@ -35,7 +35,7 @@ func TestGetNetworkInfo(t *testing.T) {
 			IndexerDBClient: indexerDB,
 		}
 
-		sharedService, err := service.New(ctx, cfg, nil, nil, nil, dbClients)
+		sharedService, err := service.New(cfg, nil, nil, nil, dbClients)
 		require.NoError(t, err)
 
 		service, err := New(sharedService)

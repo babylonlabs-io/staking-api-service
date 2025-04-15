@@ -24,16 +24,16 @@ func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
 		return nil, err
 	}
 
-	dbClient, err := dbclient.New(ctx, stakingMongoClient, cfg.StakingDb)
+	dbClient, err := dbclient.New(stakingMongoClient, cfg.StakingDb)
 	if err != nil {
 		return nil, err
 	}
 
-	v1dbClient, err := v1dbclient.New(ctx, stakingMongoClient, cfg.StakingDb)
+	v1dbClient, err := v1dbclient.New(stakingMongoClient, cfg.StakingDb)
 	if err != nil {
 		return nil, fmt.Errorf("error while creating v1 db client: %w", err)
 	}
-	v2dbClient, err := v2dbclient.New(ctx, stakingMongoClient, cfg.StakingDb)
+	v2dbClient, err := v2dbclient.New(stakingMongoClient, cfg.StakingDb)
 	if err != nil {
 		return nil, fmt.Errorf("error while creating v2 db client: %w", err)
 	}
@@ -43,7 +43,7 @@ func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
 		return nil, fmt.Errorf("error while creating indexer mongo client: %w", err)
 	}
 
-	indexerDbClient, err := indexerdbclient.New(ctx, indexerMongoClient, cfg.IndexerDb)
+	indexerDbClient, err := indexerdbclient.New(indexerMongoClient, cfg.IndexerDb)
 	if err != nil {
 		return nil, fmt.Errorf("error while creating indexer db client: %w", err)
 	}

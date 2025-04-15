@@ -45,7 +45,7 @@ func New(
 		Handler:      r,
 	}
 
-	handlers, err := handlers.New(ctx, cfg, services)
+	handlers, err := handlers.New(cfg, services)
 	if err != nil {
 		return nil, fmt.Errorf("error while setting up handlers: %w", err)
 	}

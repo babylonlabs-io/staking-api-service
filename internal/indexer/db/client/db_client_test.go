@@ -151,7 +151,7 @@ func setupClient(cfg *config.DbConfig, client *mongo.Client) (*indexerdbclient.I
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	return indexerdbclient.New(ctx, client, cfg)
+	return indexerdbclient.New(client, cfg)
 }
 
 func setupMongoClient(cfg *config.DbConfig) (*mongo.Client, error) {

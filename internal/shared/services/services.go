@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
@@ -18,20 +16,13 @@ type Services struct {
 	V2Service     v2service.V2ServiceProvider
 }
 
-func New(
-	ctx context.Context,
-	cfg *config.Config,
-	globalParams *types.GlobalParams,
-	finalityProviders []types.FinalityProviderDetails,
-	clients *clients.Clients,
-	dbClients *dbclients.DbClients,
-) (*Services, error) {
-	sharedService, err := service.New(ctx, cfg, globalParams, finalityProviders, clients, dbClients)
+func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders []types.FinalityProviderDetails, clients *clients.Clients, dbClients *dbclients.DbClients, ) (*Services, error) {
+	sharedService, err := service.New(cfg, globalParams, finalityProviders, clients, dbClients)
 	if err != nil {
 		return nil, err
 	}
 
-	v1Service, err := v1service.New(ctx, sharedService)
+	v1Service, err := v1service.New(sharedService)
 	if err != nil {
 		return nil, err
 	}

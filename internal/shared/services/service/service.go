@@ -25,14 +25,7 @@ type Service struct {
 	singleFlightGroup *singleflight.Group
 }
 
-func New(
-	ctx context.Context,
-	cfg *config.Config,
-	globalParams *types.GlobalParams,
-	finalityProviders []types.FinalityProviderDetails,
-	clients *clients.Clients,
-	dbClients *dbclients.DbClients,
-) (*Service, error) {
+func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders []types.FinalityProviderDetails, clients *clients.Clients, dbClients *dbclients.DbClients, ) (*Service, error) {
 	return &Service{
 		DbClients:         dbClients,
 		Clients:           clients,
