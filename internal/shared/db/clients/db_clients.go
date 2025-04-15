@@ -9,16 +9,13 @@ import (
 	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
 	v1dbclient "github.com/babylonlabs-io/staking-api-service/internal/v1/db/client"
 	v2dbclient "github.com/babylonlabs-io/staking-api-service/internal/v2/db/client"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type DbClients struct {
-	StakingMongoClient *mongo.Client
-	IndexerMongoClient *mongo.Client
-	SharedDBClient     dbclient.DBClient
-	V1DBClient         v1dbclient.V1DBClient
-	V2DBClient         v2dbclient.V2DBClient
-	IndexerDBClient    indexerdbclient.IndexerDBClient
+	SharedDBClient  dbclient.DBClient
+	V1DBClient      v1dbclient.V1DBClient
+	V2DBClient      v2dbclient.V2DBClient
+	IndexerDBClient indexerdbclient.IndexerDBClient
 }
 
 func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
@@ -52,12 +49,10 @@ func New(ctx context.Context, cfg *config.Config) (*DbClients, error) {
 	}
 
 	dbClients := DbClients{
-		StakingMongoClient: stakingMongoClient,
-		IndexerMongoClient: indexerMongoClient,
-		SharedDBClient:     dbClient,
-		V1DBClient:         v1dbClient,
-		V2DBClient:         v2dbClient,
-		IndexerDBClient:    indexerDbClient,
+		SharedDBClient:  dbClient,
+		V1DBClient:      v1dbClient,
+		V2DBClient:      v2dbClient,
+		IndexerDBClient: indexerDbClient,
 	}
 
 	return &dbClients, nil
