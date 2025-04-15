@@ -8,7 +8,7 @@ type V1Service struct {
 	*service.Service
 }
 
-func New(sharedService *service.Service, ) (*V1Service, error) {
+func New(sharedService *service.Service) (*V1Service, error) {
 	return &V1Service{
 		Service: sharedService,
 	}, nil

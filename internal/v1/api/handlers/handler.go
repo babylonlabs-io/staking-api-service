@@ -10,7 +10,7 @@ type V1Handler struct {
 	Service v1service.V1ServiceProvider
 }
 
-func New(handler *handler.Handler, v1Service v1service.V1ServiceProvider, ) (*V1Handler, error) {
+func New(handler *handler.Handler, v1Service v1service.V1ServiceProvider) (*V1Handler, error) {
 	return &V1Handler{
 		Handler: handler,
 		Service: v1Service,
