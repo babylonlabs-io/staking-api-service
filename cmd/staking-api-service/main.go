@@ -73,7 +73,7 @@ func main() {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading finality providers file: %s", finalityProvidersPath))
 	}
 
-	err = dbmodel.Setup(ctx, cfg)
+	err = dbmodel.Setup(ctx, cfg.StakingDb, cfg.ExternalAPIs)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking db model")
 	}

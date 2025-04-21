@@ -69,7 +69,6 @@ func (a *Server) Start() error {
 	if err != nil {
 		return err
 	}
-	// todo correct shutdown of a.listener
 
 	return a.httpServer.Serve(a.listener)
 }

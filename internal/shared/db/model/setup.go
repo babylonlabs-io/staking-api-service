@@ -71,12 +71,12 @@ var collections = map[string][]index{
 	},
 }
 
-func Setup(ctx context.Context, cfg *config.Config) error {
+func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *config.ExternalAPIsConfig) error {
 	credential := options.Credential{
-		Username: cfg.StakingDb.Username,
-		Password: cfg.StakingDb.Password,
+		Username: stakingDB.Username,
+		Password: stakingDB.Password,
 	}
-	clientOps := options.Client().ApplyURI(cfg.StakingDb.Address).SetAuth(credential)
+	clientOps := options.Client().ApplyURI(stakingDB.Address).SetAuth(credential)
 	client, err := mongo.Connect(ctx, clientOps)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func Setup(ctx context.Context, cfg *config.Config) error {
 	defer cancel()
 
 	// Access a database and create collections.
-	database := client.Database(cfg.StakingDb.DbName)
+	database := client.Database(stakingDB.DbName)
 
 	// Create collections.
 	for collection := range collections {
@@ -101,8 +101,8 @@ func Setup(ctx context.Context, cfg *config.Config) error {
 	}
 
 	// If external APIs are configured, create TTL index for BTC price collection
-	if cfg.ExternalAPIs != nil {
-		if err := createTTLIndexes(ctx, database, cfg.ExternalAPIs.CoinMarketCap.CacheTTL); err != nil {
+	if externalConfig != nil {
+		if err := createTTLIndexes(ctx, database, externalConfig.CoinMarketCap.CacheTTL); err != nil {
 			log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
 			return err
 		}

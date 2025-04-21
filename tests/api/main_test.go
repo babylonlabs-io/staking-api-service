@@ -37,14 +37,14 @@ var apiURL string
 func TestMain(t *testing.M) {
 	ctx := context.Background()
 
-	mongoConfig, cleanup, err := setupMongoContainer()
+	db, err := setupDB(ctx)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to setup mongo container")
+		log.Fatal().Err(err).Msg("Failed to setup DB")
 	}
 
 	cfg := &config.Config{
-		StakingDb: createDbConfig(mongoConfig, "api"),
-		IndexerDb: createDbConfig(mongoConfig, "indexer"),
+		StakingDb: db.stakingConfig,
+		IndexerDb: db.indexerConfig,
 		Server: &config.ServerConfig{
 			LogLevel:         "info",
 			MaxContentLength: 4096,
@@ -58,54 +58,26 @@ func TestMain(t *testing.M) {
 			Enabled: true,
 		},
 	}
-	err = cfg.Server.Validate()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to validate config")
-	}
 
-	dbClients, err := dbclients.New(ctx, cfg)
+	s, err := setupServices(ctx, cfg)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize db clients")
-	}
-
-	err = loadTestdata(ctx, cfg.StakingDb, cfg.IndexerDb)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load testdata")
-	}
-
-	fp, err := types.NewFinalityProviders("testdata/finality-providers.json")
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load finality providers")
-	}
-
-	globals, err := types.NewGlobalParams("testdata/global-params.json")
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load global params")
-	}
-
-	clients := clients.New(cfg)
-
-	s, err := services.New(cfg, globals, fp, clients, dbClients)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize services")
+		db.cleanup()
+		log.Fatal().Err(err).Msg("Failed to setup services")
 	}
 
 	srv, err := api.New(ctx, cfg, s)
 	if err != nil {
+		db.cleanup()
 		log.Fatal().Err(err).Msg("Failed to initialize api")
 	}
 
 	metrics.Init(7777)
 
-	err = dbmodel.Setup(ctx, cfg)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to setup db")
-	}
-
 	go srv.Start() //nolint:errcheck
 	time.Sleep(time.Second)
 	_, port, err := net.SplitHostPort(srv.Addr())
 	if err != nil {
+		db.cleanup()
 		log.Fatal().Err(err).Msg("Failed to parse server address")
 	}
 	apiURL = "http://localhost:" + port
@@ -113,8 +85,67 @@ func TestMain(t *testing.M) {
 
 	// running tests
 	code := t.Run()
-	cleanup()
+	db.cleanup()
 	os.Exit(code)
+}
+
+func setupServices(ctx context.Context, cfg *config.Config) (*services.Services, error) {
+	err := cfg.Server.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	dbClients, err := dbclients.New(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	fp, err := types.NewFinalityProviders("testdata/finality-providers.json")
+	if err != nil {
+		return nil, err
+	}
+
+	globals, err := types.NewGlobalParams("testdata/global-params.json")
+	if err != nil {
+		return nil, err
+	}
+
+	clients := clients.New(cfg)
+	return services.New(cfg, globals, fp, clients, dbClients)
+}
+
+type db struct {
+	stakingConfig *config.DbConfig
+	indexerConfig *config.DbConfig
+	cleanup       func()
+}
+
+func setupDB(ctx context.Context) (*db, error) {
+	mongoCfg, cleanup, err := setupMongoContainer()
+	if err != nil {
+		return nil, err
+	}
+
+	stakingConfig := createDbConfig(mongoCfg, "api")
+	indexerConfig := createDbConfig(mongoCfg, "indexer")
+
+	err = dbmodel.Setup(ctx, stakingConfig, nil)
+	if err != nil {
+		cleanup()
+		return nil, err
+	}
+
+	err = loadTestdata(ctx, stakingConfig, indexerConfig)
+	if err != nil {
+		cleanup()
+		return nil, err
+	}
+
+	return &db{
+		stakingConfig: stakingConfig,
+		indexerConfig: indexerConfig,
+		cleanup:       cleanup,
+	}, nil
 }
 
 func loadTestdata(ctx context.Context, configs ...*config.DbConfig) error {
