@@ -76,7 +76,7 @@ build-swagger:
 
 # Runs end-to-end tests for API service
 test-e2e:
-	go test -v -coverprofile=cover.out -coverpkg=./internal/... ./tests/api/...
+	go test -v -tags=e2e -coverprofile=cover.out -coverpkg=./internal/... ./tests/api/...
 
 # Opens a browser to check code coverage stats. Note that output of test-e2e (cover.out) is required
 coverage:
