@@ -66,6 +66,7 @@ func (s *V2Service) GetStakerPublicKeysByAddresses(
 		} else if addressType == utils.NativeSegwit {
 			nativeSegwitAddresses = append(nativeSegwitAddresses, addr)
 		} else {
+			// todo it's not possible (validation done at CheckBtcAddressType) replace with unreachable panic?
 			return nil, types.NewErrorWithMsg(
 				http.StatusBadRequest, types.BadRequest, "unsupported address type",
 			)

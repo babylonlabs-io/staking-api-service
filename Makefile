@@ -60,11 +60,10 @@ generate:
 	go generate ./...
 
 test:
-	./bin/local-startup.sh;
-	go test -v -cover -p 1 ./... -count=1
+	go test -v -cover -coverpkg=./internal/... ./... -count=1
 
 test-integration:
-	go test -v -cover -tags=integration ./internal/indexer/db/...
+	go test -v -cover -coverpkg=./internal/... -tags=integration ./...
 
 lint:
 	golangci-lint run
@@ -74,3 +73,9 @@ format:
 
 build-swagger:
 	swag init --parseDependency --parseInternal -d cmd/staking-api-service,internal/shared/api,internal/shared/types,internal/v1/api/handlers,internal/v2/api/handlers
+
+test-api:
+	go test -v -coverprofile=cover.out -coverpkg=./internal/... ./tests/api/...
+
+coverage:
+	go tool cover -html=cover.out

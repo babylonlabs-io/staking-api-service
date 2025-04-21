@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "3faa3aa676b2addc8e4750b65d02f54386e0dbc87d83cdbf3bd02053b0ed0bcf",
+    "taproot": "tb1pjpa390lrt7cl6ge4gs7kx7auaxqkdaj9jqzvqh5drwawa8e5j9ks2ldcpn",
+    "native_segwit_even": "tb1q663tkc4deys62yumazf9ht8a6cn44j8xpa75p6",
+    "native_segwit_odd": "tb1q7548pcdy5jqlxjrmvtn9mp892rc60qchfp8yqv"
+  },
+  {
+    "_id": "1e06e1ef408126703ed66447cd6972434396b252a22e843d8295d55ae7a9cfd1",
+    "taproot": "tb1pwa22ug5nsz76euemjqg7n9m9thasgtsp5h4q0n5cktn3dczm0hmq9fleyd",
+    "native_segwit_even": "tb1qp3hlkjuf80dxxpflvvwhl7h0zyxzne5zgtyc4v",
+    "native_segwit_odd": "tb1qq5hfp3xgrfy4z6hzp9jkgd09zvhlw0fgjz44y0"
+  },
+  {
+    "_id": "c00f83fb8dbed188175c67937c1d62f20eaf04a995b978e72f025c9c980f7a5d",
+    "taproot": "tb1p38sumg646nx74j6vxxv3krhzruk7vm75qhszvhh7zkclzyek3w7s0yz05t",
+    "native_segwit_even": "tb1qedepupztj4qmaqlkfh3fhuv4xalvhjd6xzr25p",
+    "native_segwit_odd": "tb1qkgh4sawexmxzuwdrffxc9jjrnrpyj5x4nvy637"
+  },
+  {
+    "_id": "f33a3851632079b01be26360bba9f7f49286406d2636a25565f8d83db6ac2a32",
+    "taproot": "tb1pxn93chqf33caw2dxs786leqqxwc36r603auj926347tc8n3rrjdssjcf6k",
+    "native_segwit_even": "tb1q8ne2tf0uwh525dl9apy5mnd2zjr030gq3jtpr7",
+    "native_segwit_odd": "tb1qaxp8q3esgcey4zgq8fttpqau3k47rsnl4s852f"
+  }
+]

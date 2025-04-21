@@ -12,12 +12,14 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"net"
 )
 
 type Server struct {
 	httpServer *http.Server
 	handlers   *handlers.Handlers
 	cfg        *config.Config
+	listener   net.Listener
 }
 
 func New(
@@ -38,7 +40,7 @@ func New(
 	r.Use(middlewares.ContentLengthMiddleware(cfg))
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
+		//Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
 		WriteTimeout: cfg.Server.WriteTimeout,
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		IdleTimeout:  cfg.Server.IdleTimeout,
@@ -60,6 +62,24 @@ func New(
 }
 
 func (a *Server) Start() error {
-	log.Info().Msgf("Starting server on %s", a.httpServer.Addr)
-	return a.httpServer.ListenAndServe()
+	address := fmt.Sprintf("%s:%d", a.cfg.Server.Host, a.cfg.Server.Port)
+
+	log.Info().Msgf("Starting server on %s", address)
+	var err error
+	a.listener, err = net.Listen("tcp", address)
+	if err != nil {
+		return err
+	}
+	// todo correct shutdown of a.listener
+
+	return a.httpServer.Serve(a.listener)
+}
+
+func (a *Server) Stop() error {
+	log.Info().Msg("Stopping server")
+	return a.httpServer.Shutdown(context.TODO())
+}
+
+func (a *Server) Addr() string {
+	return a.listener.Addr().String()
 }

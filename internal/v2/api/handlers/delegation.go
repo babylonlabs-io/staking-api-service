@@ -54,7 +54,6 @@ func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *typ
 	if err != nil {
 		return nil, err
 	}
-
 	bbnAddress, err := handler.ParseBabylonAddressQuery(
 		request, "babylon_address", true,
 	)

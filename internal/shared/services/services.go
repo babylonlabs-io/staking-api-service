@@ -17,6 +17,7 @@ type Services struct {
 }
 
 func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders []types.FinalityProviderDetails, clients *clients.Clients, dbClients *dbclients.DbClients) (*Services, error) {
+	// todo remove errors in service constructors (they are always nil)
 	sharedService, err := service.New(cfg, globalParams, finalityProviders, clients, dbClients)
 	if err != nil {
 		return nil, err
