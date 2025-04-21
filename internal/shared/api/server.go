@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers"
@@ -12,7 +13,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"net"
 )
 
 type Server struct {
@@ -40,7 +40,6 @@ func New(
 	r.Use(middlewares.ContentLengthMiddleware(cfg))
 
 	srv := &http.Server{
-		//Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
 		WriteTimeout: cfg.Server.WriteTimeout,
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		IdleTimeout:  cfg.Server.IdleTimeout,

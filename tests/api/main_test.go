@@ -1,33 +1,36 @@
 package api
 
 import (
-	"testing"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
 	"context"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
-	"github.com/rs/zerolog/log"
-	"os"
-	"net"
-	"time"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
-	"github.com/stretchr/testify/require"
-	"strings"
-	"net/http"
-	"io"
-	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
-	"github.com/babylonlabs-io/babylon-staking-indexer/testutil"
-	dc "github.com/ory/dockertest/docker"
 	"fmt"
-	"github.com/ory/dockertest"
-	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
-	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
+	"io"
+	"net"
+	"net/http"
+	"os"
 	"path/filepath"
-	"go.mongodb.org/mongo-driver/bson"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/babylonlabs-io/babylon-staking-indexer/testutil"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
+	dbclient "github.com/babylonlabs-io/staking-api-service/internal/shared/db/client"
+	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
+	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/pkg"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
+	"github.com/ory/dockertest"
+	dc "github.com/ory/dockertest/docker"
+	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson"
 )
+
+const requestTimeout = 3 * time.Second
 
 var apiURL string
 
@@ -99,14 +102,14 @@ func TestMain(t *testing.M) {
 		log.Fatal().Err(err).Msg("Failed to setup db")
 	}
 
-	go srv.Start()
+	go srv.Start() //nolint:errcheck
 	time.Sleep(time.Second)
 	_, port, err := net.SplitHostPort(srv.Addr())
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to parse server address")
 	}
 	apiURL = "http://localhost:" + port
-	defer srv.Stop()
+	defer srv.Stop() //nolint:errcheck
 
 	// running tests
 	code := t.Run()
@@ -166,7 +169,13 @@ func clientGet(t *testing.T, endpoint string) ([]byte, int) {
 	require.True(t, strings.HasPrefix(endpoint, "/"), "endpoint must start with /")
 	url := apiURL + endpoint
 
-	resp, err := http.Get(url)
+	ctx, cancel := context.WithTimeout(context.TODO(), requestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	require.NoError(t, err)
+
+	resp, err := (&http.Client{}).Do(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
 
@@ -208,7 +217,6 @@ func setupMongoContainer() (*mongoConfig, func(), error) {
 		Env: []string{
 			"MONGO_INITDB_ROOT_USERNAME=" + mongoUsername,
 			"MONGO_INITDB_ROOT_PASSWORD=" + mongoPassword,
-			//"MONGO_INITDB_DATABASE=" + mongoDatabaseName,
 		},
 	}, func(config *dc.HostConfig) {
 		config.AutoRemove = true

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"testing"
 	"net/http"
+	"testing"
 )
 
 func TestV1_Delegation(t *testing.T) {

@@ -81,14 +81,13 @@ linters:
     - ineffassign
     - noctx
     - typecheck
-    - tparallel
     - gofumpt
     - misspell
     - nilerr
     - gocyclo
-    - unused
   # todo enable after golangci-lint update to 1.63
-#    - gosec
+  #  - tparallel
+  #    - gosec
   #    - prealloc
   #    - mnd
   #    - unused

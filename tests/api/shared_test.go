@@ -1,10 +1,10 @@
 package api
 
 import (
-	"testing"
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
+	"testing"
 )
 
 func TestV1_StakerPubkeyLookup(t *testing.T) {
