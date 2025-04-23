@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,7 +21,7 @@ type Handler struct {
 	Service service.SharedServiceProvider
 }
 
-func New(ctx context.Context, config *config.Config, service service.SharedServiceProvider) (*Handler, error) {
+func New(config *config.Config, service service.SharedServiceProvider) (*Handler, error) {
 	return &Handler{Config: config, Service: service}, nil
 }
 

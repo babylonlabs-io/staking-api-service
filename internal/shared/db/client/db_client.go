@@ -33,7 +33,7 @@ func (db *Database) Ping(ctx context.Context) error {
 	return nil
 }
 
-func New(ctx context.Context, client *mongo.Client, cfg *config.DbConfig) (*Database, error) {
+func New(client *mongo.Client, cfg *config.DbConfig) (*Database, error) {
 	return &Database{
 		DbName: cfg.DbName,
 		Client: client,

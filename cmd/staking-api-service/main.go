@@ -91,7 +91,7 @@ func main() {
 		log.Fatal().Err(err).Msg("error while setting up staking db clients")
 	}
 
-	services, err := services.New(ctx, cfg, params, finalityProviders, clients, dbClients)
+	services, err := services.New(cfg, params, finalityProviders, clients, dbClients)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking services layer")
 	}
