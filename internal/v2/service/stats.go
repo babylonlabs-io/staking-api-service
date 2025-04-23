@@ -2,7 +2,6 @@ package v2service
 
 import (
 	"context"
-	"math"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
@@ -29,9 +28,7 @@ type OverallStatsPublic struct {
 	// This represents the total active delegations on BTC chain which includes
 	// both phase-1 and phase-2 active delegations
 	TotalActiveDelegations int64 `json:"total_active_delegations"`
-
-	// Represents the APY percentage for BTC staking on Babylon chain.
-	// Rounded to 2 decimal places.
+	// Represents the APY for BTC staking as a decimal (e.g., 0.035 = 3.5%)
 	BTCStakingAPY float64 `json:"btc_staking_apy"`
 }
 
@@ -134,11 +131,10 @@ func (s *V2Service) GetBTCStakingAPY(
 	}
 
 	// Calculate the APY of the BTC staking on Babylon Genesis
-	// APY = (400,000,000 * BABY/BTC price) / Total BTC staked * 100
-	btcStakingAPY := (ANNUAL_BABY_REWARDS_FOR_BTC_STAKING * (babyPrice / btcPrice)) / btcTvl * 100
+	// APY = (400,000,000 * BABY Price) / (Total BTC Staked * BTC price)
+	btcStakingAPY := (ANNUAL_BABY_REWARDS_FOR_BTC_STAKING * babyPrice) / (btcTvl * btcPrice)
 
-	// Round the APY to 2 decimal places
-	return math.Round(btcStakingAPY*100) / 100, nil
+	return btcStakingAPY, nil
 }
 
 func (s *V2Service) GetStakerStats(
