@@ -466,6 +466,11 @@ definitions:
         type: integer
       active_tvl:
         type: integer
+      btc_staking_apy:
+        description: |-
+          Represents the APY percentage for BTC staking on Babylon chain.
+          Rounded to 2 decimal places.
+        type: number
       total_active_delegations:
         description: |-
           This represents the total active delegations on BTC chain which includes

@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	// CoinMarketCap UCID for BABY.
+	// https://coinmarketcap.com/currencies/babylon/
 	BABY_COINMARKETCAP_ID = 32198
 )
 
