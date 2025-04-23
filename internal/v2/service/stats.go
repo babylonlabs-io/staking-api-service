@@ -111,13 +111,15 @@ func (s *V2Service) GetBTCStakingAPY(
 		return 0, nil
 	}
 
-	// CoinMarketCap integration is optional since not all deployments require APY calculation.
-	// If CoinMarketCap is not configured in the service config, return 0 as the APY.
+	// CoinMarketCap integration is optional since not all deployments require
+	// APY calculation. If CoinMarketCap is not configured in the service config,
+	// return 0 as the APY.
 	if s.clients.CoinMarketCap == nil {
 		return 0, nil
 	}
 
-	// Convert the activeTvl to BTC as APY is calculated per BTC
+	// Convert the activeTvl which is in satoshis to BTC as APY is calculated per
+	// BTC
 	btcTvl := float64(activeTvl) / 1e8
 
 	btcPrice, err := s.sharedService.GetLatestBTCPrice(ctx)

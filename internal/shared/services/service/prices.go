@@ -13,7 +13,10 @@ import (
 const (
 	// CoinMarketCap UCID for BABY.
 	// https://coinmarketcap.com/currencies/babylon/
-	BABY_COINMARKETCAP_ID = 32198
+	BabyCoinmarketcapID = 32198
+	// CoinMarketCap UCID for BTC.
+	// https://coinmarketcap.com/currencies/bitcoin/
+	BtcCoinmarketcapID = 1
 )
 
 func (s *Service) GetLatestBTCPrice(ctx context.Context) (float64, error) {
@@ -79,14 +82,23 @@ func (s *Service) doGetLatestBTCPrice() (float64, error) {
 		return 0, err
 	}
 
-	if len(quotes) != 1 {
-		return 0, fmt.Errorf("number of quotes from coinmarketcap != 1")
+	var targetQuote *coinmarketcap.QuoteLatest
+	for _, quote := range quotes {
+		if quote.ID == BtcCoinmarketcapID {
+			targetQuote = quote
+			break
+		}
 	}
-	btcLatestQuote := quotes[0]
+	if targetQuote == nil {
+		return 0, fmt.Errorf(
+			"BTC token with ID %d not found in coinmarketcap response",
+			BtcCoinmarketcapID,
+		)
+	}
 
-	btcToUsdQuote := btcLatestQuote.Quote["USD"]
+	btcToUsdQuote := targetQuote.Quote["USD"]
 	if btcToUsdQuote == nil {
-		return 0, fmt.Errorf("USD quote not found in coinmarketcap response")
+		return 0, fmt.Errorf("USD quote not found in coinmarketcap response for BTC")
 	}
 
 	return btcToUsdQuote.Price, nil
@@ -106,13 +118,16 @@ func (s *Service) doGetLatestBABYPrice() (float64, error) {
 
 	var targetQuote *coinmarketcap.QuoteLatest
 	for _, quote := range quotes {
-		if quote.ID == BABY_COINMARKETCAP_ID {
+		if quote.ID == BabyCoinmarketcapID {
 			targetQuote = quote
 			break
 		}
 	}
 	if targetQuote == nil {
-		return 0, fmt.Errorf("BABY token with ID %d not found in coinmarketcap response", BABY_COINMARKETCAP_ID)
+		return 0, fmt.Errorf(
+			"BABY token with ID %d not found in coinmarketcap response",
+			BabyCoinmarketcapID,
+		)
 	}
 
 	babyToUsdQuote := targetQuote.Quote["USD"]
