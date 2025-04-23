@@ -85,7 +85,11 @@ func (s *V2Service) GetOverallStats(
 		phase1Stats.ActiveDelegations = 0
 	}
 
-	btcStakingAPY, errApyCalculation := s.GetBTCStakingAPY(ctx, phase1Stats.ActiveTvl)
+	// Calculate the APY for BTC staking on Babylon Genesis
+	// The APY is calculated based on the activeTvl of the overall stats
+	btcStakingAPY, errApyCalculation := s.GetBTCStakingAPY(
+		ctx, overallStats.ActiveTvl,
+	)
 	if errApyCalculation != nil {
 		log.Ctx(ctx).Error().Err(errApyCalculation).
 			Msg("error while calculating BTC staking APY")
