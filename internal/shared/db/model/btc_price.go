@@ -2,7 +2,10 @@ package dbmodel
 
 import "time"
 
-const SymbolBTC = "btc"
+const (
+	SymbolBTC  = "btc"
+	SymbolBABY = "baby"
+)
 
 type CoinPrice struct {
 	ID        string    `bson:"_id"` // symbol
