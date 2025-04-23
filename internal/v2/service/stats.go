@@ -14,7 +14,7 @@ import (
 const (
 	// Hardcoded value based on 4% of BABY's annual inflation
 	// Assuming 10 billion total annual inflation (10_000_000_000)
-	ANNUAL_BABY_REWARDS_FOR_BTC_STAKING float64 = 400_000_000
+	AnnualBabyRewardsForBtcStaking float64 = 400_000_000
 )
 
 type OverallStatsPublic struct {
@@ -134,7 +134,7 @@ func (s *V2Service) GetBTCStakingAPY(
 
 	// Calculate the APY of the BTC staking on Babylon Genesis
 	// APY = (400,000,000 * BABY Price) / (Total BTC Staked * BTC price)
-	btcStakingAPY := (ANNUAL_BABY_REWARDS_FOR_BTC_STAKING * babyPrice) / (btcTvl * btcPrice)
+	btcStakingAPY := (AnnualBabyRewardsForBtcStaking * babyPrice) / (btcTvl * btcPrice)
 
 	return btcStakingAPY, nil
 }
