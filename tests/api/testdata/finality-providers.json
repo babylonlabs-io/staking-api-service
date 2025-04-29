@@ -2,14 +2,14 @@
     "finality_providers": [
         {
             "description": {
-                "moniker": "Babylon Foundation 0",
+                "moniker": "Babylon Foundation 2",
                 "identity": "",
                 "website": "",
                 "security_contact": "",
                 "details": ""
             },
-            "commission": "0.050000000000000000",
-            "btc_pk": "03d5a0bb72d71993e435d6c5a70e2aa4db500a62cfaae33c56050deefee64ec0"
+            "commission": "0.080000000000000000",
+            "btc_pk": "094f5861be4128861d69ea4b66a5f974943f100f55400bf26f5cce124b4c9af7"
         },
         {
             "description": {
@@ -24,17 +24,6 @@
         },
         {
             "description": {
-                "moniker": "Babylon Foundation 2",
-                "identity": "",
-                "website": "",
-                "security_contact": "",
-                "details": ""
-            },
-            "commission": "0.080000000000000000",
-            "btc_pk": "094f5861be4128861d69ea4b66a5f974943f100f55400bf26f5cce124b4c9af7"
-        },
-        {
-            "description": {
                 "moniker": "Babylon Foundation 3",
                 "identity": "",
                 "website": "",
@@ -43,6 +32,17 @@
             },
             "commission": "0.090000000000000000",
             "btc_pk": "0d2f9728abc45c0cdeefdd73f52a0e0102470e35fb689fc5bc681959a61b021f"
+        },
+        {
+            "description": {
+                "moniker": "Babylon Foundation 0",
+                "identity": "",
+                "website": "",
+                "security_contact": "",
+                "details": ""
+            },
+            "commission": "0.050000000000000000",
+            "btc_pk": "03d5a0bb72d71993e435d6c5a70e2aa4db500a62cfaae33c56050deefee64ec0"
         }
     ]
 }

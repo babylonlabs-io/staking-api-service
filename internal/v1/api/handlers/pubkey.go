@@ -32,7 +32,6 @@ const (
 // @Failure 500 {object} types.Error "Internal Server Error"
 // @Router /v1/staker/pubkey-lookup [get]
 func (h *V1Handler) GetPubKeys(request *http.Request) (*handler.Result, *types.Error) {
-	// todo change tags in doc to v1 ?
 	addresses, err := handler.ParseBtcAddressesQuery(
 		request, "address", h.Handler.Config.Server.BTCNetParam, MAX_NUM_PK_LOOKUP_ADDRESSES,
 	)

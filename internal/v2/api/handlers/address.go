@@ -24,7 +24,6 @@ type AddressScreeningResponse struct {
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /address/screening [get]
 func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *types.Error) {
-	// todo change tags to shared?
 	btcAddress := request.URL.Query().Get("btc_address")
 	if btcAddress == "" {
 		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "btc_address is required")

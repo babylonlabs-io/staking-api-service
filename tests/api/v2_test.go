@@ -25,7 +25,7 @@ func TestV2_Prices(t *testing.T) {
 }
 
 func TestV2_Stats(t *testing.T) {
-	contents := `{"data":{"active_tvl":0,"active_delegations":0,"active_finality_providers":3,"total_finality_providers":3,"total_active_tvl":67986511595,"total_active_delegations":417254}}`
+	contents := `{"data":{"active_tvl":0,"active_delegations":0,"active_finality_providers":3,"total_finality_providers":3,"total_active_tvl":67986511595,"total_active_delegations":417254,"btc_staking_apy":0}}`
 	assertResponse(t, "/v2/stats", http.StatusOK, contents)
 }
 

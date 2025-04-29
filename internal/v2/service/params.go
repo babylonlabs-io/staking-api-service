@@ -34,7 +34,6 @@ func (s *V2Service) GetParams(ctx context.Context) (*ParamsPublic, *types.Error)
 func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, *types.Error) {
 	params, err := s.dbClients.IndexerDBClient.GetBbnStakingParams(ctx)
 	if err != nil {
-		// todo it's unreachable statement - this error is not returned if there is no data
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("Babylon params not found")
 			return nil, types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "babylon params not found.")

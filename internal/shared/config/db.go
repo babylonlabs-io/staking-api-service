@@ -16,7 +16,7 @@ type DbConfig struct {
 	DbName             string `mapstructure:"db-name"`
 	Address            string `mapstructure:"address"`
 	MaxPaginationLimit int64  `mapstructure:"max-pagination-limit"`
-	LogicalShardCount  *int64 `mapstructure:"logical-shard-count"` // todo it's used only in 1 collection, why it's part of config?
+	LogicalShardCount  *int64 `mapstructure:"logical-shard-count"`
 }
 
 func (cfg *DbConfig) Validate() error {
