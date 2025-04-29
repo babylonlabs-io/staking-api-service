@@ -11,6 +11,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	// Hardcoded value based on 4% of BABY's annual inflation
+	// Assuming 10 billion total annual inflation (10_000_000_000)
+	AnnualBabyRewardsForBtcStaking float64 = 400_000_000
+)
+
 type OverallStatsPublic struct {
 	ActiveTvl               int64  `json:"active_tvl"`
 	ActiveDelegations       int64  `json:"active_delegations"`
@@ -22,6 +28,8 @@ type OverallStatsPublic struct {
 	// This represents the total active delegations on BTC chain which includes
 	// both phase-1 and phase-2 active delegations
 	TotalActiveDelegations int64 `json:"total_active_delegations"`
+	// Represents the APY for BTC staking as a decimal (e.g., 0.035 = 3.5%)
+	BTCStakingAPY float64 `json:"btc_staking_apy"`
 }
 
 type StakerStatsPublic struct {
@@ -77,6 +85,17 @@ func (s *V2Service) GetOverallStats(
 		phase1Stats.ActiveDelegations = 0
 	}
 
+	// Calculate the APY for BTC staking on Babylon Genesis
+	// The APY is calculated based on the activeTvl of the overall stats
+	btcStakingAPY, errApyCalculation := s.GetBTCStakingAPY(
+		ctx, overallStats.ActiveTvl,
+	)
+	if errApyCalculation != nil {
+		log.Ctx(ctx).Error().Err(errApyCalculation).
+			Msg("error while calculating BTC staking APY")
+		return nil, types.NewInternalServiceError(errApyCalculation)
+	}
+
 	return &OverallStatsPublic{
 		ActiveTvl:               overallStats.ActiveTvl,
 		ActiveDelegations:       overallStats.ActiveDelegations,
@@ -84,7 +103,44 @@ func (s *V2Service) GetOverallStats(
 		TotalActiveDelegations:  overallStats.ActiveDelegations + phase1Stats.ActiveDelegations,
 		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
 		TotalFinalityProviders:  uint64(len(finalityProviders)),
+		BTCStakingAPY:           btcStakingAPY,
 	}, nil
+}
+
+func (s *V2Service) GetBTCStakingAPY(
+	ctx context.Context, activeTvl int64,
+) (float64, *types.Error) {
+	// Skip calculation if activeTvl is 0
+	if activeTvl <= 0 {
+		return 0, nil
+	}
+
+	// CoinMarketCap integration is optional since not all deployments require
+	// APY calculation. If CoinMarketCap is not configured in the service config,
+	// return 0 as the APY.
+	if s.clients.CoinMarketCap == nil {
+		return 0, nil
+	}
+
+	// Convert the activeTvl which is in satoshis to BTC as APY is calculated per
+	// BTC
+	btcTvl := float64(activeTvl) / 1e8
+
+	btcPrice, err := s.sharedService.GetLatestBTCPrice(ctx)
+	if err != nil {
+		return 0, types.NewInternalServiceError(err)
+	}
+
+	babyPrice, err := s.sharedService.GetLatestBABYPrice(ctx)
+	if err != nil {
+		return 0, types.NewInternalServiceError(err)
+	}
+
+	// Calculate the APY of the BTC staking on Babylon Genesis
+	// APY = (400,000,000 * BABY Price) / (Total BTC Staked * BTC price)
+	btcStakingAPY := (AnnualBabyRewardsForBtcStaking * babyPrice) / (btcTvl * btcPrice)
+
+	return btcStakingAPY, nil
 }
 
 func (s *V2Service) GetStakerStats(

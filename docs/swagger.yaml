@@ -466,6 +466,10 @@ definitions:
         type: integer
       active_tvl:
         type: integer
+      btc_staking_apy:
+        description: Represents the APY for BTC staking as a decimal (e.g., 0.035
+          = 3.5%)
+        type: number
       total_active_delegations:
         description: |-
           This represents the total active delegations on BTC chain which includes
