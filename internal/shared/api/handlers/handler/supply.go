@@ -119,7 +119,7 @@ func init() {
 	}
 }
 
-func (h *Handler) circulationSupply(req *http.Request) (any, error) {
+func (h *Handler) circulationSupply(_ *http.Request) (any, error) {
 	now := time.Now()
 
 	var tokenInCirculation float64
