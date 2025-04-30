@@ -3,6 +3,7 @@ package bbnclient
 import (
 	"context"
 	"fmt"
+
 	"github.com/avast/retry-go/v4"
 	bbncfg "github.com/babylonlabs-io/babylon/client/config"
 	"github.com/babylonlabs-io/babylon/client/query"

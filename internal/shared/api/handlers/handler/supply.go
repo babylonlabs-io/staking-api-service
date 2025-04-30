@@ -4,9 +4,10 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // IntegrationSupply handler returns supply information to an external client (e.g., CoinMarketCap).
