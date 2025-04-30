@@ -21,9 +21,9 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 		r.Post("/v1/ordinals/verify-utxos", registerHandler(handlers.SharedHandler.VerifyUTXOs))
 	}
 
-	// todo add cfg flag
-	r.Get("/integration/cmc/total-supply", handlers.SharedHandler.CMCTotalSupply)
-	r.Get("/integration/cmc/circulation-supply", handlers.SharedHandler.CMCCirculationSupply)
+	if a.cfg.BBN != nil {
+		r.Get("/integration/supply", registerIntegrationHandler(handlers.SharedHandler.IntegrationSupply))
+	}
 
 	if a.cfg.TermsAcceptanceLogging != nil && a.cfg.TermsAcceptanceLogging.Enabled {
 		r.Post("/log-terms-acceptance", registerHandler(handlers.SharedHandler.LogTermsAcceptance))
