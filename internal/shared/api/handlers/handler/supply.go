@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"math"
 )
 
 // InfoMetrics handler returns supply information to an external client (e.g., CoinMarketCap).
@@ -110,7 +111,7 @@ func (tu tokenUnlock) availableTokensAt(t time.Time) float64 {
 		}
 	}
 
-	return availableTokens
+	return math.Ceil(availableTokens)
 }
 
 var schedule []tokenUnlock
