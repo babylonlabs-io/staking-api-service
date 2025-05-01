@@ -10,21 +10,21 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// IntegrationSupply handler returns supply information to an external client (e.g., CoinMarketCap).
+// InfoMetrics handler returns supply information to an external client (e.g., CoinMarketCap).
 // Note that the error text is returned to the client, so avoid including sensitive data in errors.
-func (h *Handler) IntegrationSupply(req *http.Request) (any, error) {
-	supplyType := req.URL.Query().Get("type")
-	switch supplyType {
-	case "total":
-		return h.totalSupply(req)
-	case "circulation":
-		return h.circulationSupply(req)
+func (h *Handler) InfoMetrics(req *http.Request) (any, error) {
+	key := req.URL.Query().Get("key")
+	switch key {
+	case "baby_total_supply":
+		return h.babyTotalSupply(req)
+	case "baby_circulation_supply":
+		return h.babyCirculationSupply(req)
 	default:
-		return nil, fmt.Errorf("wrong type parameter='%s' (please provider either 'total' or 'circulation')", supplyType)
+		return nil, fmt.Errorf("wrong type parameter='%s' (please provider either 'baby_total_supply' or 'baby_circulation_supply')", key)
 	}
 }
 
-func (h *Handler) totalSupply(req *http.Request) (any, error) {
+func (h *Handler) babyTotalSupply(req *http.Request) (any, error) {
 	if h.bbnClient == nil {
 		return nil, fmt.Errorf("bbn configuration is not set")
 	}
@@ -34,6 +34,10 @@ func (h *Handler) totalSupply(req *http.Request) (any, error) {
 	if err != nil {
 		log.Ctx(ctx).Err(err).Msg("Failed to get total supply")
 		return nil, fmt.Errorf("internal error")
+	}
+
+	if !coin.Amount.IsInt64() {
+		return nil, fmt.Errorf("cosmos.int %s overflowed int64", coin.Amount)
 	}
 
 	return coin.Amount.Uint64(), nil
@@ -119,7 +123,7 @@ func init() {
 	}
 }
 
-func (h *Handler) circulationSupply(_ *http.Request) (any, error) {
+func (h *Handler) babyCirculationSupply(_ *http.Request) (any, error) {
 	now := time.Now()
 
 	var tokenInCirculation float64

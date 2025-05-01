@@ -26,7 +26,7 @@ func (e *ErrorResponse) Error() string {
 	return e.Message
 }
 
-func registerIntegrationHandler(handlerFunc func(*http.Request) (any, error)) func(http.ResponseWriter, *http.Request) {
+func registerInfoHandler(handlerFunc func(*http.Request) (any, error)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Set up metrics recording for the endpoint
 		timer := metrics.StartHttpRequestDurationTimer(r.URL.Path)

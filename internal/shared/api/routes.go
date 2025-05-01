@@ -22,7 +22,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	}
 
 	if a.cfg.BBN != nil {
-		r.Get("/integration/supply", registerIntegrationHandler(handlers.SharedHandler.IntegrationSupply))
+		r.Get("/info/metrics", registerInfoHandler(handlers.SharedHandler.InfoMetrics))
 	}
 
 	if a.cfg.TermsAcceptanceLogging != nil && a.cfg.TermsAcceptanceLogging.Enabled {
