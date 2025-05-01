@@ -88,13 +88,9 @@ func (tu tokenUnlock) availableTokensAt(t time.Time) float64 {
 		if tu.EndTime.Before(t) {
 			return tu.Amount
 		}
-
-		if tu.Frequency == nil {
-			panic(fmt.Errorf("non cliff token unlock contains frequency"))
-		}
-
 		start, end := tu.StartTime, tu.EndTime
 
+		// it's guaranteed that this pointer is non nil (see init() function that populates schedule var)
 		switch f := *tu.Frequency; f {
 		case daily:
 			daysWithinRange := int(end.Sub(start).Hours() / 24)
@@ -105,7 +101,6 @@ func (tu tokenUnlock) availableTokensAt(t time.Time) float64 {
 		case monthly:
 			monthsWithinRange := (end.Year()-start.Year())*12 + int(end.Month()) - int(start.Month())
 			monthsPassed := (t.Year()-start.Year())*12 + int(t.Month()) - int(start.Month())
-			// todo check days handling
 
 			tokensUnlockedPerMonth := tu.Amount / float64(monthsWithinRange)
 			availableTokens = float64(monthsPassed) * tokensUnlockedPerMonth
@@ -126,6 +121,12 @@ func init() {
 	err := json.Unmarshal(scheduleData, &schedule)
 	if err != nil {
 		panic(fmt.Errorf("failed to unmarshal unlock-schedule.json: %v", err))
+	}
+
+	for i, unlock := range schedule {
+		if unlock.VestingType != cliff && unlock.Frequency == nil {
+			panic(fmt.Errorf("non cliff token unlock %d has empty frequency", i))
+		}
 	}
 }
 
