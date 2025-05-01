@@ -6,6 +6,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/bbnclient"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
@@ -21,6 +22,7 @@ type Service struct {
 	Cfg               *config.Config
 	Params            *types.GlobalParams
 	FinalityProviders []types.FinalityProviderDetails
+	BBNClient         *bbnclient.BBNClient
 
 	singleFlightGroup *singleflight.Group
 }

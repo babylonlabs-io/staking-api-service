@@ -52,3 +52,8 @@ external_apis:
   chainalysis:
     api_key: "chainalysis_api_key"
     base_url: "https://api.chainalysis.com"
+bbn:
+  rpc-addr: https://rpc-dapp.devnet.babylonlabs.io:443
+  timeout: 30s
+  maxretrytimes: 5
+  retryinterval: 500ms
