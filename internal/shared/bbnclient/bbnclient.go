@@ -34,10 +34,10 @@ func New(cfg *config.BBNConfig) (*BBNClient, error) {
 	}, nil
 }
 
-func (c *BBNClient) GetTotalSupply(ctx context.Context) (types.Coin, error) {
+func (c *BBNClient) GetTotalSupply(ctx context.Context, denom string) (types.Coin, error) {
 	callForStatus := func() (*banktypes.QuerySupplyOfResponse, error) {
 		queryClient := banktypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
-		status, err := queryClient.SupplyOf(ctx, &banktypes.QuerySupplyOfRequest{"ubbn"})
+		status, err := queryClient.SupplyOf(ctx, &banktypes.QuerySupplyOfRequest{denom})
 		if err != nil {
 			return nil, err
 		}

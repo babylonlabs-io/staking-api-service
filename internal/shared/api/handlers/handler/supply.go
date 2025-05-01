@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	cosmosMath "cosmossdk.io/math"
 	"github.com/rs/zerolog/log"
 	"math"
 )
@@ -33,17 +34,19 @@ func (h *Handler) babyTotalSupply(req *http.Request) (any, error) {
 	}
 	ctx := req.Context()
 
-	coin, err := h.bbnClient.GetTotalSupply(ctx)
+	coin, err := h.bbnClient.GetTotalSupply(ctx, "ubbn")
 	if err != nil {
 		log.Ctx(ctx).Err(err).Msg("Failed to get total supply")
 		return nil, fmt.Errorf("internal error")
 	}
 
-	if !coin.Amount.IsInt64() {
+	const ubbnPerBabyToken = 1e6
+	babyAmount := coin.Amount.Quo(cosmosMath.NewInt(ubbnPerBabyToken))
+	if !babyAmount.IsInt64() {
 		return nil, fmt.Errorf("cosmos.int %s overflowed int64", coin.Amount)
 	}
 
-	return coin.Amount.Int64(), nil
+	return babyAmount.Int64(), nil
 }
 
 type vestingFrequency string
