@@ -19,8 +19,10 @@ func (h *Handler) InfoMetrics(req *http.Request) (any, error) {
 		return h.babyTotalSupply(req)
 	case "baby_circulation_supply":
 		return h.babyCirculationSupply(req)
+	case "":
+		return nil, fmt.Errorf("GET-parameter 'key' is required")
 	default:
-		return nil, fmt.Errorf("wrong type parameter='%s' (please provider either 'baby_total_supply' or 'baby_circulation_supply')", key)
+		return nil, fmt.Errorf("wrong key parameter='%s' (please provider either 'baby_total_supply' or 'baby_circulation_supply')", key)
 	}
 }
 
@@ -40,7 +42,7 @@ func (h *Handler) babyTotalSupply(req *http.Request) (any, error) {
 		return nil, fmt.Errorf("cosmos.int %s overflowed int64", coin.Amount)
 	}
 
-	return coin.Amount.Uint64(), nil
+	return coin.Amount.Int64(), nil
 }
 
 type vestingFrequency string
