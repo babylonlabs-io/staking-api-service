@@ -21,8 +21,8 @@ const (
 	MetricRequestIdleTimeout time.Duration = 10 * time.Second
 )
 
-func (O Outcome) String() string {
-	return string(O)
+func (o Outcome) String() string {
+	return string(o)
 }
 
 var (
