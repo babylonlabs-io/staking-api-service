@@ -4,12 +4,12 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
 	cosmosMath "cosmossdk.io/math"
 	"github.com/rs/zerolog/log"
-	"math"
 )
 
 // InfoMetrics handler returns supply information to an external client (e.g., CoinMarketCap).
