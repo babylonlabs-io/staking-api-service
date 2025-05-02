@@ -89,6 +89,7 @@ linters:
     - nilerr
     - gocyclo
     - gocritic
+    - staticcheck
   # todo enable after golangci-lint update to 1.63
 #    - gosec
   #    - prealloc
@@ -96,7 +97,6 @@ linters:
   #    - unused
   #    - govet
   #    - nakedret
-  #    - staticcheck
   # - nilnesserr
   # - usetesting
   # - exhaustruct
