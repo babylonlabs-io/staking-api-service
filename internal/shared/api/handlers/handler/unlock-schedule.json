@@ -115,7 +115,7 @@
     "name": "Inflation Year 3",
     "startTime": "2027-04-03T06:36:14Z",
     "endTime": "2028-04-03T06:36:13Z",
-    "amount": 869120000,
+    "amount": 933120000,
     "frequency": "daily",
     "vestingType": "inflationary"
   },
@@ -123,7 +123,7 @@
     "name": "Inflation Year 4",
     "startTime": "2028-04-03T06:36:14Z",
     "endTime": "2029-04-03T06:36:13Z",
-    "amount": 938649600,
+    "amount": 1007769600,
     "frequency": "daily",
     "vestingType": "inflationary"
   }
