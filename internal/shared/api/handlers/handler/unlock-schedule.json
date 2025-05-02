@@ -1,0 +1,130 @@
+[
+  {
+    "name": "Community 1",
+    "startTime": "2025-04-10T10:00:00Z",
+    "endTime": null,
+    "amount": 1378400000,
+    "frequency": null,
+    "vestingType": "cliff"
+  },
+  {
+    "name": "Community 2",
+    "startTime": "2025-10-10T10:00:00Z",
+    "endTime": null,
+    "amount": 121600000,
+    "frequency": null,
+    "vestingType": "cliff"
+  },
+  {
+    "name": "Ecosystem 1",
+    "startTime": "2025-04-10T10:00:00Z",
+    "endTime": null,
+    "amount": 450000000,
+    "frequency": null,
+    "vestingType": "cliff"
+  },
+  {
+    "name": "Ecosystem 2",
+    "startTime": "2026-04-10T10:00:00Z",
+    "endTime": "2028-04-10T09:59:59Z",
+    "amount": 1350000000,
+    "frequency": "monthly",
+    "vestingType": "linear"
+  },
+  {
+    "name": "R&D & Operations 1",
+    "startTime": "2025-04-10T10:00:00Z",
+    "endTime": null,
+    "amount": 450000000,
+    "frequency": null,
+    "vestingType": "cliff"
+  },
+  {
+    "name": "R&D & Operations 2",
+    "startTime": "2026-04-10T10:00:00Z",
+    "endTime": "2028-04-10T09:59:59Z",
+    "amount": 1350000000,
+    "frequency": "monthly",
+    "vestingType": "linear"
+  },
+  {
+    "name": "Core Team 1",
+    "startTime": "2026-04-10T10:00:00Z",
+    "endTime": null,
+    "amount": 187500000,
+    "frequency": null,
+    "vestingType": "cliff"
+  },
+  {
+    "name": "Core Team 2",
+    "startTime": "2026-05-10T10:00:00Z",
+    "endTime": "2029-04-10T09:59:59Z",
+    "amount": 1312500000,
+    "frequency": "monthly",
+    "vestingType": "linear"
+  },
+  {
+    "name": "Advisors 1",
+    "startTime": "2026-04-10T10:00:00Z",
+    "endTime": null,
+    "amount": 43750000,
+    "frequency": null,
+    "vestingType": "cliff"
+  },
+  {
+    "name": "Advisors 2",
+    "startTime": "2026-05-10T10:00:00Z",
+    "endTime": "2029-04-10T09:59:59Z",
+    "amount": 306250000,
+    "frequency": "monthly",
+    "vestingType": "linear"
+  },
+  {
+    "name": "Investors 1",
+    "startTime": "2026-04-10T10:00:00Z",
+    "endTime": null,
+    "amount": 381250000,
+    "frequency": null,
+    "vestingType": "cliff"
+  },
+  {
+    "name": "Investors 2",
+    "startTime": "2026-05-10T10:00:00Z",
+    "endTime": "2029-04-10T09:59:59Z",
+    "amount": 2668750000,
+    "frequency": "monthly",
+    "vestingType": "linear"
+  },
+  {
+    "name": "Inflation Year 1",
+    "startTime": "2025-04-03T06:36:14Z",
+    "endTime": "2026-04-03T06:36:13Z",
+    "amount": 800000000,
+    "frequency": "daily",
+    "vestingType": "inflationary"
+  },
+  {
+    "name": "Inflation Year 2",
+    "startTime": "2026-04-03T06:36:14Z",
+    "endTime": "2027-04-03T06:36:13Z",
+    "amount": 864000000,
+    "frequency": "daily",
+    "vestingType": "inflationary"
+  },
+  {
+    "name": "Inflation Year 3",
+    "startTime": "2027-04-03T06:36:14Z",
+    "endTime": "2028-04-03T06:36:13Z",
+    "amount": 869120000,
+    "frequency": "daily",
+    "vestingType": "inflationary"
+  },
+  {
+    "name": "Inflation Year 4",
+    "startTime": "2028-04-03T06:36:14Z",
+    "endTime": "2029-04-03T06:36:13Z",
+    "amount": 938649600,
+    "frequency": "daily",
+    "vestingType": "inflationary"
+  }
+]

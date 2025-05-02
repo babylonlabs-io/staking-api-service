@@ -20,6 +20,7 @@ type Config struct {
 	ExternalAPIs           *ExternalAPIsConfig         `mapstructure:"external_apis"`
 	TermsAcceptanceLogging *TermsAcceptanceConfig      `mapstructure:"terms_acceptance_logging"`
 	AddressScreeningConfig *AddressScreeningConfig     `mapstructure:"address_screening"`
+	BBN                    *BBNConfig                  `mapstructure:"bbn"`
 }
 
 func (cfg *Config) Validate() error {
@@ -59,6 +60,12 @@ func (cfg *Config) Validate() error {
 	// ExternalAPIs is optional
 	if cfg.ExternalAPIs != nil {
 		if err := cfg.ExternalAPIs.Validate(); err != nil {
+			return err
+		}
+	}
+
+	if cfg.BBN != nil {
+		if err := cfg.BBN.Validate(); err != nil {
 			return err
 		}
 	}

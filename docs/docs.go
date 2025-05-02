@@ -1428,8 +1428,12 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
+                "btc_staking_apr": {
+                    "description": "Represents the APR for BTC staking as a decimal (e.g., 0.035 = 3.5%)",
+                    "type": "number"
+                },
                 "btc_staking_apy": {
-                    "description": "Represents the APY for BTC staking as a decimal (e.g., 0.035 = 3.5%)",
+                    "description": "TODO: To be removed once the APR is rolled out",
                     "type": "number"
                 },
                 "total_active_delegations": {

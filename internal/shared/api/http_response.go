@@ -26,6 +26,39 @@ func (e *ErrorResponse) Error() string {
 	return e.Message
 }
 
+func registerInfoHandler(handlerFunc func(*http.Request) (any, error)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Set up metrics recording for the endpoint
+		timer := metrics.StartHttpRequestDurationTimer(r.URL.Path)
+
+		// Handle the actual business logic
+		result, err := handlerFunc(r)
+		if err != nil {
+			code := http.StatusInternalServerError
+
+			logger.Ctx(r.Context()).Error().Err(err).Msg("request failed with 5xx error")
+			timer(code)
+			// terminate the request here
+			writeResponse(w, r, code, err.Error())
+			return
+		}
+
+		if result == nil {
+			code := http.StatusInternalServerError
+
+			logger.Ctx(r.Context()).Error().Msg("invalid success response, error returned")
+			timer(code)
+			// terminate the request here
+			writeResponse(w, r, code, err.Error())
+			return
+		}
+
+		code := http.StatusOK
+		defer timer(code)
+		writeResponse(w, r, code, result)
+	}
+}
+
 func registerHandler(handlerFunc func(*http.Request) (*handler.Result, *types.Error)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Set up metrics recording for the endpoint
