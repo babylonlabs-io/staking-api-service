@@ -90,11 +90,11 @@ linters:
     - gocyclo
     - gocritic
     - staticcheck
+    - unused
   # todo enable after golangci-lint update to 1.63
 #    - gosec
   #    - prealloc
   #    - mnd
-  #    - unused
   #    - govet
   #    - nakedret
   # - nilnesserr
