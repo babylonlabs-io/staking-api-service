@@ -130,7 +130,7 @@ func init() {
 	}
 }
 
-func (h *Handler) babyCirculationSupply(_ *http.Request) (float64, error) {
+func (h *Handler) babyCirculationSupply(_ *http.Request) (float64, error) { //nolint:unparam
 	now := time.Now()
 
 	var tokenInCirculation float64
