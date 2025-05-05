@@ -130,13 +130,17 @@ func init() {
 	}
 }
 
-func (h *Handler) babyCirculationSupply(_ *http.Request) (any, error) {
+func (h *Handler) babyCirculationSupply(_ *http.Request) (float64, error) { //nolint:unparam
 	now := time.Now()
 
 	var tokenInCirculation float64
 	for _, unlock := range schedule {
 		tokenInCirculation += unlock.availableTokensAt(now)
 	}
+	// ~8.9m BABY was accumulated as part of the inflation for BTC staking gauge before BTC stake registration
+	// opened on 11 Apr 2025, which is not claimable and currently excluded from circulating supply calculation.
+	const ineligibleBTCStakingGauge = 8_919_424.02
+	tokenInCirculation -= ineligibleBTCStakingGauge
 
 	return tokenInCirculation, nil
 }
