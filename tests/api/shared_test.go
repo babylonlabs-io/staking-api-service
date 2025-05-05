@@ -43,10 +43,10 @@ func TestV1_StakerPubkeyLookup(t *testing.T) {
 
 	t.Run("ok", func(t *testing.T) {
 		addresses := []string{
-			"tb1pjpa390lrt7cl6ge4gs7kx7auaxqkdaj9jqzvqh5drwawa8e5j9ks2ldcpn", // taproot
-			"tb1q663tkc4deys62yumazf9ht8a6cn44j8xpa75p6",                     // native segwit even, but corresponds to the same doc as above
-			"tb1qp3hlkjuf80dxxpflvvwhl7h0zyxzne5zgtyc4v",                     // native segwit even
-			"tb1qkgh4sawexmxzuwdrffxc9jjrnrpyj5x4nvy637",                     // native segwit odd
+			"bc1pwwrdfkea9qtp5fg9m630c403vq950s0s36h7pz6435mgafl7auls2cpnvh", // taproot
+			"bc1qyepnd0hvyxakv3xmh48q5hv4plfsqp8vq9a7uz",                     // native segwit even, but corresponds to the same doc as above
+			"bc1qfnqcsx5pk9ct4v4v4e58z8wekkw2lm0fqx9cf5",                     // native segwit even
+			"bc1qwrcdqzme084nnkhgjtgerj3dcfyntgz6q80tsq",                     // native segwit odd
 		}
 
 		var query string
@@ -57,10 +57,10 @@ func TestV1_StakerPubkeyLookup(t *testing.T) {
 
 		const expected = `
 		{"data":{
-			"tb1pjpa390lrt7cl6ge4gs7kx7auaxqkdaj9jqzvqh5drwawa8e5j9ks2ldcpn":"3faa3aa676b2addc8e4750b65d02f54386e0dbc87d83cdbf3bd02053b0ed0bcf",
-			"tb1q663tkc4deys62yumazf9ht8a6cn44j8xpa75p6": "3faa3aa676b2addc8e4750b65d02f54386e0dbc87d83cdbf3bd02053b0ed0bcf",
-			"tb1qkgh4sawexmxzuwdrffxc9jjrnrpyj5x4nvy637": "c00f83fb8dbed188175c67937c1d62f20eaf04a995b978e72f025c9c980f7a5d",
-			"tb1qp3hlkjuf80dxxpflvvwhl7h0zyxzne5zgtyc4v": "1e06e1ef408126703ed66447cd6972434396b252a22e843d8295d55ae7a9cfd1"
+			"bc1pwwrdfkea9qtp5fg9m630c403vq950s0s36h7pz6435mgafl7auls2cpnvh":"3faa3aa676b2addc8e4750b65d02f54386e0dbc87d83cdbf3bd02053b0ed0bcf",
+			"bc1qfnqcsx5pk9ct4v4v4e58z8wekkw2lm0fqx9cf5":"1e06e1ef408126703ed66447cd6972434396b252a22e843d8295d55ae7a9cfd1",
+			"bc1qwrcdqzme084nnkhgjtgerj3dcfyntgz6q80tsq":"c00f83fb8dbed188175c67937c1d62f20eaf04a995b978e72f025c9c980f7a5d",
+			"bc1qyepnd0hvyxakv3xmh48q5hv4plfsqp8vq9a7uz":"3faa3aa676b2addc8e4750b65d02f54386e0dbc87d83cdbf3bd02053b0ed0bcf"
 		}}
 		`
 		assertResponse(t, endpoint, http.StatusOK, expected)
@@ -108,7 +108,7 @@ func TestV1_StakerDelegationCheck(t *testing.T) {
 		},
 		{
 			testName:         "ok",
-			endpoint:         "/v1/staker/delegation/check?address=tb1pwa22ug5nsz76euemjqg7n9m9thasgtsp5h4q0n5cktn3dczm0hmq9fleyd",
+			endpoint:         "/v1/staker/delegation/check?address=bc1p4uscanqkv7r3fc9kf3e9gs3jwe8zvhztxnfx8cmrgmm5p0txx8zsuygt0d",
 			expectedHttpCode: http.StatusOK,
 			expectedContents: `{"code":0, "data":true}`,
 		},
