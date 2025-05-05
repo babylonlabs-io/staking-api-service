@@ -137,7 +137,8 @@ func (h *Handler) babyCirculationSupply(_ *http.Request) (float64, error) { //no
 	for _, unlock := range schedule {
 		tokenInCirculation += unlock.availableTokensAt(now)
 	}
-	// correction made on 5.05.2025
+	// ~8.9m BABY was accumulated as part of the inflation for BTC staking gauge before BTC stake registration
+	// opened on 11 Apr 2025, which is not claimable and currently excluded from circulating supply calculation.
 	const ineligibleBTCStakingGauge = 8_919_424.02
 	tokenInCirculation -= ineligibleBTCStakingGauge
 
