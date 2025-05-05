@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/bbnclient"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -15,12 +16,22 @@ import (
 )
 
 type Handler struct {
-	Config  *config.Config
-	Service service.SharedServiceProvider
+	Config    *config.Config
+	Service   service.SharedServiceProvider
+	bbnClient *bbnclient.BBNClient
 }
 
 func New(config *config.Config, service service.SharedServiceProvider) (*Handler, error) {
-	return &Handler{Config: config, Service: service}, nil
+	var bbnClient *bbnclient.BBNClient
+	if config.BBN != nil {
+		var err error
+		bbnClient, err = bbnclient.New(config.BBN)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &Handler{Config: config, Service: service, bbnClient: bbnClient}, nil
 }
 
 type ResultOptions struct {

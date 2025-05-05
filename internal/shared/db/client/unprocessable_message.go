@@ -41,9 +41,9 @@ func (db *Database) FindUnprocessableMessages(ctx context.Context) ([]dbmodel.Un
 	return unprocessableMessages, nil
 }
 
-func (db *Database) DeleteUnprocessableMessage(ctx context.Context, Receipt interface{}) error {
+func (db *Database) DeleteUnprocessableMessage(ctx context.Context, receipt interface{}) error {
 	unprocessableMsgClient := db.Client.Database(db.DbName).Collection(dbmodel.V1UnprocessableMsgCollection)
-	filter := bson.M{"receipt": Receipt}
+	filter := bson.M{"receipt": receipt}
 	_, err := unprocessableMsgClient.DeleteOne(ctx, filter)
 	if err != nil {
 		metrics.RecordDbError("delete_unprocessable_message")
