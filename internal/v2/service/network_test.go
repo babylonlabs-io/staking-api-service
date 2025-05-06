@@ -44,7 +44,6 @@ func TestGetNetworkInfo(t *testing.T) {
 		resp, rpcErr := service.GetNetworkInfo(ctx)
 		require.Nil(t, rpcErr)
 
-		// todo(Kirill) use Map functional flow once it's added
 		var versions []uint32
 		for _, param := range resp.Params.Bbn {
 			versions = append(versions, param.Version)

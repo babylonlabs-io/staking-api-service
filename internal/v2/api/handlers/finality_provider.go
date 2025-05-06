@@ -15,7 +15,6 @@ import (
 // @Produce json
 // @Tags v2
 // @Success 200 {object} handler.PublicResponse[[]v2service.FinalityProviderStatsPublic] "List of finality providers with its stats"
-// @Failure 400 {object} types.Error "Invalid parameters or malformed request"
 // @Failure 404 {object} types.Error "No finality providers found"
 // @Failure 500 {object} types.Error "Internal server error occurred"
 // @Router /v2/finality-providers [get]

@@ -1,0 +1,424 @@
+[{
+  "_id": {
+    "$oid": "67ab24b88c690f616643f879"
+  },
+  "version": {
+    "$numberLong": "0"
+  },
+  "type": "CHECKPOINT",
+  "params": {
+    "btc_confirmation_depth": {
+      "$numberLong": "10"
+    },
+    "checkpoint_finalization_timeout": {
+      "$numberLong": "100"
+    },
+    "checkpoint_tag": "62627435"
+  }
+},
+{
+  "_id": {
+    "$oid": "67ab24b88c690f616643f87a"
+  },
+  "version": {
+    "$numberLong": "0"
+  },
+  "type": "STAKING",
+  "params": {
+    "covenant_pks": [
+      "49766ccd9e3cd94343e2040474a77fb37cdfd30530d05f9f1e96ae1e2102c86e",
+      "76d1ae01f8fb6bf30108731c884cddcf57ef6eef2d9d9559e130894e0e40c62c",
+      "17921cf156ccb4e73d428f996ed11b245313e37e27c978ac4d2cc21eca4672e4",
+      "113c3a32a9d320b72190a04a020a0db3976ef36972673258e9a38a364f3dc3b0",
+      "79a71ffd71c503ef2e2f91bccfc8fcda7946f4653cef0d9f3dde20795ef3b9f0",
+      "3bb93dfc8b61887d771f3630e9a63e97cbafcfcc78556a474df83a31a0ef899c",
+      "d21faf78c6751a0d38e6bd8028b907ff07e9a869a43fc837d6b3f8dff6119a36",
+      "40afaf47c4ffa56de86410d8e47baa2bb6f04b604f4ea24323737ddc3fe092df",
+      "f5199efae3f28bb82476163a7e458c7ad445d9bffb0682d10d3bdb2cb41f8e8e"
+    ],
+    "covenant_quorum": {
+      "$numberLong": "6"
+    },
+    "min_staking_value_sat": {
+      "$numberLong": "50000"
+    },
+    "max_staking_value_sat": {
+      "$numberLong": "5000000"
+    },
+    "min_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "max_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "slashing_pk_script": "76a914010101010101010101010101010101010101010188ac",
+    "min_slashing_tx_fee_sat": {
+      "$numberLong": "1000"
+    },
+    "slashing_rate": "0.100000000000000000",
+    "unbonding_time_blocks": {
+      "$numberLong": "1008"
+    },
+    "unbonding_fee_sat": {
+      "$numberLong": "2000"
+    },
+    "min_commission_rate": "0.030000000000000000",
+    "delegation_creation_base_gas_fee": {
+      "$numberLong": "1000"
+    },
+    "allow_list_expiration_height": {
+      "$numberLong": "26120"
+    },
+    "btc_activation_height": {
+      "$numberLong": "197535"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "67ab24b88c690f616643f87b"
+  },
+  "version": {
+    "$numberLong": "1"
+  },
+  "type": "STAKING",
+  "params": {
+    "covenant_pks": [
+      "09585ab55a971a231c945790a0a81df754e5a07263a5c20829931cc24683bbb7",
+      "76d1ae01f8fb6bf30108731c884cddcf57ef6eef2d9d9559e130894e0e40c62c",
+      "17921cf156ccb4e73d428f996ed11b245313e37e27c978ac4d2cc21eca4672e4",
+      "113c3a32a9d320b72190a04a020a0db3976ef36972673258e9a38a364f3dc3b0",
+      "79a71ffd71c503ef2e2f91bccfc8fcda7946f4653cef0d9f3dde20795ef3b9f0",
+      "3bb93dfc8b61887d771f3630e9a63e97cbafcfcc78556a474df83a31a0ef899c",
+      "d21faf78c6751a0d38e6bd8028b907ff07e9a869a43fc837d6b3f8dff6119a36",
+      "40afaf47c4ffa56de86410d8e47baa2bb6f04b604f4ea24323737ddc3fe092df",
+      "f5199efae3f28bb82476163a7e458c7ad445d9bffb0682d10d3bdb2cb41f8e8e"
+    ],
+    "covenant_quorum": {
+      "$numberLong": "6"
+    },
+    "min_staking_value_sat": {
+      "$numberLong": "50000"
+    },
+    "max_staking_value_sat": {
+      "$numberLong": "5000000"
+    },
+    "min_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "max_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "slashing_pk_script": "76a914010101010101010101010101010101010101010188ac",
+    "min_slashing_tx_fee_sat": {
+      "$numberLong": "1000"
+    },
+    "slashing_rate": "0.100000000000000000",
+    "unbonding_time_blocks": {
+      "$numberLong": "1008"
+    },
+    "unbonding_fee_sat": {
+      "$numberLong": "10000"
+    },
+    "min_commission_rate": "0.030000000000000000",
+    "delegation_creation_base_gas_fee": {
+      "$numberLong": "1000"
+    },
+    "allow_list_expiration_height": {
+      "$numberLong": "26120"
+    },
+    "btc_activation_height": {
+      "$numberLong": "198665"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "67ab24b88c690f616643f87c"
+  },
+  "version": {
+    "$numberLong": "2"
+  },
+  "type": "STAKING",
+  "params": {
+    "covenant_pks": [
+      "fa9d882d45f4060bdb8042183828cd87544f1ea997380e586cab77d5fd698737",
+      "0aee0509b16db71c999238a4827db945526859b13c95487ab46725357c9a9f25",
+      "17921cf156ccb4e73d428f996ed11b245313e37e27c978ac4d2cc21eca4672e4",
+      "113c3a32a9d320b72190a04a020a0db3976ef36972673258e9a38a364f3dc3b0",
+      "79a71ffd71c503ef2e2f91bccfc8fcda7946f4653cef0d9f3dde20795ef3b9f0",
+      "3bb93dfc8b61887d771f3630e9a63e97cbafcfcc78556a474df83a31a0ef899c",
+      "d21faf78c6751a0d38e6bd8028b907ff07e9a869a43fc837d6b3f8dff6119a36",
+      "40afaf47c4ffa56de86410d8e47baa2bb6f04b604f4ea24323737ddc3fe092df",
+      "f5199efae3f28bb82476163a7e458c7ad445d9bffb0682d10d3bdb2cb41f8e8e"
+    ],
+    "covenant_quorum": {
+      "$numberLong": "6"
+    },
+    "min_staking_value_sat": {
+      "$numberLong": "50000"
+    },
+    "max_staking_value_sat": {
+      "$numberLong": "5000000"
+    },
+    "min_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "max_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "slashing_pk_script": "76a914010101010101010101010101010101010101010188ac",
+    "min_slashing_tx_fee_sat": {
+      "$numberLong": "1000"
+    },
+    "slashing_rate": "0.100000000000000000",
+    "unbonding_time_blocks": {
+      "$numberLong": "1008"
+    },
+    "unbonding_fee_sat": {
+      "$numberLong": "10000"
+    },
+    "min_commission_rate": "0.030000000000000000",
+    "delegation_creation_base_gas_fee": {
+      "$numberLong": "1000"
+    },
+    "allow_list_expiration_height": {
+      "$numberLong": "26120"
+    },
+    "btc_activation_height": {
+      "$numberLong": "200665"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "67ab24b88c690f616643f87d"
+  },
+  "version": {
+    "$numberLong": "3"
+  },
+  "type": "STAKING",
+  "params": {
+    "covenant_pks": [
+      "fa9d882d45f4060bdb8042183828cd87544f1ea997380e586cab77d5fd698737",
+      "0aee0509b16db71c999238a4827db945526859b13c95487ab46725357c9a9f25",
+      "17921cf156ccb4e73d428f996ed11b245313e37e27c978ac4d2cc21eca4672e4",
+      "113c3a32a9d320b72190a04a020a0db3976ef36972673258e9a38a364f3dc3b0",
+      "79a71ffd71c503ef2e2f91bccfc8fcda7946f4653cef0d9f3dde20795ef3b9f0",
+      "3bb93dfc8b61887d771f3630e9a63e97cbafcfcc78556a474df83a31a0ef899c",
+      "d21faf78c6751a0d38e6bd8028b907ff07e9a869a43fc837d6b3f8dff6119a36",
+      "40afaf47c4ffa56de86410d8e47baa2bb6f04b604f4ea24323737ddc3fe092df",
+      "f5199efae3f28bb82476163a7e458c7ad445d9bffb0682d10d3bdb2cb41f8e8e"
+    ],
+    "covenant_quorum": {
+      "$numberLong": "6"
+    },
+    "min_staking_value_sat": {
+      "$numberLong": "50000"
+    },
+    "max_staking_value_sat": {
+      "$numberLong": "50000000"
+    },
+    "min_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "max_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "slashing_pk_script": "76a914010101010101010101010101010101010101010188ac",
+    "min_slashing_tx_fee_sat": {
+      "$numberLong": "1000"
+    },
+    "slashing_rate": "0.100000000000000000",
+    "unbonding_time_blocks": {
+      "$numberLong": "1008"
+    },
+    "unbonding_fee_sat": {
+      "$numberLong": "5000"
+    },
+    "min_commission_rate": "0.030000000000000000",
+    "delegation_creation_base_gas_fee": {
+      "$numberLong": "1000"
+    },
+    "allow_list_expiration_height": {
+      "$numberLong": "26120"
+    },
+    "btc_activation_height": {
+      "$numberLong": "215968"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "67ab24b88c690f616643f87e"
+  },
+  "version": {
+    "$numberLong": "4"
+  },
+  "type": "STAKING",
+  "params": {
+    "covenant_pks": [
+      "fa9d882d45f4060bdb8042183828cd87544f1ea997380e586cab77d5fd698737",
+      "0aee0509b16db71c999238a4827db945526859b13c95487ab46725357c9a9f25",
+      "17921cf156ccb4e73d428f996ed11b245313e37e27c978ac4d2cc21eca4672e4",
+      "113c3a32a9d320b72190a04a020a0db3976ef36972673258e9a38a364f3dc3b0",
+      "79a71ffd71c503ef2e2f91bccfc8fcda7946f4653cef0d9f3dde20795ef3b9f0",
+      "3bb93dfc8b61887d771f3630e9a63e97cbafcfcc78556a474df83a31a0ef899c",
+      "d21faf78c6751a0d38e6bd8028b907ff07e9a869a43fc837d6b3f8dff6119a36",
+      "40afaf47c4ffa56de86410d8e47baa2bb6f04b604f4ea24323737ddc3fe092df",
+      "f5199efae3f28bb82476163a7e458c7ad445d9bffb0682d10d3bdb2cb41f8e8e"
+    ],
+    "covenant_quorum": {
+      "$numberLong": "6"
+    },
+    "min_staking_value_sat": {
+      "$numberLong": "50000"
+    },
+    "max_staking_value_sat": {
+      "$numberLong": "50000000"
+    },
+    "min_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "max_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "slashing_pk_script": "76a914010101010101010101010101010101010101010188ac",
+    "min_slashing_tx_fee_sat": {
+      "$numberLong": "1000"
+    },
+    "slashing_rate": "0.100000000000000000",
+    "unbonding_time_blocks": {
+      "$numberLong": "1008"
+    },
+    "unbonding_fee_sat": {
+      "$numberLong": "5000"
+    },
+    "min_commission_rate": "0.030000000000000000",
+    "delegation_creation_base_gas_fee": {
+      "$numberLong": "1000"
+    },
+    "allow_list_expiration_height": {
+      "$numberLong": "26120"
+    },
+    "btc_activation_height": {
+      "$numberLong": "220637"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "67ab24b88c690f616643f87f"
+  },
+  "version": {
+    "$numberLong": "5"
+  },
+  "type": "STAKING",
+  "params": {
+    "covenant_pks": [
+      "fa9d882d45f4060bdb8042183828cd87544f1ea997380e586cab77d5fd698737",
+      "0aee0509b16db71c999238a4827db945526859b13c95487ab46725357c9a9f25",
+      "17921cf156ccb4e73d428f996ed11b245313e37e27c978ac4d2cc21eca4672e4",
+      "113c3a32a9d320b72190a04a020a0db3976ef36972673258e9a38a364f3dc3b0",
+      "79a71ffd71c503ef2e2f91bccfc8fcda7946f4653cef0d9f3dde20795ef3b9f0",
+      "3bb93dfc8b61887d771f3630e9a63e97cbafcfcc78556a474df83a31a0ef899c",
+      "d21faf78c6751a0d38e6bd8028b907ff07e9a869a43fc837d6b3f8dff6119a36",
+      "40afaf47c4ffa56de86410d8e47baa2bb6f04b604f4ea24323737ddc3fe092df",
+      "f5199efae3f28bb82476163a7e458c7ad445d9bffb0682d10d3bdb2cb41f8e8e"
+    ],
+    "covenant_quorum": {
+      "$numberLong": "6"
+    },
+    "min_staking_value_sat": {
+      "$numberLong": "50000"
+    },
+    "max_staking_value_sat": {
+      "$numberLong": "35000000000"
+    },
+    "min_staking_time_blocks": {
+      "$numberLong": "10000"
+    },
+    "max_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "slashing_pk_script": "00145be12624d08a2b424095d7c07221c33450d14bf1",
+    "min_slashing_tx_fee_sat": {
+      "$numberLong": "5000"
+    },
+    "slashing_rate": "0.050000000000000000",
+    "unbonding_time_blocks": {
+      "$numberLong": "1008"
+    },
+    "unbonding_fee_sat": {
+      "$numberLong": "2000"
+    },
+    "min_commission_rate": "0.030000000000000000",
+    "delegation_creation_base_gas_fee": {
+      "$numberLong": "1095000"
+    },
+    "allow_list_expiration_height": {
+      "$numberLong": "26124"
+    },
+    "btc_activation_height": {
+      "$numberLong": "227174"
+    }
+  }
+},
+{
+  "_id": {
+    "$oid": "67b47d138c690f616643f8b9"
+  },
+  "type": "STAKING",
+  "version": {
+    "$numberLong": "6"
+  },
+  "params": {
+    "covenant_pks": [
+      "fa9d882d45f4060bdb8042183828cd87544f1ea997380e586cab77d5fd698737",
+      "0aee0509b16db71c999238a4827db945526859b13c95487ab46725357c9a9f25",
+      "17921cf156ccb4e73d428f996ed11b245313e37e27c978ac4d2cc21eca4672e4",
+      "113c3a32a9d320b72190a04a020a0db3976ef36972673258e9a38a364f3dc3b0",
+      "79a71ffd71c503ef2e2f91bccfc8fcda7946f4653cef0d9f3dde20795ef3b9f0",
+      "3bb93dfc8b61887d771f3630e9a63e97cbafcfcc78556a474df83a31a0ef899c",
+      "d21faf78c6751a0d38e6bd8028b907ff07e9a869a43fc837d6b3f8dff6119a36",
+      "40afaf47c4ffa56de86410d8e47baa2bb6f04b604f4ea24323737ddc3fe092df",
+      "f5199efae3f28bb82476163a7e458c7ad445d9bffb0682d10d3bdb2cb41f8e8e"
+    ],
+    "covenant_quorum": {
+      "$numberLong": "6"
+    },
+    "min_staking_value_sat": {
+      "$numberLong": "50000"
+    },
+    "max_staking_value_sat": {
+      "$numberLong": "35000000000"
+    },
+    "min_staking_time_blocks": {
+      "$numberLong": "10000"
+    },
+    "max_staking_time_blocks": {
+      "$numberLong": "64000"
+    },
+    "slashing_pk_script": "00145be12624d08a2b424095d7c07221c33450d14bf1",
+    "min_slashing_tx_fee_sat": {
+      "$numberLong": "6000"
+    },
+    "slashing_rate": "0.050000000000000000",
+    "unbonding_time_blocks": {
+      "$numberLong": "1008"
+    },
+    "unbonding_fee_sat": {
+      "$numberLong": "2000"
+    },
+    "min_commission_rate": "0.030000000000000000",
+    "delegation_creation_base_gas_fee": {
+      "$numberLong": "1095000"
+    },
+    "allow_list_expiration_height": {
+      "$numberLong": "26124"
+    },
+    "btc_activation_height": {
+      "$numberLong": "235952"
+    }
+  }
+}]

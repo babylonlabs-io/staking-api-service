@@ -60,11 +60,10 @@ generate:
 	go generate ./...
 
 test:
-	./bin/local-startup.sh;
-	go test -v -cover -p 1 ./... -count=1
+	go test -v -cover ./... -count=1
 
 test-integration:
-	go test -v -cover -tags=integration ./internal/indexer/db/...
+	go test -v -cover -tags=integration ./internal/indexer/db/
 
 lint:
 	golangci-lint run
@@ -74,3 +73,11 @@ format:
 
 build-swagger:
 	swag init --parseDependency --parseInternal -d cmd/staking-api-service,internal/shared/api,internal/shared/types,internal/v1/api/handlers,internal/v2/api/handlers
+
+# Runs end-to-end tests for API service
+test-e2e:
+	go test -v -tags=e2e -coverprofile=cover.out -coverpkg=./internal/... ./tests/api/...
+
+# Opens a browser to check code coverage stats. Note that output of test-e2e (cover.out) is required
+coverage:
+	go tool cover -html=cover.out

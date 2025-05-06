@@ -1,0 +1,81 @@
+[{
+  "_id": "0",
+  "active_tvl": {
+    "$numberLong": "67990642595"
+  },
+  "total_tvl": {
+    "$numberLong": "72583507351"
+  },
+  "active_delegations": {
+    "$numberLong": "417282"
+  },
+  "total_delegations": {
+    "$numberLong": "478967"
+  },
+  "total_stakers": {
+    "$numberLong": "343480"
+  }
+},
+{
+  "_id": "6",
+  "active_delegations": -7,
+  "active_tvl": {
+    "$numberLong": "-352000"
+  }
+},
+{
+  "_id": "8",
+  "active_delegations": -4,
+  "active_tvl": {
+    "$numberLong": "-240000"
+  }
+},
+{
+  "_id": "9",
+  "active_delegations": -1,
+  "active_tvl": {
+    "$numberLong": "-100000"
+  }
+},
+{
+  "_id": "4",
+  "active_delegations": -4,
+  "active_tvl": {
+    "$numberLong": "-1639000"
+  }
+},
+{
+  "_id": "5",
+  "active_delegations": -4,
+  "active_tvl": {
+    "$numberLong": "-200000"
+  }
+},
+{
+  "_id": "2",
+  "active_delegations": -2,
+  "active_tvl": {
+    "$numberLong": "-100000"
+  }
+},
+{
+  "_id": "1",
+  "active_delegations": -3,
+  "active_tvl": {
+    "$numberLong": "-900000"
+  }
+},
+{
+  "_id": "7",
+  "active_delegations": -2,
+  "active_tvl": {
+    "$numberLong": "-550000"
+  }
+},
+{
+  "_id": "3",
+  "active_delegations": -1,
+  "active_tvl": {
+    "$numberLong": "-50000"
+  }
+}]
