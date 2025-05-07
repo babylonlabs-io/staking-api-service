@@ -1,8 +1,9 @@
 module github.com/babylonlabs-io/staking-api-service
 
-go 1.23.4
+go 1.24.3
 
 require (
+	cosmossdk.io/math v1.5.0
 	github.com/avast/retry-go/v4 v4.5.1
 	github.com/babylonlabs-io/babylon v1.0.0
 	github.com/babylonlabs-io/babylon-staking-indexer v1.0.0
@@ -30,7 +31,6 @@ require (
 	cosmossdk.io/depinject v1.1.0 // indirect
 	cosmossdk.io/errors v1.0.1 // indirect
 	cosmossdk.io/log v1.5.0 // indirect
-	cosmossdk.io/math v1.5.0 // indirect
 	cosmossdk.io/store v1.1.1 // indirect
 	cosmossdk.io/x/tx v0.13.7 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
