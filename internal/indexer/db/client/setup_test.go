@@ -1,6 +1,5 @@
 //go:build integration
 
-// todo comment
 package indexerdbclient_test
 
 import (

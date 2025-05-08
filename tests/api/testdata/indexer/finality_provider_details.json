@@ -1,0 +1,39 @@
+[{
+  "_id": "bef341a7adb10213a7ec7825afeb7d57fbfa7b5f7bdf201204fb0ef62fb9cfa6",
+  "babylon_address": "bbn1hq2ueffyn44u3t67u39yl8jfhs39lfcydnayx3",
+  "commission": "0.050000000000000000",
+  "state": "FINALITY_PROVIDER_STATUS_ACTIVE",
+  "description": {
+    "moniker": "verse2",
+    "identity": "",
+    "website": "https://verse2.io",
+    "security_contact": "ted@verse2.io",
+    "details": ""
+  }
+},
+  {
+    "_id": "d23c2c25e1fcf8fd1c21b9a402c19e2e309e531e45e92fb1e9805b6056b0cc76",
+    "babylon_address": "bbn1ty8c9awrpkqw3jldpcxr942y6yz6tjzg7zqttr",
+    "commission": "0.100000000000000000",
+    "state": "FINALITY_PROVIDER_STATUS_ACTIVE",
+    "description": {
+      "moniker": "Babylon Foundation 0",
+      "identity": "",
+      "website": "https://babylonlabs.io",
+      "security_contact": "",
+      "details": ""
+    }
+  },
+  {
+    "_id": "e4889630fa8695dae630c41cd9b85ef165ccc2dc5e5935d5a24393a9defee9ef",
+    "babylon_address": "bbn16mqs7es930802me0lnyl00rq5rejzezgsa5mwc",
+    "commission": "0.070000000000000000",
+    "state": "FINALITY_PROVIDER_STATUS_ACTIVE",
+    "description": {
+      "moniker": "Babylon Foundation 1",
+      "identity": "",
+      "website": "https://babylonlabs.io",
+      "security_contact": "",
+      "details": ""
+    }
+  }]

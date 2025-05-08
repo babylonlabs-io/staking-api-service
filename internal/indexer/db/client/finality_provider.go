@@ -7,24 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// GetFinalityProviderByPk retrieves a single finality provider by their primary key
-func (indexerdbclient *IndexerDatabase) GetFinalityProviderByPk(
-	ctx context.Context,
-	fpPk string,
-) (*indexerdbmodel.IndexerFinalityProviderDetails, error) {
-	client := indexerdbclient.Client.Database(
-		indexerdbclient.DbName,
-	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
-
-	var result indexerdbmodel.IndexerFinalityProviderDetails
-	err := client.FindOne(ctx, bson.M{"_id": fpPk}).Decode(&result)
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
-}
-
 // GetFinalityProviders retrieves finality providers filtered by state
 func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 	ctx context.Context,

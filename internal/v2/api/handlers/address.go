@@ -21,7 +21,6 @@ type AddressScreeningResponse struct {
 // @Param btc_address query string true "BTC address to check"
 // @Success 200 {object} handler.PublicResponse[AddressScreeningResponse] "Risk of provided address"
 // @Failure 400 {object} types.Error "Error: Bad Request"
-// @Failure 404 {object} types.Error "Error: Not Found"
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /address/screening [get]
 func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *types.Error) {

@@ -28,8 +28,6 @@ type OverallStatsPublic struct {
 	// This represents the total active delegations on BTC chain which includes
 	// both phase-1 and phase-2 active delegations
 	TotalActiveDelegations int64 `json:"total_active_delegations"`
-	// TODO: To be removed once the APR is rolled out
-	BTCStakingAPY float64 `json:"btc_staking_apy"`
 	// Represents the APR for BTC staking as a decimal (e.g., 0.035 = 3.5%)
 	BTCStakingAPR float64 `json:"btc_staking_apr"`
 }
@@ -105,7 +103,6 @@ func (s *V2Service) GetOverallStats(
 		TotalActiveDelegations:  overallStats.ActiveDelegations + phase1Stats.ActiveDelegations,
 		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
 		TotalFinalityProviders:  uint64(len(finalityProviders)),
-		BTCStakingAPY:           btcStakingAPR,
 		BTCStakingAPR:           btcStakingAPR,
 	}, nil
 }
@@ -119,13 +116,13 @@ func (s *V2Service) GetBTCStakingAPR(
 	}
 
 	// CoinMarketCap integration is optional since not all deployments require
-	// APY calculation. If CoinMarketCap is not configured in the service config,
-	// return 0 as the APY.
+	// APR calculation. If CoinMarketCap is not configured in the service config,
+	// return 0 as the APR.
 	if s.clients.CoinMarketCap == nil {
 		return 0, nil
 	}
 
-	// Convert the activeTvl which is in satoshis to BTC as APY is calculated per
+	// Convert the activeTvl which is in satoshis to BTC as APR is calculated per
 	// BTC
 	btcTvl := float64(activeTvl) / 1e8
 

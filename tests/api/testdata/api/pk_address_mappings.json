@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "3faa3aa676b2addc8e4750b65d02f54386e0dbc87d83cdbf3bd02053b0ed0bcf",
+    "taproot": "bc1pwwrdfkea9qtp5fg9m630c403vq950s0s36h7pz6435mgafl7auls2cpnvh",
+    "native_segwit_even": "bc1qyepnd0hvyxakv3xmh48q5hv4plfsqp8vq9a7uz",
+    "native_segwit_odd": "bc1qr8fv34wj8lklnu0cz5tzz6szrakngph6ycqv2m"
+  },
+  {
+    "_id": "1e06e1ef408126703ed66447cd6972434396b252a22e843d8295d55ae7a9cfd1",
+    "taproot": "bc1p4uscanqkv7r3fc9kf3e9gs3jwe8zvhztxnfx8cmrgmm5p0txx8zsuygt0d",
+    "native_segwit_even": "bc1qfnqcsx5pk9ct4v4v4e58z8wekkw2lm0fqx9cf5",
+    "native_segwit_odd": "bc1q9yyawfqufdwm6gqsjejad49q8kk7er2v598anl"
+  },
+  {
+    "_id": "c00f83fb8dbed188175c67937c1d62f20eaf04a995b978e72f025c9c980f7a5d",
+    "taproot": "bc1p2vv2h0n47l7c6xrdwztsrkr6h85hrjxewdadnh5dyev0gzdn6ytqvwlctr",
+    "native_segwit_even": "bc1qmfe9hcupvjqpry5u9prwppha3xpx7lulucq9m0",
+    "native_segwit_odd": "bc1qwrcdqzme084nnkhgjtgerj3dcfyntgz6q80tsq"
+  }
+]

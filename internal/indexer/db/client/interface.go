@@ -16,7 +16,6 @@ type IndexerDBClient interface {
 	GetBtcCheckpointParams(ctx context.Context) ([]*indexertypes.BtcCheckpointParams, error)
 	// Finality Providers
 	GetFinalityProviders(ctx context.Context) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)
-	GetFinalityProviderByPk(ctx context.Context, fpPk string) (*indexerdbmodel.IndexerFinalityProviderDetails, error)
 	// Staker Delegations
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error)
 	GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)

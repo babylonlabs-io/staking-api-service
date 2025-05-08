@@ -31,8 +31,6 @@ func parseRequestPayload(request *http.Request, maxUTXOs uint32, netParam *chain
 	for _, utxo := range utxos {
 		if !utils.IsValidTxHash(utxo.Txid) {
 			return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "invalid UTXO txid")
-		} else if utxo.Vout < 0 {
-			return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "invalid UTXO vout")
 		}
 	}
 

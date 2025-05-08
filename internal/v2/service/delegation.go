@@ -126,6 +126,7 @@ func (s *V2Service) GetDelegations(
 		ctx, stakerPkHex, stakerBabylonAddress, paginationKey,
 	)
 	if err != nil {
+		// todo this statement is not reachable
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHashHex", stakerPkHex).Msg("Staking delegations not found")
 			return nil, "", types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "staking delegation not found, please retry")
