@@ -256,7 +256,7 @@ func (q *Queues) IsConnectionHealthy() error {
 	checkQueue("WithdrawnStakingQueueClient", q.WithdrawnStakingQueueClient)
 
 	if len(errorMessages) > 0 {
-		return fmt.Errorf("queue health check failed: " + strings.Join(errorMessages, "; "))
+		return fmt.Errorf("queue health check failed: %s", strings.Join(errorMessages, "; "))
 	}
 	return nil
 }
