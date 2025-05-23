@@ -13,16 +13,6 @@ type AddressScreeningResponse struct {
 	} `json:"btc_address"`
 }
 
-// AddressScreening checks address risk against address screening providers
-// @Summary Checks address risk
-// @Description Checks address risk
-// @Produce json
-// @Tags v2
-// @Param btc_address query string true "BTC address to check"
-// @Success 200 {object} handler.PublicResponse[AddressScreeningResponse] "Risk of provided address"
-// @Failure 400 {object} types.Error "Error: Bad Request"
-// @Failure 500 {object} types.Error "Error: Internal Server Error"
-// @Router /address/screening [get]
 func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *types.Error) {
 	btcAddress := request.URL.Query().Get("btc_address")
 	if btcAddress == "" {
