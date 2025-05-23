@@ -21,53 +21,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/address/screening": {
-            "get": {
-                "description": "Checks address risk",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v2"
-                ],
-                "summary": "Checks address risk",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "BTC address to check",
-                        "name": "btc_address",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Risk of provided address",
-                        "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-v2handlers_AddressScreeningResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Error: Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Error: Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Error: Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/healthcheck": {
             "get": {
                 "description": "Health check the service, including ping database connection",
@@ -566,12 +519,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderStatsPublic"
                         }
                     },
-                    "400": {
-                        "description": "Invalid parameters or malformed request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    },
                     "404": {
                         "description": "No finality providers found",
                         "schema": {
@@ -848,17 +795,6 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/v1service.OverallStatsPublic"
-                },
-                "pagination": {
-                    "$ref": "#/definitions/handler.paginationResponse"
-                }
-            }
-        },
-        "handler.PublicResponse-v2handlers_AddressScreeningResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/v2handlers.AddressScreeningResponse"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -1277,19 +1213,6 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "integer"
-                }
-            }
-        },
-        "v2handlers.AddressScreeningResponse": {
-            "type": "object",
-            "properties": {
-                "btc_address": {
-                    "type": "object",
-                    "properties": {
-                        "risk": {
-                            "type": "string"
-                        }
-                    }
                 }
             }
         },
