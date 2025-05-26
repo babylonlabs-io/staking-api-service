@@ -2,6 +2,8 @@ package v2service
 
 import (
 	"errors"
+	"testing"
+
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
@@ -13,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func Test_GetOverallStats(t *testing.T) {
