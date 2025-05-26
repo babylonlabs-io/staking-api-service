@@ -87,13 +87,13 @@ func (s *V2Service) GetOverallStats(
 
 	// Calculate the APR for BTC staking on Babylon Genesis
 	// The APR is calculated based on the activeTvl of the overall stats
-	btcStakingAPR, errAprCalculation := s.GetBTCStakingAPR(
+	btcStakingAPR, errAprCalculation := s.getBTCStakingAPR(
 		ctx, overallStats.ActiveTvl,
 	)
 	if errAprCalculation != nil {
 		log.Ctx(ctx).Error().Err(errAprCalculation).
 			Msg("error while calculating BTC staking APR")
-		return nil, types.NewInternalServiceError(errAprCalculation)
+		// in case of error we use zero value in BTCStakingAPR
 	}
 
 	return &OverallStatsPublic{
@@ -107,9 +107,9 @@ func (s *V2Service) GetOverallStats(
 	}, nil
 }
 
-func (s *V2Service) GetBTCStakingAPR(
+func (s *V2Service) getBTCStakingAPR(
 	ctx context.Context, activeTvl int64,
-) (float64, *types.Error) {
+) (float64, error) {
 	// Skip calculation if activeTvl is 0
 	if activeTvl <= 0 {
 		return 0, nil
@@ -128,12 +128,12 @@ func (s *V2Service) GetBTCStakingAPR(
 
 	btcPrice, err := s.sharedService.GetLatestBTCPrice(ctx)
 	if err != nil {
-		return 0, types.NewInternalServiceError(err)
+		return 0, err
 	}
 
 	babyPrice, err := s.sharedService.GetLatestBABYPrice(ctx)
 	if err != nil {
-		return 0, types.NewInternalServiceError(err)
+		return 0, err
 	}
 
 	// Calculate the APR of the BTC staking on Babylon Genesis

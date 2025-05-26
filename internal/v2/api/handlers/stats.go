@@ -5,8 +5,6 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/service"
-	"github.com/rs/zerolog/log"
 )
 
 // GetStakerStats gets staker stats for babylon staking
@@ -55,15 +53,10 @@ func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *typ
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v2/stats [get]
 func (h *V2Handler) GetOverallStats(request *http.Request) (*handler.Result, *types.Error) {
-	ctx := request.Context()
-	stats, err := h.Service.GetOverallStats(ctx)
+	stats, err := h.Service.GetOverallStats(request.Context())
 	if err != nil {
-		log.Ctx(ctx).Err(err).Msg("Failed to get overall stats")
-		// in case of error fallback to zero values
-		var zeroResponse v2service.OverallStatsPublic
-		return handler.NewResult(&zeroResponse), nil
+		return nil, err
 	}
-
 	return handler.NewResult(stats), nil
 }
 
