@@ -112,7 +112,7 @@ func main() {
 	job := tmp2.New(dbClients.IndexerDBClient, dbClients.V2DBClient, lockClient, keybaseClient)
 
 	cronService := cron.NewService()
-	err = cronService.Add("@every 10s", job)
+	err = cronService.Add("@every 6h", job)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create cron service")
 	}
