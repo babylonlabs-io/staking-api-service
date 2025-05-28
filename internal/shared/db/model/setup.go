@@ -18,6 +18,7 @@ const (
 	// Shared
 	PkAddressMappingsCollection = "pk_address_mappings"
 	TermsAcceptanceCollection   = "terms_acceptance"
+	Locks                       = "locks"
 	// V1
 	V1StatsLockCollection             = "stats_lock"
 	V1OverallStatsCollection          = "overall_stats"
@@ -30,10 +31,11 @@ const (
 	V1UnprocessableMsgCollection      = "unprocessable_messages"
 	PriceCollection                   = "prices"
 	// V2
-	V2StatsLockCollection             = "v2_stats_lock"
-	V2OverallStatsCollection          = "v2_overall_stats"
-	V2FinalityProviderStatsCollection = "v2_finality_providers_stats"
-	V2StakerStatsCollection           = "v2_staker_stats"
+	V2StatsLockCollection              = "v2_stats_lock"
+	V2OverallStatsCollection           = "v2_overall_stats"
+	V2FinalityProviderStatsCollection  = "v2_finality_providers_stats"
+	V2StakerStatsCollection            = "v2_staker_stats"
+	V2FinalityProvidersLogosCollection = "v2_finality_providers_logos"
 )
 
 type index struct {
@@ -49,6 +51,7 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
 	},
 	TermsAcceptanceCollection: {{Indexes: map[string]int{}}},
+	Locks:                     {{Indexes: map[string]int{"resource": 1}, Unique: true}},
 	// V1
 	V1StatsLockCollection:             {{Indexes: map[string]int{}}},
 	V1OverallStatsCollection:          {{Indexes: map[string]int{}}},
@@ -69,6 +72,7 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"active_tvl": -1}, Unique: false},
 		{Indexes: map[string]int{"active_delegations": 1}, Unique: false},
 	},
+	V2FinalityProvidersLogosCollection: {{Indexes: map[string]int{}}},
 }
 
 func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *config.ExternalAPIsConfig) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 //go:generate mockery --name=DBClient --output=../../../../tests/mocks --outpkg=mocks --filename=mock_db_client.go
@@ -38,4 +39,6 @@ type DBClient interface {
 	// SetLatestPrice sets the latest symbol price in the database
 	SetLatestPrice(ctx context.Context, symbol string, price float64) error
 	SaveTermsAcceptance(ctx context.Context, termsAcceptance *dbmodel.TermsAcceptance) error
+
+	LocksCollection() *mongo.Collection
 }

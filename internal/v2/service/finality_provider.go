@@ -18,6 +18,7 @@ type FinalityProviderStatsPublic struct {
 	Commission        string                              `json:"commission"`
 	ActiveTvl         int64                               `json:"active_tvl"`
 	ActiveDelegations int64                               `json:"active_delegations"`
+	LogoURL           string                              `json:"logo_url,omitempty"`
 }
 
 type FinalityProvidersStatsPublic struct {

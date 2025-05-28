@@ -11,13 +11,17 @@ import (
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/keybase"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/healthcheck"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/v2/cron"
 	v2queue "github.com/babylonlabs-io/staking-api-service/internal/v2/queue"
+	tmp2 "github.com/babylonlabs-io/staking-api-service/internal/v2/tmp"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
+	lock "github.com/square/mongo-lock"
 )
 
 func init() {
@@ -102,6 +106,18 @@ func main() {
 		metrics.RecordServiceCrash("queue")
 		log.Fatal().Err(err).Msg("error while setting up queue service")
 	}
+
+	keybaseClient := keybase.NewClient()
+	lockClient := lock.NewClient(dbClients.SharedDBClient.LocksCollection())
+	job := tmp2.New(dbClients.IndexerDBClient, dbClients.V2DBClient, lockClient, keybaseClient)
+
+	cronService := cron.NewService()
+	err = cronService.Add("@every 10s", job)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create cron service")
+	}
+	cronService.Start()
+	defer cronService.Stop()
 
 	// Check if the scripts flag is set
 	if cli.GetReplayFlag() {
