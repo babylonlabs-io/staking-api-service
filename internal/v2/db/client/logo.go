@@ -2,6 +2,7 @@ package v2dbclient
 
 import (
 	"context"
+
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"go.mongodb.org/mongo-driver/bson"

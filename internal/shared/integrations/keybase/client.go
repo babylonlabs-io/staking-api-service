@@ -3,8 +3,9 @@ package keybase
 import (
 	"context"
 	"fmt"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 	"net/http"
+
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 )
 
 type Client struct {

@@ -125,7 +125,7 @@ func main() {
 
 		err := scripts.ReplayUnprocessableMessages(ctx, cfg, v2queues, dbClients.SharedDBClient)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to replay unprocessable messages")
+			log.Fatal().Err(err).Msg("Failed to replay unprocessable messages") //nolint:gocritic
 		}
 
 		return
