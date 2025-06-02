@@ -12,8 +12,8 @@ func (v2 V2Database) InsertFinalityProviderLogo(ctx context.Context, identity, l
 	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersLogosCollection)
 
 	doc := v2dbmodel.FinalityProviderLogo{
-		Id:      identity,
-		LogoURL: logoURL,
+		Id:  identity,
+		URL: logoURL,
 	}
 	_, err := client.InsertOne(ctx, doc)
 	return err

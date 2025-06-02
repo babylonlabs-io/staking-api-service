@@ -18,7 +18,6 @@ const (
 	// Shared
 	PkAddressMappingsCollection = "pk_address_mappings"
 	TermsAcceptanceCollection   = "terms_acceptance"
-	Locks                       = "locks"
 	// V1
 	V1StatsLockCollection             = "stats_lock"
 	V1OverallStatsCollection          = "overall_stats"
@@ -51,7 +50,6 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"native_segwit_even": 1}, Unique: true},
 	},
 	TermsAcceptanceCollection: {{Indexes: map[string]int{}}},
-	Locks:                     {{Indexes: map[string]int{"resource": 1}, Unique: true}},
 	// V1
 	V1StatsLockCollection:             {{Indexes: map[string]int{}}},
 	V1OverallStatsCollection:          {{Indexes: map[string]int{}}},

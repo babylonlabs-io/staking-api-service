@@ -3,12 +3,14 @@ package v2service
 import (
 	"context"
 	"net/http"
+	"sync"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"github.com/rs/zerolog/log"
+	"github.com/sourcegraph/conc"
 )
 
 type FinalityProviderStatsPublic struct {
@@ -28,6 +30,7 @@ type FinalityProvidersStatsPublic struct {
 func mapToFinalityProviderStatsPublic(
 	provider indexerdbmodel.IndexerFinalityProviderDetails,
 	fpStats *v2dbmodel.V2FinalityProviderStatsDocument,
+	fpLogoURL string,
 ) *FinalityProviderStatsPublic {
 	return &FinalityProviderStatsPublic{
 		BtcPk:             provider.BtcPk,
@@ -36,6 +39,7 @@ func mapToFinalityProviderStatsPublic(
 		Commission:        provider.Commission,
 		ActiveTvl:         fpStats.ActiveTvl,
 		ActiveDelegations: fpStats.ActiveDelegations,
+		LogoURL:           fpLogoURL,
 	}
 }
 
@@ -69,6 +73,12 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		)
 	}
 
+	logoMap, err := s.fetchLogos(ctx, finalityProviders)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msg("Failed to get finality provider logos")
+		// todo should we return an error here?
+	}
+
 	statsLookup := make(map[string]*v2dbmodel.V2FinalityProviderStatsDocument)
 	for _, stats := range providerStats {
 		statsLookup[stats.FinalityProviderPkHex] = stats
@@ -87,10 +97,62 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 				Str("finality_provider_pk_hex", provider.BtcPk).
 				Msg("Initializing finality provider with default stats")
 		}
+		logoURL := logoMap[provider.BtcPk]
+
 		finalityProvidersWithStats = append(
 			finalityProvidersWithStats,
-			mapToFinalityProviderStatsPublic(*provider, providerStats),
+			mapToFinalityProviderStatsPublic(*provider, providerStats, logoURL),
 		)
 	}
 	return finalityProvidersWithStats, nil
+}
+
+func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.IndexerFinalityProviderDetails) (map[string]string, error) {
+	logos, err := s.dbClients.V2DBClient.GetFinalityProviderLogos(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// btc pk => url
+	logoMap := make(map[string]string)
+	for _, logo := range logos {
+		logoMap[logo.Id] = logo.URL
+	}
+
+	// btc pk => identity
+	var missingLogosMx sync.Mutex
+	missingLogos := make(map[string]string)
+	for _, fp := range fps {
+		_, ok := logoMap[fp.BtcPk]
+		if ok {
+			continue
+		}
+
+		missingLogos[fp.BtcPk] = fp.Description.Identity
+	}
+
+	log := log.Ctx(ctx)
+
+	var wg conc.WaitGroup
+	for btcPK, identity := range missingLogos {
+		wg.Go(func() {
+			url, err := s.keybaseClient.GetLogoURL(ctx, identity)
+			if err != nil {
+				log.Err(err).Str("identity", identity).Msg("Failed to get logo url")
+				return
+			}
+
+			err = s.dbClients.V2DBClient.InsertFinalityProviderLogo(ctx, identity, url)
+			if err != nil {
+				log.Err(err).Str("identity", identity).Msg("Failed to insert logo url")
+			}
+
+			missingLogosMx.Lock()
+			logoMap[btcPK] = url
+			missingLogosMx.Unlock()
+		})
+	}
+	wg.Wait()
+
+	return logoMap, nil
 }
