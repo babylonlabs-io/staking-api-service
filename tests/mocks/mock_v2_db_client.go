@@ -8,8 +8,6 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	mock "github.com/stretchr/testify/mock"
 
-	mongo "go.mongodb.org/mongo-driver/mongo"
-
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 )
 
@@ -471,26 +469,6 @@ func (_m *V2DBClient) InsertPkAddressMappings(ctx context.Context, stakerPkHex s
 		r0 = rf(ctx, stakerPkHex, taproot, nativeSigwitOdd, nativeSigwitEven)
 	} else {
 		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// LocksCollection provides a mock function with no fields
-func (_m *V2DBClient) LocksCollection() *mongo.Collection {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for LocksCollection")
-	}
-
-	var r0 *mongo.Collection
-	if rf, ok := ret.Get(0).(func() *mongo.Collection); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*mongo.Collection)
-		}
 	}
 
 	return r0

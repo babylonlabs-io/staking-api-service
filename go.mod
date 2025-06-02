@@ -6,7 +6,7 @@ require (
 	cosmossdk.io/math v1.5.0
 	github.com/avast/retry-go/v4 v4.5.1
 	github.com/babylonlabs-io/babylon v1.0.0
-	github.com/babylonlabs-io/babylon-staking-indexer v1.0.0
+	github.com/babylonlabs-io/babylon-staking-indexer v1.0.4
 	github.com/babylonlabs-io/networks/parameters v0.2.2
 	github.com/babylonlabs-io/staking-queue-client v1.0.0
 	github.com/btcsuite/btcd v0.24.3-0.20241011125836-24eb815168f4
@@ -128,7 +128,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kkdai/bstream v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
-	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/linxGnu/grocksdb v1.9.3 // indirect
@@ -154,7 +154,6 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/sasha-s/go-deadlock v0.3.5 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/square/mongo-lock v0.0.0-20230808145049-cfcf499f6bf0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/supranational/blst v0.3.14 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
