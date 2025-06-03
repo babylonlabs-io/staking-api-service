@@ -72,11 +72,7 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		)
 	}
 
-	logoMap, err := s.fetchLogos(ctx, finalityProviders)
-	if err != nil {
-		log.Ctx(ctx).Err(err).Msg("Failed to get finality provider logos")
-		// todo should we return an error here?
-	}
+	logoMap := s.fetchLogos(ctx, finalityProviders)
 
 	statsLookup := make(map[string]*v2dbmodel.V2FinalityProviderStatsDocument)
 	for _, stats := range providerStats {
@@ -96,7 +92,11 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 				Str("finality_provider_pk_hex", provider.BtcPk).
 				Msg("Initializing finality provider with default stats")
 		}
-		logoURL := logoMap[provider.BtcPk]
+
+		var logoURL string
+		if logoMap != nil {
+			logoURL = logoMap[provider.BtcPk]
+		}
 
 		finalityProvidersPublic = append(
 			finalityProvidersPublic,
@@ -106,13 +106,16 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 	return finalityProvidersPublic, nil
 }
 
-func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.IndexerFinalityProviderDetails) (map[string]string, error) {
+func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.IndexerFinalityProviderDetails) map[string]string {
+	log := log.Ctx(ctx)
+
 	ids := pkg.Map(fps, func(v *indexerdbmodel.IndexerFinalityProviderDetails) string {
 		return v.BtcPk
 	})
 	logos, err := s.dbClients.V2DBClient.GetFinalityProviderLogosByID(ctx, ids)
 	if err != nil {
-		return nil, err
+		log.Error().Err(err).Msg("Failed to fetch logos")
+		return nil
 	}
 
 	// btc pk => url
@@ -132,14 +135,15 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 		missingLogos[fp.BtcPk] = fp.Description.Identity
 	}
 
-	log := log.Ctx(ctx)
-
 	for btcPK, identity := range missingLogos {
 		go func() {
 			// because this goroutine may take longer than the current request to our endpoint,
 			// we need to use different context; otherwise all requests will be canceled
 			fetchCtx := context.Background()
-			url, _ := s.keybaseClient.GetLogoURL(fetchCtx, identity)
+			url, err := s.keybaseClient.GetLogoURL(fetchCtx, identity)
+			if err != nil {
+				log.Err(err).Str("identity", identity).Msg("Failed to fetch logo")
+			}
 
 			// we store null in case url is empty string so we don't fetch failed logos every time
 			var urlValue *string
@@ -161,5 +165,5 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 
 		result[id] = *url
 	}
-	return result, nil
+	return result
 }
