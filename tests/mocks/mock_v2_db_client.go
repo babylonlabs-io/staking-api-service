@@ -182,6 +182,36 @@ func (_m *V2DBClient) GetFinalityProviderLogos(ctx context.Context) ([]v2dbmodel
 	return r0, r1
 }
 
+// GetFinalityProviderLogosByID provides a mock function with given fields: ctx, ids
+func (_m *V2DBClient) GetFinalityProviderLogosByID(ctx context.Context, ids []string) ([]v2dbmodel.FinalityProviderLogo, error) {
+	ret := _m.Called(ctx, ids)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFinalityProviderLogosByID")
+	}
+
+	var r0 []v2dbmodel.FinalityProviderLogo
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]v2dbmodel.FinalityProviderLogo, error)); ok {
+		return rf(ctx, ids)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []v2dbmodel.FinalityProviderLogo); ok {
+		r0 = rf(ctx, ids)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]v2dbmodel.FinalityProviderLogo)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, ids)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFinalityProviderStats provides a mock function with given fields: ctx
 func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
 	ret := _m.Called(ctx)
