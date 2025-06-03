@@ -113,7 +113,7 @@ func setupServices(ctx context.Context, cfg *config.Config) (*services.Services,
 	}
 
 	clients := clients.New(cfg)
-	return services.New(cfg, globals, fp, clients, dbClients)
+	return services.New(cfg, globals, fp, clients, dbClients, nil)
 }
 
 type db struct {
