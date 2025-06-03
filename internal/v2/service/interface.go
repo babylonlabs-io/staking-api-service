@@ -10,6 +10,7 @@ import (
 type V2ServiceProvider interface {
 	chainalysis.Interface
 
+	// todo rename this method ?
 	GetFinalityProvidersWithStats(ctx context.Context) (
 		[]*FinalityProviderPublic, *types.Error,
 	)

@@ -48,7 +48,7 @@ func (c *Client) GetLogoURL(ctx context.Context, identity string) (string, error
 	}
 
 	const endpoint = "/_/api/1.0/user/lookup.json"
-	path := endpoint + fmt.Sprintf("?key_suffix=%s&fields=pictures", identity)
+	path := endpoint + fmt.Sprintf("?key_suffix=%s&fields=pictures&username=ds", identity)
 
 	opts := &client.HttpClientOptions{
 		Path:         path,

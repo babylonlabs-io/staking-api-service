@@ -3,19 +3,30 @@ package v2dbclient
 import (
 	"context"
 
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
-func (v2 *V2Database) InsertFinalityProviderLogo(ctx context.Context, fpID, logoURL string) error {
+func (v2 *V2Database) InsertFinalityProviderLogo(ctx context.Context, fpID string, logoURL *string) error {
 	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersLogosCollection)
 
 	doc := v2dbmodel.FinalityProviderLogo{
-		Id:  fpID,
-		URL: logoURL,
+		Id:        fpID,
+		URL:       logoURL,
+		CreatedAt: time.Now(),
 	}
 	_, err := client.InsertOne(ctx, doc)
+	if mongo.IsDuplicateKeyError(err) {
+		return &db.DuplicateKeyError{
+			Key:     fpID,
+			Message: err.Error(),
+		}
+	}
+
 	return err
 }
 

@@ -44,5 +44,5 @@ type V2DBClient interface {
 
 	GetFinalityProviderLogos(ctx context.Context) ([]v2dbmodel.FinalityProviderLogo, error)
 	GetFinalityProviderLogosByID(ctx context.Context, ids []string) ([]v2dbmodel.FinalityProviderLogo, error)
-	InsertFinalityProviderLogo(ctx context.Context, identity, logoURL string) error
+	InsertFinalityProviderLogo(ctx context.Context, fpID string, logoURL *string) error
 }

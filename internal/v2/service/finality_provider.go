@@ -116,7 +116,7 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 	}
 
 	// btc pk => url
-	logoMap := make(map[string]string)
+	logoMap := make(map[string]*string)
 	for _, logo := range logos {
 		logoMap[logo.Id] = logo.URL
 	}
@@ -136,19 +136,30 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 
 	for btcPK, identity := range missingLogos {
 		go func() {
-			// todo add singleflight
-			url, err := s.keybaseClient.GetLogoURL(ctx, identity)
-			if err != nil {
-				log.Err(err).Str("identity", identity).Msg("Failed to get logo url")
-				return
-			}
+			// because this goroutine may take longer than the current request to our endpoint,
+			// we need to use different context; otherwise all requests will be canceled
+			fetchCtx := context.Background()
+			url, _ := s.keybaseClient.GetLogoURL(fetchCtx, identity)
 
-			err = s.dbClients.V2DBClient.InsertFinalityProviderLogo(ctx, btcPK, url)
+			// we store null in case url is empty string so we don't fetch failed logos every time
+			var urlValue *string
+			if url != "" {
+				urlValue = &url
+			}
+			err = s.dbClients.V2DBClient.InsertFinalityProviderLogo(fetchCtx, btcPK, urlValue)
 			if err != nil {
 				log.Err(err).Str("identity", identity).Msg("Failed to insert logo url")
 			}
 		}()
 	}
 
-	return logoMap, nil
+	result := make(map[string]string, len(logoMap))
+	for id, url := range logoMap {
+		if url == nil {
+			continue
+		}
+
+		result[id] = *url
+	}
+	return result, nil
 }
