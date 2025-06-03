@@ -43,5 +43,6 @@ type V2DBClient interface {
 	GetActiveStakersCount(ctx context.Context) (int64, error)
 
 	GetFinalityProviderLogos(ctx context.Context) ([]v2dbmodel.FinalityProviderLogo, error)
+	GetFinalityProviderLogosByID(ctx context.Context, ids []string) ([]v2dbmodel.FinalityProviderLogo, error)
 	InsertFinalityProviderLogo(ctx context.Context, identity, logoURL string) error
 }

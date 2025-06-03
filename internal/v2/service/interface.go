@@ -11,7 +11,7 @@ type V2ServiceProvider interface {
 	chainalysis.Interface
 
 	GetFinalityProvidersWithStats(ctx context.Context) (
-		[]*FinalityProviderStatsPublic, *types.Error,
+		[]*FinalityProviderPublic, *types.Error,
 	)
 	GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error)
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error)

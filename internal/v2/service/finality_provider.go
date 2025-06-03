@@ -2,18 +2,16 @@ package v2service
 
 import (
 	"context"
-	"net/http"
-	"sync"
-
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"github.com/rs/zerolog/log"
-	"github.com/sourcegraph/conc"
+	"net/http"
 )
 
-type FinalityProviderStatsPublic struct {
+type FinalityProviderPublic struct {
 	BtcPk             string                              `json:"btc_pk"`
 	State             types.FinalityProviderQueryingState `json:"state"`
 	Description       types.FinalityProviderDescription   `json:"description"`
@@ -24,15 +22,15 @@ type FinalityProviderStatsPublic struct {
 }
 
 type FinalityProvidersStatsPublic struct {
-	FinalityProviders []FinalityProviderStatsPublic `json:"finality_providers"`
+	FinalityProviders []FinalityProviderPublic `json:"finality_providers"`
 }
 
 func mapToFinalityProviderStatsPublic(
 	provider indexerdbmodel.IndexerFinalityProviderDetails,
 	fpStats *v2dbmodel.V2FinalityProviderStatsDocument,
 	fpLogoURL string,
-) *FinalityProviderStatsPublic {
-	return &FinalityProviderStatsPublic{
+) *FinalityProviderPublic {
+	return &FinalityProviderPublic{
 		BtcPk:             provider.BtcPk,
 		State:             types.FinalityProviderQueryingState(provider.State),
 		Description:       types.FinalityProviderDescription(provider.Description),
@@ -46,7 +44,7 @@ func mapToFinalityProviderStatsPublic(
 // GetFinalityProvidersWithStats retrieves all finality providers and their associated statistics
 func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
-) ([]*FinalityProviderStatsPublic, *types.Error) {
+) ([]*FinalityProviderPublic, *types.Error) {
 	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		if db.IsNotFoundError(err) {
@@ -84,7 +82,7 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		statsLookup[stats.FinalityProviderPkHex] = stats
 	}
 
-	finalityProvidersWithStats := make([]*FinalityProviderStatsPublic, 0, len(finalityProviders))
+	finalityProvidersPublic := make([]*FinalityProviderPublic, 0, len(finalityProviders))
 
 	for _, provider := range finalityProviders {
 		providerStats, hasStats := statsLookup[provider.BtcPk]
@@ -99,16 +97,19 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		}
 		logoURL := logoMap[provider.BtcPk]
 
-		finalityProvidersWithStats = append(
-			finalityProvidersWithStats,
+		finalityProvidersPublic = append(
+			finalityProvidersPublic,
 			mapToFinalityProviderStatsPublic(*provider, providerStats, logoURL),
 		)
 	}
-	return finalityProvidersWithStats, nil
+	return finalityProvidersPublic, nil
 }
 
 func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.IndexerFinalityProviderDetails) (map[string]string, error) {
-	logos, err := s.dbClients.V2DBClient.GetFinalityProviderLogos(ctx)
+	ids := pkg.Map(fps, func(v *indexerdbmodel.IndexerFinalityProviderDetails) string {
+		return v.BtcPk
+	})
+	logos, err := s.dbClients.V2DBClient.GetFinalityProviderLogosByID(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,6 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 	}
 
 	// btc pk => identity
-	var missingLogosMx sync.Mutex
 	missingLogos := make(map[string]string)
 	for _, fp := range fps {
 		_, ok := logoMap[fp.BtcPk]
@@ -133,26 +133,21 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 
 	log := log.Ctx(ctx)
 
-	var wg conc.WaitGroup
 	for btcPK, identity := range missingLogos {
-		wg.Go(func() {
+		go func() {
+			// todo add singleflight
 			url, err := s.keybaseClient.GetLogoURL(ctx, identity)
 			if err != nil {
 				log.Err(err).Str("identity", identity).Msg("Failed to get logo url")
 				return
 			}
 
-			err = s.dbClients.V2DBClient.InsertFinalityProviderLogo(ctx, identity, url)
+			err = s.dbClients.V2DBClient.InsertFinalityProviderLogo(ctx, btcPK, url)
 			if err != nil {
 				log.Err(err).Str("identity", identity).Msg("Failed to insert logo url")
 			}
-
-			missingLogosMx.Lock()
-			logoMap[btcPK] = url
-			missingLogosMx.Unlock()
-		})
+		}()
 	}
-	wg.Wait()
 
 	return logoMap, nil
 }

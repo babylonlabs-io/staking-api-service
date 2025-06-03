@@ -59,9 +59,15 @@ func (c *Client) GetLogoURL(ctx context.Context, identity string) (string, error
 	if err != nil {
 		return "", err
 	}
+
 	if len(resp.Them) == 0 {
 		return "", fmt.Errorf("no pictures found for %q", identity)
 	}
 
-	return resp.Them[0].Pictures.Primary.URL, nil
+	url := resp.Them[0].Pictures.Primary.URL
+	if url == "" {
+		return "", fmt.Errorf("empty picture url for %q (keybase changed response?)", identity)
+	}
+
+	return url, nil
 }
