@@ -168,7 +168,7 @@ func createTTLIndexes(ctx context.Context, database *mongo.Database, collectionN
 
 	collection := database.Collection(collectionName)
 	// while we transitioning to other index name we need to keep this one
-	collection.Indexes().DropOne(ctx, oldIndexName)
+	collection.Indexes().DropOne(ctx, oldIndexName) //nolint:errcheck
 	// First, drop the existing TTL index if it exists
 	_, err := collection.Indexes().DropOne(ctx, indexName)
 	if err != nil && !strings.Contains(err.Error(), "not found") {

@@ -468,17 +468,17 @@ func (_m *V2DBClient) IncrementOverallStats(ctx context.Context, stakingTxHashHe
 	return r0
 }
 
-// InsertFinalityProviderLogo provides a mock function with given fields: ctx, identity, logoURL
-func (_m *V2DBClient) InsertFinalityProviderLogo(ctx context.Context, identity string, logoURL string) error {
-	ret := _m.Called(ctx, identity, logoURL)
+// InsertFinalityProviderLogo provides a mock function with given fields: ctx, fpID, logoURL
+func (_m *V2DBClient) InsertFinalityProviderLogo(ctx context.Context, fpID string, logoURL *string) error {
+	ret := _m.Called(ctx, fpID, logoURL)
 
 	if len(ret) == 0 {
 		panic("no return value specified for InsertFinalityProviderLogo")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, identity, logoURL)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *string) error); ok {
+		r0 = rf(ctx, fpID, logoURL)
 	} else {
 		r0 = ret.Error(0)
 	}

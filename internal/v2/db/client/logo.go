@@ -2,13 +2,13 @@ package v2dbclient
 
 import (
 	"context"
+	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 func (v2 *V2Database) InsertFinalityProviderLogo(ctx context.Context, fpID string, logoURL *string) error {
