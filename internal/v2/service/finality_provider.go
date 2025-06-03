@@ -2,13 +2,14 @@ package v2service
 
 import (
 	"context"
+	"net/http"
+
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 type FinalityProviderPublic struct {
