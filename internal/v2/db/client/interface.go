@@ -41,4 +41,8 @@ type V2DBClient interface {
 		ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64,
 	) error
 	GetActiveStakersCount(ctx context.Context) (int64, error)
+
+	GetFinalityProviderLogos(ctx context.Context) ([]v2dbmodel.FinalityProviderLogo, error)
+	GetFinalityProviderLogosByID(ctx context.Context, ids []string) ([]v2dbmodel.FinalityProviderLogo, error)
+	InsertFinalityProviderLogo(ctx context.Context, fpID string, logoURL *string) error
 }

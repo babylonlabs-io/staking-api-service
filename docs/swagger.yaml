@@ -43,11 +43,11 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
-  handler.PublicResponse-array_v2service_FinalityProviderStatsPublic:
+  handler.PublicResponse-array_v2service_FinalityProviderPublic:
     properties:
       data:
         items:
-          $ref: '#/definitions/v2service.FinalityProviderStatsPublic'
+          $ref: '#/definitions/v2service.FinalityProviderPublic'
         type: array
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
@@ -421,7 +421,7 @@ definitions:
       unbonding_tx:
         type: string
     type: object
-  v2service.FinalityProviderStatsPublic:
+  v2service.FinalityProviderPublic:
     properties:
       active_delegations:
         type: integer
@@ -433,6 +433,8 @@ definitions:
         type: string
       description:
         $ref: '#/definitions/types.FinalityProviderDescription'
+      logo_url:
+        type: string
       state:
         $ref: '#/definitions/types.FinalityProviderQueryingState'
     type: object
@@ -914,7 +916,7 @@ paths:
         "200":
           description: List of finality providers with its stats
           schema:
-            $ref: '#/definitions/handler.PublicResponse-array_v2service_FinalityProviderStatsPublic'
+            $ref: '#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic'
         "404":
           description: No finality providers found
           schema:
