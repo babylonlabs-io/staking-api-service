@@ -12,7 +12,7 @@ import (
 )
 
 func (v2 *V2Database) InsertFinalityProviderLogo(ctx context.Context, fpID string, logoURL *string) error {
-	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersLogosCollection)
+	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersMetadataCollection)
 
 	doc := v2dbmodel.FinalityProviderLogo{
 		Id:        fpID,
@@ -31,7 +31,7 @@ func (v2 *V2Database) InsertFinalityProviderLogo(ctx context.Context, fpID strin
 }
 
 func (v2 *V2Database) GetFinalityProviderLogos(ctx context.Context) ([]v2dbmodel.FinalityProviderLogo, error) {
-	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersLogosCollection)
+	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersMetadataCollection)
 
 	cursor, err := client.Find(ctx, bson.M{})
 	if err != nil {
@@ -51,7 +51,7 @@ func (v2 *V2Database) GetFinalityProviderLogosByID(ctx context.Context, ids []st
 		return nil, nil
 	}
 
-	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersLogosCollection)
+	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersMetadataCollection)
 
 	filter := bson.M{"_id": bson.M{"$in": ids}}
 	cursor, err := client.Find(ctx, filter)

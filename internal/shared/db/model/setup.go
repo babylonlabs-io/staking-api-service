@@ -31,11 +31,11 @@ const (
 	V1UnprocessableMsgCollection      = "unprocessable_messages"
 	PriceCollection                   = "prices"
 	// V2
-	V2StatsLockCollection              = "v2_stats_lock"
-	V2OverallStatsCollection           = "v2_overall_stats"
-	V2FinalityProviderStatsCollection  = "v2_finality_providers_stats"
-	V2StakerStatsCollection            = "v2_staker_stats"
-	V2FinalityProvidersLogosCollection = "v2_finality_providers_logos"
+	V2StatsLockCollection                 = "v2_stats_lock"
+	V2OverallStatsCollection              = "v2_overall_stats"
+	V2FinalityProviderStatsCollection     = "v2_finality_providers_stats"
+	V2StakerStatsCollection               = "v2_staker_stats"
+	V2FinalityProvidersMetadataCollection = "v2_finality_providers_metadata"
 )
 
 type index struct {
@@ -71,7 +71,7 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"active_tvl": -1}, Unique: false},
 		{Indexes: map[string]int{"active_delegations": 1}, Unique: false},
 	},
-	V2FinalityProvidersLogosCollection: {{Indexes: map[string]int{}}},
+	V2FinalityProvidersMetadataCollection: {{Indexes: map[string]int{}}},
 }
 
 func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *config.ExternalAPIsConfig) error {
@@ -111,7 +111,7 @@ func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *conf
 		}
 	}
 
-	err = createTTLIndexes(ctx, database, V2FinalityProvidersLogosCollection, pkg.Day)
+	err = createTTLIndexes(ctx, database, V2FinalityProvidersMetadataCollection, pkg.Day)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to create TTL index for v2 finality providers logos")
 		return err
