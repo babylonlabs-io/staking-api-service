@@ -124,25 +124,32 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 		logoMap[logo.Id] = logo.URL
 	}
 
-	// btc pk => identity
-	missingLogos := make(map[string]string)
+	type logoToUpdate struct {
+		identity string
+		btcPK    string
+	}
+	missingLogos := make(chan logoToUpdate, len(fps)) // upper bound for logos is len(fps)
 	for _, fp := range fps {
 		_, ok := logoMap[fp.BtcPk]
 		if ok {
 			continue
 		}
 
-		missingLogos[fp.BtcPk] = fp.Description.Identity
+		missingLogos <- logoToUpdate{
+			identity: fp.Description.Identity,
+			btcPK:    fp.BtcPk,
+		}
 	}
+	close(missingLogos)
 
-	for btcPK, identity := range missingLogos {
-		go func() {
+	go func() {
+		for missingLogo := range missingLogos {
 			// because this goroutine may take longer than the current request to our endpoint,
 			// we need to use different context; otherwise all requests will be canceled
 			fetchCtx := context.Background()
-			url, err := s.keybaseClient.GetLogoURL(fetchCtx, identity)
+			url, err := s.keybaseClient.GetLogoURL(fetchCtx, missingLogo.identity)
 			if err != nil {
-				log.Err(err).Str("identity", identity).Msg("Failed to fetch logo")
+				log.Err(err).Str("identity", missingLogo.identity).Msg("Failed to fetch logo")
 			}
 
 			// we store null in case url is empty string so we don't fetch failed logos every time
@@ -150,12 +157,12 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 			if url != "" {
 				urlValue = &url
 			}
-			err = s.dbClients.V2DBClient.InsertFinalityProviderLogo(fetchCtx, btcPK, urlValue)
+			err = s.dbClients.V2DBClient.InsertFinalityProviderLogo(fetchCtx, missingLogo.btcPK, urlValue)
 			if err != nil {
-				log.Err(err).Str("identity", identity).Msg("Failed to insert logo url")
+				log.Err(err).Str("identity", missingLogo.identity).Msg("Failed to insert logo url")
 			}
-		}()
-	}
+		}
+	}()
 
 	result := make(map[string]string, len(logoMap))
 	for id, url := range logoMap {
