@@ -19,3 +19,8 @@ func New(client *mongo.Client, cfg *config.DbConfig) (*IndexerDatabase, error) {
 		},
 	}, nil
 }
+
+func (iDB *IndexerDatabase) collection(name string) *mongo.Collection {
+	db := iDB.Database
+	return db.Client.Database(db.DbName).Collection(name)
+}

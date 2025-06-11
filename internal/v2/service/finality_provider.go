@@ -45,8 +45,9 @@ func mapToFinalityProviderStatsPublic(
 // GetFinalityProvidersWithStats retrieves all finality providers and their associated statistics
 func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
+	consumerID *string,
 ) ([]*FinalityProviderPublic, *types.Error) {
-	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, consumerID)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("No finality providers found")

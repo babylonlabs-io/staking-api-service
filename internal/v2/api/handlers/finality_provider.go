@@ -5,6 +5,7 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 )
 
 // GetFinalityProviders gets a list of finality providers with its stats
@@ -20,9 +21,12 @@ import (
 // @Failure 500 {object} types.Error "Internal server error occurred"
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
-	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context())
+	consumerID := request.URL.Query().Get("consumer_id")
+
+	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context(), pkg.PtrIfNonZero(consumerID))
 	if err != nil {
 		return nil, err
 	}
+
 	return handler.NewResultWithPagination(providers, ""), nil
 }

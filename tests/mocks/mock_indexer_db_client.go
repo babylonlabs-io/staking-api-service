@@ -198,9 +198,39 @@ func (_m *IndexerDBClient) GetDelegationsInStates(ctx context.Context, stakerPKH
 	return r0, r1
 }
 
-// GetFinalityProviders provides a mock function with given fields: ctx
-func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
+// GetEventConsumers provides a mock function with given fields: ctx
+func (_m *IndexerDBClient) GetEventConsumers(ctx context.Context) ([]indexerdbmodel.EventConsumer, error) {
 	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEventConsumers")
+	}
+
+	var r0 []indexerdbmodel.EventConsumer
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]indexerdbmodel.EventConsumer, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []indexerdbmodel.EventConsumer); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]indexerdbmodel.EventConsumer)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetFinalityProviders provides a mock function with given fields: ctx, consumerID
+func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context, consumerID *string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
+	ret := _m.Called(ctx, consumerID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetFinalityProviders")
@@ -208,19 +238,19 @@ func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context) ([]*indexer
 
 	var r0 []*indexerdbmodel.IndexerFinalityProviderDetails
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)); ok {
+		return rf(ctx, consumerID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []*indexerdbmodel.IndexerFinalityProviderDetails); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *string) []*indexerdbmodel.IndexerFinalityProviderDetails); ok {
+		r0 = rf(ctx, consumerID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*indexerdbmodel.IndexerFinalityProviderDetails)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *string) error); ok {
+		r1 = rf(ctx, consumerID)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -1,10 +1,10 @@
 package v2handlers
 
 import (
+	"net/http"
+
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
-	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/service"
-	"net/http"
 )
 
 // GetEventConsumers gets event consumers (BSN-s)
@@ -15,5 +15,10 @@ import (
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/event-consumers [get]
 func (h *V2Handler) GetEventConsumers(request *http.Request) (*handler.Result, *types.Error) {
-	return handler.NewResultWithPagination([]v2service.EventConsumer{}, ""), nil
+	items, err := h.Service.GetEventConsumers(request.Context())
+	if err != nil {
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	return handler.NewResultWithPagination(items, ""), nil
 }
