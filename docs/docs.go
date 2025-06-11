@@ -502,6 +502,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/event-consumers": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Get event consumers",
+                "responses": {
+                    "200": {
+                        "description": "List of available event consumers",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_EventConsumer"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v2/finality-providers": {
             "get": {
                 "description": "Fetches finality providers with its stats, currently does not support pagination",
@@ -512,6 +537,14 @@ const docTemplate = `{
                     "v2"
                 ],
                 "summary": "List Finality Providers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by consumer id",
+                        "name": "consumer_id",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of finality providers with its stats",
@@ -725,6 +758,20 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v2service.DelegationPublic"
+                    }
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-array_v2service_EventConsumer": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2service.EventConsumer"
                     }
                 },
                 "pagination": {
@@ -1301,6 +1348,20 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "unbonding_tx": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2service.EventConsumer": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
