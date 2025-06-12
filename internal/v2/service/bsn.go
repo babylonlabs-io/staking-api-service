@@ -11,6 +11,7 @@ type EventConsumer struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	ActiveTvl   int64  `json:"active_tvl"`
 }
 
 func (s *V2Service) GetEventConsumers(ctx context.Context) ([]EventConsumer, error) {
