@@ -22,6 +22,7 @@ import (
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
 	consumerID := request.URL.Query().Get("consumer_id")
+	// todo add validation for consumer_id
 
 	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context(), pkg.PtrIfNonZero(consumerID))
 	if err != nil {
