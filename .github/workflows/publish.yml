@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - 'main'
+    - 'hiep/bump-publish'
     tags:
     - '*'
 
@@ -12,7 +13,7 @@ permissions:
 
 jobs:
   lint_test:
-    uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.6.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.13.2
     with:
      go-version: '1.24.3'
      go-lint-version: 'v1.64.8'
@@ -22,7 +23,7 @@ jobs:
      
   docker_pipeline:
     # needs: ["lint_test"]
-    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.6.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.13.2
     secrets: inherit
     with:
       publish: true
