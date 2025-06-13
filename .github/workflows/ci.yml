@@ -27,3 +27,4 @@ jobs:
     with:
       publish: false
       dockerfile: ./contrib/images/staking-api-service/Dockerfile
+      docker_scan: true
