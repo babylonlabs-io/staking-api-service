@@ -135,6 +135,11 @@ func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.Indexe
 			continue
 		}
 
+		// identity used as id for logo retrieval
+		if fp.Description.Identity == "" {
+			continue
+		}
+
 		missingLogos <- logoToUpdate{
 			identity: fp.Description.Identity,
 			btcPK:    fp.BtcPk,
