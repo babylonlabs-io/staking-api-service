@@ -28,3 +28,4 @@ jobs:
     with:
       publish: true
       dockerfile: ./contrib/images/staking-api-service/Dockerfile
+      docker_scan: true
