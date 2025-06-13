@@ -43,6 +43,15 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-array_v2service_EventConsumer:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/v2service.EventConsumer'
+        type: array
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-array_v2service_FinalityProviderPublic:
     properties:
       data:
@@ -419,6 +428,15 @@ definitions:
       unbonding_timelock:
         type: integer
       unbonding_tx:
+        type: string
+    type: object
+  v2service.EventConsumer:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
         type: string
     type: object
   v2service.FinalityProviderPublic:
@@ -906,10 +924,31 @@ paths:
       summary: Get Delegations
       tags:
       - v2
+  /v2/event-consumers:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of available event consumers
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-array_v2service_EventConsumer'
+        "500":
+          description: 'Error: Internal Server Error'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get event consumers
+      tags:
+      - v2
   /v2/finality-providers:
     get:
       description: Fetches finality providers with its stats, currently does not support
         pagination
+      parameters:
+      - description: Filter by consumer id
+        in: query
+        name: consumer_id
+        type: string
       produces:
       - application/json
       responses:

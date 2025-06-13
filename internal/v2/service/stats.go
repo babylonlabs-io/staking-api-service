@@ -53,7 +53,7 @@ func (s *V2Service) GetOverallStats(
 	}
 
 	// TODO: ideally this should not be fetched from the indexer db
-	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, nil)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching finality providers")
 		return nil, types.NewInternalServiceError(err)
