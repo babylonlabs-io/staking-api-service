@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   lint_test:
-    uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.7.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_go_lint_test.yml@v0.13.2
     with:
      go-version: 1.24.3
      go-lint-version: v1.64.8
@@ -22,8 +22,12 @@ jobs:
      gosec-args: "-no-fail ./..."
      
   docker_pipeline:
-    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.6.0
+    uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.13.2
     secrets: inherit
+    permissions:
+      security-events: write
+      packages: read
     with:
       publish: false
       dockerfile: ./contrib/images/staking-api-service/Dockerfile
+      docker_scan: true
