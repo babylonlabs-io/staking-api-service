@@ -6,5 +6,5 @@ const (
 	TimeLockCollection                = "timelock"
 	GlobalParamsCollection            = "global_params"
 	LastProcessedHeightCollection     = "last_processed_height"
-	EventConsumerCollection           = "event_consumer"
+	BSNCollection                     = "bsn"
 )

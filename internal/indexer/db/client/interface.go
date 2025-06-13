@@ -30,7 +30,7 @@ type IndexerDBClient interface {
 		stakerBabylonAddress *string,
 		states []indexertypes.DelegationState,
 	) ([]indexerdbmodel.IndexerDelegationDetails, error)
-	GetEventConsumers(ctx context.Context) ([]indexerdbmodel.EventConsumer, error)
+	GetAllBSN(ctx context.Context) ([]indexerdbmodel.BSN, error)
 }
 
 type DelegationFilter struct {

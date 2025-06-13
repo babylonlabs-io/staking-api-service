@@ -7,17 +7,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (db *IndexerDatabase) GetEventConsumers(ctx context.Context) ([]indexerdbmodel.EventConsumer, error) {
-	cursor, err := db.collection(indexerdbmodel.EventConsumerCollection).
+func (db *IndexerDatabase) GetAllBSN(ctx context.Context) ([]indexerdbmodel.BSN, error) {
+	cursor, err := db.collection(indexerdbmodel.BSNCollection).
 		Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
-	var consumers []indexerdbmodel.EventConsumer
+	var consumers []indexerdbmodel.BSN
 	for cursor.Next(ctx) {
-		var consumer indexerdbmodel.EventConsumer
+		var consumer indexerdbmodel.BSN
 		if err := cursor.Decode(&consumer); err != nil {
 			return nil, err
 		}

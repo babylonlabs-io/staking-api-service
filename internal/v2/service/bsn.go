@@ -7,24 +7,24 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/pkg"
 )
 
-type EventConsumer struct {
+type BSN struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	ActiveTvl   int64  `json:"active_tvl"`
 }
 
-func (s *V2Service) GetEventConsumers(ctx context.Context) ([]EventConsumer, error) {
-	items, err := s.dbClients.IndexerDBClient.GetEventConsumers(ctx)
+func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
+	items, err := s.dbClients.IndexerDBClient.GetAllBSN(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return pkg.Map(items, mapEventConsumer), nil
+	return pkg.Map(items, mapBSN), nil
 }
 
-func mapEventConsumer(consumer indexerdbmodel.EventConsumer) EventConsumer {
-	return EventConsumer{
+func mapBSN(consumer indexerdbmodel.BSN) BSN {
+	return BSN{
 		ID:          consumer.ID,
 		Name:        consumer.Name,
 		Description: consumer.Description,

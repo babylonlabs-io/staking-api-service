@@ -40,5 +40,5 @@ type V2ServiceProvider interface {
 	ProcessUnbondingDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64, stateHistory []string) *types.Error
 	ProcessWithdrawableDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string) *types.Error
 	ProcessWithdrawnDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string) *types.Error
-	GetEventConsumers(ctx context.Context) ([]EventConsumer, error)
+	GetAllBSN(ctx context.Context) ([]BSN, error)
 }

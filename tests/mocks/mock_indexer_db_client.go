@@ -198,24 +198,24 @@ func (_m *IndexerDBClient) GetDelegationsInStates(ctx context.Context, stakerPKH
 	return r0, r1
 }
 
-// GetEventConsumers provides a mock function with given fields: ctx
-func (_m *IndexerDBClient) GetEventConsumers(ctx context.Context) ([]indexerdbmodel.EventConsumer, error) {
+// GetAllBSN provides a mock function with given fields: ctx
+func (_m *IndexerDBClient) GetAllBSN(ctx context.Context) ([]indexerdbmodel.BSN, error) {
 	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetEventConsumers")
+		panic("no return value specified for GetAllBSN")
 	}
 
-	var r0 []indexerdbmodel.EventConsumer
+	var r0 []indexerdbmodel.BSN
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]indexerdbmodel.EventConsumer, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) ([]indexerdbmodel.BSN, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []indexerdbmodel.EventConsumer); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) []indexerdbmodel.BSN); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]indexerdbmodel.EventConsumer)
+			r0 = ret.Get(0).([]indexerdbmodel.BSN)
 		}
 	}
 

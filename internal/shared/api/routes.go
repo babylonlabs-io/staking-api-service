@@ -32,7 +32,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	// V2 API
 	r.Get("/v2/network-info", registerHandler(handlers.V2Handler.GetNetworkInfo))
 	r.Get("/v2/finality-providers", registerHandler(handlers.V2Handler.GetFinalityProviders))
-	r.Get("/v2/event-consumers", registerHandler(handlers.V2Handler.GetEventConsumers))
+	r.Get("/v2/bsn", registerHandler(handlers.V2Handler.GetAllBSN))
 	r.Get("/v2/delegation", registerHandler(handlers.V2Handler.GetDelegation))
 	r.Get("/v2/delegations", registerHandler(handlers.V2Handler.GetDelegations))
 	r.Get("/v2/stats", registerHandler(handlers.V2Handler.GetOverallStats))
