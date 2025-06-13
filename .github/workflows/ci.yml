@@ -6,7 +6,7 @@ on:
     - '**'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   lint_test:
@@ -24,6 +24,9 @@ jobs:
   docker_pipeline:
     uses: babylonlabs-io/.github/.github/workflows/reusable_docker_pipeline.yml@v0.13.2
     secrets: inherit
+    permissions:
+      security-events: write
+      packages: read
     with:
       publish: false
       dockerfile: ./contrib/images/staking-api-service/Dockerfile
