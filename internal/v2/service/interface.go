@@ -11,7 +11,7 @@ type V2ServiceProvider interface {
 	chainalysis.Interface
 
 	// todo rename this method ?
-	GetFinalityProvidersWithStats(ctx context.Context, consumerID *string) (
+	GetFinalityProvidersWithStats(ctx context.Context, bsnID *string) (
 		[]*FinalityProviderPublic, *types.Error,
 	)
 	GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error)

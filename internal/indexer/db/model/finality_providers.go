@@ -15,7 +15,7 @@ type IndexerFinalityProviderDetails struct {
 	Commission     string                `bson:"commission"`
 	State          FinalityProviderState `bson:"state"`
 	Description    Description           `bson:"description"`
-	ConsumerID     string                `bson:"consumer_id"`
+	BsnID          string                `bson:"bsn_id"`
 }
 
 // Description represents the nested description field
