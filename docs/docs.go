@@ -396,6 +396,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/v2/bsn": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Get event consumers",
+                "responses": {
+                    "200": {
+                        "description": "List of available event consumers",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_BSN"
+                        }
+                    },
+                    "500": {
+                        "description": "Error: Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v2/delegation": {
             "get": {
                 "description": "Retrieves a delegation by a given transaction hash",
@@ -502,31 +527,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/event-consumers": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v2"
-                ],
-                "summary": "Get event consumers",
-                "responses": {
-                    "200": {
-                        "description": "List of available event consumers",
-                        "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_EventConsumer"
-                        }
-                    },
-                    "500": {
-                        "description": "Error: Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/v2/finality-providers": {
             "get": {
                 "description": "Fetches finality providers with its stats, currently does not support pagination",
@@ -540,8 +540,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Filter by consumer id",
-                        "name": "consumer_id",
+                        "description": "Filter by bsn id",
+                        "name": "bsn_id",
                         "in": "query"
                     }
                 ],
@@ -751,13 +751,13 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_DelegationPublic": {
+        "handler.PublicResponse-array_v2service_BSN": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.DelegationPublic"
+                        "$ref": "#/definitions/v2service.BSN"
                     }
                 },
                 "pagination": {
@@ -765,13 +765,13 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_EventConsumer": {
+        "handler.PublicResponse-array_v2service_DelegationPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.EventConsumer"
+                        "$ref": "#/definitions/v2service.DelegationPublic"
                     }
                 },
                 "pagination": {
@@ -1263,6 +1263,23 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.BSN": {
+            "type": "object",
+            "properties": {
+                "active_tvl": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "v2service.CovenantSignature": {
             "type": "object",
             "properties": {
@@ -1348,20 +1365,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "unbonding_tx": {
-                    "type": "string"
-                }
-            }
-        },
-        "v2service.EventConsumer": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
                     "type": "string"
                 }
             }

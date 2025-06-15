@@ -11,7 +11,7 @@ import (
 // @Summary Get event consumers
 // @Produce json
 // @Tags v2
-// @Success 200 {object} handler.PublicResponse[[]v2service.EventConsumer]{array} "List of available event consumers"
+// @Success 200 {object} handler.PublicResponse[[]v2service.BSN]{array} "List of available event consumers"
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/bsn [get]
 func (h *V2Handler) GetAllBSN(request *http.Request) (*handler.Result, *types.Error) {
