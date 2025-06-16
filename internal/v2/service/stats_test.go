@@ -49,7 +49,7 @@ func Test_GetOverallStats(t *testing.T) {
 		// we pass zero value as 1st return value which is ok - we won't use its values anyway
 		dbV2.On("GetOverallStats", ctx).Return(&v2dbmodel.V2OverallStatsDocument{}, nil).Once()
 		err := errors.New("indexer err")
-		dbIndexer.On("GetFinalityProviders", ctx).Return(nil, err).Once()
+		dbIndexer.On("GetFinalityProviders", ctx, (*string)(nil)).Return(nil, err).Once()
 
 		resp, respErr := s.GetOverallStats(ctx)
 		assert.Equal(t, types.NewInternalServiceError(err), respErr)
@@ -59,7 +59,7 @@ func Test_GetOverallStats(t *testing.T) {
 		// we pass zero value as 1st return value which is ok - we won't use its values anyway
 		dbV2.On("GetOverallStats", ctx).Return(&v2dbmodel.V2OverallStatsDocument{}, nil).Once()
 		// note that first return value (finality providers) is nil which is ok (iteration over nil slice is valid)
-		dbIndexer.On("GetFinalityProviders", ctx).Return(nil, nil).Once()
+		dbIndexer.On("GetFinalityProviders", ctx, (*string)(nil)).Return(nil, nil).Once()
 		err := errors.New("v1 err")
 		dbV1.On("GetOverallStats", ctx).Return(nil, err).Once()
 
@@ -71,7 +71,7 @@ func Test_GetOverallStats(t *testing.T) {
 		dbV2.On("GetOverallStats", ctx).Return(&v2dbmodel.V2OverallStatsDocument{
 			ActiveTvl: 777, // here is important to pass non-zero tvl so it triggers staking BTC calculation
 		}, nil).Once()
-		dbIndexer.On("GetFinalityProviders", ctx).Return(nil, nil).Once()
+		dbIndexer.On("GetFinalityProviders", ctx, (*string)(nil)).Return(nil, nil).Once()
 		dbV1.On("GetOverallStats", ctx).Return(&v1dbmodel.OverallStatsDocument{}, nil).Once()
 		err := errors.New("db err")
 		// this error shouldn't trigger error in GetOverallStats method

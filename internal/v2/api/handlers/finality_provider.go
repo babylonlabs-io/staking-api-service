@@ -12,6 +12,7 @@ import (
 // @Description Fetches finality providers with its stats, currently does not support pagination
 // the response contains a field for pagination token, but it's not used yet
 // this is for the future when we will support pagination
+// @Param bsn_id query string false "Filter by bsn id"
 // @Produce json
 // @Tags v2
 // @Success 200 {object} handler.PublicResponse[[]v2service.FinalityProviderPublic] "List of finality providers with its stats"
@@ -19,9 +20,26 @@ import (
 // @Failure 500 {object} types.Error "Internal server error occurred"
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
-	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context())
+	bsnID := h.getBsnIDFromQuery(request)
+	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context(), bsnID)
 	if err != nil {
 		return nil, err
 	}
+
 	return handler.NewResultWithPagination(providers, ""), nil
+}
+
+func (h *V2Handler) getBsnIDFromQuery(request *http.Request) *string {
+	value := request.URL.Query().Get("bsn_id")
+	// todo add validation for bsn_id
+	return ptrIfNonZero(value)
+}
+
+func ptrIfNonZero[T comparable](v T) *T {
+	var zero T
+	if v == zero {
+		return nil
+	}
+
+	return &v
 }

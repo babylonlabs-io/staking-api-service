@@ -34,6 +34,15 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-array_v2service_BSN:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/v2service.BSN'
+        type: array
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.PublicResponse-array_v2service_DelegationPublic:
     properties:
       data:
@@ -362,6 +371,17 @@ definitions:
         type: integer
       version:
         type: integer
+    type: object
+  v2service.BSN:
+    properties:
+      active_tvl:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
     type: object
   v2service.CovenantSignature:
     properties:
@@ -835,6 +855,22 @@ paths:
       summary: Check unbonding eligibility
       tags:
       - v1
+  /v2/bsn:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of available event consumers
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-array_v2service_BSN'
+        "500":
+          description: 'Error: Internal Server Error'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get event consumers
+      tags:
+      - v2
   /v2/delegation:
     get:
       description: Retrieves a delegation by a given transaction hash
@@ -910,6 +946,11 @@ paths:
     get:
       description: Fetches finality providers with its stats, currently does not support
         pagination
+      parameters:
+      - description: Filter by bsn id
+        in: query
+        name: bsn_id
+        type: string
       produces:
       - application/json
       responses:

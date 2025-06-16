@@ -10,12 +10,18 @@ import (
 // GetFinalityProviders retrieves finality providers filtered by state
 func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 	ctx context.Context,
+	bsnID *string,
 ) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
 	client := indexerdbclient.Client.Database(
 		indexerdbclient.DbName,
 	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
 
-	cursor, err := client.Find(ctx, bson.M{})
+	filter := bson.M{}
+	if bsnID != nil {
+		filter["bsn_id"] = *bsnID
+	}
+
+	cursor, err := client.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
