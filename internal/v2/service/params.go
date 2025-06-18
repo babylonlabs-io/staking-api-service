@@ -11,24 +11,9 @@ import (
 )
 
 type ParamsPublic struct {
-	Bbn []*indexertypes.BbnStakingParams    `json:"bbn"`
-	Btc []*indexertypes.BtcCheckpointParams `json:"btc"`
-}
-
-func (s *V2Service) GetParams(ctx context.Context) (*ParamsPublic, *types.Error) {
-	babylonParams, err := s.getBbnStakingParams(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	btcParams, err := s.getBtcCheckpointParams(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &ParamsPublic{
-		Bbn: babylonParams,
-		Btc: btcParams,
-	}, nil
+	Bbn               []*indexertypes.BbnStakingParams    `json:"bbn"`
+	Btc               []*indexertypes.BtcCheckpointParams `json:"btc"`
+	MaxBsnFpProviders int                                 `json:"max_bsn_fp_providers,omitempty"`
 }
 
 func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, *types.Error) {
