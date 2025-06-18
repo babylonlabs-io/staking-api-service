@@ -20,5 +20,13 @@ func (h *V2Handler) GetAllBSN(request *http.Request) (*handler.Result, *types.Er
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	return handler.NewResultWithPagination(items, ""), nil
+	return handler.NewResultWithPagination(nonNilSlice(items), ""), nil
+}
+
+func nonNilSlice[T any](sl []T) []T {
+	if sl == nil {
+		return []T{}
+	}
+
+	return sl
 }
