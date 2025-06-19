@@ -52,8 +52,9 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 			IsStakingOpen: status,
 		},
 		Params: ParamsPublic{
-			Bbn: babylonParams,
-			Btc: btcParams,
+			Bbn:               babylonParams,
+			Btc:               btcParams,
+			MaxBsnFpProviders: 2, // todo replace with bsn global value once it's ready
 		},
 	}, nil
 }

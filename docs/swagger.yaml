@@ -500,6 +500,8 @@ definitions:
         items:
           $ref: '#/definitions/indexertypes.BtcCheckpointParams'
         type: array
+      max_bsn_fp_providers:
+        type: integer
     type: object
   v2service.StakerStatsPublic:
     properties:

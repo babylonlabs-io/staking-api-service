@@ -30,16 +30,11 @@ func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result
 }
 
 func (h *V2Handler) getBsnIDFromQuery(request *http.Request) *string {
-	value := request.URL.Query().Get("bsn_id")
-	// todo add validation for bsn_id
-	return ptrIfNonZero(value)
-}
-
-func ptrIfNonZero[T comparable](v T) *T {
-	var zero T
-	if v == zero {
+	const paramKey = "bsn_id"
+	if !request.URL.Query().Has(paramKey) {
 		return nil
 	}
 
-	return &v
+	value := request.URL.Query().Get(paramKey)
+	return &value
 }
