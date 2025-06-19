@@ -1449,6 +1449,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
                     }
+                },
+                "max_bsn_fp_providers": {
+                    "type": "integer"
                 }
             }
         },
