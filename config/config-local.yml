@@ -19,7 +19,7 @@ staking-db:
 indexer-db:
   username: root
   password: example
-  address: "mongodb://localhost:27019/?directConnection=true"
+  address: "mongodb://localhost:27017/?directConnection=true"
   db-name: babylon-staking-indexer
   max-pagination-limit: 10
 queue:
