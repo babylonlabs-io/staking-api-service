@@ -17,8 +17,17 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
 
 	filter := bson.M{}
-	if bsnID != nil {
+	if bsnID != nil && *bsnID != "" {
 		filter["bsn_id"] = *bsnID
+	} else {
+		// When bsnID is nil or empty, fetch items that don't have bsn_id field or have empty string
+		// TODO: temporary solution until figure out the bsn_id for BABY chain
+		filter = bson.M{
+			"$or": []bson.M{
+				{"bsn_id": bson.M{"$exists": false}},
+				{"bsn_id": ""},
+			},
+		}
 	}
 
 	cursor, err := client.Find(ctx, filter)
