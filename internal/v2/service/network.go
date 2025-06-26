@@ -54,7 +54,7 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 		Params: ParamsPublic{
 			Bbn:               babylonParams,
 			Btc:               btcParams,
-			MaxBsnFpProviders: 2, // todo replace with bsn global value once it's ready
+			MaxBsnFpProviders: 10, // todo replace with bsn global value once it's ready
 		},
 	}, nil
 }
