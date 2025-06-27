@@ -17,7 +17,10 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
 
 	filter := bson.M{}
-	if bsnID != nil && *bsnID != "" {
+	if bsnID != nil && *bsnID == "all" {
+		// When bsnID is "all", fetch all values without any filter
+		filter = bson.M{}
+	} else if bsnID != nil && *bsnID != "" {
 		filter["bsn_id"] = *bsnID
 	} else {
 		// When bsnID is nil or empty, fetch items that don't have bsn_id field or have empty string
