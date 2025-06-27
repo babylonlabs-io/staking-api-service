@@ -12,7 +12,7 @@ import (
 // @Description Fetches finality providers with its stats, currently does not support pagination
 // the response contains a field for pagination token, but it's not used yet
 // this is for the future when we will support pagination
-// @Param bsn_id query string false "Filter by bsn id"
+// @Param bsn_id query string false "Filter by bsn id". `all` for all FPs across all BSNs
 // @Produce json
 // @Tags v2
 // @Success 200 {object} handler.PublicResponse[[]v2service.FinalityProviderPublic] "List of finality providers with its stats"
