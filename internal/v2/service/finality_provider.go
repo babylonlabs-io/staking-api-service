@@ -20,6 +20,7 @@ type FinalityProviderPublic struct {
 	ActiveTvl         int64                               `json:"active_tvl"`
 	ActiveDelegations int64                               `json:"active_delegations"`
 	LogoURL           string                              `json:"logo_url,omitempty"`
+	BsnID             string                              `json:"bsn_id,omitempty"`
 }
 
 type FinalityProvidersStatsPublic struct {
@@ -39,6 +40,7 @@ func mapToFinalityProviderStatsPublic(
 		ActiveTvl:         fpStats.ActiveTvl,
 		ActiveDelegations: fpStats.ActiveDelegations,
 		LogoURL:           fpLogoURL,
+		BsnID:             provider.BsnID,
 	}
 }
 
