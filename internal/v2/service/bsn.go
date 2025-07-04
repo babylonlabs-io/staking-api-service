@@ -14,23 +14,13 @@ type BSN struct {
 	ActiveTvl   int64  `json:"active_tvl"`
 }
 
-var babylonBSN = BSN{
-	ID:          "", // empty string corresponds to babylon network
-	Name:        "Babylon",
-	Description: "Babylon network",
-	ActiveTvl:   0,
-}
-
 func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 	items, err := s.dbClients.IndexerDBClient.GetAllBSN(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// because Babylon BSN is not stored in the db we add it in service layer
-	allItems := []BSN{babylonBSN}
-	allItems = append(allItems, pkg.Map(items, mapBSN)...)
-	return allItems, nil
+	return pkg.Map(items, mapBSN), nil
 }
 
 func mapBSN(consumer indexerdbmodel.BSN) BSN {
