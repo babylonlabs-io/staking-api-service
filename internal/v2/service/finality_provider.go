@@ -21,7 +21,7 @@ type FinalityProviderPublic struct {
 	ActiveDelegations int64                               `json:"active_delegations"`
 	LogoURL           string                              `json:"logo_url,omitempty"`
 	BsnID             string                              `json:"bsn_id,omitempty"`
-	Group             string                              `json:"group"`
+	Type              string                              `json:"type"`
 }
 
 type FinalityProvidersStatsPublic struct {
@@ -34,13 +34,13 @@ func mapToFinalityProviderStatsPublic(
 	bsn *indexerdbmodel.BSN,
 	fpLogoURL string,
 ) *FinalityProviderPublic {
-	var group string
+	var bsnType string
 	if bsn != nil {
 		switch bsn.Type {
 		case indexerdbmodel.TypeCosmos:
-			group = "cosmos"
+			bsnType = "cosmos"
 		case indexerdbmodel.TypeRollup:
-			group = "rollup"
+			bsnType = "rollup"
 		}
 	}
 
@@ -53,7 +53,7 @@ func mapToFinalityProviderStatsPublic(
 		ActiveDelegations: fpStats.ActiveDelegations,
 		LogoURL:           fpLogoURL,
 		BsnID:             provider.BsnID,
-		Group:             group,
+		Type:              bsnType,
 	}
 }
 
