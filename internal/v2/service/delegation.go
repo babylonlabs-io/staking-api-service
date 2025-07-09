@@ -137,7 +137,7 @@ func (s *V2Service) GetDelegations(
 	// Initialize result structure
 	delegationsPublic := make([]*DelegationPublic, 0, len(resultMap.Data))
 
-	// Group delegations by state
+	// Type delegations by state
 	for _, delegation := range resultMap.Data {
 		delegationPublic, delErr := FromDelegationDocument(delegation)
 		if delErr != nil {

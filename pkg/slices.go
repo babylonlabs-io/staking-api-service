@@ -12,3 +12,13 @@ func Map[T1, T2 any](slice []T1, f func(T1) T2) []T2 {
 
 	return result
 }
+
+func SliceToMap[T any, K comparable](sl []T, f func(T) K) map[K]T {
+	m := make(map[K]T, len(sl))
+	for _, el := range sl {
+		key := f(el)
+		m[key] = el
+	}
+
+	return m
+}

@@ -21,6 +21,7 @@ type FinalityProviderPublic struct {
 	ActiveDelegations int64                               `json:"active_delegations"`
 	LogoURL           string                              `json:"logo_url,omitempty"`
 	BsnID             string                              `json:"bsn_id,omitempty"`
+	Type              string                              `json:"type"`
 }
 
 type FinalityProvidersStatsPublic struct {
@@ -30,8 +31,19 @@ type FinalityProvidersStatsPublic struct {
 func mapToFinalityProviderStatsPublic(
 	provider indexerdbmodel.IndexerFinalityProviderDetails,
 	fpStats *v2dbmodel.V2FinalityProviderStatsDocument,
+	bsn *indexerdbmodel.BSN,
 	fpLogoURL string,
 ) *FinalityProviderPublic {
+	var bsnType string
+	if bsn != nil {
+		switch bsn.Type {
+		case indexerdbmodel.TypeCosmos:
+			bsnType = "cosmos"
+		case indexerdbmodel.TypeRollup:
+			bsnType = "rollup"
+		}
+	}
+
 	return &FinalityProviderPublic{
 		BtcPk:             provider.BtcPk,
 		State:             types.FinalityProviderQueryingState(provider.State),
@@ -41,6 +53,7 @@ func mapToFinalityProviderStatsPublic(
 		ActiveDelegations: fpStats.ActiveDelegations,
 		LogoURL:           fpLogoURL,
 		BsnID:             provider.BsnID,
+		Type:              bsnType,
 	}
 }
 
@@ -84,6 +97,18 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 
 	finalityProvidersPublic := make([]*FinalityProviderPublic, 0, len(finalityProviders))
 
+	bsn, err := s.dbClients.IndexerDBClient.GetAllBSN(ctx)
+	if err != nil {
+		return nil, types.NewErrorWithMsg(
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			"failed to get bsn list",
+		)
+	}
+	bsnMap := pkg.SliceToMap(bsn, func(b indexerdbmodel.BSN) string {
+		return b.ID
+	})
+
 	for _, provider := range finalityProviders {
 		providerStats, hasStats := statsLookup[provider.BtcPk]
 		if !hasStats {
@@ -101,9 +126,13 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 			logoURL = logoMap[provider.BtcPk]
 		}
 
+		var bsn *indexerdbmodel.BSN
+		if bsnValue, ok := bsnMap[provider.BsnID]; ok {
+			bsn = &bsnValue
+		}
 		finalityProvidersPublic = append(
 			finalityProvidersPublic,
-			mapToFinalityProviderStatsPublic(*provider, providerStats, logoURL),
+			mapToFinalityProviderStatsPublic(*provider, providerStats, bsn, logoURL),
 		)
 	}
 	return finalityProvidersPublic, nil
