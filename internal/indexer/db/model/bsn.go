@@ -9,6 +9,11 @@ type BSN struct {
 	RollupMetadata    *ETHL2Metadata `bson:"rollup_metadata"`
 }
 
+const (
+	TypeCosmos = "COSMOS"
+	TypeRollup = "ROLLUP"
+)
+
 type ETHL2Metadata struct {
 	FinalityContractAddress string `bson:"finality_contract_address"`
 }
