@@ -27,6 +27,7 @@ type IndexerBbnStakingParamsDocument struct {
 	DelegationCreationBaseGasFee uint64   `bson:"delegation_creation_base_gas_fee"`
 	AllowListExpirationHeight    uint64   `bson:"allow_list_expiration_height"`
 	BtcActivationHeight          uint32   `bson:"btc_activation_height"`
+	MaxFinalityProviders         uint32   `bson:"max_finality_providers"`
 }
 
 type IndexerBtcCheckpointParamsDocument struct {
