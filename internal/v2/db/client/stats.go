@@ -473,7 +473,7 @@ func (v2 *V2Database) SubtractBsnStats(
 ) error {
 	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
 
-	// Create bulk write operations for each FP
+	// Create bulk write operations for each bsn
 	var operations []mongo.WriteModel
 	for _, bsnID := range bsnIds {
 		operation := mongo.NewUpdateOneModel().
