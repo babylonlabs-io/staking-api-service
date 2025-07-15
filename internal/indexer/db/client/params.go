@@ -49,11 +49,10 @@ func (db *IndexerDatabase) GetBbnStakingParams(ctx context.Context) ([]*indexert
 			UnbondingTimeBlocks:          stakingParams.UnbondingTimeBlocks,
 			UnbondingFeeSat:              stakingParams.UnbondingFeeSat,
 			MinCommissionRate:            stakingParams.MinCommissionRate,
-			MaxActiveFinalityProviders:   stakingParams.MaxActiveFinalityProviders,
 			DelegationCreationBaseGasFee: stakingParams.DelegationCreationBaseGasFee,
 			AllowListExpirationHeight:    stakingParams.AllowListExpirationHeight,
 			BtcActivationHeight:          stakingParams.BtcActivationHeight,
-			MaxFinalityProviders:         stakingParams.MaxActiveFinalityProviders,
+			MaxFinalityProviders:         stakingParams.MaxFinalityProviders,
 		}
 
 		params = append(params, bbnParams)

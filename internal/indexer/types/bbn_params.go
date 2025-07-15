@@ -22,7 +22,6 @@ type BbnStakingParams struct {
 	UnbondingTimeBlocks          uint32   `json:"unbonding_time_blocks"`
 	UnbondingFeeSat              int64    `json:"unbonding_fee_sat"`
 	MinCommissionRate            string   `json:"min_commission_rate"`
-	MaxActiveFinalityProviders   uint32   `json:"max_active_finality_providers"`
 	DelegationCreationBaseGasFee uint64   `json:"delegation_creation_base_gas_fee"`
 	AllowListExpirationHeight    uint64   `json:"allow_list_expiration_height"`
 	BtcActivationHeight          uint32   `json:"btc_activation_height"`
