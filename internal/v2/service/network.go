@@ -47,20 +47,13 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 		return cmp.Compare(a.Version, b.Version)
 	})
 
-	var maxBSNfpProviders int
-	if len(babylonParams) > 0 {
-		lastIdx := len(babylonParams) - 1
-		maxBSNfpProviders = int(babylonParams[lastIdx].MaxFinalityProviders)
-	}
-
 	return &NetworkInfoPublic{
 		StakingStatus: StakingStatusPublic{
 			IsStakingOpen: status,
 		},
 		Params: ParamsPublic{
-			Bbn:               babylonParams,
-			Btc:               btcParams,
-			MaxBsnFpProviders: maxBSNfpProviders,
+			Bbn: babylonParams,
+			Btc: btcParams,
 		},
 	}, nil
 }
