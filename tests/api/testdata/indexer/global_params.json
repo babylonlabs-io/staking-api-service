@@ -419,6 +419,9 @@
     },
     "btc_activation_height": {
       "$numberLong": "235952"
+    },
+    "max_finality_providers": {
+      "$numberLong": "3"
     }
   }
 }]

@@ -3,9 +3,8 @@ package indexertypes
 type GlobalParamsType string
 
 const (
-	CHECKPOINT_PARAMS_VERSION uint32           = 0
-	CHECKPOINT_PARAMS_TYPE    GlobalParamsType = "CHECKPOINT"
-	STAKING_PARAMS_TYPE       GlobalParamsType = "STAKING"
+	CHECKPOINT_PARAMS_TYPE GlobalParamsType = "CHECKPOINT"
+	STAKING_PARAMS_TYPE    GlobalParamsType = "STAKING"
 )
 
 type BbnStakingParams struct {
