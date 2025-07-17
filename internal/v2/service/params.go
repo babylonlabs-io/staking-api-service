@@ -11,9 +11,8 @@ import (
 )
 
 type ParamsPublic struct {
-	Bbn               []*indexertypes.BbnStakingParams    `json:"bbn"`
-	Btc               []*indexertypes.BtcCheckpointParams `json:"btc"`
-	MaxBsnFpProviders int                                 `json:"max_bsn_fp_providers,omitempty"`
+	Bbn []*indexertypes.BbnStakingParams    `json:"bbn"`
+	Btc []*indexertypes.BtcCheckpointParams `json:"btc"`
 }
 
 func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, *types.Error) {
