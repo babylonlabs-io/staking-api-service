@@ -55,4 +55,8 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v1/stats", registerHandler(handlers.V1Handler.GetOverallStats))
 	r.Get("/v1/stats/staker", registerHandler(handlers.V1Handler.GetStakersStats))
 	r.Get("/v1/delegation", registerHandler(handlers.V1Handler.GetDelegationByTxHash))
+
+	// V3 API
+	// todo for review: IMO we should use version prefixes now without referring them to particular phase
+	r.Get("/v1/allow-list", registerHandler(handlers.SharedHandler.AllowList))
 }

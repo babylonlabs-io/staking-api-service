@@ -41,6 +41,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/allow-list": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "shared"
+                ],
+                "summary": "Checks that given staking transaction hash is part of allow-list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Staking transaction hash",
+                        "name": "staking_tx_hash",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Given stakingTxHash is in allow-list",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/delegation": {
             "get": {
                 "description": "[DEPRECATED] Retrieves a delegation by a given transaction hash. Please use /v2/delegation instead.",
@@ -910,7 +938,7 @@ const docTemplate = `{
                 "delegation_creation_base_gas_fee": {
                     "type": "integer"
                 },
-                "max_active_finality_providers": {
+                "max_finality_providers": {
                     "type": "integer"
                 },
                 "max_staking_time_blocks": {
@@ -1378,6 +1406,9 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
+                "bsn_id": {
+                    "type": "string"
+                },
                 "btc_pk": {
                     "type": "string"
                 },
@@ -1392,6 +1423,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -1449,9 +1483,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
                     }
-                },
-                "max_bsn_fp_providers": {
-                    "type": "integer"
                 }
             }
         },
