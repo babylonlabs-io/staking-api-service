@@ -1,7 +1,6 @@
 package v2service
 
 import (
-	"context"
 	"slices"
 	"testing"
 
@@ -15,7 +14,7 @@ import (
 )
 
 func TestGetNetworkInfo(t *testing.T) {
-	ctx := context.Background() // todo(Kirill) replace with t.Context() after go 1.24 release
+	ctx := t.Context()
 	t.Run("BBN params are sorted", func(t *testing.T) {
 		indexerDB := &mocks.IndexerDBClient{}
 		defer indexerDB.AssertExpectations(t)
