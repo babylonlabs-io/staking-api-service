@@ -31,7 +31,7 @@ func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result
 
 func (h *V2Handler) getBsnIDFromQuery(request *http.Request) *string {
 	const paramKey = "bsn_id"
-	if !request.URL.Query().Has(paramKey) {
+	if !request.URL.Query().Has(paramKey) { // todo for review should I also include empty string here?
 		return nil
 	}
 
