@@ -6,7 +6,6 @@ type BSN struct {
 	Description       string         `bson:"description"`
 	MaxMultiStakedFPS uint32         `bson:"max_multi_staked_fps"` // max number of finality providers from consumer
 	Type              string         `bson:"type"`
-	IsBabylon         bool           `bson:"is_babylon"`
 	RollupMetadata    *ETHL2Metadata `bson:"rollup_metadata"`
 }
 
