@@ -62,6 +62,19 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
 	bsnID *string,
 ) ([]*FinalityProviderPublic, *types.Error) {
+	if bsnID == nil {
+		networkInfo, err := s.dbClients.IndexerDBClient.GetNetworkInfo(ctx)
+		if err != nil {
+			return nil, types.NewErrorWithMsg(
+				http.StatusInternalServerError,
+				types.InternalServiceError,
+				"failed to get network info",
+			)
+		}
+
+		bsnID = &networkInfo.ChainID
+	}
+
 	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, bsnID)
 	if err != nil {
 		if db.IsNotFoundError(err) {
