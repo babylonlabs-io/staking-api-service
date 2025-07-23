@@ -3,7 +3,6 @@
 package indexerdbclient_test
 
 import (
-	"context"
 	"encoding/json"
 	"path/filepath"
 	"testing"
@@ -16,7 +15,7 @@ import (
 )
 
 func TestDelegations(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	const (
 		stakerPKHex = "1cb8800d69c22978cbfe4874e132f6a0735880d49b3fecf2543e50b8b16fde57"

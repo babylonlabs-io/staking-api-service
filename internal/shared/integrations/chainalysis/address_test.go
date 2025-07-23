@@ -1,7 +1,6 @@
 package chainalysis_test
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +17,7 @@ func TestClient(t *testing.T) {
 	// temporary while we won't transition to non global metrics
 	metrics.Init(9999)
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	const apiKey = "valid_api_key"
 	const (
