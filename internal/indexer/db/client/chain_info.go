@@ -3,6 +3,7 @@ package indexerdbclient
 import (
 	"context"
 	"errors"
+
 	model "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"go.mongodb.org/mongo-driver/mongo"
