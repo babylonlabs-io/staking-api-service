@@ -41,34 +41,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/allow-list": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "shared"
-                ],
-                "summary": "Checks that given staking transaction hash is part of allow-list",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Staking transaction hash",
-                        "name": "staking_tx_hash",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Given stakingTxHash is in allow-list",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/delegation": {
             "get": {
                 "description": "[DEPRECATED] Retrieves a delegation by a given transaction hash. Please use /v2/delegation instead.",

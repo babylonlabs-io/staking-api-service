@@ -600,24 +600,6 @@ paths:
       summary: Health check endpoint
       tags:
       - shared
-  /v1/allow-list:
-    get:
-      parameters:
-      - description: Staking transaction hash
-        in: query
-        name: staking_tx_hash
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Given stakingTxHash is in allow-list
-          schema:
-            type: string
-      summary: Checks that given staking transaction hash is part of allow-list
-      tags:
-      - shared
   /v1/delegation:
     get:
       deprecated: true
