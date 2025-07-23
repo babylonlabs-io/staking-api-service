@@ -66,7 +66,6 @@ func Setup() error {
 		"Backfill pubkey address mappings",
 	)
 	rootCmd.AddCommand(UpdateLegacyOverallStatsCmd())
-	rootCmd.AddCommand(ImportAllowListCmd())
 
 	return rootCmd.Execute()
 }
