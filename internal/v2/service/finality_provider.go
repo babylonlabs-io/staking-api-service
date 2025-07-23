@@ -62,16 +62,6 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
 	bsnID *string,
 ) ([]*FinalityProviderPublic, *types.Error) {
-	// if bsnID is not provided fallback to previous behaviour: fetch fp-s related only to babylon
-	if bsnID == nil {
-		bbnBSN, err := s.getBabylonBSN(ctx)
-		if err != nil {
-			return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get bsn info")
-		}
-
-		bsnID = &bbnBSN
-	}
-
 	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, bsnID)
 	if err != nil {
 		if db.IsNotFoundError(err) {
@@ -146,28 +136,6 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		)
 	}
 	return finalityProvidersPublic, nil
-}
-
-var babylonBSN string
-
-func (s *V2Service) getBabylonBSN(ctx context.Context) (string, error) {
-	if babylonBSN != "" {
-		return babylonBSN, nil
-	}
-
-	allBSN, err := s.dbClients.IndexerDBClient.GetAllBSN(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	for _, bsn := range allBSN {
-		if bsn.IsBabylon {
-			babylonBSN = bsn.ID
-			break
-		}
-	}
-
-	return babylonBSN, nil
 }
 
 func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.IndexerFinalityProviderDetails) map[string]string {
