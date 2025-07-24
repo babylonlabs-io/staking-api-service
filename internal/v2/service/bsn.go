@@ -25,6 +25,7 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 		return nil, err
 	}
 
+	// we don't store babylon bsn in mongo, we place it on top so on frontend it's always displayed first
 	result := []BSN{
 		{
 			ID:          networkInfo.ChainID,
