@@ -1294,6 +1294,9 @@ const docTemplate = `{
         "v2service.DelegationPublic": {
             "type": "object",
             "properties": {
+                "can_expand": {
+                    "type": "boolean"
+                },
                 "delegation_staking": {
                     "$ref": "#/definitions/v2service.DelegationStaking"
                 },
