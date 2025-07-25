@@ -1288,6 +1288,9 @@ const docTemplate = `{
                 },
                 "signature_hex": {
                     "type": "string"
+                },
+                "stake_expansion_signature_hex": {
+                    "type": "string"
                 }
             }
         },

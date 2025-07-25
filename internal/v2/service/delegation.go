@@ -36,8 +36,9 @@ type UnbondingSlashing struct {
 }
 
 type CovenantSignature struct {
-	CovenantBtcPkHex string `json:"covenant_btc_pk_hex"`
-	SignatureHex     string `json:"signature_hex"`
+	CovenantBtcPkHex           string `json:"covenant_btc_pk_hex"`
+	SignatureHex               string `json:"signature_hex"`
+	StakeExpansionSignatureHex string `json:"stake_expansion_signature_hex,omitempty"`
 }
 
 type DelegationUnbonding struct {
@@ -90,7 +91,7 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 			UnbondingTimelock: delegation.UnbondingTimeLock,
 			UnbondingTx:       delegation.UnbondingTx,
 			CovenantUnbondingSignatures: getUnbondingSignatures(
-				delegation.CovenantUnbondingSignatures,
+				delegation.CovenantSignatures,
 			),
 			Slashing: UnbondingSlashing{
 				UnbondingSlashingTxHex: delegation.SlashingTx.UnbondingSlashingTxHex,
@@ -152,7 +153,11 @@ func (s *V2Service) GetDelegations(
 func getUnbondingSignatures(covenantSignatures []indexerdbmodel.CovenantSignature) []CovenantSignature {
 	covenantSignaturesPublic := make([]CovenantSignature, 0, len(covenantSignatures))
 	for _, covenantSignature := range covenantSignatures {
-		covenantSignaturesPublic = append(covenantSignaturesPublic, CovenantSignature{CovenantBtcPkHex: covenantSignature.CovenantBtcPkHex, SignatureHex: covenantSignature.SignatureHex})
+		covenantSignaturesPublic = append(covenantSignaturesPublic, CovenantSignature{
+			CovenantBtcPkHex:           covenantSignature.CovenantBtcPkHex,
+			SignatureHex:               covenantSignature.SignatureHex,
+			StakeExpansionSignatureHex: covenantSignature.StakeExpansionSignatureHex,
+		})
 	}
 	return covenantSignaturesPublic
 }

@@ -389,6 +389,8 @@ definitions:
         type: string
       signature_hex:
         type: string
+      stake_expansion_signature_hex:
+        type: string
     type: object
   v2service.DelegationPublic:
     properties:
