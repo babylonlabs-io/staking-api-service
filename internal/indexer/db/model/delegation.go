@@ -12,7 +12,8 @@ type IndexerDelegationPagination struct {
 }
 
 type CovenantSignature struct {
-	CovenantBtcPkHex           string `bson:"covenant_btc_pk_hex"`
+	CovenantBtcPkHex string `bson:"covenant_btc_pk_hex"`
+	// SignatureHex is for unbonding case
 	SignatureHex               string `bson:"signature_hex"`
 	StakeExpansionSignatureHex string `bson:"stake_expansion_signature_hex,omitempty"`
 }
