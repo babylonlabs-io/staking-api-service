@@ -10,7 +10,7 @@ func (cfg *NetworkUpgrade) Validate() error {
 	if cfg == nil {
 		return fmt.Errorf("empty network upgrade config")
 	}
-	
+
 	if cfg.POPUpgradeHeight == 0 {
 		return fmt.Errorf("POP upgrade height must be greater than zero")
 	}

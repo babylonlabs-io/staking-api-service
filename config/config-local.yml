@@ -41,6 +41,8 @@ assets:
     timeout: 5000
 terms_acceptance_logging:
   enabled: true
+network_upgrade:
+  pop_upgrade_height: 1
 address_screening:
   enabled: true
 external_apis:

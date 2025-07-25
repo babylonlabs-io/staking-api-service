@@ -21,7 +21,7 @@ type NetworkUpgradePublic struct {
 type NetworkInfoPublic struct {
 	StakingStatus  StakingStatusPublic  `json:"staking_status,omitempty"`
 	Params         ParamsPublic         `json:"params"`
-	NetworkUpgrade NetworkUpgradePublic `json:"network_upgrade,omitempty"`
+	NetworkUpgrade NetworkUpgradePublic `json:"network_upgrade"`
 }
 
 func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error) {
