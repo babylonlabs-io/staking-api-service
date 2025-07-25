@@ -13,7 +13,9 @@ type IndexerDelegationPagination struct {
 
 type CovenantSignature struct {
 	CovenantBtcPkHex string `bson:"covenant_btc_pk_hex"`
-	SignatureHex     string `bson:"signature_hex"`
+	// SignatureHex is for unbonding case
+	SignatureHex               string `bson:"signature_hex"`
+	StakeExpansionSignatureHex string `bson:"stake_expansion_signature_hex,omitempty"`
 }
 
 type BTCDelegationCreatedBbnBlock struct {
@@ -44,7 +46,7 @@ type IndexerDelegationDetails struct {
 	SubState                     indexertypes.DelegationSubState `bson:"sub_state,omitempty"`
 	StartHeight                  uint32                          `bson:"start_height"`
 	EndHeight                    uint32                          `bson:"end_height"`
-	CovenantUnbondingSignatures  []CovenantSignature             `bson:"covenant_unbonding_signatures"`
+	CovenantSignatures           []CovenantSignature             `bson:"covenant_unbonding_signatures"`
 	BTCDelegationCreatedBbnBlock BTCDelegationCreatedBbnBlock    `bson:"btc_delegation_created_bbn_block"`
 	SlashingTx                   SlashingTx                      `bson:"slashing_tx"`
 }
