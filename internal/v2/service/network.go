@@ -14,9 +14,14 @@ type StakingStatusPublic struct {
 	IsStakingOpen bool `json:"is_staking_open"`
 }
 
+type NetworkUpgradePublic struct {
+	POPUpgradeHeight uint64 `json:"pop_upgrade_height"`
+}
+
 type NetworkInfoPublic struct {
-	StakingStatus StakingStatusPublic `json:"staking_status,omitempty"`
-	Params        ParamsPublic        `json:"params"`
+	StakingStatus  StakingStatusPublic  `json:"staking_status,omitempty"`
+	Params         ParamsPublic         `json:"params"`
+	NetworkUpgrade NetworkUpgradePublic `json:"network_upgrade,omitempty"`
 }
 
 func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error) {
@@ -54,6 +59,9 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 		Params: ParamsPublic{
 			Bbn: babylonParams,
 			Btc: btcParams,
+		},
+		NetworkUpgrade: NetworkUpgradePublic{
+			POPUpgradeHeight: s.cfg.NetworkUpgrade.POPUpgradeHeight,
 		},
 	}, nil
 }
