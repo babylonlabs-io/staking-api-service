@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 )
 
 func Test_GetOverallStats(t *testing.T) {
@@ -83,5 +84,77 @@ func Test_GetOverallStats(t *testing.T) {
 			ActiveTvl:      777,
 			TotalActiveTvl: 777,
 		}, resp)
+	})
+}
+
+func Test_ProcessActiveDelegationStats(t *testing.T) {
+	ctx := t.Context()
+
+	dbShared := mocks.NewDBClient(t)
+	dbV1 := mocks.NewV1DBClient(t)
+	dbV2 := mocks.NewV2DBClient(t)
+	dbIndexer := mocks.NewIndexerDBClient(t)
+	s, err := New(&service.Service{
+		DbClients: &dbclients.DbClients{
+			SharedDBClient:  dbShared,
+			V1DBClient:      dbV1,
+			V2DBClient:      dbV2,
+			IndexerDBClient: dbIndexer,
+		},
+		Clients: &clients.Clients{
+			CoinMarketCap: cmc.NewClient(nil),
+		},
+	}, nil)
+	require.NoError(t, err)
+
+	t.Run("V2 DB failure", func(t *testing.T) {
+		stakingTxHashHex := `19caaf9dcf7be81120a503b8e007189ecee53e5912c8fa542b187224ce45000a`
+		stakerPkHex := `21d17b47e1d763f478cba5c414b7adf2778fa4ff6a5ba3d79f08f7a494781e06`
+		err := errors.New("some error")
+
+		dbV2.On("GetOrCreateStatsLock", ctx, stakingTxHashHex, "active").Return(nil, err).Once()
+		statsErr := s.ProcessActiveDelegationStats(ctx, stakingTxHashHex, stakerPkHex, nil, 30)
+		require.Error(t, statsErr)
+	})
+	t.Run("BSN stats", func(t *testing.T) {
+		stakingTxHashHex := `19caaf9dcf7be81120a503b8e007189ecee53e5912c8fa542b187224ce45000a`
+		stakerPkHex := `21d17b47e1d763f478cba5c414b7adf2778fa4ff6a5ba3d79f08f7a494781e06`
+		amount := uint64(77)
+
+		const (
+			fp1ID = "fp1"
+			fp2ID = "fp2"
+		)
+
+		locks := &v2dbmodel.V2StatsLockDocument{
+			Id:                    stakingTxHashHex + ":active",
+			OverallStats:          true,
+			StakerStats:           true,
+			FinalityProviderStats: true,
+			BsnStats:              false, // we test only bsn logic in this subtest
+		}
+		dbV2.On("GetOrCreateStatsLock", ctx, stakingTxHashHex, "active").Return(locks, nil).Once()
+
+		fps := []*indexerdbmodel.IndexerFinalityProviderDetails{
+			{
+				BtcPk: fp1ID,
+				BsnID: "babylon",
+			},
+			{
+				BtcPk: fp2ID,
+				BsnID: "bsn2",
+			},
+			{
+				BtcPk: "fp3",
+				BsnID: "bsn3",
+			},
+		}
+		dbIndexer.On("GetFinalityProviders", ctx, (*string)(nil)).Return(fps, nil).Once()
+
+		dbV2.On("IncrementBsnStats", ctx, stakingTxHashHex, []string{"babylon", "bsn2"}, amount).Return(nil, nil).Once()
+
+		fpBtcPkHexes := []string{fp1ID, fp2ID}
+		statsErr := s.ProcessActiveDelegationStats(ctx, stakingTxHashHex, stakerPkHex, fpBtcPkHexes, amount)
+		require.Error(t, statsErr)
 	})
 }

@@ -194,6 +194,7 @@ func (s *V2Service) GetStakerStats(
 	return &stats, nil
 }
 
+// todo test this method
 // ProcessActiveDelegationStats calculates the active delegation stats and updates the database.
 func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64) *types.Error {
 	// Fetch existing or initialize the stats lock document if not exist
@@ -299,12 +300,13 @@ func (s *V2Service) getBsnForFinalityProviders(ctx context.Context, fpBtcPkHexes
 			continue
 		}
 
-		bsnIds = append(bsnIds, fp.BtcPk)
+		bsnIds = append(bsnIds, fp.BsnID)
 	}
 
 	return bsnIds, nil
 }
 
+// todo test this method
 // ProcessUnbondingDelegationStats calculates the unbonding delegation stats
 func (s *V2Service) ProcessUnbondingDelegationStats(
 	ctx context.Context,
