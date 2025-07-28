@@ -30,6 +30,6 @@ type IndexerBbnStakingParamsDocument struct {
 }
 
 type IndexerBtcCheckpointParamsDocument struct {
-	Version              uint32 `bson:"version"`
-	BtcConfirmationDepth uint64 `bson:"btc_confirmation_depth"`
+	BtcConfirmationDepth          uint64 `bson:"btc_confirmation_depth"`
+	CheckpointFinalizationTimeout uint32 `bson:"checkpoint_finalization_timeout"`
 }
