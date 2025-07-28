@@ -1288,6 +1288,9 @@ const docTemplate = `{
                 },
                 "signature_hex": {
                     "type": "string"
+                },
+                "stake_expansion_signature_hex": {
+                    "type": "string"
                 }
             }
         },
@@ -1410,11 +1413,22 @@ const docTemplate = `{
         "v2service.NetworkInfoPublic": {
             "type": "object",
             "properties": {
+                "network_upgrade": {
+                    "$ref": "#/definitions/v2service.NetworkUpgradePublic"
+                },
                 "params": {
                     "$ref": "#/definitions/v2service.ParamsPublic"
                 },
                 "staking_status": {
                     "$ref": "#/definitions/v2service.StakingStatusPublic"
+                }
+            }
+        },
+        "v2service.NetworkUpgradePublic": {
+            "type": "object",
+            "properties": {
+                "pop_upgrade_height": {
+                    "type": "integer"
                 }
             }
         },
