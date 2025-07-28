@@ -55,6 +55,7 @@ type DelegationPublic struct {
 	DelegationUnbonding       DelegationUnbonding     `json:"delegation_unbonding"`
 	State                     v2types.DelegationState `json:"state"`
 	CanExpand                 bool                    `json:"can_expand"`
+	PreviousStakingTxHashHex  string                  `json:"previous_staking_tx_hash_hex,omitempty"`
 }
 
 func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) (*DelegationPublic, *types.Error) {
@@ -98,8 +99,9 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 				SpendingHeight:         delegation.SlashingTx.SpendingHeight,
 			},
 		},
-		State:     state,
-		CanExpand: delegation.CanExpand,
+		State:                    state,
+		CanExpand:                delegation.CanExpand,
+		PreviousStakingTxHashHex: delegation.PreviousStakingTxHashHex,
 	}
 
 	return delegationPublic, nil

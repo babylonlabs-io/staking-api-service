@@ -910,7 +910,7 @@ const docTemplate = `{
                 "delegation_creation_base_gas_fee": {
                     "type": "integer"
                 },
-                "max_active_finality_providers": {
+                "max_finality_providers": {
                     "type": "integer"
                 },
                 "max_staking_time_blocks": {
@@ -1312,6 +1312,9 @@ const docTemplate = `{
                 "params_version": {
                     "type": "integer"
                 },
+                "previous_staking_tx_hash_hex": {
+                    "type": "string"
+                },
                 "staker_btc_pk_hex": {
                     "type": "string"
                 },
@@ -1381,6 +1384,9 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
+                "bsn_id": {
+                    "type": "string"
+                },
                 "btc_pk": {
                     "type": "string"
                 },
@@ -1395,6 +1401,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -1452,9 +1461,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
                     }
-                },
-                "max_bsn_fp_providers": {
-                    "type": "integer"
                 }
             }
         },

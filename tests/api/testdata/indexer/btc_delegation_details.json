@@ -246,5 +246,106 @@
     },
     "sub_state": "EARLY_UNBONDING",
     "staker_babylon_address": "bbn1fc9qp3ujx7ylc34pcmwackdwdaexgs02rvpek8"
+  },
+  {
+    "_id": "b4ffb9d0715be3ffe8bbf11c6ee2e3a49931f141ca6c432f8f3d404f67b79ee8",
+    "staking_tx_hex": "010000000196b325275fabe621dbd94cb4e6771f53febad2bb8dc0ff02efbe75786e7702bc0000000000ffffffff0210270000000000002251205123e30fb9e0b3c0c0316f43cb923b5853f1560c36019014a3cae946e0060a4497ff300100000000160014d1cf9898bc4a7e8549682d0da8f199fb8d8a916600000000",
+    "staking_time": {
+      "$numberLong": "60000"
+    },
+    "staking_amount": {
+      "$numberLong": "10000"
+    },
+    "staking_output_idx": {
+      "$numberLong": "0"
+    },
+    "staking_btc_timestamp": {
+      "$numberLong": "1750918184"
+    },
+    "staker_btc_pk_hex": "20342b8a35b1d3627cac65e43de5ac484d0e4ed451879debe0583bae543eb25a",
+    "staker_babylon_address": "bbn1kvtvmjeyw6cxqf5txs4jngsduuwp3ys8r4qvlc",
+    "finality_provider_btc_pks_hex": [
+      "1cf6b50b57c48fac59db84aa04db7bbcce9bdc5704c71c0301b61d072ed06357"
+    ],
+    "start_height": {
+      "$numberLong": "257941"
+    },
+    "end_height": {
+      "$numberLong": "317941"
+    },
+    "state": "ACTIVE",
+    "state_history": [
+      {
+        "state": "PENDING",
+        "bbn_height": {
+          "$numberLong": "129"
+        },
+        "bbn_event_type": "EventBTCDelegationCreated"
+      },
+      {
+        "state": "VERIFIED",
+        "bbn_height": {
+          "$numberLong": "130"
+        },
+        "bbn_event_type": "EventCovenantQuorumReached"
+      },
+      {
+        "state": "ACTIVE",
+        "bbn_height": {
+          "$numberLong": "73458"
+        },
+        "bbn_event_type": "EventBTCDelegationInclusionProofReceived"
+      }
+    ],
+    "params_version": {
+      "$numberLong": "0"
+    },
+    "unbonding_time": {
+      "$numberLong": "20"
+    },
+    "unbonding_tx": "0200000001e89eb7674f403d8f2f436cca41f13199a4e3e26e1cf1bbe8ffe35b71d0b9ffb40000000000ffffffff01581b000000000000225120cafef41bed50d6b67ea4b7d2d590f815e9c82ceae94b73e1231753cc489e7c7800000000",
+    "unbonding_start_height": {
+      "$numberLong": "0"
+    },
+    "unbonding_btc_timestamp": {
+      "$numberLong": "0"
+    },
+    "covenant_unbonding_signatures": [
+      {
+        "covenant_btc_pk_hex": "ffeaec52a9b407b355ef6967a7ffc15fd6c3fe07de2844d61550475e7a5233e5",
+        "signature_hex": "8e33e6a71ac70825141579138ed0b8e97c851c646e82dd2be8a2ebbd35d49fc8c9d5750b1d90b1475a4c8d3c4b390eff3873b08950d1f51d3dfaf2541ddb4fe4"
+      },
+      {
+        "covenant_btc_pk_hex": "59d3532148a597a2d05c0395bf5f7176044b1cd312f37701a9b4d0aad70bc5a4",
+        "signature_hex": "63da7aa88f61a77cfd583ff85aa27fbdef17ec624bf2502009188f4bb188e2fb6ab8be00d74d0f07f752a9c88b71649bee2d773cab7d53c402f05713cc0f7f45"
+      },
+      {
+        "covenant_btc_pk_hex": "a5c60c2188e833d39d0fa798ab3f69aa12ed3dd2f3bad659effa252782de3c31",
+        "signature_hex": "ba0c7ce70dd54b1c1bf9253c0580a9c045f8ef4c23ff72886ce58376b20b5ab4a473793c4b08fd351441ce46c0cabc24ea0a04c48387eb06233e3d54eda60ecf"
+      }
+    ],
+    "btc_delegation_created_bbn_block": {
+      "height": {
+        "$numberLong": "129"
+      },
+      "timestamp": {
+        "$numberLong": "1750158624"
+      }
+    },
+    "slashing_tx": {
+      "spending_height": {
+        "$numberLong": "0"
+      },
+      "slashing_tx_hex": "",
+      "slashing_btc_timestamp": {
+        "$numberLong": "0"
+      },
+      "unbonding_slashing_tx_hex": "",
+      "unbonding_slashing_btc_timestamp": {
+        "$numberLong": "0"
+      }
+    },
+    "previous_staking_tx_hash_hex": "010000000196b325275fabe621dbd94cb4e6771f53febad2bb8dc0ff02efbe75786e7702bc0000000000ffffffff0210270000000000002251205123e30fb9e0b3c0c0316f43cb923b5853f1560c36019014a3cae946e0060a4497ff300100000000160014d1cf9898bc4a7e8549682d0da8f199fb8d8a916600000001",
+    "can_expand": true
   }
 ]
