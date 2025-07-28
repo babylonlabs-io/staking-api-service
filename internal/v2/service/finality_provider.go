@@ -64,7 +64,7 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 ) ([]*FinalityProviderPublic, *types.Error) {
 	if bsnID == nil {
 		// if no bsn_id is provided we first retrieve chain_id corresponding to babylon network
-		// then we filter all finality providers by bsn_id = chain_id so we end up with default behaviour:
+		// then we filter all finality providers by bsn_id = chain_id so we end up with default behavior:
 		// in response there will be only finality providers for babylon
 		networkInfo, err := s.dbClients.IndexerDBClient.GetNetworkInfo(ctx)
 		if err != nil {
