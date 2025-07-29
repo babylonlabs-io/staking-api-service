@@ -910,7 +910,7 @@ const docTemplate = `{
                 "delegation_creation_base_gas_fee": {
                     "type": "integer"
                 },
-                "max_active_finality_providers": {
+                "max_finality_providers": {
                     "type": "integer"
                 },
                 "max_staking_time_blocks": {
@@ -1288,6 +1288,9 @@ const docTemplate = `{
                 },
                 "signature_hex": {
                     "type": "string"
+                },
+                "stake_expansion_signature_hex": {
+                    "type": "string"
                 }
             }
         },
@@ -1378,6 +1381,9 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
+                "bsn_id": {
+                    "type": "string"
+                },
                 "btc_pk": {
                     "type": "string"
                 },
@@ -1392,17 +1398,31 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
         "v2service.NetworkInfoPublic": {
             "type": "object",
             "properties": {
+                "network_upgrade": {
+                    "$ref": "#/definitions/v2service.NetworkUpgradePublic"
+                },
                 "params": {
                     "$ref": "#/definitions/v2service.ParamsPublic"
                 },
                 "staking_status": {
                     "$ref": "#/definitions/v2service.StakingStatusPublic"
+                }
+            }
+        },
+        "v2service.NetworkUpgradePublic": {
+            "type": "object",
+            "properties": {
+                "pop_upgrade_height": {
+                    "type": "integer"
                 }
             }
         },
@@ -1449,9 +1469,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
                     }
-                },
-                "max_bsn_fp_providers": {
-                    "type": "integer"
                 }
             }
         },

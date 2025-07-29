@@ -44,6 +44,8 @@ assets:
     timeout: 1000
 terms_acceptance_logging:
   enabled: true
+network_upgrade:
+  pop_upgrade_height: 1
 external_apis:
   coinmarketcap:
     api_key: ${COINMARKETCAP_API_KEY}
