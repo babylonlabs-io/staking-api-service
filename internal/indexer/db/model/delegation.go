@@ -48,6 +48,8 @@ type IndexerDelegationDetails struct {
 	CovenantSignatures           []CovenantSignature             `bson:"covenant_unbonding_signatures"`
 	BTCDelegationCreatedBbnBlock BTCDelegationCreatedBbnBlock    `bson:"btc_delegation_created_bbn_block"`
 	SlashingTx                   SlashingTx                      `bson:"slashing_tx"`
+	CanExpand                    bool                            `bson:"can_expand"`
+	PreviousStakingTxHashHex     string                          `bson:"previous_staking_tx_hash_hex"`
 }
 
 func BuildDelegationPaginationToken(d IndexerDelegationDetails) (string, error) {

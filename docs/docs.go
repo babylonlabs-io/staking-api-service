@@ -1300,6 +1300,9 @@ const docTemplate = `{
         "v2service.DelegationPublic": {
             "type": "object",
             "properties": {
+                "can_expand": {
+                    "type": "boolean"
+                },
                 "delegation_staking": {
                     "$ref": "#/definitions/v2service.DelegationStaking"
                 },
@@ -1314,6 +1317,9 @@ const docTemplate = `{
                 },
                 "params_version": {
                     "type": "integer"
+                },
+                "previous_staking_tx_hash_hex": {
+                    "type": "string"
                 },
                 "staker_btc_pk_hex": {
                     "type": "string"
