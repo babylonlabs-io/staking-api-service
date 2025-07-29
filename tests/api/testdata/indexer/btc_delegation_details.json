@@ -257,7 +257,7 @@
       "$numberLong": "10000"
     },
     "staking_output_idx": {
-      "$numberLong": "0"
+      "$numberLong": "1"
     },
     "staking_btc_timestamp": {
       "$numberLong": "1750918184"
