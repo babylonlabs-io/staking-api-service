@@ -92,8 +92,9 @@ func (db *IndexerDatabase) GetBtcCheckpointParams(ctx context.Context) ([]*index
 		}
 
 		btcParams := &indexertypes.BtcCheckpointParams{
-			Version:              model.Version,
-			BtcConfirmationDepth: btcParamsDoc.BtcConfirmationDepth,
+			Version:                       model.Version,
+			BtcConfirmationDepth:          btcParamsDoc.BtcConfirmationDepth,
+			CheckpointFinalizationTimeout: btcParamsDoc.CheckpointFinalizationTimeout,
 		}
 
 		params = append(params, btcParams)

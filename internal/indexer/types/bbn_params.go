@@ -28,6 +28,7 @@ type BbnStakingParams struct {
 }
 
 type BtcCheckpointParams struct {
-	Version              uint32 `json:"version"`
-	BtcConfirmationDepth uint64 `json:"btc_confirmation_depth"`
+	Version                       uint32 `json:"version"`
+	BtcConfirmationDepth          uint64 `json:"btc_confirmation_depth"`
+	CheckpointFinalizationTimeout uint32 `json:"checkpoint_finalization_timeout"`
 }
