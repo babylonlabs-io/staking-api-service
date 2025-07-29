@@ -38,7 +38,6 @@ type IndexerDelegationDetails struct {
 	StakerBabylonAddress         string                          `bson:"staker_babylon_address"`
 	StakingTimeLock              uint32                          `bson:"staking_time"`
 	StakingAmount                uint64                          `bson:"staking_amount"`
-	StakingOutputPkScript        string                          `bson:"staking_output_pk_script"`
 	StakingOutputIdx             uint32                          `bson:"staking_output_idx"`
 	UnbondingTimeLock            uint32                          `bson:"unbonding_time"`
 	UnbondingTx                  string                          `bson:"unbonding_tx"`

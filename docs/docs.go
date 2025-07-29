@@ -954,6 +954,9 @@ const docTemplate = `{
                 "btc_confirmation_depth": {
                     "type": "integer"
                 },
+                "checkpoint_finalization_timeout": {
+                    "type": "integer"
+                },
                 "version": {
                     "type": "integer"
                 }
@@ -1338,6 +1341,9 @@ const docTemplate = `{
                 "staking_amount": {
                     "type": "integer"
                 },
+                "staking_output_idx": {
+                    "type": "integer"
+                },
                 "staking_timelock": {
                     "type": "integer"
                 },
@@ -1421,8 +1427,11 @@ const docTemplate = `{
         "v2service.NetworkUpgradePublic": {
             "type": "object",
             "properties": {
-                "pop_upgrade_height": {
-                    "type": "integer"
+                "pop": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2service.POPUpgradePublic"
+                    }
                 }
             }
         },
@@ -1451,6 +1460,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "total_finality_providers": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v2service.POPUpgradePublic": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "version": {
                     "type": "integer"
                 }
             }
