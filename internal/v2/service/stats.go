@@ -359,7 +359,7 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 				return nil
 			}
 			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while incrementing bsn stats")
+				Msg("error while subtracting bsn stats")
 			return types.NewInternalServiceError(err)
 		}
 	}

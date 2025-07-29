@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
@@ -15,7 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 )
 
 func Test_GetOverallStats(t *testing.T) {
@@ -151,7 +151,7 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 		}
 		dbIndexer.On("GetFinalityProviders", ctx, (*string)(nil)).Return(fps, nil).Once()
 
-		dbV2.On("IncrementBsnStats", ctx, stakingTxHashHex, []string{"babylon", "bsn2"}, amount).Return(nil, nil).Once()
+		dbV2.On("IncrementBsnStats", ctx, stakingTxHashHex, []string{"babylon", "bsn2"}, amount).Return(nil).Once()
 
 		fpBtcPkHexes := []string{fp1ID, fp2ID}
 		statsErr := s.ProcessActiveDelegationStats(ctx, stakingTxHashHex, stakerPkHex, fpBtcPkHexes, amount)
