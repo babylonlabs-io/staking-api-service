@@ -9,16 +9,18 @@ type V2StatsLockDocument struct {
 	OverallStats          bool   `bson:"overall_stats"`
 	StakerStats           bool   `bson:"staker_stats"`
 	FinalityProviderStats bool   `bson:"finality_provider_stats"`
+	BsnStats              bool   `bson:"bsn_stats"`
 }
 
 func NewV2StatsLockDocument(
-	id string, overallStats, stakerStats, finalityProviderStats bool,
+	id string, overallStats, stakerStats, finalityProviderStats, bsnStats bool,
 ) *V2StatsLockDocument {
 	return &V2StatsLockDocument{
 		Id:                    id,
 		OverallStats:          overallStats,
 		StakerStats:           stakerStats,
 		FinalityProviderStats: finalityProviderStats,
+		BsnStats:              bsnStats,
 	}
 }
 
@@ -42,4 +44,10 @@ type V2FinalityProviderStatsDocument struct {
 	FinalityProviderPkHex string `bson:"_id"`
 	ActiveTvl             int64  `bson:"active_tvl"`
 	ActiveDelegations     int64  `bson:"active_delegations"`
+}
+
+type BSNStatsDocument struct {
+	BsnID             string `bson:"_id"`
+	ActiveTvl         int64  `bson:"active_tvl"`
+	ActiveDelegations int64  `bson:"active_delegations"`
 }

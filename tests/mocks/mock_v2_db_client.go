@@ -152,6 +152,36 @@ func (_m *V2DBClient) GetActiveStakersCount(ctx context.Context) (int64, error) 
 	return r0, r1
 }
 
+// GetBsnStats provides a mock function with given fields: ctx
+func (_m *V2DBClient) GetBsnStats(ctx context.Context) ([]*v2dbmodel.BSNStatsDocument, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBsnStats")
+	}
+
+	var r0 []*v2dbmodel.BSNStatsDocument
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*v2dbmodel.BSNStatsDocument, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*v2dbmodel.BSNStatsDocument); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*v2dbmodel.BSNStatsDocument)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFinalityProviderLogos provides a mock function with given fields: ctx
 func (_m *V2DBClient) GetFinalityProviderLogos(ctx context.Context) ([]v2dbmodel.FinalityProviderLogo, error) {
 	ret := _m.Called(ctx)
@@ -432,6 +462,24 @@ func (_m *V2DBClient) HandleWithdrawnStakerStats(ctx context.Context, stakingTxH
 	return r0
 }
 
+// IncrementBsnStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHexes, amount
+func (_m *V2DBClient) IncrementBsnStats(ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, fpPkHexes, amount)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IncrementBsnStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, fpPkHexes, amount)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // IncrementFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHexes, amount
 func (_m *V2DBClient) IncrementFinalityProviderStats(ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64) error {
 	ret := _m.Called(ctx, stakingTxHashHex, fpPkHexes, amount)
@@ -569,6 +617,24 @@ func (_m *V2DBClient) SetLatestPrice(ctx context.Context, symbol string, price f
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, float64) error); ok {
 		r0 = rf(ctx, symbol, price)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SubtractBsnStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHexes, amount
+func (_m *V2DBClient) SubtractBsnStats(ctx context.Context, stakingTxHashHex string, fpPkHexes []string, amount uint64) error {
+	ret := _m.Called(ctx, stakingTxHashHex, fpPkHexes, amount)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SubtractBsnStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []string, uint64) error); ok {
+		r0 = rf(ctx, stakingTxHashHex, fpPkHexes, amount)
 	} else {
 		r0 = ret.Error(0)
 	}
