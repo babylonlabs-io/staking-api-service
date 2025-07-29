@@ -12,8 +12,8 @@ import (
 const networkInfoID = "singleton"
 
 type networkInfoDoc struct {
-	ID string `bson:"_id"`
-	*model.NetworkInfo
+	ID                 string `bson:"_id"`
+	*model.NetworkInfo `bson:",inline"`
 }
 
 func (idb *IndexerDatabase) GetNetworkInfo(ctx context.Context) (*model.NetworkInfo, error) {
