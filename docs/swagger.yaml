@@ -165,6 +165,8 @@ definitions:
     properties:
       btc_confirmation_depth:
         type: integer
+      checkpoint_finalization_timeout:
+        type: integer
       version:
         type: integer
     type: object
@@ -425,6 +427,8 @@ definitions:
         $ref: '#/definitions/v2service.StakingSlashing'
       staking_amount:
         type: integer
+      staking_output_idx:
+        type: integer
       staking_timelock:
         type: integer
       staking_tx_hash_hex:
@@ -479,8 +483,10 @@ definitions:
     type: object
   v2service.NetworkUpgradePublic:
     properties:
-      pop_upgrade_height:
-        type: integer
+      pop:
+        items:
+          $ref: '#/definitions/v2service.POPUpgradePublic'
+        type: array
     type: object
   v2service.OverallStatsPublic:
     properties:
@@ -505,6 +511,13 @@ definitions:
           both phase-1 and phase-2 active tvl
         type: integer
       total_finality_providers:
+        type: integer
+    type: object
+  v2service.POPUpgradePublic:
+    properties:
+      height:
+        type: integer
+      version:
         type: integer
     type: object
   v2service.ParamsPublic:

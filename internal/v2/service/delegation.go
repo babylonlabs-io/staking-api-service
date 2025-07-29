@@ -16,6 +16,7 @@ import (
 type DelegationStaking struct {
 	StakingTxHashHex   string          `json:"staking_tx_hash_hex"`
 	StakingTxHex       string          `json:"staking_tx_hex"`
+	StakingOutputIdx   uint32          `json:"staking_output_idx"`
 	StakingTimelock    uint32          `json:"staking_timelock"`
 	StakingAmount      uint64          `json:"staking_amount"`
 	StartHeight        uint32          `json:"start_height,omitempty"`
@@ -76,6 +77,7 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 		DelegationStaking: DelegationStaking{
 			StakingTxHashHex:   delegation.StakingTxHashHex,
 			StakingTxHex:       delegation.StakingTxHex,
+			StakingOutputIdx:   delegation.StakingOutputIdx,
 			StakingTimelock:    delegation.StakingTimeLock,
 			StakingAmount:      delegation.StakingAmount,
 			StartHeight:        delegation.StartHeight,
