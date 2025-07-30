@@ -490,8 +490,6 @@ definitions:
     type: object
   v2service.NetworkUpgradePublic:
     properties:
-      allow-list:
-        $ref: '#/definitions/v2service.AllowListPublic'
       pop:
         items:
           $ref: '#/definitions/v2service.POPUpgradePublic'
@@ -568,6 +566,8 @@ definitions:
     type: object
   v2service.StakingStatusPublic:
     properties:
+      allow_list:
+        $ref: '#/definitions/v2service.AllowListPublic'
       is_staking_open:
         type: boolean
     type: object

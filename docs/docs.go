@@ -1444,9 +1444,6 @@ const docTemplate = `{
         "v2service.NetworkUpgradePublic": {
             "type": "object",
             "properties": {
-                "allow-list": {
-                    "$ref": "#/definitions/v2service.AllowListPublic"
-                },
                 "pop": {
                     "type": "array",
                     "items": {
@@ -1555,6 +1552,9 @@ const docTemplate = `{
         "v2service.StakingStatusPublic": {
             "type": "object",
             "properties": {
+                "allow_list": {
+                    "$ref": "#/definitions/v2service.AllowListPublic"
+                },
                 "is_staking_open": {
                     "type": "boolean"
                 }
