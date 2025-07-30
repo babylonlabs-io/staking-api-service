@@ -1444,12 +1444,9 @@ const docTemplate = `{
         "v2service.NetworkUpgradePublic": {
             "type": "object",
             "properties": {
-<<<<<<< Updated upstream
-=======
                 "allow-list": {
                     "$ref": "#/definitions/v2service.AllowListPublic"
                 },
->>>>>>> Stashed changes
                 "pop": {
                     "type": "array",
                     "items": {
