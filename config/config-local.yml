@@ -45,6 +45,9 @@ network_upgrade:
   pop:
     - height: 123
       version: 0
+  allow-list:
+    activation_block: 0
+    expiration_block: 100
 address_screening:
   enabled: true
 external_apis:

@@ -1266,6 +1266,17 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.AllowListPublic": {
+            "type": "object",
+            "properties": {
+                "activation_block": {
+                    "type": "integer"
+                },
+                "expiration_block": {
+                    "type": "integer"
+                }
+            }
+        },
         "v2service.BSN": {
             "type": "object",
             "properties": {
@@ -1433,6 +1444,12 @@ const docTemplate = `{
         "v2service.NetworkUpgradePublic": {
             "type": "object",
             "properties": {
+<<<<<<< Updated upstream
+=======
+                "allow-list": {
+                    "$ref": "#/definitions/v2service.AllowListPublic"
+                },
+>>>>>>> Stashed changes
                 "pop": {
                     "type": "array",
                     "items": {

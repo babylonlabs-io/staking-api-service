@@ -374,6 +374,13 @@ definitions:
       version:
         type: integer
     type: object
+  v2service.AllowListPublic:
+    properties:
+      activation_block:
+        type: integer
+      expiration_block:
+        type: integer
+    type: object
   v2service.BSN:
     properties:
       active_tvl:
@@ -483,6 +490,11 @@ definitions:
     type: object
   v2service.NetworkUpgradePublic:
     properties:
+<<<<<<< Updated upstream
+=======
+      allow-list:
+        $ref: '#/definitions/v2service.AllowListPublic'
+>>>>>>> Stashed changes
       pop:
         items:
           $ref: '#/definitions/v2service.POPUpgradePublic'
