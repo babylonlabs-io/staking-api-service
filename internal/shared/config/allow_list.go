@@ -8,7 +8,7 @@ type AllowList struct {
 }
 
 func (cfg *AllowList) Validate() error {
-	if cfg.ActivationBlock >= cfg.ExpirationBlock {
+	if cfg.ActivationBlock > cfg.ExpirationBlock {
 		return fmt.Errorf("activation block (%d) must be less than expiration block (%d)", cfg.ActivationBlock, cfg.ExpirationBlock)
 	}
 
