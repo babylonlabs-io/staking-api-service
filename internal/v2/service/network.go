@@ -26,7 +26,7 @@ type AllowListPublic struct {
 
 type NetworkUpgradePublic struct {
 	POP       []POPUpgradePublic `json:"pop,omitempty"`
-	AllowList AllowListPublic    `json:"allow-list"`
+	AllowList AllowListPublic    `json:"allow_list"`
 }
 
 type NetworkInfoPublic struct {

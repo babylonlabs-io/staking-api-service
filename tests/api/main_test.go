@@ -59,6 +59,12 @@ func TestMain(t *testing.M) {
 		AddressScreeningConfig: &config.AddressScreeningConfig{
 			Enabled: true,
 		},
+		NetworkUpgrade: &config.NetworkUpgrade{
+			AllowList: &config.AllowList{
+				ActivationBlock: 101,
+				ExpirationBlock: 200,
+			},
+		},
 	}
 
 	s, err := setupServices(ctx, cfg)
