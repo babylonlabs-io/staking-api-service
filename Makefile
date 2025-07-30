@@ -63,7 +63,7 @@ test:
 	go test -v -cover ./... -count=1
 
 test-integration:
-	go test -v -cover -tags=integration ./internal/v2/db/...
+	go test -v -cover -tags=integration ./internal/indexer/db/
 
 lint:
 	golangci-lint run
