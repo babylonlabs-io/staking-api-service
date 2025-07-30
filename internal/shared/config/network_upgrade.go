@@ -29,8 +29,7 @@ func (pop *POPUpgrade) Validate() error {
 }
 
 type NetworkUpgrade struct {
-	POP       []POPUpgrade `mapstructure:"pop,omitempty"`
-	AllowList *AllowList   `mapstructure:"allow-list"`
+	POP []POPUpgrade `mapstructure:"pop,omitempty"`
 }
 
 // network upgrade config is optional.
@@ -46,10 +45,6 @@ func (cfg *NetworkUpgrade) Validate() error {
 		if err := pop.Validate(); err != nil {
 			return fmt.Errorf("POP upgrade %d validation failed: %w", i, err)
 		}
-	}
-
-	if cfg.AllowList != nil {
-		return cfg.AllowList.Validate()
 	}
 
 	return nil

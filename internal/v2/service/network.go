@@ -88,12 +88,12 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 				POP: popUpgrades,
 			}
 		}
+	}
 
-		if allowList := s.cfg.NetworkUpgrade.AllowList; allowList != nil {
-			result.StakingStatus.AllowList = &AllowListPublic{
-				ActivationBlock: allowList.ActivationBlock,
-				ExpirationBlock: allowList.ExpirationBlock,
-			}
+	if allowList := s.cfg.AllowList; allowList != nil {
+		result.StakingStatus.AllowList = &AllowListPublic{
+			ActivationBlock: allowList.ActivationBlock,
+			ExpirationBlock: allowList.ExpirationBlock,
 		}
 	}
 
