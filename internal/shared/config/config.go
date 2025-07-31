@@ -22,7 +22,7 @@ type Config struct {
 	AddressScreeningConfig *AddressScreeningConfig     `mapstructure:"address_screening"`
 	BBN                    *BBNConfig                  `mapstructure:"bbn"`
 	NetworkUpgrade         *NetworkUpgrade             `mapstructure:"network_upgrade,omitempty"`
-	AllowList              *AllowList                  `mapstructure:"allow-list"`
+	AllowList              *AllowList                  `mapstructure:"staking-expansion-allow-list"`
 }
 
 func (cfg *Config) Validate() error {
