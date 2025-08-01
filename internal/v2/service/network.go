@@ -21,8 +21,7 @@ type POPUpgradePublic struct {
 }
 
 type AllowListPublic struct {
-	ActivationBlock uint64 `json:"activation_block"`
-	ExpirationBlock uint64 `json:"expiration_block"`
+	IsExpired bool `json:"is_expired"`
 }
 
 type NetworkUpgradePublic struct {
@@ -91,9 +90,14 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 	}
 
 	if allowList := s.cfg.AllowList; allowList != nil {
+		lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+		if err != nil {
+			return nil, types.NewInternalServiceError(err)
+		}
+
+		isExpired := lastHeight >= allowList.ExpirationBlock
 		result.StakingStatus.AllowList = &AllowListPublic{
-			ActivationBlock: allowList.ActivationBlock,
-			ExpirationBlock: allowList.ExpirationBlock,
+			IsExpired: isExpired,
 		}
 	}
 

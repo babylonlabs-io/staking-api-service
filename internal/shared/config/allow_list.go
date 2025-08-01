@@ -3,13 +3,12 @@ package config
 import "fmt"
 
 type AllowList struct {
-	ActivationBlock uint64 `mapstructure:"activation_block"`
 	ExpirationBlock uint64 `mapstructure:"expiration_block"`
 }
 
 func (cfg *AllowList) Validate() error {
-	if cfg.ActivationBlock > cfg.ExpirationBlock {
-		return fmt.Errorf("activation block (%d) must be less than expiration block (%d)", cfg.ActivationBlock, cfg.ExpirationBlock)
+	if cfg.ExpirationBlock > 0 {
+		return fmt.Errorf("allow-list: expiration block cannot be set to 0 or negative")
 	}
 
 	return nil

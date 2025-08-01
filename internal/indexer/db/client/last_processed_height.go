@@ -6,6 +6,7 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"errors"
 )
 
 func (db *IndexerDatabase) GetLastProcessedBbnHeight(ctx context.Context) (uint64, error) {
@@ -14,11 +15,12 @@ func (db *IndexerDatabase) GetLastProcessedBbnHeight(ctx context.Context) (uint6
 	err := db.Client.Database(db.DbName).Collection(
 		indexerdbmodel.LastProcessedHeightCollection,
 	).FindOne(ctx, bson.M{}).Decode(&result)
-	if err == mongo.ErrNoDocuments {
-		// If no document exists, return 0
-		return 0, nil
-	}
+
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			// If no document exists, return 0
+			return 0, nil
+		}
 		return 0, err
 	}
 	return result.Height, nil
