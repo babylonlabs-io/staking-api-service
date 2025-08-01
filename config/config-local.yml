@@ -46,7 +46,6 @@ network_upgrade:
     - height: 123
       version: 0
 staking-expansion-allow-list:
-  activation_block: 0
   expiration_block: 100
 address_screening:
   enabled: true
