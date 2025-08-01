@@ -60,8 +60,7 @@ func TestMain(t *testing.M) {
 			Enabled: true,
 		},
 		AllowList: &config.AllowList{
-			ActivationBlock: 101,
-			ExpirationBlock: 200,
+			ExpirationBlock: 100_000_000,
 		},
 	}
 
