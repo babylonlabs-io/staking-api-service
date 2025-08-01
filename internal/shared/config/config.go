@@ -22,6 +22,7 @@ type Config struct {
 	AddressScreeningConfig *AddressScreeningConfig     `mapstructure:"address_screening"`
 	BBN                    *BBNConfig                  `mapstructure:"bbn"`
 	NetworkUpgrade         *NetworkUpgrade             `mapstructure:"network_upgrade,omitempty"`
+	AllowList              *AllowList                  `mapstructure:"staking-expansion-allow-list"`
 }
 
 func (cfg *Config) Validate() error {
@@ -59,6 +60,12 @@ func (cfg *Config) Validate() error {
 
 	if cfg.BBN != nil {
 		if err := cfg.BBN.Validate(); err != nil {
+			return err
+		}
+	}
+
+	if cfg.AllowList != nil {
+		if err := cfg.AllowList.Validate(); err != nil {
 			return err
 		}
 	}

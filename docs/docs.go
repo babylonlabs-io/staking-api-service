@@ -1266,6 +1266,17 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.AllowListPublic": {
+            "type": "object",
+            "properties": {
+                "activation_block": {
+                    "type": "integer"
+                },
+                "expiration_block": {
+                    "type": "integer"
+                }
+            }
+        },
         "v2service.BSN": {
             "type": "object",
             "properties": {
@@ -1541,6 +1552,9 @@ const docTemplate = `{
         "v2service.StakingStatusPublic": {
             "type": "object",
             "properties": {
+                "allow_list": {
+                    "$ref": "#/definitions/v2service.AllowListPublic"
+                },
                 "is_staking_open": {
                     "type": "boolean"
                 }

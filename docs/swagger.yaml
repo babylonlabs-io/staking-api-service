@@ -374,6 +374,13 @@ definitions:
       version:
         type: integer
     type: object
+  v2service.AllowListPublic:
+    properties:
+      activation_block:
+        type: integer
+      expiration_block:
+        type: integer
+    type: object
   v2service.BSN:
     properties:
       active_tvl:
@@ -559,6 +566,8 @@ definitions:
     type: object
   v2service.StakingStatusPublic:
     properties:
+      allow_list:
+        $ref: '#/definitions/v2service.AllowListPublic'
       is_staking_open:
         type: boolean
     type: object

@@ -11,12 +11,18 @@ import (
 )
 
 type StakingStatusPublic struct {
-	IsStakingOpen bool `json:"is_staking_open"`
+	IsStakingOpen bool             `json:"is_staking_open"`
+	AllowList     *AllowListPublic `json:"allow_list"`
 }
 
 type POPUpgradePublic struct {
 	Height  uint64 `json:"height"`
 	Version uint64 `json:"version"`
+}
+
+type AllowListPublic struct {
+	ActivationBlock uint64 `json:"activation_block"`
+	ExpirationBlock uint64 `json:"expiration_block"`
 }
 
 type NetworkUpgradePublic struct {
@@ -68,17 +74,26 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 	}
 
 	// Only include NetworkUpgrade if it exists and POP is configured
-	if s.cfg.NetworkUpgrade != nil && len(s.cfg.NetworkUpgrade.POP) > 0 {
-		popUpgrades := make([]POPUpgradePublic, len(s.cfg.NetworkUpgrade.POP))
-		for i, pop := range s.cfg.NetworkUpgrade.POP {
-			popUpgrades[i] = POPUpgradePublic{
-				Height:  pop.Height,
-				Version: pop.Version,
+	if networkUpgrade := s.cfg.NetworkUpgrade; networkUpgrade != nil {
+		if len(networkUpgrade.POP) > 0 {
+			popUpgrades := make([]POPUpgradePublic, len(networkUpgrade.POP))
+			for i, pop := range networkUpgrade.POP {
+				popUpgrades[i] = POPUpgradePublic{
+					Height:  pop.Height,
+					Version: pop.Version,
+				}
+			}
+
+			result.NetworkUpgrade = &NetworkUpgradePublic{
+				POP: popUpgrades,
 			}
 		}
+	}
 
-		result.NetworkUpgrade = &NetworkUpgradePublic{
-			POP: popUpgrades,
+	if allowList := s.cfg.AllowList; allowList != nil {
+		result.StakingStatus.AllowList = &AllowListPublic{
+			ActivationBlock: allowList.ActivationBlock,
+			ExpirationBlock: allowList.ExpirationBlock,
 		}
 	}
 
