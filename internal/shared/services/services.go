@@ -29,7 +29,13 @@ func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders
 		return nil, err
 	}
 
-	v2Service, err := v2service.New(sharedService, keybaseClient)
+	// Load allow-list for V2 service if configured
+	allowList, err := loadAllowList(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	v2Service, err := v2service.New(sharedService, keybaseClient, allowList)
 	if err != nil {
 		return nil, err
 	}

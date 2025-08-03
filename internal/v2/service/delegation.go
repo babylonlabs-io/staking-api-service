@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -103,11 +104,35 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 			},
 		},
 		State:                    state,
-		CanExpand:                delegation.CanExpand,
+		CanExpand:                false, // Will be set by runtime evaluation below
 		PreviousStakingTxHashHex: delegation.PreviousStakingTxHashHex,
 	}
 
 	return delegationPublic, nil
+}
+
+// evaluateCanExpand determines if a delegation can be expanded based on runtime conditions:
+// 1. Delegation must be in Active state
+// 2. Delegation must have more than one finality provider
+// 3. Delegation hash must exist in the allow-list (if allow-list is configured, otherwise defaults to true)
+func (s *V2Service) evaluateCanExpand(delegation indexerdbmodel.IndexerDelegationDetails) bool {
+	// Condition 1: Check if delegation is in Active state
+	if delegation.State != indexertypes.StateActive {
+		return false
+	}
+
+	// Condition 2: Check if delegation has more than one finality provider
+	if len(delegation.FinalityProviderBtcPksHex) <= 1 {
+		return false
+	}
+
+	// Condition 3: Check if delegation hash exists in allow-list (if allow-list is configured)
+	// If no allow-list is configured, allow expansion for delegations meeting first 2 conditions
+	if len(s.allowList) == 0 {
+		return true // Allow expansion when no allow-list is configured
+	}
+
+	return s.allowList[delegation.StakingTxHashHex]
 }
 
 func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error) {
@@ -120,7 +145,15 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
 
-	return FromDelegationDocument(*delegation)
+	delegationPublic, delegationErr := FromDelegationDocument(*delegation)
+	if delegationErr != nil {
+		return nil, delegationErr
+	}
+
+	// Apply runtime canExpand evaluation
+	delegationPublic.CanExpand = s.evaluateCanExpand(*delegation)
+
+	return delegationPublic, nil
 }
 
 func (s *V2Service) GetDelegations(
@@ -150,6 +183,10 @@ func (s *V2Service) GetDelegations(
 		if delErr != nil {
 			return nil, "", delErr
 		}
+
+		// Apply runtime canExpand evaluation for each delegation
+		delegationPublic.CanExpand = s.evaluateCanExpand(delegation)
+
 		delegationsPublic = append(delegationsPublic, delegationPublic)
 	}
 
