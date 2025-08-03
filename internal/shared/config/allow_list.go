@@ -12,5 +12,9 @@ func (cfg *AllowList) Validate() error {
 		return fmt.Errorf("allow-list: expiration block cannot be zero")
 	}
 
+	if cfg.FilePath == "" {
+		return fmt.Errorf("allow-list: file_path cannot be empty when allow-list is configured")
+	}
+
 	return nil
 }

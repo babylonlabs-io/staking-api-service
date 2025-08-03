@@ -1,6 +1,7 @@
 package v2service
 
 import (
+	"context"
 	"slices"
 	"testing"
 
@@ -14,7 +15,7 @@ import (
 )
 
 func TestGetNetworkInfo(t *testing.T) {
-	ctx := t.Context()
+	ctx := context.Background()
 	t.Run("BBN params are sorted", func(t *testing.T) {
 		indexerDB := &mocks.IndexerDBClient{}
 		defer indexerDB.AssertExpectations(t)
@@ -37,7 +38,7 @@ func TestGetNetworkInfo(t *testing.T) {
 		sharedService, err := service.New(cfg, nil, nil, nil, dbClients)
 		require.NoError(t, err)
 
-		service, err := New(sharedService, nil)
+		service, err := New(sharedService, nil, make(map[string]bool))
 		require.NoError(t, err)
 
 		resp, rpcErr := service.GetNetworkInfo(ctx)

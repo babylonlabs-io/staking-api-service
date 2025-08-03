@@ -1,6 +1,7 @@
 package v2service
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -18,7 +19,7 @@ import (
 )
 
 func Test_GetOverallStats(t *testing.T) {
-	ctx := t.Context()
+	ctx := context.Background()
 
 	dbShared := mocks.NewDBClient(t)
 	dbV1 := mocks.NewV1DBClient(t)
@@ -34,7 +35,7 @@ func Test_GetOverallStats(t *testing.T) {
 		Clients: &clients.Clients{
 			CoinMarketCap: cmc.NewClient(nil),
 		},
-	}, nil)
+	}, nil, make(map[string]bool))
 	require.NoError(t, err)
 
 	t.Run("V2 DB failure", func(t *testing.T) {

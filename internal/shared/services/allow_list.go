@@ -10,16 +10,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func loadAllowList(cfg *config.Config) (map[string]bool, error) {
-	if cfg.AllowList == nil || cfg.AllowList.FilePath == "" {
+// loadAllowList loads allow-list from configuration at the application level.
+// Returns a non-nil map, empty if no allow-list is configured.
+func loadAllowList(cfg *config.Config) map[string]bool {
+	if cfg.AllowList == nil {
 		log.Debug().Msg("No allow-list configured, canExpand will default to true for Active delegations with >1 finality providers")
-		return make(map[string]bool), nil
+		return make(map[string]bool)
 	}
 
 	stakingHashes, err := loadAllowListFile(cfg.AllowList.FilePath)
 	if err != nil {
-		log.Warn().Err(err).Str("path", cfg.AllowList.FilePath).Msg("Failed to load allow-list file, continuing without allow-list")
-		return make(map[string]bool), nil
+		log.Error().Err(err).Str("path", cfg.AllowList.FilePath).Msg("Failed to load allow-list file, continuing without allow-list")
+		return make(map[string]bool)
 	}
 
 	allowList := make(map[string]bool, len(stakingHashes))
@@ -32,13 +34,13 @@ func loadAllowList(cfg *config.Config) (map[string]bool, error) {
 		Str("file", cfg.AllowList.FilePath).
 		Msg("Allow-list loaded successfully during application initialization")
 
-	return allowList, nil
+	return allowList
 }
 
 func loadAllowListFile(filePath string) ([]string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open allow-list file %s: %w", filePath, err)
+		return nil, fmt.Errorf("failed to open allow-list file %q: %w", filePath, err)
 	}
 	defer file.Close()
 

@@ -61,7 +61,7 @@ type DelegationPublic struct {
 	PreviousStakingTxHashHex  string                  `json:"previous_staking_tx_hash_hex,omitempty"`
 }
 
-func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) (*DelegationPublic, *types.Error) {
+func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails, canExpand bool) (*DelegationPublic, *types.Error) {
 	state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
 	if err != nil {
 		return nil, types.NewErrorWithMsg(
@@ -104,7 +104,7 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 			},
 		},
 		State:                    state,
-		CanExpand:                false, // Will be set by runtime evaluation below
+		CanExpand:                canExpand,
 		PreviousStakingTxHashHex: delegation.PreviousStakingTxHashHex,
 	}
 
@@ -145,13 +145,13 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
 
-	delegationPublic, delegationErr := FromDelegationDocument(*delegation)
+	// Evaluate canExpand before creating delegation document
+	canExpand := s.evaluateCanExpand(*delegation)
+
+	delegationPublic, delegationErr := FromDelegationDocument(*delegation, canExpand)
 	if delegationErr != nil {
 		return nil, delegationErr
 	}
-
-	// Apply runtime canExpand evaluation
-	delegationPublic.CanExpand = s.evaluateCanExpand(*delegation)
 
 	return delegationPublic, nil
 }
@@ -179,13 +179,13 @@ func (s *V2Service) GetDelegations(
 
 	// Type delegations by state
 	for _, delegation := range resultMap.Data {
-		delegationPublic, delErr := FromDelegationDocument(delegation)
+		// Evaluate canExpand before creating delegation document
+		canExpand := s.evaluateCanExpand(delegation)
+
+		delegationPublic, delErr := FromDelegationDocument(delegation, canExpand)
 		if delErr != nil {
 			return nil, "", delErr
 		}
-
-		// Apply runtime canExpand evaluation for each delegation
-		delegationPublic.CanExpand = s.evaluateCanExpand(delegation)
 
 		delegationsPublic = append(delegationsPublic, delegationPublic)
 	}
