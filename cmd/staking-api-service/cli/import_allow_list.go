@@ -26,7 +26,7 @@ func ImportAllowListCmd() *cobra.Command {
 		"",
 		"Path to the allow-list file to import and validate (required)",
 	)
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	return cmd
 }

@@ -148,11 +148,13 @@ func TestEvaluateCanExpand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			indexerDB := mocks.NewIndexerDBClient(t)
 
-			// Mock GetBbnStakingParams call
-			if tt.expectedErrorInGetParams {
-				indexerDB.On("GetBbnStakingParams", ctx).Return(nil, tt.babylonParamsError).Once()
-			} else {
-				indexerDB.On("GetBbnStakingParams", ctx).Return(tt.babylonParams, nil).Once()
+			// Only mock GetBbnStakingParams call if delegation is active (will reach the params check)
+			if tt.delegation.State == indexertypes.StateActive {
+				if tt.expectedErrorInGetParams {
+					indexerDB.On("GetBbnStakingParams", ctx).Return(nil, tt.babylonParamsError).Once()
+				} else {
+					indexerDB.On("GetBbnStakingParams", ctx).Return(tt.babylonParams, nil).Once()
+				}
 			}
 
 			cfg := &config.Config{}
