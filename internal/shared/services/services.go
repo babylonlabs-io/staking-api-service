@@ -17,7 +17,7 @@ type Services struct {
 	V2Service     v2service.V2ServiceProvider
 }
 
-func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders []types.FinalityProviderDetails, clients *clients.Clients, dbClients *dbclients.DbClients, keybaseClient *keybase.Client) (*Services, error) {
+func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders []types.FinalityProviderDetails, clients *clients.Clients, dbClients *dbclients.DbClients, keybaseClient *keybase.Client, allowList map[string]bool) (*Services, error) {
 	// todo remove errors in service constructors (they are always nil)
 	sharedService, err := service.New(cfg, globalParams, finalityProviders, clients, dbClients)
 	if err != nil {
@@ -28,9 +28,6 @@ func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders
 	if err != nil {
 		return nil, err
 	}
-
-	// Load allow-list for V2 service if configured
-	allowList := loadAllowList(cfg)
 
 	v2Service, err := v2service.New(sharedService, keybaseClient, allowList)
 	if err != nil {

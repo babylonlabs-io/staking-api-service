@@ -74,6 +74,13 @@ func main() {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading finality providers file: %s", finalityProvidersPath))
 	}
 
+	allowListPath := cli.GetAllowListPath()
+	allowList, err := types.NewAllowList(allowListPath)
+	if err != nil {
+		log.Warn().Err(err).Str("path", allowListPath).Msg("Failed to load allow-list file, continuing without allow-list")
+		allowList = make(map[string]bool)
+	}
+
 	err = dbmodel.Setup(ctx, cfg.StakingDb, cfg.ExternalAPIs)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking db model")
@@ -93,7 +100,7 @@ func main() {
 	}
 
 	keybaseClient := keybase.NewClient()
-	services, err := services.New(cfg, params, finalityProviders, clients, dbClients, keybaseClient)
+	services, err := services.New(cfg, params, finalityProviders, clients, dbClients, keybaseClient, allowList)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking services layer")
 	}

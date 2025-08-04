@@ -14,7 +14,7 @@ type V2Service struct {
 	cfg           *config.Config
 	sharedService *service.Service
 	keybaseClient *keybase.Client
-	allowList     map[string]bool // loaded once on init for canExpand evaluation
+	allowList     map[string]bool 
 }
 
 func New(sharedService *service.Service, keybaseClient *keybase.Client, allowList map[string]bool) (*V2Service, error) {

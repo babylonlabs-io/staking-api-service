@@ -1,4 +1,4 @@
-package services
+package types
 
 import (
 	"bufio"
@@ -6,22 +6,20 @@ import (
 	"os"
 	"strings"
 
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/rs/zerolog/log"
 )
 
-// loadAllowList loads allow-list from configuration at the application level.
-// Returns a non-nil map, empty if no allow-list is configured.
-func loadAllowList(cfg *config.Config) map[string]bool {
-	if cfg.AllowList == nil {
-		log.Debug().Msg("No allow-list configured, canExpand will default to true for Active delegations with >1 finality providers")
-		return make(map[string]bool)
+// NewAllowList loads allow-list from file path and returns a map for O(1) lookup.
+// Returns an empty map if the file path is empty or file doesn't exist.
+func NewAllowList(path string) (map[string]bool, error) {
+	if path == "" {
+		log.Debug().Msg("No allow-list path provided, canExpand will use default logic")
+		return make(map[string]bool), nil
 	}
 
-	stakingHashes, err := loadAllowListFile(cfg.AllowList.FilePath)
+	stakingHashes, err := loadAllowListFile(path)
 	if err != nil {
-		log.Error().Err(err).Str("path", cfg.AllowList.FilePath).Msg("Failed to load allow-list file, continuing without allow-list")
-		return make(map[string]bool)
+		return nil, fmt.Errorf("failed to load allow-list from %q: %w", path, err)
 	}
 
 	allowList := make(map[string]bool, len(stakingHashes))
@@ -31,10 +29,10 @@ func loadAllowList(cfg *config.Config) map[string]bool {
 
 	log.Info().
 		Int("count", len(stakingHashes)).
-		Str("file", cfg.AllowList.FilePath).
+		Str("file", path).
 		Msg("Allow-list loaded successfully during application initialization")
 
-	return allowList
+	return allowList, nil
 }
 
 func loadAllowListFile(filePath string) ([]string, error) {
