@@ -12,7 +12,7 @@ const (
 	defaultConfigFileName            = "config.yml"
 	defaultGlobalParamsFileName      = "global_params.json"
 	defaultFinalityProvidersFileName = "finality_providers.json"
-	defaultAllowListFileName         = "allow_list.txt"
+	defaultAllowListFileName         = "allow_list.json"
 )
 
 var (

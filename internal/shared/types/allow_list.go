@@ -1,64 +1,46 @@
 package types
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 )
 
-// NewAllowList loads allow-list from file path and returns a map for O(1) lookup.
-// Returns an empty map if the file path is empty or file doesn't exist.
+// NewAllowList loads allow-list from JSON file and returns a map lookup.
+// Returns an empty map if the file path is empty.
+// Expects JSON file to be an array of staking transaction hashes
 func NewAllowList(path string) (map[string]bool, error) {
 	if path == "" {
 		log.Debug().Msg("No allow-list path provided, canExpand will use default logic")
 		return make(map[string]bool), nil
 	}
 
-	stakingHashes, err := loadAllowListFile(path)
+	data, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
-		return nil, fmt.Errorf("failed to load allow-list from %q: %w", path, err)
+		return nil, fmt.Errorf("failed to read allow-list file %q: %w", path, err)
 	}
 
+	var stakingHashes []string
+	err = json.Unmarshal(data, &stakingHashes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse allow-list JSON from %q: %w", path, err)
+	}
+
+	// Convert slice to map for fast lookup in runtime
 	allowList := make(map[string]bool, len(stakingHashes))
 	for _, hash := range stakingHashes {
-		allowList[hash] = true
+		if hash != "" { // Skip empty strings
+			allowList[hash] = true
+		}
 	}
 
 	log.Info().
-		Int("count", len(stakingHashes)).
+		Int("count", len(allowList)).
 		Str("file", path).
-		Msg("Allow-list loaded successfully during application initialization")
+		Msg("Allow-list loaded successfully from JSON file")
 
 	return allowList, nil
-}
-
-func loadAllowListFile(filePath string) ([]string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open allow-list file %q: %w", filePath, err)
-	}
-	defer file.Close()
-
-	var stakingHashes []string
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-
-		// Skip empty lines and comments
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		stakingHashes = append(stakingHashes, line)
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("error reading allow-list file: %w", err)
-	}
-
-	return stakingHashes, nil
 }

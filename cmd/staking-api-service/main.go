@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/cli"
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
@@ -74,12 +75,8 @@ func main() {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading finality providers file: %s", finalityProvidersPath))
 	}
 
-	allowListPath := cli.GetAllowListPath()
-	allowList, err := types.NewAllowList(allowListPath)
-	if err != nil {
-		log.Warn().Err(err).Str("path", allowListPath).Msg("Failed to load allow-list file, continuing without allow-list")
-		allowList = make(map[string]bool)
-	}
+	// Load allow-list if file exists, continue without it if file doesn't exist
+	allowList := loadAllowList()
 
 	err = dbmodel.Setup(ctx, cfg.StakingDb, cfg.ExternalAPIs)
 	if err != nil {
@@ -112,22 +109,7 @@ func main() {
 		log.Fatal().Err(err).Msg("error while setting up queue service")
 	}
 
-	// Check if the scripts flag is set
-	if cli.GetReplayFlag() {
-		log.Info().Msg("Replay flag is set. Starting to process unprocessable messages.")
-
-		err := scripts.ReplayUnprocessableMessages(ctx, cfg, v2queues, dbClients.SharedDBClient)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to replay unprocessable messages")
-		}
-
-		return
-	} else if cli.GetBackfillPubkeyAddressFlag() {
-		log.Info().Msg("Backfill pubkey address flag is set. Starting backfill of pubkey address mappings.")
-		err := scripts.BackfillPubkeyAddressesMappings(ctx, cfg)
-		if err != nil {
-			log.Fatal().Err(err).Msg("error while backfilling pubkey address mappings")
-		}
+	if handleScriptExecution(ctx, cfg, v2queues, dbClients) {
 		return
 	}
 
@@ -149,5 +131,40 @@ func main() {
 	}
 	if err = apiServer.Start(); err != nil {
 		log.Fatal().Err(err).Msg("error while starting staking api service")
+	}
+}
+
+func loadAllowList() map[string]bool {
+	allowListPath := cli.GetAllowListPath()
+	if _, err := os.Stat(allowListPath); os.IsNotExist(err) {
+		log.Info().Str("path", allowListPath).Msg("Allow-list file not found, continuing without allow-list")
+		return make(map[string]bool)
+	} else if err != nil {
+		log.Fatal().Err(err).Str("path", allowListPath).Msg("error while checking allow-list file")
+	}
+
+	allowList, err := types.NewAllowList(allowListPath)
+	if err != nil {
+		log.Fatal().Err(err).Str("path", allowListPath).Msg("error while loading allow-list file")
+	}
+	return allowList
+}
+
+func handleScriptExecution(ctx context.Context, cfg *config.Config, v2queues *v2queue.Queues, dbClients *dbclients.DbClients) bool {
+	switch {
+	case cli.GetReplayFlag():
+		log.Info().Msg("Replay flag is set. Starting to process unprocessable messages.")
+		if err := scripts.ReplayUnprocessableMessages(ctx, cfg, v2queues, dbClients.SharedDBClient); err != nil {
+			log.Fatal().Err(err).Msg("Failed to replay unprocessable messages")
+		}
+		return true
+	case cli.GetBackfillPubkeyAddressFlag():
+		log.Info().Msg("Backfill pubkey address flag is set. Starting backfill of pubkey address mappings.")
+		if err := scripts.BackfillPubkeyAddressesMappings(ctx, cfg); err != nil {
+			log.Fatal().Err(err).Msg("error while backfilling pubkey address mappings")
+		}
+		return true
+	default:
+		return false
 	}
 }
