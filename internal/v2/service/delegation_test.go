@@ -203,6 +203,16 @@ func TestGetLatestMaxFinalityProviders(t *testing.T) {
 			expectError:    false,
 		},
 		{
+			name: "First element has highest MaxFinalityProviders but not highest version",
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 10}, // Highest MaxFinalityProviders but lowest version
+				{Version: 5, MaxFinalityProviders: 3},  // Highest version
+				{Version: 3, MaxFinalityProviders: 7},
+			},
+			expectedResult: 3, // Version 5 is the latest, should return its MaxFinalityProviders (3)
+			expectError:    false,
+		},
+		{
 			name:          "No params found",
 			babylonParams: []*indexertypes.BbnStakingParams{},
 			expectError:   true,

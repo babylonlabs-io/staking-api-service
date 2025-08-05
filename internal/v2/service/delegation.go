@@ -1,9 +1,11 @@
 package v2service
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
@@ -154,13 +156,13 @@ func (s *V2Service) getLatestMaxFinalityProviders(ctx context.Context) (uint32, 
 		return 0, fmt.Errorf("no babylon staking params found")
 	}
 
-	// Find the latest params (highest version)
-	latestParams := params[0]
-	for _, param := range params {
-		if param.Version > latestParams.Version {
-			latestParams = param
-		}
-	}
+	// Sort params by version in ascending order to find the latest (highest version)
+	slices.SortFunc(params, func(a, b *indexertypes.BbnStakingParams) int {
+		return cmp.Compare(a.Version, b.Version)
+	})
+
+	// Get the latest params (last element after sorting)
+	latestParams := params[len(params)-1]
 
 	return latestParams.MaxFinalityProviders, nil
 }
