@@ -11,8 +11,8 @@ import (
 )
 
 type StakingStatusPublic struct {
-	IsStakingOpen bool             `json:"is_staking_open"`
-	AllowList     *AllowListPublic `json:"allow_list"`
+	IsStakingOpen             bool             `json:"is_staking_open"`
+	StakingExpansionAllowList *AllowListPublic `json:"staking_expansion_allow_list"`
 }
 
 type POPUpgradePublic struct {
@@ -96,7 +96,7 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 		}
 
 		isExpired := lastHeight >= allowList.ExpirationBlock
-		result.StakingStatus.AllowList = &AllowListPublic{
+		result.StakingStatus.StakingExpansionAllowList = &AllowListPublic{
 			IsExpired: isExpired,
 		}
 	}

@@ -1541,7 +1541,7 @@
         "v2service.StakingStatusPublic": {
             "type": "object",
             "properties": {
-                "allow_list": {
+                "staking_expansion_allow_list": {
                     "$ref": "#/definitions/v2service.AllowListPublic"
                 },
                 "is_staking_open": {
