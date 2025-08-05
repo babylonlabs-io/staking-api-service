@@ -1,10 +1,14 @@
 package v2service
 
 import (
+	"cmp"
 	"context"
+	"fmt"
 	"net/http"
+	"slices"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -60,7 +64,7 @@ type DelegationPublic struct {
 	PreviousStakingTxHashHex  string                  `json:"previous_staking_tx_hash_hex,omitempty"`
 }
 
-func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) (*DelegationPublic, *types.Error) {
+func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails, canExpand bool) (*DelegationPublic, *types.Error) {
 	state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
 	if err != nil {
 		return nil, types.NewErrorWithMsg(
@@ -103,11 +107,85 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 			},
 		},
 		State:                    state,
-		CanExpand:                delegation.CanExpand,
+		CanExpand:                canExpand,
 		PreviousStakingTxHashHex: delegation.PreviousStakingTxHashHex,
 	}
 
 	return delegationPublic, nil
+}
+
+// evaluateCanExpand determines if a delegation can be expanded based on runtime conditions:
+// 1. Delegation must be in Active state
+// 2. Delegation must not have reached the maximum finality providers limit
+// 3. Delegation hash must exist in the allow-list (if allow-list is configured, otherwise defaults to true)
+func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbmodel.IndexerDelegationDetails) bool {
+	// Condition 1: Check if delegation is in Active state
+	if delegation.State != indexertypes.StateActive {
+		return false
+	}
+
+	// Condition 2: Check if delegation has reached the maximum finality providers limit
+	maxFinalityProviders, err := s.getLatestMaxFinalityProviders(ctx)
+	if err != nil {
+		// Log error but don't block expansion - use conservative approach
+		log.Ctx(ctx).Error().Err(err).Msg("Failed to get max finality providers, using conservative approach")
+		return false
+	}
+
+	if uint32(len(delegation.FinalityProviderBtcPksHex)) >= maxFinalityProviders {
+		return false
+	}
+
+	// Condition 3: Check allow-list configuration and expiration
+	// If no allow-list is configured, allow expansion for delegations meeting first 2 conditions
+	if len(s.allowList) == 0 {
+		return true
+	}
+
+	// Check if allow-list has expired by comparing with current BBN height
+	if allowListConfig := s.cfg.AllowList; allowListConfig != nil {
+		lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+		if err != nil {
+			log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height for allow-list expiration check")
+			return false
+		}
+
+		// If allow-list has expired, allow expansion for all active delegations
+		if lastHeight >= allowListConfig.ExpirationBlock {
+			return true
+		}
+	}
+
+	// Allow-list is active and not expired
+	return s.allowList[delegation.StakingTxHashHex]
+}
+
+// getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
+// Uses version-based selection to find the highest version
+// TODO: Use BTC height-based selection when current BTC height implementation is available
+func (s *V2Service) getLatestMaxFinalityProviders(ctx context.Context) (uint32, error) {
+	params, err := s.getBbnStakingParams(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get babylon staking params: %w", err)
+	}
+
+	if len(params) == 0 {
+		return 0, fmt.Errorf("no babylon staking params found")
+	}
+
+	// Sort params by version in ascending order to find the latest (highest version)
+	slices.SortFunc(params, func(a, b *indexertypes.BbnStakingParams) int {
+		return cmp.Compare(a.Version, b.Version)
+	})
+
+	// Get the latest params (last element after sorting)
+	latestParams := params[len(params)-1]
+
+	log.Ctx(ctx).Debug().
+		Uint32("selected_version", latestParams.Version).
+		Msg("Selected staking params by version")
+
+	return latestParams.MaxFinalityProviders, nil
 }
 
 func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error) {
@@ -120,7 +198,10 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
 
-	return FromDelegationDocument(*delegation)
+	// Evaluate canExpand before creating delegation document
+	canExpand := s.evaluateCanExpand(ctx, *delegation)
+
+	return FromDelegationDocument(*delegation, canExpand)
 }
 
 func (s *V2Service) GetDelegations(
@@ -146,10 +227,14 @@ func (s *V2Service) GetDelegations(
 
 	// Type delegations by state
 	for _, delegation := range resultMap.Data {
-		delegationPublic, delErr := FromDelegationDocument(delegation)
+		// Evaluate canExpand before creating delegation document
+		canExpand := s.evaluateCanExpand(ctx, delegation)
+
+		delegationPublic, delErr := FromDelegationDocument(delegation, canExpand)
 		if delErr != nil {
 			return nil, "", delErr
 		}
+
 		delegationsPublic = append(delegationsPublic, delegationPublic)
 	}
 

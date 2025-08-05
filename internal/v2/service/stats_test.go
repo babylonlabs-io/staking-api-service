@@ -34,7 +34,7 @@ func Test_GetOverallStats(t *testing.T) {
 		Clients: &clients.Clients{
 			CoinMarketCap: cmc.NewClient(nil),
 		},
-	}, nil)
+	}, nil, nil)
 	require.NoError(t, err)
 
 	t.Run("V2 DB failure", func(t *testing.T) {
