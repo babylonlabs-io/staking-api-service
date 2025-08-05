@@ -13,15 +13,9 @@ import (
 // Returns an empty map if the file doesn't exist or if the file exists but fails to load.
 // Expects JSON file to be an array of staking transaction hashes
 func NewAllowList(path string) (map[string]bool, error) {
-	if path == "" {
-		log.Debug().Msg("No allow-list path provided, canExpand will use default logic")
-		return make(map[string]bool), nil
-	}
-
 	// Check if file exists first
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Info().Str("path", path).Msg("Allow-list file not found, continuing without allow-list")
-		return make(map[string]bool), nil
+		return nil, fmt.Errorf("allow-list file %q does not exist", path)
 	} else if err != nil {
 		return nil, fmt.Errorf("error while checking allow-list file %q: %w", path, err)
 	}
