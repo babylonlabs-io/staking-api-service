@@ -161,7 +161,8 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 }
 
 // getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
-// Uses BTC height-based selection when current BTC height is available, falls back to version-based selection otherwise
+// Uses version-based selection to find the highest version
+// TODO: Use BTC height-based selection when current BTC height implementation is available
 func (s *V2Service) getLatestMaxFinalityProviders(ctx context.Context) (uint32, error) {
 	params, err := s.getBbnStakingParams(ctx)
 	if err != nil {
@@ -171,40 +172,6 @@ func (s *V2Service) getLatestMaxFinalityProviders(ctx context.Context) (uint32, 
 	if len(params) == 0 {
 		return 0, fmt.Errorf("no babylon staking params found")
 	}
-
-	// Get current BTC height for height-based parameter selection
-	btcInfo, btcErr := s.dbClients.V1DBClient.GetLatestBtcInfo(ctx)
-	if btcErr == nil && btcInfo != nil {
-		// BTC height is available - use height-based selection
-		currentBtcHeight := uint32(btcInfo.BtcHeight)
-
-		// Sort params by BtcActivationHeight in ascending order
-		slices.SortFunc(params, func(a, b *indexertypes.BbnStakingParams) int {
-			return cmp.Compare(a.BtcActivationHeight, b.BtcActivationHeight)
-		})
-
-		// Find the latest params with BtcActivationHeight <= current BTC height
-		// Iterate in reverse to find the highest activation height that's still active
-		for i := len(params) - 1; i >= 0; i-- {
-			if params[i].BtcActivationHeight <= currentBtcHeight {
-				log.Ctx(ctx).Debug().
-					Uint32("selected_btc_activation_height", params[i].BtcActivationHeight).
-					Uint32("current_btc_height", currentBtcHeight).
-					Uint32("version", params[i].Version).
-					Msg("Selected staking params by BTC height")
-				return params[i].MaxFinalityProviders, nil
-			}
-		}
-
-		// Fallback: If no params are active yet, use the earliest one
-		log.Ctx(ctx).Warn().
-			Uint32("current_btc_height", currentBtcHeight).
-			Msg("No staking params active at current BTC height, using earliest params")
-		return params[0].MaxFinalityProviders, nil
-	}
-
-	// BTC height not available - fall back to version-based selection
-	log.Ctx(ctx).Debug().Err(btcErr).Msg("BTC height not available, using version-based parameter selection")
 
 	// Sort params by version in ascending order to find the latest (highest version)
 	slices.SortFunc(params, func(a, b *indexertypes.BbnStakingParams) int {
@@ -216,7 +183,7 @@ func (s *V2Service) getLatestMaxFinalityProviders(ctx context.Context) (uint32, 
 
 	log.Ctx(ctx).Debug().
 		Uint32("selected_version", latestParams.Version).
-		Msg("Selected staking params by version (fallback)")
+		Msg("Selected staking params by version")
 
 	return latestParams.MaxFinalityProviders, nil
 }
