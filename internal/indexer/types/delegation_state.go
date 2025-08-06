@@ -9,8 +9,9 @@ const (
 	StateActive       DelegationState = "ACTIVE"
 	StateUnbonding    DelegationState = "UNBONDING"
 	StateWithdrawable DelegationState = "WITHDRAWABLE"
-	StateWithdrawn    DelegationState = "WITHDRAWN"
 	StateSlashed      DelegationState = "SLASHED"
+	StateWithdrawn    DelegationState = "WITHDRAWN"
+	StateExpanded     DelegationState = "EXPANDED"
 )
 
 func (s DelegationState) String() string {

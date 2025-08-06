@@ -31,6 +31,9 @@ const (
 	StateEarlyUnbondingWithdrawn         DelegationState = "EARLY_UNBONDING_WITHDRAWN"
 	StateTimelockSlashingWithdrawn       DelegationState = "TIMELOCK_SLASHING_WITHDRAWN"
 	StateEarlyUnbondingSlashingWithdrawn DelegationState = "EARLY_UNBONDING_SLASHING_WITHDRAWN"
+
+	// Expanded states
+	StateExpanded DelegationState = "EXPANDED"
 )
 
 // MapDelegationState consumes internal indexer states and maps them to the frontend-facing states
@@ -44,39 +47,59 @@ func MapDelegationState(state indexertypes.DelegationState, subState indexertype
 		return StateActive, nil
 	case indexertypes.StateSlashed:
 		return StateSlashed, nil
-
+	case indexertypes.StateExpanded:
+		return StateExpanded, nil
 	case indexertypes.StateUnbonding:
-		switch subState {
-		case indexertypes.SubStateTimelock:
-			return StateTimelockUnbonding, nil
-		case indexertypes.SubStateEarlyUnbonding:
-			return StateEarlyUnbonding, nil
-		}
-
+		return mapUnbondingState(subState)
 	case indexertypes.StateWithdrawable:
-		switch subState {
-		case indexertypes.SubStateTimelock:
-			return StateTimelockWithdrawable, nil
-		case indexertypes.SubStateEarlyUnbonding:
-			return StateEarlyUnbondingWithdrawable, nil
-		case indexertypes.SubStateTimelockSlashing:
-			return StateTimelockSlashingWithdrawable, nil
-		case indexertypes.SubStateEarlyUnbondingSlashing:
-			return StateEarlyUnbondingSlashingWithdrawable, nil
-		}
-
+		return mapWithdrawableState(subState)
 	case indexertypes.StateWithdrawn:
-		switch subState {
-		case indexertypes.SubStateTimelock:
-			return StateTimelockWithdrawn, nil
-		case indexertypes.SubStateEarlyUnbonding:
-			return StateEarlyUnbondingWithdrawn, nil
-		case indexertypes.SubStateTimelockSlashing:
-			return StateTimelockSlashingWithdrawn, nil
-		case indexertypes.SubStateEarlyUnbondingSlashing:
-			return StateEarlyUnbondingSlashingWithdrawn, nil
-		}
+		return mapWithdrawnState(subState)
 	}
 
 	return "", fmt.Errorf("invalid state/subState combination: state=%s, subState=%s", state, subState)
+}
+
+// mapUnbondingState maps unbonding states based on subState
+func mapUnbondingState(subState indexertypes.DelegationSubState) (DelegationState, error) {
+	switch subState {
+	case indexertypes.SubStateTimelock:
+		return StateTimelockUnbonding, nil
+	case indexertypes.SubStateEarlyUnbonding:
+		return StateEarlyUnbonding, nil
+	default:
+		return "", fmt.Errorf("invalid subState for StateUnbonding: %s", subState)
+	}
+}
+
+// mapWithdrawableState maps withdrawable states based on subState
+func mapWithdrawableState(subState indexertypes.DelegationSubState) (DelegationState, error) {
+	switch subState {
+	case indexertypes.SubStateTimelock:
+		return StateTimelockWithdrawable, nil
+	case indexertypes.SubStateEarlyUnbonding:
+		return StateEarlyUnbondingWithdrawable, nil
+	case indexertypes.SubStateTimelockSlashing:
+		return StateTimelockSlashingWithdrawable, nil
+	case indexertypes.SubStateEarlyUnbondingSlashing:
+		return StateEarlyUnbondingSlashingWithdrawable, nil
+	default:
+		return "", fmt.Errorf("invalid subState for StateWithdrawable: %s", subState)
+	}
+}
+
+// mapWithdrawnState maps withdrawn states based on subState
+func mapWithdrawnState(subState indexertypes.DelegationSubState) (DelegationState, error) {
+	switch subState {
+	case indexertypes.SubStateTimelock:
+		return StateTimelockWithdrawn, nil
+	case indexertypes.SubStateEarlyUnbonding:
+		return StateEarlyUnbondingWithdrawn, nil
+	case indexertypes.SubStateTimelockSlashing:
+		return StateTimelockSlashingWithdrawn, nil
+	case indexertypes.SubStateEarlyUnbondingSlashing:
+		return StateEarlyUnbondingSlashingWithdrawn, nil
+	default:
+		return "", fmt.Errorf("invalid subState for StateWithdrawn: %s", subState)
+	}
 }

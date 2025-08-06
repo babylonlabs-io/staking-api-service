@@ -564,10 +564,10 @@ definitions:
     type: object
   v2service.StakingStatusPublic:
     properties:
-      staking_expansion_allow_list:
-        $ref: '#/definitions/v2service.AllowListPublic'
       is_staking_open:
         type: boolean
+      staking_expansion_allow_list:
+        $ref: '#/definitions/v2service.AllowListPublic'
     type: object
   v2service.UnbondingSlashing:
     properties:
@@ -592,6 +592,7 @@ definitions:
     - EARLY_UNBONDING_WITHDRAWN
     - TIMELOCK_SLASHING_WITHDRAWN
     - EARLY_UNBONDING_SLASHING_WITHDRAWN
+    - EXPANDED
     type: string
     x-enum-varnames:
     - StatePending
@@ -608,6 +609,7 @@ definitions:
     - StateEarlyUnbondingWithdrawn
     - StateTimelockSlashingWithdrawn
     - StateEarlyUnbondingSlashingWithdrawn
+    - StateExpanded
 info:
   contact:
     email: contact@babylonlabs.io

@@ -1549,11 +1549,11 @@ const docTemplate = `{
         "v2service.StakingStatusPublic": {
             "type": "object",
             "properties": {
-                "allow_list": {
-                    "$ref": "#/definitions/v2service.AllowListPublic"
-                },
                 "is_staking_open": {
                     "type": "boolean"
+                },
+                "staking_expansion_allow_list": {
+                    "$ref": "#/definitions/v2service.AllowListPublic"
                 }
             }
         },
@@ -1584,7 +1584,8 @@ const docTemplate = `{
                 "TIMELOCK_WITHDRAWN",
                 "EARLY_UNBONDING_WITHDRAWN",
                 "TIMELOCK_SLASHING_WITHDRAWN",
-                "EARLY_UNBONDING_SLASHING_WITHDRAWN"
+                "EARLY_UNBONDING_SLASHING_WITHDRAWN",
+                "EXPANDED"
             ],
             "x-enum-varnames": [
                 "StatePending",
@@ -1600,7 +1601,8 @@ const docTemplate = `{
                 "StateTimelockWithdrawn",
                 "StateEarlyUnbondingWithdrawn",
                 "StateTimelockSlashingWithdrawn",
-                "StateEarlyUnbondingSlashingWithdrawn"
+                "StateEarlyUnbondingSlashingWithdrawn",
+                "StateExpanded"
             ]
         }
     },
