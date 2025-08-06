@@ -36,7 +36,6 @@ func Setup() error {
 	defaultConfigPath := getDefaultConfigFile(homePath, defaultConfigFileName)
 	defaultGlobalParamsPath := getDefaultConfigFile(homePath, defaultGlobalParamsFileName)
 	defaultFinalityProvidersPath := getDefaultConfigFile(homePath, defaultFinalityProvidersFileName)
-	defaultAllowListPath := getDefaultConfigFile(homePath, defaultAllowListFileName)
 
 	rootCmd.PersistentFlags().StringVar(
 		&cfgPath,
@@ -59,8 +58,8 @@ func Setup() error {
 	rootCmd.PersistentFlags().StringVar(
 		&allowListPath,
 		"allow-list",
-		defaultAllowListPath,
-		fmt.Sprintf("allow list file (default %s)", defaultAllowListPath),
+		"",
+		"allow list file (optional, defaults to empty string if not provided)",
 	)
 	rootCmd.PersistentFlags().BoolVar(
 		&replayFlag,

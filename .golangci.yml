@@ -129,6 +129,5 @@ issues:
         - lll
         - gosec
         - exhaustruct
-
 run:
   timeout: 5m
