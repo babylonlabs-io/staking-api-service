@@ -10,6 +10,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
+	v2types "github.com/babylonlabs-io/staking-api-service/internal/v2/types"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,6 +32,10 @@ func TestEvaluateCanExpand(t *testing.T) {
 	testHash6, err := testutil.RandomAlphaNum(10)
 	require.NoError(t, err)
 	testHash7, err := testutil.RandomAlphaNum(10)
+	require.NoError(t, err)
+	testHash8, err := testutil.RandomAlphaNum(10)
+	require.NoError(t, err)
+	testHash9, err := testutil.RandomAlphaNum(10)
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -142,6 +147,36 @@ func TestEvaluateCanExpand(t *testing.T) {
 			expectedResult:           false,
 			expectedErrorInGetParams: true,
 		},
+		{
+			name: "Expanded delegation should not expand further",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateExpanded,
+				StakingTxHashHex:          testHash8,
+				FinalityProviderBtcPksHex: []string{"fp1", "fp2"},
+			},
+			allowList: map[string]bool{
+				testHash8: true,
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: false, // Already expanded, should not expand further
+		},
+		{
+			name: "Expanded delegation not in allow-list should not expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateExpanded,
+				StakingTxHashHex:          testHash9,
+				FinalityProviderBtcPksHex: []string{"fp1", "fp2"},
+			},
+			allowList: map[string]bool{
+				"other-hash": true,
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: false, // Not in allow-list, should not expand
+		},
 	}
 
 	for _, tt := range tests {
@@ -171,6 +206,100 @@ func TestEvaluateCanExpand(t *testing.T) {
 			require.NoError(t, err)
 
 			result := v2Service.evaluateCanExpand(ctx, tt.delegation)
+			assert.Equal(t, tt.expectedResult, result)
+		})
+	}
+}
+
+func TestMapDelegationState(t *testing.T) {
+	tests := []struct {
+		name           string
+		state          indexertypes.DelegationState
+		subState       indexertypes.DelegationSubState
+		expectedResult v2types.DelegationState
+		expectError    bool
+	}{
+		{
+			name:           "Map StateExpanded with SubStateEarlyUnbonding",
+			state:          indexertypes.StateExpanded,
+			subState:       indexertypes.SubStateEarlyUnbonding,
+			expectedResult: v2types.StateExpanded,
+			expectError:    false,
+		},
+		{
+			name:           "Map StateExpanded with SubStateTimelock",
+			state:          indexertypes.StateExpanded,
+			subState:       indexertypes.SubStateTimelock,
+			expectedResult: v2types.StateExpanded,
+			expectError:    false,
+		},
+		{
+			name:           "Map StateExpanded with any subState should work",
+			state:          indexertypes.StateExpanded,
+			subState:       "any-substate",
+			expectedResult: v2types.StateExpanded,
+			expectError:    false,
+		},
+		{
+			name:           "Map StateActive",
+			state:          indexertypes.StateActive,
+			subState:       indexertypes.SubStateTimelock, // subState doesn't matter for StateActive
+			expectedResult: v2types.StateActive,
+			expectError:    false,
+		},
+		{
+			name:           "Map StatePending",
+			state:          indexertypes.StatePending,
+			subState:       indexertypes.SubStateTimelock, // subState doesn't matter for StatePending
+			expectedResult: v2types.StatePending,
+			expectError:    false,
+		},
+		{
+			name:           "Map StateVerified",
+			state:          indexertypes.StateVerified,
+			subState:       indexertypes.SubStateTimelock, // subState doesn't matter for StateVerified
+			expectedResult: v2types.StateVerified,
+			expectError:    false,
+		},
+		{
+			name:           "Map StateSlashed",
+			state:          indexertypes.StateSlashed,
+			subState:       indexertypes.SubStateTimelock, // subState doesn't matter for StateSlashed
+			expectedResult: v2types.StateSlashed,
+			expectError:    false,
+		},
+		{
+			name:           "Map StateUnbonding with SubStateTimelock",
+			state:          indexertypes.StateUnbonding,
+			subState:       indexertypes.SubStateTimelock,
+			expectedResult: v2types.StateTimelockUnbonding,
+			expectError:    false,
+		},
+		{
+			name:           "Map StateUnbonding with SubStateEarlyUnbonding",
+			state:          indexertypes.StateUnbonding,
+			subState:       indexertypes.SubStateEarlyUnbonding,
+			expectedResult: v2types.StateEarlyUnbonding,
+			expectError:    false,
+		},
+		{
+			name:        "Map StateUnbonding with invalid subState should error",
+			state:       indexertypes.StateUnbonding,
+			subState:    "invalid-substate",
+			expectError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := v2types.MapDelegationState(tt.state, tt.subState)
+
+			if tt.expectError {
+				assert.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
 			assert.Equal(t, tt.expectedResult, result)
 		})
 	}
