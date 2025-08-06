@@ -564,7 +564,7 @@ definitions:
     type: object
   v2service.StakingStatusPublic:
     properties:
-      allow_list:
+      staking_expansion_allow_list:
         $ref: '#/definitions/v2service.AllowListPublic'
       is_staking_open:
         type: boolean
