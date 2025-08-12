@@ -19,6 +19,7 @@ import (
 	v2queue "github.com/babylonlabs-io/staking-api-service/internal/v2/queue"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 )
 
 func init() {
@@ -113,6 +114,11 @@ func main() {
 
 	if handleScriptExecution(ctx, cfg, v2queues, dbClients) {
 		return
+	}
+
+	_, err = dbClients.IndexerDBClient.GetNetworkInfo(ctx)
+	if db.IsNotFoundError(err) {
+		log.Fatal().Err(err).Msg("network_info collection is not populated by indexer")
 	}
 
 	// Start the event queue processing
