@@ -11,16 +11,18 @@ import (
 
 const networkInfoID = "singleton"
 
-type networkInfoDoc struct {
-	ID                 string `bson:"_id"`
-	*model.NetworkInfo `bson:",inline"`
+type chainInfoDoc struct {
+	ID               string `bson:"_id"`
+	*model.ChainInfo `bson:",inline"`
 }
 
-func (idb *IndexerDatabase) GetNetworkInfo(ctx context.Context) (*model.NetworkInfo, error) {
+func (idb *IndexerDatabase) GetChainInfo(
+	ctx context.Context,
+) (*model.ChainInfo, error) {
 	filter := map[string]any{"_id": networkInfoID}
 	res := idb.collection(model.NetworkInfoCollection).FindOne(ctx, filter)
 
-	var doc networkInfoDoc
+	var doc chainInfoDoc
 	err := res.Decode(&doc)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -32,5 +34,5 @@ func (idb *IndexerDatabase) GetNetworkInfo(ctx context.Context) (*model.NetworkI
 		return nil, err
 	}
 
-	return doc.NetworkInfo, nil
+	return doc.ChainInfo, nil
 }

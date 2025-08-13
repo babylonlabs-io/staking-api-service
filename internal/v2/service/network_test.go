@@ -8,6 +8,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,7 +35,11 @@ func TestGetNetworkInfo(t *testing.T) {
 			IndexerDBClient: indexerDB,
 		}
 
-		sharedService, err := service.New(cfg, nil, nil, nil, dbClients)
+		sharedService, err := service.New(
+			cfg, nil, nil, nil, dbClients, &types.ChainInfo{
+				ChainID: "babylon",
+			},
+		)
 		require.NoError(t, err)
 
 		service, err := New(sharedService, nil, nil)

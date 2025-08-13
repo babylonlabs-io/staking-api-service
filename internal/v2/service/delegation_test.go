@@ -10,6 +10,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2types "github.com/babylonlabs-io/staking-api-service/internal/v2/types"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
 	"github.com/stretchr/testify/assert"
@@ -199,7 +200,9 @@ func TestEvaluateCanExpand(t *testing.T) {
 				V1DBClient:      v1DB,
 			}
 
-			sharedService, err := service.New(cfg, nil, nil, nil, dbClients)
+			sharedService, err := service.New(cfg, nil, nil, nil, dbClients, &types.ChainInfo{
+				ChainID: "babylon",
+			})
 			require.NoError(t, err)
 
 			v2Service, err := New(sharedService, nil, tt.allowList)
@@ -372,7 +375,9 @@ func TestGetLatestMaxFinalityProviders(t *testing.T) {
 			dbClients := &dbclients.DbClients{
 				IndexerDBClient: indexerDB,
 			}
-			sharedService, err := service.New(cfg, nil, nil, nil, dbClients)
+			sharedService, err := service.New(cfg, nil, nil, nil, dbClients, &types.ChainInfo{
+				ChainID: "babylon",
+			})
 			require.NoError(t, err)
 
 			v2Service, err := New(sharedService, nil, nil)

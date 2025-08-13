@@ -20,16 +20,12 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 		return nil, err
 	}
 
-	networkInfo, err := s.dbClients.IndexerDBClient.GetNetworkInfo(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// we don't store babylon bsn in mongo, we place it on top so on frontend it's always displayed first
+	// we don't store babylon bsn in mongo, we place it on top so on frontend
+	// it's always displayed first
 	result := []BSN{
 		{
-			ID:          networkInfo.ChainID,
-			Name:        "Babylon network",
+			ID:          s.sharedService.ChainInfo.ChainID,
+			Name:        "Babylon Genesis",
 			Description: "",
 		},
 	}

@@ -1,5 +1,5 @@
 package indexerdbmodel
 
-type NetworkInfo struct {
+type ChainInfo struct {
 	ChainID string `bson:"chain_id"`
 }

@@ -25,6 +25,7 @@ type Service struct {
 	BBNClient         *bbnclient.BBNClient
 
 	singleFlightGroup *singleflight.Group
+	ChainInfo         *types.ChainInfo
 }
 
 func New(
@@ -33,6 +34,7 @@ func New(
 	finalityProviders []types.FinalityProviderDetails,
 	clients *clients.Clients,
 	dbClients *dbclients.DbClients,
+	chainInfo *types.ChainInfo,
 ) (*Service, error) {
 	return &Service{
 		DbClients:         dbClients,
@@ -41,6 +43,7 @@ func New(
 		Params:            globalParams,
 		FinalityProviders: finalityProviders,
 		singleFlightGroup: &singleflight.Group{},
+		ChainInfo:         chainInfo,
 	}, nil
 }
 
