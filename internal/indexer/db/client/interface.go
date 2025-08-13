@@ -31,6 +31,7 @@ type IndexerDBClient interface {
 		states []indexertypes.DelegationState,
 	) ([]indexerdbmodel.IndexerDelegationDetails, error)
 	GetAllBSN(ctx context.Context) ([]indexerdbmodel.BSN, error)
+	GetChainInfo(ctx context.Context) (*indexerdbmodel.ChainInfo, error)
 }
 
 type DelegationFilter struct {

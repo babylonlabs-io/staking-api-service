@@ -20,7 +20,18 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 		return nil, err
 	}
 
-	return pkg.Map(items, mapBSN), nil
+	// we don't store babylon bsn in mongo, we place it on top so on frontend
+	// it's always displayed first
+	result := []BSN{
+		{
+			ID:          s.sharedService.ChainInfo.ChainID,
+			Name:        "Babylon Genesis",
+			Description: "",
+		},
+	}
+	result = append(result, pkg.Map(items, mapBSN)...)
+
+	return result, nil
 }
 
 func mapBSN(consumer indexerdbmodel.BSN) BSN {
