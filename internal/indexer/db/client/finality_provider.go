@@ -16,20 +16,14 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 		indexerdbclient.DbName,
 	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
 
+	// default filter to fetch all finality providers if bsnID is nil
 	filter := bson.M{}
-	if bsnID != nil && *bsnID == "all" {
-		// When bsnID is "all", fetch all values without any filter
-		filter = bson.M{}
-	} else if bsnID != nil && *bsnID != "" {
-		filter["bsn_id"] = *bsnID
-	} else {
-		// When bsnID is nil or empty, fetch items that don't have bsn_id field or have empty string
-		// TODO: temporary solution until figure out the bsn_id for BABY chain
-		filter = bson.M{
-			"$or": []bson.M{
-				{"bsn_id": bson.M{"$exists": false}},
-				{"bsn_id": ""},
-			},
+	if bsnID != nil {
+		if *bsnID == "all" {
+			// When bsnID is "all", fetch all values without any filter
+			filter = bson.M{}
+		} else {
+			filter["bsn_id"] = *bsnID
 		}
 	}
 
