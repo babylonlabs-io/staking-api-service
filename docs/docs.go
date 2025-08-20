@@ -910,7 +910,7 @@ const docTemplate = `{
                 "delegation_creation_base_gas_fee": {
                     "type": "integer"
                 },
-                "max_active_finality_providers": {
+                "max_finality_providers": {
                     "type": "integer"
                 },
                 "max_staking_time_blocks": {
@@ -952,6 +952,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "btc_confirmation_depth": {
+                    "type": "integer"
+                },
+                "checkpoint_finalization_timeout": {
                     "type": "integer"
                 },
                 "version": {
@@ -1263,6 +1266,14 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.AllowListPublic": {
+            "type": "object",
+            "properties": {
+                "is_expired": {
+                    "type": "boolean"
+                }
+            }
+        },
         "v2service.BSN": {
             "type": "object",
             "properties": {
@@ -1288,12 +1299,18 @@ const docTemplate = `{
                 },
                 "signature_hex": {
                     "type": "string"
+                },
+                "stake_expansion_signature_hex": {
+                    "type": "string"
                 }
             }
         },
         "v2service.DelegationPublic": {
             "type": "object",
             "properties": {
+                "can_expand": {
+                    "type": "boolean"
+                },
                 "delegation_staking": {
                     "$ref": "#/definitions/v2service.DelegationStaking"
                 },
@@ -1308,6 +1325,9 @@ const docTemplate = `{
                 },
                 "params_version": {
                     "type": "integer"
+                },
+                "previous_staking_tx_hash_hex": {
+                    "type": "string"
                 },
                 "staker_btc_pk_hex": {
                     "type": "string"
@@ -1333,6 +1353,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/v2service.StakingSlashing"
                 },
                 "staking_amount": {
+                    "type": "integer"
+                },
+                "staking_output_idx": {
                     "type": "integer"
                 },
                 "staking_timelock": {
@@ -1378,6 +1401,9 @@ const docTemplate = `{
                 "active_tvl": {
                     "type": "integer"
                 },
+                "bsn_id": {
+                    "type": "string"
+                },
                 "btc_pk": {
                     "type": "string"
                 },
@@ -1392,17 +1418,34 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
         "v2service.NetworkInfoPublic": {
             "type": "object",
             "properties": {
+                "network_upgrade": {
+                    "$ref": "#/definitions/v2service.NetworkUpgradePublic"
+                },
                 "params": {
                     "$ref": "#/definitions/v2service.ParamsPublic"
                 },
                 "staking_status": {
                     "$ref": "#/definitions/v2service.StakingStatusPublic"
+                }
+            }
+        },
+        "v2service.NetworkUpgradePublic": {
+            "type": "object",
+            "properties": {
+                "pop": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2service.POPUpgradePublic"
+                    }
                 }
             }
         },
@@ -1435,6 +1478,17 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.POPUpgradePublic": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
         "v2service.ParamsPublic": {
             "type": "object",
             "properties": {
@@ -1449,9 +1503,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/indexertypes.BtcCheckpointParams"
                     }
-                },
-                "max_bsn_fp_providers": {
-                    "type": "integer"
                 }
             }
         },
@@ -1500,6 +1551,9 @@ const docTemplate = `{
             "properties": {
                 "is_staking_open": {
                     "type": "boolean"
+                },
+                "staking_expansion_allow_list": {
+                    "$ref": "#/definitions/v2service.AllowListPublic"
                 }
             }
         },
@@ -1530,7 +1584,8 @@ const docTemplate = `{
                 "TIMELOCK_WITHDRAWN",
                 "EARLY_UNBONDING_WITHDRAWN",
                 "TIMELOCK_SLASHING_WITHDRAWN",
-                "EARLY_UNBONDING_SLASHING_WITHDRAWN"
+                "EARLY_UNBONDING_SLASHING_WITHDRAWN",
+                "EXPANDED"
             ],
             "x-enum-varnames": [
                 "StatePending",
@@ -1546,7 +1601,8 @@ const docTemplate = `{
                 "StateTimelockWithdrawn",
                 "StateEarlyUnbondingWithdrawn",
                 "StateTimelockSlashingWithdrawn",
-                "StateEarlyUnbondingSlashingWithdrawn"
+                "StateEarlyUnbondingSlashingWithdrawn",
+                "StateExpanded"
             ]
         }
     },

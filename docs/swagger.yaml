@@ -136,7 +136,7 @@ definitions:
         type: integer
       delegation_creation_base_gas_fee:
         type: integer
-      max_active_finality_providers:
+      max_finality_providers:
         type: integer
       max_staking_time_blocks:
         type: integer
@@ -164,6 +164,8 @@ definitions:
   indexertypes.BtcCheckpointParams:
     properties:
       btc_confirmation_depth:
+        type: integer
+      checkpoint_finalization_timeout:
         type: integer
       version:
         type: integer
@@ -372,6 +374,11 @@ definitions:
       version:
         type: integer
     type: object
+  v2service.AllowListPublic:
+    properties:
+      is_expired:
+        type: boolean
+    type: object
   v2service.BSN:
     properties:
       active_tvl:
@@ -389,9 +396,13 @@ definitions:
         type: string
       signature_hex:
         type: string
+      stake_expansion_signature_hex:
+        type: string
     type: object
   v2service.DelegationPublic:
     properties:
+      can_expand:
+        type: boolean
       delegation_staking:
         $ref: '#/definitions/v2service.DelegationStaking'
       delegation_unbonding:
@@ -402,6 +413,8 @@ definitions:
         type: array
       params_version:
         type: integer
+      previous_staking_tx_hash_hex:
+        type: string
       staker_btc_pk_hex:
         type: string
       state:
@@ -418,6 +431,8 @@ definitions:
       slashing:
         $ref: '#/definitions/v2service.StakingSlashing'
       staking_amount:
+        type: integer
+      staking_output_idx:
         type: integer
       staking_timelock:
         type: integer
@@ -447,6 +462,8 @@ definitions:
         type: integer
       active_tvl:
         type: integer
+      bsn_id:
+        type: string
       btc_pk:
         type: string
       commission:
@@ -457,13 +474,24 @@ definitions:
         type: string
       state:
         $ref: '#/definitions/types.FinalityProviderQueryingState'
+      type:
+        type: string
     type: object
   v2service.NetworkInfoPublic:
     properties:
+      network_upgrade:
+        $ref: '#/definitions/v2service.NetworkUpgradePublic'
       params:
         $ref: '#/definitions/v2service.ParamsPublic'
       staking_status:
         $ref: '#/definitions/v2service.StakingStatusPublic'
+    type: object
+  v2service.NetworkUpgradePublic:
+    properties:
+      pop:
+        items:
+          $ref: '#/definitions/v2service.POPUpgradePublic'
+        type: array
     type: object
   v2service.OverallStatsPublic:
     properties:
@@ -490,6 +518,13 @@ definitions:
       total_finality_providers:
         type: integer
     type: object
+  v2service.POPUpgradePublic:
+    properties:
+      height:
+        type: integer
+      version:
+        type: integer
+    type: object
   v2service.ParamsPublic:
     properties:
       bbn:
@@ -500,8 +535,6 @@ definitions:
         items:
           $ref: '#/definitions/indexertypes.BtcCheckpointParams'
         type: array
-      max_bsn_fp_providers:
-        type: integer
     type: object
   v2service.StakerStatsPublic:
     properties:
@@ -533,6 +566,8 @@ definitions:
     properties:
       is_staking_open:
         type: boolean
+      staking_expansion_allow_list:
+        $ref: '#/definitions/v2service.AllowListPublic'
     type: object
   v2service.UnbondingSlashing:
     properties:
@@ -557,6 +592,7 @@ definitions:
     - EARLY_UNBONDING_WITHDRAWN
     - TIMELOCK_SLASHING_WITHDRAWN
     - EARLY_UNBONDING_SLASHING_WITHDRAWN
+    - EXPANDED
     type: string
     x-enum-varnames:
     - StatePending
@@ -573,6 +609,7 @@ definitions:
     - StateEarlyUnbondingWithdrawn
     - StateTimelockSlashingWithdrawn
     - StateEarlyUnbondingSlashingWithdrawn
+    - StateExpanded
 info:
   contact:
     email: contact@babylonlabs.io

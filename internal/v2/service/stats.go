@@ -52,8 +52,10 @@ func (s *V2Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	// TODO: ideally this should not be fetched from the indexer db
-	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, nil)
+	// We only care about the Babylon finality providers stats for now
+	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(
+		ctx, &s.sharedService.ChainInfo.ChainID,
+	)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching finality providers")
 		return nil, types.NewInternalServiceError(err)

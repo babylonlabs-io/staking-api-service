@@ -21,27 +21,21 @@ type Config struct {
 	TermsAcceptanceLogging *TermsAcceptanceConfig      `mapstructure:"terms_acceptance_logging"`
 	AddressScreeningConfig *AddressScreeningConfig     `mapstructure:"address_screening"`
 	BBN                    *BBNConfig                  `mapstructure:"bbn"`
+	NetworkUpgrade         *NetworkUpgrade             `mapstructure:"network_upgrade,omitempty"`
+	AllowList              *AllowList                  `mapstructure:"staking-expansion-allow-list"`
 }
 
 func (cfg *Config) Validate() error {
-	if err := cfg.Server.Validate(); err != nil {
-		return err
+	type configValidator interface {
+		Validate() error
 	}
 
-	if err := cfg.StakingDb.Validate(); err != nil {
-		return err
-	}
-
-	if err := cfg.IndexerDb.Validate(); err != nil {
-		return err
-	}
-
-	if err := cfg.Metrics.Validate(); err != nil {
-		return err
-	}
-
-	if err := cfg.Queue.Validate(); err != nil {
-		return err
+	configs := []configValidator{cfg.Server, cfg.StakingDb, cfg.IndexerDb, cfg.Metrics, cfg.Queue, cfg.NetworkUpgrade}
+	for _, config := range configs {
+		err := config.Validate()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Assets is optional
@@ -66,6 +60,12 @@ func (cfg *Config) Validate() error {
 
 	if cfg.BBN != nil {
 		if err := cfg.BBN.Validate(); err != nil {
+			return err
+		}
+	}
+
+	if cfg.AllowList != nil {
+		if err := cfg.AllowList.Validate(); err != nil {
 			return err
 		}
 	}

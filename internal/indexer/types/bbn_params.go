@@ -3,9 +3,8 @@ package indexertypes
 type GlobalParamsType string
 
 const (
-	CHECKPOINT_PARAMS_VERSION uint32           = 0
-	CHECKPOINT_PARAMS_TYPE    GlobalParamsType = "CHECKPOINT"
-	STAKING_PARAMS_TYPE       GlobalParamsType = "STAKING"
+	CHECKPOINT_PARAMS_TYPE GlobalParamsType = "CHECKPOINT"
+	STAKING_PARAMS_TYPE    GlobalParamsType = "STAKING"
 )
 
 type BbnStakingParams struct {
@@ -22,13 +21,14 @@ type BbnStakingParams struct {
 	UnbondingTimeBlocks          uint32   `json:"unbonding_time_blocks"`
 	UnbondingFeeSat              int64    `json:"unbonding_fee_sat"`
 	MinCommissionRate            string   `json:"min_commission_rate"`
-	MaxActiveFinalityProviders   uint32   `json:"max_active_finality_providers"`
 	DelegationCreationBaseGasFee uint64   `json:"delegation_creation_base_gas_fee"`
 	AllowListExpirationHeight    uint64   `json:"allow_list_expiration_height"`
 	BtcActivationHeight          uint32   `json:"btc_activation_height"`
+	MaxFinalityProviders         uint32   `json:"max_finality_providers"`
 }
 
 type BtcCheckpointParams struct {
-	Version              uint32 `json:"version"`
-	BtcConfirmationDepth uint64 `json:"btc_confirmation_depth"`
+	Version                       uint32 `json:"version"`
+	BtcConfirmationDepth          uint64 `json:"btc_confirmation_depth"`
+	CheckpointFinalizationTimeout uint32 `json:"checkpoint_finalization_timeout"`
 }

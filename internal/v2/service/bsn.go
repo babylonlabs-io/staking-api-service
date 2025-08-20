@@ -29,7 +29,15 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 		return doc.BsnID
 	})
 
-	var result []BSN
+  // we don't store babylon bsn in mongo, we place it on top so on frontend
+	// it's always displayed first
+	result := []BSN{
+		{
+			ID:          s.sharedService.ChainInfo.ChainID,
+			Name:        "Babylon Genesis",
+			Description: "",
+		},
+	}
 	for _, item := range items {
 		var activeTVL int64
 		if v, ok := statsByBSN[item.ID]; ok {

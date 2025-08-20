@@ -59,6 +59,9 @@ func TestMain(t *testing.M) {
 		AddressScreeningConfig: &config.AddressScreeningConfig{
 			Enabled: true,
 		},
+		AllowList: &config.AllowList{
+			ExpirationBlock: 100_000_000,
+		},
 	}
 
 	s, err := setupServices(ctx, cfg)
@@ -113,7 +116,7 @@ func setupServices(ctx context.Context, cfg *config.Config) (*services.Services,
 	}
 
 	clients := clients.New(cfg)
-	return services.New(cfg, globals, fp, clients, dbClients, nil)
+	return services.New(cfg, globals, fp, clients, dbClients, nil, nil)
 }
 
 type db struct {

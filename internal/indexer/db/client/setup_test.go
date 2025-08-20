@@ -50,7 +50,7 @@ func Setup(ctx context.Context, cfg *config.DbConfig) error {
 	}
 
 	// Create a context with timeout.
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second) //nolint:mnd
 	defer cancel()
 
 	// Access a database and create collections.

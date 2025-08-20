@@ -49,10 +49,10 @@ func (db *IndexerDatabase) GetBbnStakingParams(ctx context.Context) ([]*indexert
 			UnbondingTimeBlocks:          stakingParams.UnbondingTimeBlocks,
 			UnbondingFeeSat:              stakingParams.UnbondingFeeSat,
 			MinCommissionRate:            stakingParams.MinCommissionRate,
-			MaxActiveFinalityProviders:   stakingParams.MaxActiveFinalityProviders,
 			DelegationCreationBaseGasFee: stakingParams.DelegationCreationBaseGasFee,
 			AllowListExpirationHeight:    stakingParams.AllowListExpirationHeight,
 			BtcActivationHeight:          stakingParams.BtcActivationHeight,
+			MaxFinalityProviders:         stakingParams.MaxFinalityProviders,
 		}
 
 		params = append(params, bbnParams)
@@ -92,8 +92,9 @@ func (db *IndexerDatabase) GetBtcCheckpointParams(ctx context.Context) ([]*index
 		}
 
 		btcParams := &indexertypes.BtcCheckpointParams{
-			Version:              model.Version,
-			BtcConfirmationDepth: btcParamsDoc.BtcConfirmationDepth,
+			Version:                       model.Version,
+			BtcConfirmationDepth:          btcParamsDoc.BtcConfirmationDepth,
+			CheckpointFinalizationTimeout: btcParamsDoc.CheckpointFinalizationTimeout,
 		}
 
 		params = append(params, btcParams)

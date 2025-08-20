@@ -17,9 +17,20 @@ type Services struct {
 	V2Service     v2service.V2ServiceProvider
 }
 
-func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders []types.FinalityProviderDetails, clients *clients.Clients, dbClients *dbclients.DbClients, keybaseClient *keybase.Client) (*Services, error) {
+func New(
+	cfg *config.Config,
+	globalParams *types.GlobalParams,
+	finalityProviders []types.FinalityProviderDetails,
+	clients *clients.Clients,
+	dbClients *dbclients.DbClients,
+	keybaseClient *keybase.Client,
+	allowList map[string]bool,
+	chainInfo *types.ChainInfo,
+) (*Services, error) {
 	// todo remove errors in service constructors (they are always nil)
-	sharedService, err := service.New(cfg, globalParams, finalityProviders, clients, dbClients)
+	sharedService, err := service.New(
+		cfg, globalParams, finalityProviders, clients, dbClients, chainInfo,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +40,7 @@ func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders
 		return nil, err
 	}
 
-	v2Service, err := v2service.New(sharedService, keybaseClient)
+	v2Service, err := v2service.New(sharedService, keybaseClient, allowList)
 	if err != nil {
 		return nil, err
 	}

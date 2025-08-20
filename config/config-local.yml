@@ -41,6 +41,12 @@ assets:
     timeout: 5000
 terms_acceptance_logging:
   enabled: true
+network_upgrade:
+  pop:
+    - height: 123
+      version: 0
+staking-expansion-allow-list:
+  expiration_block: 100
 address_screening:
   enabled: true
 external_apis:

@@ -14,14 +14,16 @@ type V2Service struct {
 	cfg           *config.Config
 	sharedService *service.Service
 	keybaseClient *keybase.Client
+	allowList     map[string]bool
 }
 
-func New(sharedService *service.Service, keybaseClient *keybase.Client) (*V2Service, error) {
+func New(sharedService *service.Service, keybaseClient *keybase.Client, allowList map[string]bool) (*V2Service, error) {
 	return &V2Service{
 		dbClients:     sharedService.DbClients,
 		clients:       sharedService.Clients,
 		cfg:           sharedService.Cfg,
 		sharedService: sharedService,
 		keybaseClient: keybaseClient,
+		allowList:     allowList,
 	}, nil
 }
