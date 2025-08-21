@@ -907,6 +907,9 @@ const docTemplate = `{
                 "btc_confirmation_depth": {
                     "type": "integer"
                 },
+                "checkpoint_finalization_timeout": {
+                    "type": "integer"
+                },
                 "version": {
                     "type": "integer"
                 }
