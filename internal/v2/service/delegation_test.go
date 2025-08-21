@@ -178,6 +178,205 @@ func TestEvaluateCanExpand(t *testing.T) {
 			},
 			expectedResult: false, // Not in allow-list, should not expand
 		},
+		{
+			name: "Active expanded delegation should check allowlist using original hash - should expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "expanded_hash_123", // New expanded delegation hash
+				PreviousStakingTxHashHex:  testHash1,           // Original hash that's in allowlist
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				testHash1: true, // Original hash is in allowlist, not the expanded hash
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Should expand because original hash is in allowlist
+		},
+		{
+			name: "Active expanded delegation where original hash is not in allowlist - should not expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "expanded_hash_456", // New expanded delegation hash
+				PreviousStakingTxHashHex:  "original_hash_not_in_allowlist",
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"some_other_hash": true, // Original hash is NOT in allowlist
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: false, // Should not expand because original hash is not in allowlist
+		},
+		{
+			name: "Active expanded delegation with original hash NOT in allowlist but current expanded hash IS in allowlist - should expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "expanded_hash_in_allowlist",     // Current expanded hash IS in allowlist
+				PreviousStakingTxHashHex:  "original_hash_not_in_allowlist", // Original hash NOT in allowlist
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"expanded_hash_in_allowlist": true, // Current expanded hash is in allowlist
+				"some_other_hash":            true, // Original hash is NOT in allowlist
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Should expand because current expanded hash is in allowlist
+		},
+		{
+			name: "Active expanded delegation with BOTH original and current hash in allowlist - should expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "expanded_hash_also_in_allowlist", // Current expanded hash IS in allowlist
+				PreviousStakingTxHashHex:  testHash2,                         // Original hash IS in allowlist
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				testHash2:                         true, // Original hash is in allowlist
+				"expanded_hash_also_in_allowlist": true, // Current expanded hash is also in allowlist
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Should expand because both hashes are in allowlist
+		},
+		{
+			name: "Active expanded delegation with NEITHER original nor current hash in allowlist - should not expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "expanded_hash_not_in_allowlist",      // Current expanded hash NOT in allowlist
+				PreviousStakingTxHashHex:  "original_hash_also_not_in_allowlist", // Original hash NOT in allowlist
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"completely_different_hash": true, // Neither hash is in allowlist
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: false, // Should not expand because neither hash is in allowlist
+		},
+		{
+			name: "Chained expansion: delegation1->delegation2->delegation3, only delegation1 in allowlist - should expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "delegation3_hash", // Current (delegation3)
+				PreviousStakingTxHashHex:  "delegation2_hash", // Points to delegation2 (immediate previous)
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				testHash1: true, // Only delegation1 (original) is in allowlist
+				// delegation2_hash and delegation3_hash are NOT in allowlist
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Should expand because delegation1 (root) is in allowlist
+		},
+		{
+			name: "Deep chain: delegation at depth 5 with root in allowlist - should expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "delegation5_hash", // Current (delegation5)
+				PreviousStakingTxHashHex:  "delegation4_hash", // Points to delegation4
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				testHash2: true, // Only delegation1 (original) is in allowlist
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Should expand because delegation1 (root) is in allowlist
+		},
+		{
+			name: "Cycle detection: delegation with circular reference - should not expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "delegationA_hash", // Current (delegationA)
+				PreviousStakingTxHashHex:  "delegationB_hash", // Points to delegationB
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"some_hash": true, // None of the cycle hashes are in allowlist
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: false, // Should not expand due to cycle detection
+		},
+
+		{
+			name: "Chain expansion: root allowlisted",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "del3",
+				PreviousStakingTxHashHex:  "del2",
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"del1": true, // Only root is allowlisted
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true,
+		},
+
+		{
+			name: "Chain expansion: middle allowlisted",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "del3",
+				PreviousStakingTxHashHex:  "del2",
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"del2": true, // Middle delegation allowlisted
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true,
+		},
+
+		{
+			name: "Chain expansion: leaf allowlisted",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "del3",
+				PreviousStakingTxHashHex:  "del2",
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"del3": true, // Current (leaf) delegation allowlisted
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true,
+		},
+
+		{
+			name: "Chain expansion: none allowlisted",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          "del3",
+				PreviousStakingTxHashHex:  "del2",
+				FinalityProviderBtcPksHex: []string{"fp1"},
+			},
+			allowList: map[string]bool{
+				"other": true, // None in chain allowlisted
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -191,6 +390,147 @@ func TestEvaluateCanExpand(t *testing.T) {
 					indexerDB.On("GetBbnStakingParams", ctx).Return(nil, tt.babylonParamsError).Once()
 				} else {
 					indexerDB.On("GetBbnStakingParams", ctx).Return(tt.babylonParams, nil).Once()
+				}
+
+				// Mock chain traversal calls for specific test cases
+				switch tt.name {
+				case "Chained expansion: delegation1->delegation2->delegation3, only delegation1 in allowlist - should expand":
+					// Mock GetDelegation call for delegation2_hash -> return delegation2
+					delegation2 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "delegation2_hash",
+						PreviousStakingTxHashHex:  testHash1, // Points to delegation1 (which is in allowlist)
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "delegation2_hash").Return(delegation2, nil).Once()
+
+					// Mock GetDelegation call for testHash1 (delegation1) -> return delegation1 (root)
+					delegation1 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          testHash1,
+						PreviousStakingTxHashHex:  "", // Root delegation, no previous
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, testHash1).Return(delegation1, nil).Once()
+
+				case "Deep chain: delegation at depth 5 with root in allowlist - should expand":
+					// Mock the chain: delegation5 -> delegation4 -> delegation3 -> delegation2 -> delegation1 (testHash2)
+					delegation4 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "delegation4_hash",
+						PreviousStakingTxHashHex:  "delegation3_hash",
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "delegation4_hash").Return(delegation4, nil).Once()
+
+					delegation3 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "delegation3_hash",
+						PreviousStakingTxHashHex:  "delegation2_hash_deep",
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "delegation3_hash").Return(delegation3, nil).Once()
+
+					delegation2Deep := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "delegation2_hash_deep",
+						PreviousStakingTxHashHex:  testHash2, // Points to delegation1 (root, in allowlist)
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "delegation2_hash_deep").Return(delegation2Deep, nil).Once()
+
+					delegation1Deep := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          testHash2,
+						PreviousStakingTxHashHex:  "", // Root delegation, no previous
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, testHash2).Return(delegation1Deep, nil).Once()
+
+				case "Cycle detection: delegation with circular reference - should not expand":
+					// Mock the cycle: delegationA -> delegationB -> delegationA (cycle)
+					delegationB := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "delegationB_hash",
+						PreviousStakingTxHashHex:  "delegationA_hash", // This creates the cycle
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "delegationB_hash").Return(delegationB, nil).Once()
+
+				case "Active expanded delegation should check allowlist using original hash - should expand":
+					// This test has PreviousStakingTxHashHex: testHash1 which is in allowlist
+					// No need to traverse further since testHash1 is directly in allowlist
+					break
+
+				case "Active expanded delegation where original hash is not in allowlist - should not expand":
+					// Mock the chain: expanded_hash_456 -> original_hash_not_in_allowlist (root, not allowlisted)
+					originalDelegation := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "original_hash_not_in_allowlist",
+						PreviousStakingTxHashHex:  "", // Root delegation
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "original_hash_not_in_allowlist").Return(originalDelegation, nil).Once()
+
+				case "Active expanded delegation with NEITHER original nor current hash in allowlist - should not expand":
+					// Mock the chain: expanded_hash_not_in_allowlist -> original_hash_also_not_in_allowlist (both not allowlisted)
+					originalNotAllowlisted := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "original_hash_also_not_in_allowlist",
+						PreviousStakingTxHashHex:  "", // Root delegation
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "original_hash_also_not_in_allowlist").Return(originalNotAllowlisted, nil).Once()
+
+				case "Chain expansion: root allowlisted":
+					// Mock: del3 -> del2 -> del1 (root allowlisted)
+					del2 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "del2",
+						PreviousStakingTxHashHex:  "del1",
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "del2").Return(del2, nil).Once()
+
+					del1 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "del1",
+						PreviousStakingTxHashHex:  "",
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "del1").Return(del1, nil).Once()
+
+				case "Chain expansion: middle allowlisted":
+					// Mock: del3 -> del2 (allowlisted)
+					del2 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "del2",
+						PreviousStakingTxHashHex:  "del1",
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "del2").Return(del2, nil).Once()
+
+				case "Chain expansion: leaf allowlisted":
+					// Current delegation (del3) is allowlisted, no traversal needed
+					break
+
+				case "Chain expansion: none allowlisted":
+					// Mock: del3 -> del2 -> del1 (none allowlisted)
+					del2 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "del2",
+						PreviousStakingTxHashHex:  "del1",
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "del2").Return(del2, nil).Once()
+
+					del1 := &indexerdbmodel.IndexerDelegationDetails{
+						StakingTxHashHex:          "del1",
+						PreviousStakingTxHashHex:  "",
+						State:                     indexertypes.StateExpanded,
+						FinalityProviderBtcPksHex: []string{"fp1"},
+					}
+					indexerDB.On("GetDelegation", ctx, "del1").Return(del1, nil).Once()
 				}
 			}
 

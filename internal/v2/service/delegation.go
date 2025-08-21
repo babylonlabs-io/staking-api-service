@@ -157,7 +157,47 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 	}
 
 	// Allow-list is active and not expired
-	return s.allowList[delegation.StakingTxHashHex]
+	// Check if ANY delegation in the entire chain back to the root is allowlisted
+	return s.isDelegationInChainAllowlisted(ctx, delegation)
+}
+
+// Chain expansion: isDelegationInChainAllowlisted traverses the entire delegation chain back to the root
+// and returns true if ANY delegation in the chain is found in the allowlist.
+func (s *V2Service) isDelegationInChainAllowlisted(ctx context.Context, delegation indexerdbmodel.IndexerDelegationDetails) bool {
+	visited := make(map[string]bool) // Prevent infinite loops
+	current := delegation
+
+	for {
+		// Check if current delegation is in allowlist
+		if s.allowList[current.StakingTxHashHex] {
+			return true
+		}
+
+		if visited[current.StakingTxHashHex] {
+			log.Ctx(ctx).Warn().
+				Str("stakingTxHashHex", current.StakingTxHashHex).
+				Msg("Detected cycle in delegation chain during allowlist check")
+			return false
+		}
+		visited[current.StakingTxHashHex] = true
+
+		// root delegation
+		if current.PreviousStakingTxHashHex == "" {
+			return false
+		}
+
+		// Fetch parent delegation to continue traversal
+		parent, err := s.dbClients.IndexerDBClient.GetDelegation(ctx, current.PreviousStakingTxHashHex)
+		if err != nil {
+			log.Ctx(ctx).Error().Err(err).
+				Str("stakingTxHashHex", current.StakingTxHashHex).
+				Str("previousTxHashHex", current.PreviousStakingTxHashHex).
+				Msg("Failed to fetch parent delegation during chain traversal")
+			return false
+		}
+
+		current = *parent
+	}
 }
 
 // getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
