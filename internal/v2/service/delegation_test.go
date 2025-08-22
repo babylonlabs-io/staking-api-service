@@ -237,7 +237,6 @@ func TestEvaluateCanExpand(t *testing.T) {
 				} else {
 					indexerDB.On("GetBbnStakingParams", ctx).Return(tt.babylonParams, nil).Once()
 				}
-
 			}
 
 			cfg := &config.Config{}
