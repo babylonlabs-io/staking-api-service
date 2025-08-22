@@ -136,6 +136,12 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 		return false
 	}
 
+	// Early return as multiple FPs can always expand
+	if len(delegation.FinalityProviderBtcPksHex) > 1 {
+		return true
+	}
+
+	// Single FP case: Check allowlist only if needed
 	// Condition 3: Check allow-list configuration and expiration
 	allowlistActive := true
 
@@ -158,17 +164,18 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 		}
 	}
 
-	// Check if delegation has more than 1 finality provider
-	if len(delegation.FinalityProviderBtcPksHex) > 1 {
-		return true
-	}
-
 	// Single FP case: can expand if in allowlist (when allowlist is active)
 	if allowlistActive && len(delegation.FinalityProviderBtcPksHex) == 1 {
 		return s.allowList[delegation.StakingTxHashHex]
 	}
 
-	// Single FP case: cannot expand if allowlist is not active or delegation not in allowlist
+	// Single FP case: allow expansion if allowlist is not active (defaults to true)
+	// or if allowlist is active but delegation is not in allowlist
+	if len(delegation.FinalityProviderBtcPksHex) == 1 {
+		return !allowlistActive
+	}
+
+	// Fallback
 	return false
 }
 

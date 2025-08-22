@@ -111,7 +111,7 @@ func TestEvaluateCanExpand(t *testing.T) {
 			expectedResult: false, // Single FP, should not expand even if not in allowlist
 		},
 		{
-			name: "Active delegation with single FP, no allow-list configured - should not expand",
+			name: "Active delegation with single FP, no allow-list configured - should expand (defaults to true)",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateActive,
 				StakingTxHashHex:          testHash5,
@@ -121,7 +121,7 @@ func TestEvaluateCanExpand(t *testing.T) {
 			babylonParams: []*indexertypes.BbnStakingParams{
 				{Version: 1, MaxFinalityProviders: 5},
 			},
-			expectedResult: false, // Single FP, should not expand even with no allowlist
+			expectedResult: true,
 		},
 		{
 			name: "Multiple babylon params versions, should use latest",
