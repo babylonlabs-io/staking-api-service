@@ -165,18 +165,12 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 	}
 
 	// Single FP case: can expand if in allowlist (when allowlist is active)
-	if allowlistActive && len(delegation.FinalityProviderBtcPksHex) == 1 {
+	if allowlistActive {
 		return s.allowList[delegation.StakingTxHashHex]
 	}
 
 	// Single FP case: allow expansion if allowlist is not active (defaults to true)
-	// or if allowlist is active but delegation is not in allowlist
-	if len(delegation.FinalityProviderBtcPksHex) == 1 {
-		return !allowlistActive
-	}
-
-	// Fallback
-	return false
+	return !allowlistActive
 }
 
 // getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
