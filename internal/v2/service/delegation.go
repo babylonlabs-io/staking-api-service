@@ -137,67 +137,39 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 	}
 
 	// Condition 3: Check allow-list configuration and expiration
-	// If no allow-list is configured, allow expansion for delegations meeting first 2 conditions
+	allowlistActive := true
+
+	// If no allow-list is configured, allowlist is considered inactive
 	if len(s.allowList) == 0 {
+		allowlistActive = false
+	} else {
+		// Check if allow-list has expired by comparing with current BBN height
+		if allowListConfig := s.cfg.AllowList; allowListConfig != nil {
+			lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+			if err != nil {
+				log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height for allow-list expiration check")
+				return false
+			}
+
+			// If allow-list has expired, allowlist is considered inactive
+			if lastHeight >= allowListConfig.ExpirationBlock {
+				allowlistActive = false
+			}
+		}
+	}
+
+	// Check if delegation has more than 1 finality provider
+	if len(delegation.FinalityProviderBtcPksHex) > 1 {
 		return true
 	}
 
-	// Check if allow-list has expired by comparing with current BBN height
-	if allowListConfig := s.cfg.AllowList; allowListConfig != nil {
-		lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height for allow-list expiration check")
-			return false
-		}
-
-		// If allow-list has expired, allow expansion for all active delegations
-		if lastHeight >= allowListConfig.ExpirationBlock {
-			return true
-		}
+	// Single FP case: can expand if in allowlist (when allowlist is active)
+	if allowlistActive && len(delegation.FinalityProviderBtcPksHex) == 1 {
+		return s.allowList[delegation.StakingTxHashHex]
 	}
 
-	// Allow-list is active and not expired
-	// Check if ANY delegation in the entire chain back to the root is allowlisted
-	return s.isDelegationInChainAllowlisted(ctx, delegation)
-}
-
-// Chain expansion: isDelegationInChainAllowlisted traverses the entire delegation chain back to the root
-// and returns true if ANY delegation in the chain is found in the allowlist.
-func (s *V2Service) isDelegationInChainAllowlisted(ctx context.Context, delegation indexerdbmodel.IndexerDelegationDetails) bool {
-	visited := make(map[string]bool) // Prevent infinite loops
-	current := delegation
-
-	for {
-		// Check if current delegation is in allowlist
-		if s.allowList[current.StakingTxHashHex] {
-			return true
-		}
-
-		if visited[current.StakingTxHashHex] {
-			log.Ctx(ctx).Warn().
-				Str("stakingTxHashHex", current.StakingTxHashHex).
-				Msg("Detected cycle in delegation chain during allowlist check")
-			return false
-		}
-		visited[current.StakingTxHashHex] = true
-
-		// root delegation
-		if current.PreviousStakingTxHashHex == "" {
-			return false
-		}
-
-		// Fetch parent delegation to continue traversal
-		parent, err := s.dbClients.IndexerDBClient.GetDelegation(ctx, current.PreviousStakingTxHashHex)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).
-				Str("stakingTxHashHex", current.StakingTxHashHex).
-				Str("previousTxHashHex", current.PreviousStakingTxHashHex).
-				Msg("Failed to fetch parent delegation during chain traversal")
-			return false
-		}
-
-		current = *parent
-	}
+	// Single FP case: cannot expand if allowlist is not active or delegation not in allowlist
+	return false
 }
 
 // getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
