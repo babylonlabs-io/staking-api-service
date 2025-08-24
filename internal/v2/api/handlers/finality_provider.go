@@ -19,7 +19,7 @@ import (
 // @Failure 500 {object} types.Error "Internal server error occurred"
 // @Router /v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
-	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context())
+	providers, err := h.Service.GetFinalityProviders(request.Context())
 	if err != nil {
 		return nil, err
 	}

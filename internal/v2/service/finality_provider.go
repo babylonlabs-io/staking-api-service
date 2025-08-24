@@ -43,7 +43,7 @@ func mapToFinalityProviderStatsPublic(
 }
 
 // GetFinalityProvidersWithStats retrieves all finality providers and their associated statistics
-func (s *V2Service) GetFinalityProvidersWithStats(
+func (s *V2Service) GetFinalityProviders(
 	ctx context.Context,
 ) ([]*FinalityProviderPublic, *types.Error) {
 	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
