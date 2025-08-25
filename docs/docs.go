@@ -516,7 +516,7 @@ const docTemplate = `{
                     "200": {
                         "description": "List of finality providers with its stats",
                         "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderStatsPublic"
+                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic"
                         }
                     },
                     "404": {
@@ -732,13 +732,13 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_FinalityProviderStatsPublic": {
+        "handler.PublicResponse-array_v2service_FinalityProviderPublic": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2service.FinalityProviderStatsPublic"
+                        "$ref": "#/definitions/v2service.FinalityProviderPublic"
                     }
                 },
                 "pagination": {
@@ -905,6 +905,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "btc_confirmation_depth": {
+                    "type": "integer"
+                },
+                "checkpoint_finalization_timeout": {
                     "type": "integer"
                 },
                 "version": {
@@ -1305,7 +1308,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v2service.FinalityProviderStatsPublic": {
+        "v2service.FinalityProviderPublic": {
             "type": "object",
             "properties": {
                 "active_delegations": {
@@ -1322,6 +1325,9 @@ const docTemplate = `{
                 },
                 "description": {
                     "$ref": "#/definitions/types.FinalityProviderDescription"
+                },
+                "logo_url": {
+                    "type": "string"
                 },
                 "state": {
                     "$ref": "#/definitions/types.FinalityProviderQueryingState"
