@@ -38,6 +38,8 @@ func TestEvaluateCanExpand(t *testing.T) {
 	require.NoError(t, err)
 	testHash9, err := testutil.RandomAlphaNum(10)
 	require.NoError(t, err)
+	testHash10, err := testutil.RandomAlphaNum(10)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name                     string
@@ -49,7 +51,7 @@ func TestEvaluateCanExpand(t *testing.T) {
 		expectedErrorInGetParams bool
 	}{
 		{
-			name: "Active delegation with single FP, under max limit, in allow-list",
+			name: "Active delegation with single FP, under max limit, in allow-list - should expand",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateActive,
 				StakingTxHashHex:          testHash1,
@@ -61,7 +63,7 @@ func TestEvaluateCanExpand(t *testing.T) {
 			babylonParams: []*indexertypes.BbnStakingParams{
 				{Version: 1, MaxFinalityProviders: 5},
 			},
-			expectedResult: true,
+			expectedResult: true, // Single FP in allowlist, should expand
 		},
 		{
 			name: "Active delegation with max FPs, should not expand",
@@ -94,7 +96,7 @@ func TestEvaluateCanExpand(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			name: "Active delegation not in allow-list should not expand",
+			name: "Active delegation with single FP not in allow-list should not expand",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateActive,
 				StakingTxHashHex:          testHash4,
@@ -106,10 +108,10 @@ func TestEvaluateCanExpand(t *testing.T) {
 			babylonParams: []*indexertypes.BbnStakingParams{
 				{Version: 1, MaxFinalityProviders: 5},
 			},
-			expectedResult: false,
+			expectedResult: false, // Single FP, should not expand even if not in allowlist
 		},
 		{
-			name: "Active delegation with no allow-list configured should expand",
+			name: "Active delegation with single FP, no allow-list configured - should expand (defaults to true)",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateActive,
 				StakingTxHashHex:          testHash5,
@@ -137,10 +139,53 @@ func TestEvaluateCanExpand(t *testing.T) {
 			expectedResult: false, // Should use version 3 with MaxFinalityProviders=2
 		},
 		{
-			name: "Error getting babylon params should return false",
+			name: "Active delegation with multiple FPs not in allow-list should expand",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateActive,
 				StakingTxHashHex:          testHash7,
+				FinalityProviderBtcPksHex: []string{"fp1", "fp2"},
+			},
+			allowList: map[string]bool{
+				"other-hash": true,
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Multiple FPs, should expand regardless of allowlist
+		},
+		{
+			name: "Active delegation with multiple FPs in allow-list should expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          testHash8,
+				FinalityProviderBtcPksHex: []string{"fp1", "fp2", "fp3"},
+			},
+			allowList: map[string]bool{
+				testHash8: true,
+			},
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Multiple FPs, should expand
+		},
+		{
+			name: "Active delegation with multiple FPs, no allow-list should expand",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          testHash9,
+				FinalityProviderBtcPksHex: []string{"fp1", "fp2"},
+			},
+			allowList: map[string]bool{}, // Empty allow-list
+			babylonParams: []*indexertypes.BbnStakingParams{
+				{Version: 1, MaxFinalityProviders: 5},
+			},
+			expectedResult: true, // Multiple FPs with no allow-list, should expand
+		},
+		{
+			name: "Error getting babylon params should return false",
+			delegation: indexerdbmodel.IndexerDelegationDetails{
+				State:                     indexertypes.StateActive,
+				StakingTxHashHex:          testHash10,
 				FinalityProviderBtcPksHex: []string{"fp1"},
 			},
 			allowList:                map[string]bool{},

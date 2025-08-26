@@ -136,28 +136,41 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 		return false
 	}
 
-	// Condition 3: Check allow-list configuration and expiration
-	// If no allow-list is configured, allow expansion for delegations meeting first 2 conditions
-	if len(s.allowList) == 0 {
+	// Early return as multiple FPs can always expand
+	if len(delegation.FinalityProviderBtcPksHex) > 1 {
 		return true
 	}
 
-	// Check if allow-list has expired by comparing with current BBN height
-	if allowListConfig := s.cfg.AllowList; allowListConfig != nil {
-		lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height for allow-list expiration check")
-			return false
-		}
+	// Single FP case: Check allowlist only if needed
+	// Condition 3: Check allow-list configuration and expiration
+	allowlistActive := true
 
-		// If allow-list has expired, allow expansion for all active delegations
-		if lastHeight >= allowListConfig.ExpirationBlock {
-			return true
+	// If no allow-list is configured, allowlist is considered inactive
+	if len(s.allowList) == 0 {
+		allowlistActive = false
+	} else {
+		// Check if allow-list has expired by comparing with current BBN height
+		if allowListConfig := s.cfg.AllowList; allowListConfig != nil {
+			lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
+			if err != nil {
+				log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height for allow-list expiration check")
+				return false
+			}
+
+			// If allow-list has expired, allowlist is considered inactive
+			if lastHeight >= allowListConfig.ExpirationBlock {
+				allowlistActive = false
+			}
 		}
 	}
 
-	// Allow-list is active and not expired
-	return s.allowList[delegation.StakingTxHashHex]
+	// Single FP case: can expand if in allowlist (when allowlist is active)
+	if allowlistActive {
+		return s.allowList[delegation.StakingTxHashHex]
+	}
+
+	// Single FP case: allow expansion if allowlist is not active (defaults to true)
+	return !allowlistActive
 }
 
 // getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
