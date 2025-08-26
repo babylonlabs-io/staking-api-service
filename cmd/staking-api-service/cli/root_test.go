@@ -32,27 +32,6 @@ func TestGetDefaultConfigFile(t *testing.T) {
 	})
 }
 
-func TestGetAllowListPath(t *testing.T) {
-	t.Run("returns empty string by default", func(t *testing.T) {
-		// Reset the global variable
-		allowListPath = ""
-
-		result := GetAllowListPath()
-		assert.Equal(t, "", result)
-	})
-
-	t.Run("returns set value", func(t *testing.T) {
-		// Set the global variable
-		allowListPath = "/path/to/allowlist.json"
-
-		result := GetAllowListPath()
-		assert.Equal(t, "/path/to/allowlist.json", result)
-
-		// Reset for other tests
-		allowListPath = ""
-	})
-}
-
 func TestGetConfigPath(t *testing.T) {
 	t.Run("returns set value", func(t *testing.T) {
 		// Set the global variable
@@ -135,30 +114,6 @@ func TestGetBackfillPubkeyAddressFlag(t *testing.T) {
 }
 
 func TestSetupFunction(t *testing.T) {
-	t.Run("Setup configures allow-list flag with empty default", func(t *testing.T) {
-		// Reset global variables
-		resetGlobalVariables()
-
-		// Store original rootCmd and restore it after test
-		originalRootCmd := rootCmd
-		defer func() { rootCmd = originalRootCmd }()
-
-		// Create a test command that we can inspect
-		testCmd := &cobra.Command{
-			Use: "test",
-		}
-		rootCmd = testCmd
-
-		// Call Setup to configure flags
-		_ = Setup()
-
-		// Verify that the allow-list flag exists and has the correct default
-		allowListFlag := testCmd.PersistentFlags().Lookup("allow-list")
-		require.NotNil(t, allowListFlag, "allow-list flag should exist")
-		assert.Equal(t, "", allowListFlag.DefValue, "allow-list flag should have empty string as default")
-		assert.Equal(t, "allow list file (optional, defaults to empty string if not provided)", allowListFlag.Usage)
-	})
-
 	t.Run("Setup configures all expected flags", func(t *testing.T) {
 		// Reset global variables
 		resetGlobalVariables()
@@ -177,67 +132,11 @@ func TestSetupFunction(t *testing.T) {
 		_ = Setup()
 
 		// Verify all expected flags exist
-		expectedFlags := []string{"config", "params", "finality-providers", "allow-list", "replay", "backfill-pubkey-address"}
+		expectedFlags := []string{"config", "params", "finality-providers", "replay", "backfill-pubkey-address"}
 		for _, flagName := range expectedFlags {
 			flag := testCmd.PersistentFlags().Lookup(flagName)
 			require.NotNil(t, flag, "flag %s should exist", flagName)
 		}
-	})
-}
-
-func TestFlagParsing(t *testing.T) {
-	t.Run("allowListPath remains empty when flag not provided", func(t *testing.T) {
-		// Reset global variables
-		resetGlobalVariables()
-
-		// Store original rootCmd and restore it after test
-		originalRootCmd := rootCmd
-		defer func() { rootCmd = originalRootCmd }()
-
-		// Create a test command
-		testCmd := &cobra.Command{
-			Use: "test",
-		}
-		rootCmd = testCmd
-
-		// Configure flags using Setup
-		_ = Setup()
-
-		// Execute without any flags
-		testCmd.SetArgs([]string{})
-		err := testCmd.Execute()
-		require.NoError(t, err)
-
-		// Verify allowListPath is empty
-		assert.Equal(t, "", allowListPath)
-		assert.Equal(t, "", GetAllowListPath())
-	})
-
-	t.Run("allowListPath is set when flag is provided", func(t *testing.T) {
-		// Reset global variables
-		resetGlobalVariables()
-
-		// Store original rootCmd and restore it after test
-		originalRootCmd := rootCmd
-		defer func() { rootCmd = originalRootCmd }()
-
-		// Create a test command
-		testCmd := &cobra.Command{
-			Use: "test",
-		}
-		rootCmd = testCmd
-
-		// Configure flags using Setup
-		_ = Setup()
-
-		// Execute with allow-list flag
-		testCmd.SetArgs([]string{"--allow-list", "/path/to/allowlist.json"})
-		err := testCmd.Execute()
-		require.NoError(t, err)
-
-		// Verify allowListPath is set correctly
-		assert.Equal(t, "/path/to/allowlist.json", allowListPath)
-		assert.Equal(t, "/path/to/allowlist.json", GetAllowListPath())
 	})
 }
 
@@ -246,7 +145,6 @@ func resetGlobalVariables() {
 	cfgPath = ""
 	globalParamsPath = ""
 	finalityProvidersPath = ""
-	allowListPath = ""
 	replayFlag = false
 	backfillPubkeyAddressFlag = false
 }

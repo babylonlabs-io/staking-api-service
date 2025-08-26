@@ -11,17 +11,12 @@ import (
 )
 
 type StakingStatusPublic struct {
-	IsStakingOpen             bool             `json:"is_staking_open"`
-	StakingExpansionAllowList *AllowListPublic `json:"staking_expansion_allow_list"`
+	IsStakingOpen bool `json:"is_staking_open"`
 }
 
 type POPUpgradePublic struct {
 	Height  uint64 `json:"height"`
 	Version uint64 `json:"version"`
-}
-
-type AllowListPublic struct {
-	IsExpired bool `json:"is_expired"`
 }
 
 type NetworkUpgradePublic struct {
@@ -86,18 +81,6 @@ func (s *V2Service) GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *ty
 			result.NetworkUpgrade = &NetworkUpgradePublic{
 				POP: popUpgrades,
 			}
-		}
-	}
-
-	if allowList := s.cfg.AllowList; allowList != nil {
-		lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
-		if err != nil {
-			return nil, types.NewInternalServiceError(err)
-		}
-
-		isExpired := lastHeight >= allowList.ExpirationBlock
-		result.StakingStatus.StakingExpansionAllowList = &AllowListPublic{
-			IsExpired: isExpired,
 		}
 	}
 

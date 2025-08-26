@@ -24,7 +24,6 @@ func New(
 	clients *clients.Clients,
 	dbClients *dbclients.DbClients,
 	keybaseClient *keybase.Client,
-	allowList map[string]bool,
 	chainInfo *types.ChainInfo,
 ) (*Services, error) {
 	// todo remove errors in service constructors (they are always nil)
@@ -40,7 +39,7 @@ func New(
 		return nil, err
 	}
 
-	v2Service, err := v2service.New(sharedService, keybaseClient, allowList)
+	v2Service, err := v2service.New(sharedService, keybaseClient)
 	if err != nil {
 		return nil, err
 	}

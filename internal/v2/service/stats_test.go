@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
@@ -31,18 +32,24 @@ func Test_GetOverallStats(t *testing.T) {
 		ChainID: "test-chain-id",
 	}
 
-	s, err := New(&service.Service{
-		DbClients: &dbclients.DbClients{
+	sharedService, err := service.New(
+		&config.Config{},
+		nil,
+		nil,
+		&clients.Clients{
+			CoinMarketCap: cmc.NewClient(nil),
+		},
+		&dbclients.DbClients{
 			SharedDBClient:  dbShared,
 			V1DBClient:      dbV1,
 			V2DBClient:      dbV2,
 			IndexerDBClient: dbIndexer,
 		},
-		Clients: &clients.Clients{
-			CoinMarketCap: cmc.NewClient(nil),
-		},
-		ChainInfo: chainInfo,
-	}, nil, nil)
+		chainInfo,
+	)
+	require.NoError(t, err)
+
+	s, err := New(sharedService, nil)
 	require.NoError(t, err)
 
 	t.Run("V2 DB failure", func(t *testing.T) {
@@ -101,17 +108,28 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 	dbV1 := mocks.NewV1DBClient(t)
 	dbV2 := mocks.NewV2DBClient(t)
 	dbIndexer := mocks.NewIndexerDBClient(t)
-	s, err := New(&service.Service{
-		DbClients: &dbclients.DbClients{
+	chainInfo := &types.ChainInfo{
+		ChainID: "test-chain-id",
+	}
+
+	sharedService, err := service.New(
+		&config.Config{},
+		nil,
+		nil,
+		&clients.Clients{
+			CoinMarketCap: cmc.NewClient(nil),
+		},
+		&dbclients.DbClients{
 			SharedDBClient:  dbShared,
 			V1DBClient:      dbV1,
 			V2DBClient:      dbV2,
 			IndexerDBClient: dbIndexer,
 		},
-		Clients: &clients.Clients{
-			CoinMarketCap: cmc.NewClient(nil),
-		},
-	}, nil, nil)
+		chainInfo,
+	)
+	require.NoError(t, err)
+
+	s, err := New(sharedService, nil)
 	require.NoError(t, err)
 
 	t.Run("V2 DB failure", func(t *testing.T) {

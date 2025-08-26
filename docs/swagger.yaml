@@ -374,11 +374,6 @@ definitions:
       version:
         type: integer
     type: object
-  v2service.AllowListPublic:
-    properties:
-      is_expired:
-        type: boolean
-    type: object
   v2service.BSN:
     properties:
       active_tvl:
@@ -566,8 +561,6 @@ definitions:
     properties:
       is_staking_open:
         type: boolean
-      staking_expansion_allow_list:
-        $ref: '#/definitions/v2service.AllowListPublic'
     type: object
   v2service.UnbondingSlashing:
     properties:

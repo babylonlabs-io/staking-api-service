@@ -116,15 +116,21 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails, 
 
 // evaluateCanExpand determines if a delegation can be expanded based on runtime conditions:
 // 1. Delegation must be in Active state
-// 2. Delegation must not have reached the maximum finality providers limit
-// 3. Delegation hash must exist in the allow-list (if allow-list is configured, otherwise defaults to true)
+// 2. Multiple finality providers can always expand
+// 3. Must not have reached the maximum finality providers limit
+// 4. Must have sufficient covenant overlap with current covenant committee for unbonding signatures
 func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbmodel.IndexerDelegationDetails) bool {
 	// Condition 1: Check if delegation is in Active state
 	if delegation.State != indexertypes.StateActive {
 		return false
 	}
 
-	// Condition 2: Check if delegation has reached the maximum finality providers limit
+	// Condition 2: Multiple FPs can always expand
+	if len(delegation.FinalityProviderBtcPksHex) > 1 {
+		return true
+	}
+
+	// Condition 3: Must not have reached the maximum finality providers limit
 	maxFinalityProviders, err := s.getLatestMaxFinalityProviders(ctx)
 	if err != nil {
 		// Log error but don't block expansion - use conservative approach
@@ -136,41 +142,9 @@ func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbm
 		return false
 	}
 
-	// Early return as multiple FPs can always expand
-	if len(delegation.FinalityProviderBtcPksHex) > 1 {
-		return true
-	}
-
-	// Single FP case: Check allowlist only if needed
-	// Condition 3: Check allow-list configuration and expiration
-	allowlistActive := true
-
-	// If no allow-list is configured, allowlist is considered inactive
-	if len(s.allowList) == 0 {
-		allowlistActive = false
-	} else {
-		// Check if allow-list has expired by comparing with current BBN height
-		if allowListConfig := s.cfg.AllowList; allowListConfig != nil {
-			lastHeight, err := s.dbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
-			if err != nil {
-				log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height for allow-list expiration check")
-				return false
-			}
-
-			// If allow-list has expired, allowlist is considered inactive
-			if lastHeight >= allowListConfig.ExpirationBlock {
-				allowlistActive = false
-			}
-		}
-	}
-
-	// Single FP case: can expand if in allowlist (when allowlist is active)
-	if allowlistActive {
-		return s.allowList[delegation.StakingTxHashHex]
-	}
-
-	// Single FP case: allow expansion if allowlist is not active (defaults to true)
-	return !allowlistActive
+	// Condition 4: Must have sufficient covenant overlap with current covenant committee
+	// TODO: Implement covenant overlap validation for unbonding signature availability
+	return true
 }
 
 // getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
