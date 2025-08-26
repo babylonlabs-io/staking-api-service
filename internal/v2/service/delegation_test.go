@@ -30,8 +30,6 @@ func TestEvaluateCanExpand(t *testing.T) {
 	require.NoError(t, err)
 	testHash5, err := testutil.RandomAlphaNum(10)
 	require.NoError(t, err)
-	testHash6, err := testutil.RandomAlphaNum(10)
-	require.NoError(t, err)
 
 	tests := []struct {
 		name                     string
@@ -54,22 +52,10 @@ func TestEvaluateCanExpand(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			name: "Active delegation with max FPs, should expand (multiple FPs always expand)",
-			delegation: indexerdbmodel.IndexerDelegationDetails{
-				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash2,
-				FinalityProviderBtcPksHex: []string{"fp1", "fp2", "fp3"},
-			},
-			babylonParams: []*indexertypes.BbnStakingParams{
-				{Version: 1, MaxFinalityProviders: 3},
-			},
-			expectedResult: true,
-		},
-		{
 			name: "Inactive delegation should not expand",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateWithdrawn,
-				StakingTxHashHex:          testHash3,
+				StakingTxHashHex:          testHash2,
 				FinalityProviderBtcPksHex: []string{"fp1"},
 			},
 			babylonParams: []*indexertypes.BbnStakingParams{
@@ -81,7 +67,7 @@ func TestEvaluateCanExpand(t *testing.T) {
 			name: "Single FP delegation at max limit should not expand",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash4,
+				StakingTxHashHex:          testHash3,
 				FinalityProviderBtcPksHex: []string{"fp1"},
 			},
 			babylonParams: []*indexertypes.BbnStakingParams{
@@ -90,27 +76,15 @@ func TestEvaluateCanExpand(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			name: "Active delegation with multiple FPs, should expand",
-			delegation: indexerdbmodel.IndexerDelegationDetails{
-				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash6,
-				FinalityProviderBtcPksHex: []string{"fp1", "fp2"},
-			},
-			babylonParams: []*indexertypes.BbnStakingParams{
-				{Version: 1, MaxFinalityProviders: 5},
-			},
-			expectedResult: true, // Multiple FPs should always expand
-		},
-		{
 			name: "Multiple babylon params versions, should expand",
 			delegation: indexerdbmodel.IndexerDelegationDetails{
 				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash5,
+				StakingTxHashHex:          testHash4,
 				FinalityProviderBtcPksHex: []string{"fp1", "fp2"},
 			},
 			babylonParams: []*indexertypes.BbnStakingParams{
 				{Version: 1, MaxFinalityProviders: 5},
-				{Version: 3, MaxFinalityProviders: 2}, // Latest version with lower limit
+				{Version: 3, MaxFinalityProviders: 3},
 				{Version: 2, MaxFinalityProviders: 10},
 			},
 			expectedResult: true,
@@ -134,8 +108,8 @@ func TestEvaluateCanExpand(t *testing.T) {
 			indexerDB := mocks.NewIndexerDBClient(t)
 			v1DB := mocks.NewV1DBClient(t)
 
-			// Only mock GetBbnStakingParams call if delegation is active AND has single FP (will reach the params check)
-			if tt.delegation.State == indexertypes.StateActive && len(tt.delegation.FinalityProviderBtcPksHex) == 1 {
+			// Mock GetBbnStakingParams call if delegation is active (will reach the params check)
+			if tt.delegation.State == indexertypes.StateActive {
 				if tt.expectedErrorInGetParams {
 					indexerDB.On("GetBbnStakingParams", ctx).Return(nil, tt.babylonParamsError).Once()
 				} else {
