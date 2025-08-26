@@ -42,7 +42,7 @@ func TestGetNetworkInfo(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		service, err := New(sharedService, nil, nil)
+		service, err := New(sharedService, nil)
 		require.NoError(t, err)
 
 		resp, rpcErr := service.GetNetworkInfo(ctx)

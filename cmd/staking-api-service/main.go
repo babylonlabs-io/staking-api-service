@@ -75,12 +75,6 @@ func main() {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading finality providers file: %s", finalityProvidersPath))
 	}
 
-	// Load allow-list
-	allowList, err := types.NewAllowList(cli.GetAllowListPath())
-	if err != nil {
-		log.Fatal().Err(err).Msg("error while loading allow-list file")
-	}
-
 	err = dbmodel.Setup(ctx, cfg.StakingDb, cfg.ExternalAPIs)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking db model")
@@ -114,7 +108,6 @@ func main() {
 		clients,
 		dbClients,
 		keybaseClient,
-		allowList,
 		&types.ChainInfo{
 			ChainID: chainInfo.ChainID,
 		},

@@ -12,14 +12,12 @@ const (
 	defaultConfigFileName            = "config.yml"
 	defaultGlobalParamsFileName      = "global_params.json"
 	defaultFinalityProvidersFileName = "finality_providers.json"
-	defaultAllowListFileName         = "allow_list.json"
 )
 
 var (
 	cfgPath                   string
 	globalParamsPath          string
 	finalityProvidersPath     string
-	allowListPath             string
 	replayFlag                bool
 	backfillPubkeyAddressFlag bool
 	rootCmd                   = &cobra.Command{
@@ -54,12 +52,6 @@ func Setup() error {
 		"finality-providers",
 		defaultFinalityProvidersPath,
 		fmt.Sprintf("finality providers file (default %s)", defaultFinalityProvidersPath),
-	)
-	rootCmd.PersistentFlags().StringVar(
-		&allowListPath,
-		"allow-list",
-		"",
-		"allow list file (optional, defaults to empty string if not provided)",
 	)
 	rootCmd.PersistentFlags().BoolVar(
 		&replayFlag,
@@ -100,8 +92,4 @@ func GetReplayFlag() bool {
 
 func GetBackfillPubkeyAddressFlag() bool {
 	return backfillPubkeyAddressFlag
-}
-
-func GetAllowListPath() string {
-	return allowListPath
 }

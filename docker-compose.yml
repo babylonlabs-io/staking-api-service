@@ -7,12 +7,11 @@ services:
       - "80:8090"
     environment:
       - CONFIG=/home/staking-api-service/config.yml
-      - ALLOW_LIST=/home/staking-api-service/allowlist.json
+
     volumes:
       - ./config/global-params.json:/home/staking-api-service/global-params.json:Z
       - ./config/finality-providers.json:/home/staking-api-service/finality-providers.json:Z
       - ./config/config-docker.yml:/home/staking-api-service/config.yml:Z
-      - ./config/allowlist.json:/home/staking-api-service/allowlist.json:Z
   mongodb:
     image: mongo:latest
     container_name: mongodb
