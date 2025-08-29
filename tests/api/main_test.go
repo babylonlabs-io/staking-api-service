@@ -59,9 +59,6 @@ func TestMain(t *testing.M) {
 		AddressScreeningConfig: &config.AddressScreeningConfig{
 			Enabled: true,
 		},
-		AllowList: &config.AllowList{
-			ExpirationBlock: 100_000_000,
-		},
 	}
 
 	s, err := setupServices(ctx, cfg)

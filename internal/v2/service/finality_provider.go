@@ -22,6 +22,7 @@ type FinalityProviderPublic struct {
 	LogoURL           string                              `json:"logo_url,omitempty"`
 	BsnID             string                              `json:"bsn_id,omitempty"`
 	Type              string                              `json:"type"`
+	IsAllowlisted     bool                                `json:"is_allowlisted"`
 }
 
 type FinalityProvidersStatsPublic struct {
@@ -54,6 +55,7 @@ func mapToFinalityProviderStatsPublic(
 		LogoURL:           fpLogoURL,
 		BsnID:             provider.BsnID,
 		Type:              bsnType,
+		IsAllowlisted:     provider.IsAllowlisted,
 	}
 }
 
