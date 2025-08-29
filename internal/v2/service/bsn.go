@@ -9,10 +9,11 @@ import (
 )
 
 type BSN struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	ActiveTvl   int64  `json:"active_tvl"`
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	ActiveTvl   int64    `json:"active_tvl"`
+	Allowlist   []string `json:"allowlist,omitempty"`
 }
 
 func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
@@ -36,6 +37,7 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 			ID:          s.sharedService.ChainInfo.ChainID,
 			Name:        "Babylon Genesis",
 			Description: "",
+			Allowlist:   []string{}, // Babylon Genesis has no allowlist restrictions
 		},
 	}
 	for _, item := range items {
@@ -52,10 +54,16 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 }
 
 func mapBSN(consumer indexerdbmodel.BSN, activeTVL int64) BSN {
+	var allowlist []string
+	if consumer.RollupMetadata != nil {
+		allowlist = consumer.RollupMetadata.Allowlist
+	}
+
 	return BSN{
 		ID:          consumer.ID,
 		Name:        consumer.Name,
 		Description: consumer.Description,
 		ActiveTvl:   activeTVL,
+		Allowlist:   allowlist,
 	}
 }
