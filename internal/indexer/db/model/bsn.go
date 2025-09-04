@@ -14,5 +14,6 @@ const (
 )
 
 type ETHL2Metadata struct {
-	FinalityContractAddress string `bson:"finality_contract_address"`
+	FinalityContractAddress string   `bson:"finality_contract_address"`
+	Allowlist               []string `bson:"allowlist"` // array of FP BTC pubkeys hex
 }
