@@ -3,6 +3,7 @@ package chainalysis
 import (
 	"context"
 	"net/http"
+	"time"
 )
 
 const defaultTimeout = 5 * 1000 // 5 seconds
@@ -22,7 +23,7 @@ func (c *Client) GetBaseURL() string {
 	return c.baseURL
 }
 
-func (c *Client) GetDefaultRequestTimeout() int {
+func (c *Client) GetDefaultRequestTimeout() time.Duration {
 	return defaultTimeout
 }
 
