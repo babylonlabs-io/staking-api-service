@@ -69,7 +69,7 @@ func (h *V1Handler) GetStakerDelegations(request *http.Request) (*handler.Result
 // @Failure 400 {object} types.Error "Error: Bad Request"
 // @Router /v1/staker/delegation/check [get]
 func (h *V1Handler) CheckStakerDelegationExist(request *http.Request) (*handler.Result, *types.Error) {
-	address, err := handler.ParseBtcAddressQuery(request, "address", h.Handler.Config.Server.BTCNetParam)
+	address, err := handler.ParseBtcAddressQuery(request, "address", h.Config.Server.BTCNetParam)
 	if err != nil {
 		return nil, err
 	}
