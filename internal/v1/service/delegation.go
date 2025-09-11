@@ -56,7 +56,7 @@ func (s *V1Service) DelegationsByStakerPk(
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to find delegations by staker pk")
 		return nil, "", types.NewInternalServiceError(err)
 	}
-	var delegations = make([]*DelegationPublic, 0, len(resultMap.Data))
+	delegations := make([]*DelegationPublic, 0, len(resultMap.Data))
 	bbnHeight, err := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height")
