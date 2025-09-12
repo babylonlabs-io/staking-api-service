@@ -30,25 +30,30 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 	statsByBSN := pkg.SliceToMap(stats, func(doc *v2dbmodel.BSNStatsDocument) string {
 		return doc.BsnID
 	})
+	getActiveTVL := func(chainID string) int64 {
+		var activeTVL int64
+		if v, ok := statsByBSN[chainID]; ok {
+			activeTVL = v.ActiveTvl
+		}
+
+		return activeTVL
+	}
 
 	// we don't store babylon bsn in mongo, we place it on top so on frontend
 	// it's always displayed first
+	bbnBsnID := s.sharedService.ChainInfo.ChainID
 	result := []BSN{
 		{
-			ID:          s.sharedService.ChainInfo.ChainID,
+			ID:          bbnBsnID,
 			Name:        "Babylon Genesis",
 			Description: "",
 			Type:        indexerdbmodel.TypeCosmos,
+			ActiveTvl:   getActiveTVL(bbnBsnID),
 			Allowlist:   []string{}, // Babylon Genesis has no allowlist restrictions
 		},
 	}
 	for _, item := range items {
-		var activeTVL int64
-		if v, ok := statsByBSN[item.ID]; ok {
-			activeTVL = v.ActiveTvl
-		}
-
-		resultItem := mapBSN(item, activeTVL)
+		resultItem := mapBSN(item, getActiveTVL(item.ID))
 		result = append(result, resultItem)
 	}
 
