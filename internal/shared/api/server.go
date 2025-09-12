@@ -65,7 +65,7 @@ func (a *Server) Start() error {
 
 	log.Info().Msgf("Starting server on %s", address)
 	var err error
-	a.listener, err = net.Listen("tcp", address)
+	a.listener, err = net.Listen("tcp", address) //nolint:noctx
 	if err != nil {
 		return err
 	}
