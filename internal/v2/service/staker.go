@@ -61,11 +61,13 @@ func (s *V2Service) GetStakerPublicKeysByAddresses(
 				http.StatusBadRequest, types.BadRequest, "invalid btc address",
 			)
 		}
-		if addressType == utils.Taproot {
+
+		switch addressType {
+		case utils.Taproot:
 			taprootAddresses = append(taprootAddresses, addr)
-		} else if addressType == utils.NativeSegwit {
+		case utils.NativeSegwit:
 			nativeSegwitAddresses = append(nativeSegwitAddresses, addr)
-		} else {
+		default:
 			// todo it's not possible (validation done at CheckBtcAddressType) replace with unreachable panic?
 			return nil, types.NewErrorWithMsg(
 				http.StatusBadRequest, types.BadRequest, "unsupported address type",

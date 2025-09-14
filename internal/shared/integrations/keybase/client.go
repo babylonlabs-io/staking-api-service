@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 )
@@ -47,8 +48,14 @@ func (c *Client) GetLogoURL(ctx context.Context, identity string) (string, error
 		} `json:"them"`
 	}
 
+	params := make(url.Values)
+	params.Add("fields", "pictures")
+	params.Add("username", "ds")
+	params.Add("key_suffix", identity)
+	query := params.Encode()
+
 	const endpoint = "/_/api/1.0/user/lookup.json"
-	path := endpoint + fmt.Sprintf("?key_suffix=%s&fields=pictures&username=ds", identity)
+	path := endpoint + "?" + query
 
 	opts := &client.HttpClientOptions{
 		Path:         path,

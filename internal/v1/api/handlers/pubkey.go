@@ -33,7 +33,7 @@ const (
 // @Router /v1/staker/pubkey-lookup [get]
 func (h *V1Handler) GetPubKeys(request *http.Request) (*handler.Result, *types.Error) {
 	addresses, err := handler.ParseBtcAddressesQuery(
-		request, "address", h.Handler.Config.Server.BTCNetParam, MAX_NUM_PK_LOOKUP_ADDRESSES,
+		request, "address", h.Config.Server.BTCNetParam, MAX_NUM_PK_LOOKUP_ADDRESSES,
 	)
 	if err != nil {
 		return nil, err

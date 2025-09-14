@@ -47,7 +47,7 @@ func (s *V1Service) DelegationsByStakerPk(
 		}
 	}
 
-	resultMap, err := s.Service.DbClients.V1DBClient.FindDelegationsByStakerPk(ctx, stakerPk, filter, pageToken)
+	resultMap, err := s.DbClients.V1DBClient.FindDelegationsByStakerPk(ctx, stakerPk, filter, pageToken)
 	if err != nil {
 		if db.IsInvalidPaginationTokenError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching delegations by staker pk")
@@ -56,7 +56,7 @@ func (s *V1Service) DelegationsByStakerPk(
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to find delegations by staker pk")
 		return nil, "", types.NewInternalServiceError(err)
 	}
-	var delegations []*DelegationPublic = make([]*DelegationPublic, 0, len(resultMap.Data))
+	delegations := make([]*DelegationPublic, 0, len(resultMap.Data))
 	bbnHeight, err := s.Service.DbClients.IndexerDBClient.GetLastProcessedBbnHeight(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get last processed BBN height")
