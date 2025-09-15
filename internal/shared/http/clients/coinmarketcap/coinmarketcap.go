@@ -46,9 +46,9 @@ func (c *Client) GetHttpClient() *http.Client {
 	return c.httpClient
 }
 
-// LatestQuotes returns latest quotes data for given ucid (unified cryptoasset id)
+// LatestQuote returns latest quotes data for given ucid (unified cryptoasset id)
 // if ucid doesn't exist this method return an error
-func (c *Client) LatestQuotes(ctx context.Context, ucid int) (*QuoteLatest, error) {
+func (c *Client) LatestQuote(ctx context.Context, ucid int) (*QuoteLatest, error) {
 	ucidStr := strconv.Itoa(ucid)
 
 	path := "/cryptocurrency/quotes/latest"

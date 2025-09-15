@@ -66,7 +66,7 @@ func (s *Service) GetLatestBABYPrice(ctx context.Context) (float64, error) {
 }
 
 func (s *Service) doGetLatestBTCPrice(ctx context.Context) (float64, error) {
-	targetQuote, err := s.Clients.CoinMarketCap.LatestQuotes(ctx, coinmarketcap.BtcID)
+	targetQuote, err := s.Clients.CoinMarketCap.LatestQuote(ctx, coinmarketcap.BtcID)
 	if err != nil {
 		return 0, err
 	}
@@ -80,7 +80,7 @@ func (s *Service) doGetLatestBTCPrice(ctx context.Context) (float64, error) {
 }
 
 func (s *Service) doGetLatestBABYPrice(ctx context.Context) (float64, error) {
-	targetQuote, err := s.Clients.CoinMarketCap.LatestQuotes(ctx, coinmarketcap.BabyID)
+	targetQuote, err := s.Clients.CoinMarketCap.LatestQuote(ctx, coinmarketcap.BabyID)
 	if err != nil {
 		return 0, err
 	}
