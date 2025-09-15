@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "0",
+    "active_tvl": {
+      "$numberLong": "1000"
+    },
+    "active_delegations": {
+      "$numberLong": "1000"
+    }
+  },
+  {
+    "_id": "1",
+    "active_tvl": {
+      "$numberLong": "2000"
+    },
+    "active_delegations": {
+      "$numberLong": "2000"
+    }
+  }
+]
