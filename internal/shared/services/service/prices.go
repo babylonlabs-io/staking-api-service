@@ -6,17 +6,8 @@ import (
 	"fmt"
 
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
-	coinmarketcap "github.com/miguelmota/go-coinmarketcap/pro/v1"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/coinmarketcap"
 	"go.mongodb.org/mongo-driver/mongo"
-)
-
-const (
-	// CoinMarketCap UCID for BABY.
-	// https://coinmarketcap.com/currencies/babylon/
-	BabyCoinmarketcapID = 32198
-	// CoinMarketCap UCID for BTC.
-	// https://coinmarketcap.com/currencies/bitcoin/
-	BtcCoinmarketcapID = 1
 )
 
 func (s *Service) GetLatestBTCPrice(ctx context.Context) (float64, error) {
@@ -31,7 +22,7 @@ func (s *Service) GetLatestBTCPrice(ctx context.Context) (float64, error) {
 			// here we will make just 1 request, other goroutines will wait and receive whatever first one get
 			// note that key in .Do call below is not very important unless we use the same string
 			value, err, _ := s.singleFlightGroup.Do("fetch_btc", func() (any, error) {
-				return s.doGetLatestBTCPrice()
+				return s.doGetLatestBTCPrice(ctx)
 			})
 			if err != nil {
 				return 0, fmt.Errorf("failed to fetch BTC price from CoinMarketCap: %w", err)
@@ -56,7 +47,7 @@ func (s *Service) GetLatestBABYPrice(ctx context.Context) (float64, error) {
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			value, err, _ := s.singleFlightGroup.Do("fetch_baby", func() (any, error) {
-				return s.doGetLatestBABYPrice()
+				return s.doGetLatestBABYPrice(ctx)
 			})
 			if err != nil {
 				return 0, fmt.Errorf("failed to fetch BABY price from CoinMarketCap: %w", err)
@@ -74,26 +65,10 @@ func (s *Service) GetLatestBABYPrice(ctx context.Context) (float64, error) {
 	return babyPrice, nil
 }
 
-func (s *Service) doGetLatestBTCPrice() (float64, error) {
-	quotes, err := s.Clients.CoinMarketCap.Cryptocurrency.LatestQuotes(&coinmarketcap.QuoteOptions{
-		Symbol: "BTC",
-	})
+func (s *Service) doGetLatestBTCPrice(ctx context.Context) (float64, error) {
+	targetQuote, err := s.Clients.CoinMarketCap.LatestQuotes(ctx, coinmarketcap.BtcID)
 	if err != nil {
 		return 0, err
-	}
-
-	var targetQuote *coinmarketcap.QuoteLatest
-	for _, quote := range quotes {
-		if quote.ID == BtcCoinmarketcapID {
-			targetQuote = quote
-			break
-		}
-	}
-	if targetQuote == nil {
-		return 0, fmt.Errorf(
-			"BTC token with ID %d not found in coinmarketcap response",
-			BtcCoinmarketcapID,
-		)
 	}
 
 	btcToUsdQuote := targetQuote.Quote["USD"]
@@ -104,30 +79,10 @@ func (s *Service) doGetLatestBTCPrice() (float64, error) {
 	return btcToUsdQuote.Price, nil
 }
 
-func (s *Service) doGetLatestBABYPrice() (float64, error) {
-	quotes, err := s.Clients.CoinMarketCap.Cryptocurrency.LatestQuotes(&coinmarketcap.QuoteOptions{
-		Symbol: "BABY",
-	})
+func (s *Service) doGetLatestBABYPrice(ctx context.Context) (float64, error) {
+	targetQuote, err := s.Clients.CoinMarketCap.LatestQuotes(ctx, coinmarketcap.BabyID)
 	if err != nil {
 		return 0, err
-	}
-
-	if len(quotes) == 0 {
-		return 0, fmt.Errorf("nothing found in coinmarketcap response for BABY")
-	}
-
-	var targetQuote *coinmarketcap.QuoteLatest
-	for _, quote := range quotes {
-		if quote.ID == BabyCoinmarketcapID {
-			targetQuote = quote
-			break
-		}
-	}
-	if targetQuote == nil {
-		return 0, fmt.Errorf(
-			"BABY token with ID %d not found in coinmarketcap response",
-			BabyCoinmarketcapID,
-		)
 	}
 
 	babyToUsdQuote := targetQuote.Quote["USD"]

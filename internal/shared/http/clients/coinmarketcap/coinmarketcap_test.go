@@ -18,7 +18,7 @@ func TestMe(t *testing.T) {
 	metrics.Init(0)
 
 	cl := NewClient(key, 5000)
-	quotes, err := cl.LatestQuotes(t.Context(), "BTC")
+	quotes, err := cl.LatestQuotes(t.Context(), 100000000)
 	require.NoError(t, err)
 	spew.Dump(quotes)
 }

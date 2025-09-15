@@ -3,9 +3,19 @@ package coinmarketcap
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
+)
+
+const (
+	// CoinMarketCap UCID for BTC.
+	// https://coinmarketcap.com/currencies/bitcoin/
+	BtcID = 1
+	// CoinMarketCap UCID for BABY.
+	// https://coinmarketcap.com/currencies/babylon/
+	BabyID = 32198
 )
 
 const baseURL = "https://pro-api.coinmarketcap.com/v1"
@@ -36,9 +46,13 @@ func (c *Client) GetHttpClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *Client) LatestQuotes(ctx context.Context, symbol string) (*QuoteLatest, error) {
+// LatestQuotes returns latest quotes data for given ucid (unified cryptoasset id)
+// if ucid doesn't exist this method return an error
+func (c *Client) LatestQuotes(ctx context.Context, ucid int) (*QuoteLatest, error) {
+	ucidStr := strconv.Itoa(ucid)
+
 	path := "/cryptocurrency/quotes/latest"
-	url := path + "?symbol=" + symbol
+	url := path + "?id=" + ucidStr
 
 	opts := &client.HttpClientOptions{
 		Path:         url,
@@ -57,7 +71,7 @@ func (c *Client) LatestQuotes(ctx context.Context, symbol string) (*QuoteLatest,
 		return nil, err
 	}
 
-	return resp.Data[symbol], nil
+	return resp.Data[ucidStr], nil
 }
 
 type QuoteLatest struct {
