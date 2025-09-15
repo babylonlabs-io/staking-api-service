@@ -9,7 +9,7 @@ import (
 
 func TestV2_FinalityProviders(t *testing.T) {
 	contents := `{"data":[{"btc_pk":"bef341a7adb10213a7ec7825afeb7d57fbfa7b5f7bdf201204fb0ef62fb9cfa6","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"verse2","identity":"","website":"https://verse2.io","security_contact":"ted@verse2.io","details":""},"commission":"0.050000000000000000","active_tvl":0,"active_delegations":0,"type":""},{"btc_pk":"d23c2c25e1fcf8fd1c21b9a402c19e2e309e531e45e92fb1e9805b6056b0cc76","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"Babylon Foundation 0","identity":"","website":"https://babylonlabs.io","security_contact":"","details":""},"commission":"0.100000000000000000","active_tvl":0,"active_delegations":0,"type":""},{"btc_pk":"e4889630fa8695dae630c41cd9b85ef165ccc2dc5e5935d5a24393a9defee9ef","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"Babylon Foundation 1","identity":"","website":"https://babylonlabs.io","security_contact":"","details":""},"commission":"0.070000000000000000","active_tvl":0,"active_delegations":0,"type":""}],"pagination":{"next_key":""}}`
-	assertResponse(t, "/v2/finality-providers", http.StatusOK, contents)
+	assertResponse(t, "/v2/finality-providers?bsn_id=all", http.StatusOK, contents)
 }
 
 func TestV2_NetworkInfo(t *testing.T) {
@@ -31,7 +31,7 @@ func TestV2_Prices(t *testing.T) {
 }
 
 func TestV2_Stats(t *testing.T) {
-	contents := `{"data":{"active_tvl":0,"active_delegations":0,"active_finality_providers":3,"total_finality_providers":3,"total_active_tvl":67986511595,"total_active_delegations":417254,"btc_staking_apr":0}}`
+	contents := `{"data":{"active_tvl":3000,"active_delegations":3000,"active_finality_providers":3,"total_finality_providers":3,"total_active_tvl":67986514595,"total_active_delegations":420254,"btc_staking_apr":0}}`
 	assertResponse(t, "/v2/stats", http.StatusOK, contents)
 }
 
@@ -142,6 +142,6 @@ func TestV2_StakerStats(t *testing.T) {
 }
 
 func TestV2_BSN(t *testing.T) {
-	contents := `{"data":[{"id":"","name":"Babylon Genesis","description":"","active_tvl":0,"allowlist":[]},{"id":"consumer-chain-1","name":"Consumer Chain 1","description":"First consumer chain for testing","active_tvl":1500000,"allowlist":["03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd","03b3b3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3"]},{"id":"consumer-chain-2","name":"Consumer Chain 2","description":"Second consumer chain for testing","active_tvl":2500000,"allowlist":[]},{"id":"consumer-chain-3","name":"Consumer Chain 3","description":"Third consumer chain with empty allowlist","active_tvl":500000,"allowlist":[]}],"pagination":{"next_key":""}}`
+	contents := `{"data":[{"id":"","name":"Babylon Genesis","description":"","type":"COSMOS","active_tvl":3000},{"id":"consumer-chain-1","name":"Consumer Chain 1","type":"ROLLUP","description":"First consumer chain for testing","active_tvl":1500000,"allowlist":["03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd","03b3b3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3"]},{"id":"consumer-chain-2","name":"Consumer Chain 2","type":"COSMOS","description":"Second consumer chain for testing","active_tvl":2500000},{"id":"consumer-chain-3","name":"Consumer Chain 3","type":"ROLLUP","description":"Third consumer chain with empty allowlist","active_tvl":500000}],"pagination":{"next_key":""}}`
 	assertResponse(t, "/v2/bsn", http.StatusOK, contents)
 }
