@@ -61,11 +61,13 @@ func (s *V1Service) GetStakerPublicKeysByAddresses(
 				http.StatusBadRequest, types.BadRequest, "invalid btc address",
 			)
 		}
-		if addressType == utils.Taproot {
+
+		switch addressType {
+		case utils.Taproot:
 			taprootAddresses = append(taprootAddresses, addr)
-		} else if addressType == utils.NativeSegwit {
+		case utils.NativeSegwit:
 			nativeSegwitAddresses = append(nativeSegwitAddresses, addr)
-		} else {
+		default:
 			return nil, types.NewErrorWithMsg(
 				http.StatusBadRequest, types.BadRequest, "unsupported address type",
 			)

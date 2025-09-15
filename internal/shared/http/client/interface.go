@@ -1,8 +1,6 @@
 package client
 
-import (
-	"net/http"
-)
+import "net/http"
 
 type HttpClient interface {
 	GetBaseURL() string

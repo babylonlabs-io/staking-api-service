@@ -31,6 +31,11 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 		return doc.BsnID
 	})
 
+	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// we don't store babylon bsn in mongo, we place it on top so on frontend
 	// it's always displayed first
 	result := []BSN{
@@ -39,6 +44,7 @@ func (s *V2Service) GetAllBSN(ctx context.Context) ([]BSN, error) {
 			Name:        "Babylon Genesis",
 			Description: "",
 			Type:        indexerdbmodel.TypeCosmos,
+			ActiveTvl:   overallStats.ActiveTvl,
 			Allowlist:   []string{}, // Babylon Genesis has no allowlist restrictions
 		},
 	}

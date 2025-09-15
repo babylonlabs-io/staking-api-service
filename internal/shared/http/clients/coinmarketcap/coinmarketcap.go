@@ -2,9 +2,10 @@ package coinmarketcap
 
 import (
 	"context"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 	"net/http"
 	"time"
+
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 )
 
 const baseURL = "https://pro-api.coinmarketcap.com/v1"
