@@ -8,12 +8,12 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/coinmarketcap"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services/service"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
 	"github.com/babylonlabs-io/staking-api-service/tests/mocks"
-	cmc "github.com/miguelmota/go-coinmarketcap/pro/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -37,7 +37,7 @@ func Test_GetOverallStats(t *testing.T) {
 		nil,
 		nil,
 		&clients.Clients{
-			CoinMarketCap: cmc.NewClient(nil),
+			CoinMarketCap: coinmarketcap.NewClient("", 0),
 		},
 		&dbclients.DbClients{
 			SharedDBClient:  dbShared,
@@ -117,7 +117,7 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 		nil,
 		nil,
 		&clients.Clients{
-			CoinMarketCap: cmc.NewClient(nil),
+			CoinMarketCap: coinmarketcap.NewClient("", 0),
 		},
 		&dbclients.DbClients{
 			SharedDBClient:  dbShared,
