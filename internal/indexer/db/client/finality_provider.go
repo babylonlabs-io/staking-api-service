@@ -40,3 +40,29 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 
 	return results, nil
 }
+
+// GetFinalityProvidersByID retrieves finality providers by their id-s
+func (indexerdbclient *IndexerDatabase) GetFinalityProvidersByID(
+	ctx context.Context,
+	ids []string,
+) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	client := indexerdbclient.collection(indexerdbmodel.FinalityProviderDetailsCollection)
+
+	filter := bson.M{"_id": bson.M{"$in": ids}}
+	cursor, err := client.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []*indexerdbmodel.IndexerFinalityProviderDetails
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
