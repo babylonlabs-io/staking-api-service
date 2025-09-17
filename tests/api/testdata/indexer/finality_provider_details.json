@@ -3,6 +3,7 @@
   "babylon_address": "bbn1hq2ueffyn44u3t67u39yl8jfhs39lfcydnayx3",
   "commission": "0.050000000000000000",
   "state": "FINALITY_PROVIDER_STATUS_ACTIVE",
+  "bsn_id": "bbn-chain-id",
   "description": {
     "moniker": "verse2",
     "identity": "",
@@ -16,6 +17,7 @@
     "babylon_address": "bbn1ty8c9awrpkqw3jldpcxr942y6yz6tjzg7zqttr",
     "commission": "0.100000000000000000",
     "state": "FINALITY_PROVIDER_STATUS_ACTIVE",
+    "bsn_id": "bbn-chain-id",
     "description": {
       "moniker": "Babylon Foundation 0",
       "identity": "",
@@ -29,6 +31,7 @@
     "babylon_address": "bbn16mqs7es930802me0lnyl00rq5rejzezgsa5mwc",
     "commission": "0.070000000000000000",
     "state": "FINALITY_PROVIDER_STATUS_ACTIVE",
+    "bsn_id": "bbn-chain-id",
     "description": {
       "moniker": "Babylon Foundation 1",
       "identity": "",

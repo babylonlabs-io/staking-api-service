@@ -8,6 +8,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/rs/zerolog/log"
 )
 
@@ -52,6 +53,7 @@ func (s *V2Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
+	spew.Dump("ChainInfo", s.sharedService.ChainInfo)
 	// We only care about the Babylon finality providers stats for now
 	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(
 		ctx, &s.sharedService.ChainInfo.ChainID,
