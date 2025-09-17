@@ -138,6 +138,36 @@ func (_m *IndexerDBClient) GetBtcCheckpointParams(ctx context.Context) ([]*index
 	return r0, r1
 }
 
+// GetChainInfo provides a mock function with given fields: ctx
+func (_m *IndexerDBClient) GetChainInfo(ctx context.Context) (*indexerdbmodel.ChainInfo, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetChainInfo")
+	}
+
+	var r0 *indexerdbmodel.ChainInfo
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*indexerdbmodel.ChainInfo, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *indexerdbmodel.ChainInfo); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*indexerdbmodel.ChainInfo)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetDelegation provides a mock function with given fields: ctx, stakingTxHashHex
 func (_m *IndexerDBClient) GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error) {
 	ret := _m.Called(ctx, stakingTxHashHex)
@@ -258,6 +288,36 @@ func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context, bsnID *stri
 	return r0, r1
 }
 
+// GetFinalityProvidersByID provides a mock function with given fields: ctx, ids
+func (_m *IndexerDBClient) GetFinalityProvidersByID(ctx context.Context, ids []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
+	ret := _m.Called(ctx, ids)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFinalityProvidersByID")
+	}
+
+	var r0 []*indexerdbmodel.IndexerFinalityProviderDetails
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)); ok {
+		return rf(ctx, ids)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*indexerdbmodel.IndexerFinalityProviderDetails); ok {
+		r0 = rf(ctx, ids)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*indexerdbmodel.IndexerFinalityProviderDetails)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, ids)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetLastProcessedBbnHeight provides a mock function with given fields: ctx
 func (_m *IndexerDBClient) GetLastProcessedBbnHeight(ctx context.Context) (uint64, error) {
 	ret := _m.Called(ctx)
@@ -275,36 +335,6 @@ func (_m *IndexerDBClient) GetLastProcessedBbnHeight(ctx context.Context) (uint6
 		r0 = rf(ctx)
 	} else {
 		r0 = ret.Get(0).(uint64)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetNetworkInfo provides a mock function with given fields: ctx
-func (_m *IndexerDBClient) GetChainInfo(ctx context.Context) (*indexerdbmodel.ChainInfo, error) {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetNetworkInfo")
-	}
-
-	var r0 *indexerdbmodel.ChainInfo
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*indexerdbmodel.ChainInfo, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context) *indexerdbmodel.ChainInfo); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*indexerdbmodel.ChainInfo)
-		}
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {

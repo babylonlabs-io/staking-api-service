@@ -174,7 +174,7 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 				BsnID: "bsn3",
 			},
 		}
-		dbIndexer.On("GetFinalityProviders", ctx, (*string)(nil)).Return(fps, nil).Once()
+		dbIndexer.On("GetFinalityProvidersByID", ctx, []string{fp1ID, fp2ID}).Return(fps, nil).Once()
 
 		dbV2.On("IncrementBsnStats", ctx, stakingTxHashHex, []string{"babylon", "bsn2"}, amount).Return(nil).Once()
 

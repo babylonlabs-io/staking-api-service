@@ -284,7 +284,7 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 }
 
 func (s *V2Service) getBsnForFinalityProviders(ctx context.Context, fpBtcPkHexes []string) ([]string, error) {
-	fps, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, nil)
+	fps, err := s.dbClients.IndexerDBClient.GetFinalityProvidersByID(ctx, fpBtcPkHexes)
 	if err != nil {
 		return nil, err
 	}
