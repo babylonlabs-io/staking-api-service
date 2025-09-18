@@ -12,6 +12,7 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -148,14 +149,8 @@ func (v2dbclient *V2Database) GetOverallStats(ctx context.Context) (*v2dbmodel.V
 
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2OverallStatsCollection)
 	filter := bson.M{"_id": bson.M{"$in": shardsId}}
-	cursor, err := client.Find(ctx, filter)
+	overallStats, err := pkg.FetchAll[v2dbmodel.V2OverallStatsDocument](ctx, client, filter)
 	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var overallStats []v2dbmodel.V2OverallStatsDocument
-	if err = cursor.All(ctx, &overallStats); err != nil {
 		return nil, err
 	}
 
@@ -640,32 +635,12 @@ func (v2dbclient *V2Database) GetFinalityProviderStats(
 	ctx context.Context,
 ) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
-	cursor, err := client.Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var results []*v2dbmodel.V2FinalityProviderStatsDocument
-	if err := cursor.All(ctx, &results); err != nil {
-		return nil, err
-	}
-	return results, nil
+	return pkg.FetchAll[*v2dbmodel.V2FinalityProviderStatsDocument](ctx, client, bson.M{})
 }
 
 func (v2dbclient *V2Database) GetBsnStats(
 	ctx context.Context,
 ) ([]*v2dbmodel.BSNStatsDocument, error) {
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.BsnStatsCollection)
-	cursor, err := client.Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var results []*v2dbmodel.BSNStatsDocument
-	if err := cursor.All(ctx, &results); err != nil {
-		return nil, err
-	}
-	return results, nil
+	return pkg.FetchAll[*v2dbmodel.BSNStatsDocument](ctx, client, bson.M{})
 }
