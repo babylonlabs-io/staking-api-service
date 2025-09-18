@@ -18,7 +18,6 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/services"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2queue "github.com/babylonlabs-io/staking-api-service/internal/v2/queue"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
@@ -100,7 +99,6 @@ func main() {
 	} else if err != nil {
 		log.Fatal().Err(err).Msg("error while getting network info")
 	}
-	spew.Dump("MAIN: ChainInfo", chainInfo)
 
 	keybaseClient := keybase.NewClient()
 	services, err := services.New(
