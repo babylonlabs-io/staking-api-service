@@ -456,6 +456,36 @@ func (_m *V1DBClient) GetStakerStats(ctx context.Context, stakerPkHex string) (*
 	return r0, r1
 }
 
+// GetV1OverallStatsSimplified provides a mock function with given fields: ctx
+func (_m *V1DBClient) GetV1OverallStatsSimplified(ctx context.Context) (*v1dbmodel.V1OverallStatsDocument, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetV1OverallStatsSimplified")
+	}
+
+	var r0 *v1dbmodel.V1OverallStatsDocument
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*v1dbmodel.V1OverallStatsDocument, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *v1dbmodel.V1OverallStatsDocument); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1dbmodel.V1OverallStatsDocument)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // IncrementFinalityProviderStats provides a mock function with given fields: ctx, stakingTxHashHex, fpPkHex, amount
 func (_m *V1DBClient) IncrementFinalityProviderStats(ctx context.Context, stakingTxHashHex string, fpPkHex string, amount uint64) error {
 	ret := _m.Called(ctx, stakingTxHashHex, fpPkHex, amount)

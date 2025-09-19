@@ -25,6 +25,22 @@ func (h *V1Handler) GetOverallStats(request *http.Request) (*handler.Result, *ty
 	return handler.NewResult(stats), nil
 }
 
+// GetV1OverallStats gets overall stats for babylon staking using cron job recalculation
+// @Summary Get V1 Overall Stats (Simplified)
+// @Description Fetches overall stats for babylon staking Phase-1 using cron job recalculation approach. This provides active_tvl and active_delegations calculated every 10 minutes.
+// @Produce json
+// @Tags v1
+// @Success 200 {object} handler.PublicResponse[v1service.V1OverallStatsPublic] "V1 Overall stats for babylon staking"
+// @Router /v1/stats/simplified [get]
+func (h *V1Handler) GetV1OverallStats(request *http.Request) (*handler.Result, *types.Error) {
+	stats, err := h.Service.GetV1OverallStats(request.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.NewResult(stats), nil
+}
+
 // GetStakersStats gets staker stats for babylon staking
 // @Summary Get Staker Stats (Deprecated)
 // @Description [DEPRECATED] Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations. Please use /v2/staker/stats instead.

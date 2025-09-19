@@ -28,6 +28,15 @@ type StakerStatsPublic struct {
 	TotalDelegations  int64  `json:"total_delegations"`
 }
 
+// V1OverallStatsPublic represents the simplified overall stats for Phase-1
+// that are maintained by the expiry-checker cron job recalculation.
+type V1OverallStatsPublic struct {
+	ActiveTvl         int64 `json:"active_tvl"`
+	ActiveDelegations int64 `json:"active_delegations"`
+}
+
+// Deprecated: GetOverallStats uses incremental stats approach which has audit concerns.
+// Use GetV1OverallStats for cron job recalculated stats instead.
 func (s *V1Service) GetOverallStats(
 	ctx context.Context,
 ) (*OverallStatsPublic, *types.Error) {
@@ -118,4 +127,22 @@ func (s *V1Service) ProcessBtcInfoStats(
 		return types.NewInternalServiceError(err)
 	}
 	return nil
+}
+
+// GetV1OverallStats retrieves the simplified overall stats from the
+// new v1_overall_stats collection that is maintained by the expiry-checker cron job.
+// This replaces the deprecated incremental stats approach with regular recalculation.
+func (s *V1Service) GetV1OverallStats(
+	ctx context.Context,
+) (*V1OverallStatsPublic, *types.Error) {
+	stats, err := s.Service.DbClients.V1DBClient.GetV1OverallStats(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching simplified V1 overall stats")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	return &V1OverallStatsPublic{
+		ActiveTvl:         stats.ActiveTvl,
+		ActiveDelegations: stats.ActiveDelegations,
+	}, nil
 }

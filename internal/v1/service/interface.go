@@ -32,7 +32,9 @@ type V1ServiceProvider interface {
 	GetStakerPublicKeysByAddresses(ctx context.Context, addresses []string) (map[string]string, *types.Error)
 	// Stats
 	ProcessLegacyStatsDeduction(ctx context.Context, stakingTxHashHex, stakerPkHex, fpPkHex string, amount uint64) *types.Error
+	// Deprecated: GetOverallStats uses incremental stats approach. Use GetV1OverallStats for cron job recalculated stats.
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
+	GetV1OverallStats(ctx context.Context) (*V1OverallStatsPublic, *types.Error)
 	GetStakerStats(ctx context.Context, stakerPkHex string) (*StakerStatsPublic, *types.Error)
 	GetTopStakersByActiveTvl(ctx context.Context, pageToken string) ([]StakerStatsPublic, string, *types.Error)
 	ProcessBtcInfoStats(ctx context.Context, btcHeight uint64, confirmedTvl uint64, unconfirmedTvl uint64) *types.Error

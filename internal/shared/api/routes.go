@@ -53,6 +53,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v1/global-params", registerHandler(handlers.V1Handler.GetBabylonGlobalParams))
 	r.Get("/v1/finality-providers", registerHandler(handlers.V1Handler.GetFinalityProviders))
 	r.Get("/v1/stats", registerHandler(handlers.V1Handler.GetOverallStats))
+	r.Get("/v1/stats/simplified", registerHandler(handlers.V1Handler.GetV1OverallStats))
 	r.Get("/v1/stats/staker", registerHandler(handlers.V1Handler.GetStakersStats))
 	r.Get("/v1/delegation", registerHandler(handlers.V1Handler.GetDelegationByTxHash))
 }

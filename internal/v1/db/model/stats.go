@@ -33,6 +33,13 @@ type OverallStatsDocument struct {
 	TotalStakers      uint64 `bson:"total_stakers"`
 }
 
+// V1OverallStatsDocument represents the overall stats document
+type V1OverallStatsDocument struct {
+	Id                string `bson:"_id"`
+	ActiveTvl         int64  `bson:"active_tvl"`
+	ActiveDelegations int64  `bson:"active_delegations"`
+}
+
 type FinalityProviderStatsDocument struct {
 	FinalityProviderPkHex string `bson:"_id"` // FinalityProviderPkHex
 	ActiveTvl             int64  `bson:"active_tvl"`

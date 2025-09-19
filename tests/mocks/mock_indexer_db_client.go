@@ -138,6 +138,36 @@ func (_m *IndexerDBClient) GetBtcCheckpointParams(ctx context.Context) ([]*index
 	return r0, r1
 }
 
+// GetChainInfo provides a mock function with given fields: ctx
+func (_m *IndexerDBClient) GetChainInfo(ctx context.Context) (*indexerdbmodel.ChainInfo, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetChainInfo")
+	}
+
+	var r0 *indexerdbmodel.ChainInfo
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*indexerdbmodel.ChainInfo, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *indexerdbmodel.ChainInfo); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*indexerdbmodel.ChainInfo)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetDelegation provides a mock function with given fields: ctx, stakingTxHashHex
 func (_m *IndexerDBClient) GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error) {
 	ret := _m.Called(ctx, stakingTxHashHex)
@@ -275,36 +305,6 @@ func (_m *IndexerDBClient) GetLastProcessedBbnHeight(ctx context.Context) (uint6
 		r0 = rf(ctx)
 	} else {
 		r0 = ret.Get(0).(uint64)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetNetworkInfo provides a mock function with given fields: ctx
-func (_m *IndexerDBClient) GetChainInfo(ctx context.Context) (*indexerdbmodel.ChainInfo, error) {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetNetworkInfo")
-	}
-
-	var r0 *indexerdbmodel.ChainInfo
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (*indexerdbmodel.ChainInfo, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context) *indexerdbmodel.ChainInfo); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*indexerdbmodel.ChainInfo)
-		}
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {

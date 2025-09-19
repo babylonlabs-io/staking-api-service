@@ -609,3 +609,27 @@ func (v1dbclient *V1Database) GetStakerStats(
 	}
 	return &result, nil
 }
+
+// GetV1OverallStats retrieves the overall stats
+func (v1dbclient *V1Database) GetV1OverallStats(
+	ctx context.Context,
+) (*v1dbmodel.V1OverallStatsDocument, error) {
+	client := v1dbclient.Client.Database(v1dbclient.DbName).Collection(dbmodel.V1OverallStatsSimplifiedCollection)
+	filter := bson.M{"_id": "singleton"}
+
+	var statsDoc v1dbmodel.V1OverallStatsDocument
+	err := client.FindOne(ctx, filter).Decode(&statsDoc)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			// Return zero stats if no document exists yet
+			return &v1dbmodel.V1OverallStatsDocument{
+				Id:                "singleton",
+				ActiveTvl:         0,
+				ActiveDelegations: 0,
+			}, nil
+		}
+		return nil, err
+	}
+
+	return &statsDoc, nil
+}
