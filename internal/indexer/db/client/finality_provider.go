@@ -4,6 +4,7 @@ import (
 	"context"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -27,18 +28,7 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 		}
 	}
 
-	cursor, err := client.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var results []*indexerdbmodel.IndexerFinalityProviderDetails
-	if err := cursor.All(ctx, &results); err != nil {
-		return nil, err
-	}
-
-	return results, nil
+	return pkg.FetchAll[*indexerdbmodel.IndexerFinalityProviderDetails](ctx, client, filter)
 }
 
 // GetFinalityProvidersByID retrieves finality providers by their id-s
@@ -51,18 +41,7 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProvidersByID(
 	}
 
 	client := indexerdbclient.collection(indexerdbmodel.FinalityProviderDetailsCollection)
-
 	filter := bson.M{"_id": bson.M{"$in": ids}}
-	cursor, err := client.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
 
-	var results []*indexerdbmodel.IndexerFinalityProviderDetails
-	if err := cursor.All(ctx, &results); err != nil {
-		return nil, err
-	}
-
-	return results, nil
+	return pkg.FetchAll[*indexerdbmodel.IndexerFinalityProviderDetails](ctx, client, filter)
 }

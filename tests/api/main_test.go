@@ -116,7 +116,7 @@ func setupServices(ctx context.Context, cfg *config.Config) (*services.Services,
 
 	// Create chain info for BSN service
 	chainInfo := &types.ChainInfo{
-		ChainID: "", // Empty string as used in test data
+		ChainID: "bbn-chain-id",
 	}
 
 	return services.New(cfg, globals, fp, clients, dbClients, nil, chainInfo)
