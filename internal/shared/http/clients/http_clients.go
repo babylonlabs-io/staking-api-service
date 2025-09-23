@@ -20,14 +20,11 @@ func New(cfg *config.Config) *Clients {
 		ordinalsClient = ordinals.New(cfg.Assets.Ordinals)
 	}
 
-	var cmcClient *coinmarketcap.Client
-	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.CoinMarketCap != nil {
-		cmcConfig := cfg.ExternalAPIs.CoinMarketCap
-		cmcClient = coinmarketcap.NewClient(cmcConfig.APIKey, int(cmcConfig.Timeout))
-	}
+	cmcConfig := cfg.ExternalAPIs.CoinMarketCap
+	cmcClient := coinmarketcap.NewClient(cmcConfig.APIKey, int(cmcConfig.Timeout))
 
 	var chainalysisClient *chainalysis.Client
-	if cfg.ExternalAPIs != nil && cfg.ExternalAPIs.Chainalysis != nil {
+	if cfg.ExternalAPIs.Chainalysis != nil {
 		chainalysisClient = chainalysis.NewClient(
 			cfg.ExternalAPIs.Chainalysis.APIKey,
 			cfg.ExternalAPIs.Chainalysis.BaseURL,
