@@ -11,6 +11,7 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v1dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v1/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -331,14 +332,8 @@ func (v1dbclient *V1Database) GetOverallStats(ctx context.Context) (*v1dbmodel.O
 
 	client := v1dbclient.Client.Database(v1dbclient.DbName).Collection(dbmodel.V1OverallStatsCollection)
 	filter := bson.M{"_id": bson.M{"$in": shardsId}}
-	cursor, err := client.Find(ctx, filter)
+	overallStats, err := pkg.FetchAll[v1dbmodel.OverallStatsDocument](ctx, client, filter)
 	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var overallStats []v1dbmodel.OverallStatsDocument
-	if err = cursor.All(ctx, &overallStats); err != nil {
 		return nil, err
 	}
 
@@ -455,18 +450,7 @@ func (v1dbclient *V1Database) FindFinalityProviderStatsByFinalityProviderPkHex(
 ) ([]*v1dbmodel.FinalityProviderStatsDocument, error) {
 	client := v1dbclient.Client.Database(v1dbclient.DbName).Collection(dbmodel.V1FinalityProviderStatsCollection)
 	filter := bson.M{"_id": bson.M{"$in": finalityProviderPkHex}}
-	cursor, err := client.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var finalityProviders []*v1dbmodel.FinalityProviderStatsDocument
-	if err = cursor.All(ctx, &finalityProviders); err != nil {
-		return nil, err
-	}
-
-	return finalityProviders, nil
+	return pkg.FetchAll[*v1dbmodel.FinalityProviderStatsDocument](ctx, client, filter)
 }
 
 func (v1dbclient *V1Database) updateFinalityProviderStats(ctx context.Context, state, stakingTxHashHex, fpPkHex string, upsertUpdate primitive.M) error {
