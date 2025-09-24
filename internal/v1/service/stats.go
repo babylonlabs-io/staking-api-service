@@ -39,13 +39,11 @@ func (s *V1Service) GetOverallStats(
 
 	// Fetch BTC price for backward compatibility with phase-1 API
 	var btcPrice *float64
-	if s.Service.Clients.CoinMarketCap != nil {
-		price, err := s.Service.GetLatestBTCPrice(ctx)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
-		} else {
-			btcPrice = &price
-		}
+	price, err := s.Service.GetLatestBTCPrice(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching latest btc price")
+	} else {
+		btcPrice = &price
 	}
 
 	return &OverallStatsPublic{

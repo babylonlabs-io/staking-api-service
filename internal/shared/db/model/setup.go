@@ -106,12 +106,9 @@ func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *conf
 		}
 	}
 
-	// If external APIs are configured, create TTL index for BTC price collection
-	if externalConfig != nil {
-		if err := createTTLIndexes(ctx, database, PriceCollection, externalConfig.CoinMarketCap.CacheTTL); err != nil {
-			log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
-			return err
-		}
+	if err := createTTLIndexes(ctx, database, PriceCollection, externalConfig.CoinMarketCap.CacheTTL); err != nil {
+		log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
+		return err
 	}
 
 	err = createTTLIndexes(ctx, database, V2FinalityProvidersMetadataCollection, pkg.Day)

@@ -117,13 +117,6 @@ func (s *V2Service) getBTCStakingAPR(
 		return 0, nil
 	}
 
-	// CoinMarketCap integration is optional since not all deployments require
-	// APR calculation. If CoinMarketCap is not configured in the service config,
-	// return 0 as the APR.
-	if s.clients.CoinMarketCap == nil {
-		return 0, nil
-	}
-
 	// Convert the activeTvl which is in satoshis to BTC as APR is calculated per
 	// BTC
 	btcTvl := float64(activeTvl) / 1e8

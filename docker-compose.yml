@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   staking-api-service:
     image: babylonlabs-io/staking-api-service:latest
