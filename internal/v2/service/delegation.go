@@ -60,11 +60,10 @@ type DelegationPublic struct {
 	DelegationStaking         DelegationStaking       `json:"delegation_staking"`
 	DelegationUnbonding       DelegationUnbonding     `json:"delegation_unbonding"`
 	State                     v2types.DelegationState `json:"state"`
-	CanExpand                 bool                    `json:"can_expand"`
 	PreviousStakingTxHashHex  string                  `json:"previous_staking_tx_hash_hex,omitempty"`
 }
 
-func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails, canExpand bool) (*DelegationPublic, *types.Error) {
+func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) (*DelegationPublic, *types.Error) {
 	state, err := v2types.MapDelegationState(delegation.State, delegation.SubState)
 	if err != nil {
 		return nil, types.NewErrorWithMsg(
@@ -107,38 +106,10 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails, 
 			},
 		},
 		State:                    state,
-		CanExpand:                canExpand,
 		PreviousStakingTxHashHex: delegation.PreviousStakingTxHashHex,
 	}
 
 	return delegationPublic, nil
-}
-
-// evaluateCanExpand determines if a delegation can be expanded based on runtime conditions:
-// 1. Delegation must be in Active state
-// 2. Must not have reached the maximum finality providers limit
-// 3. Must have sufficient covenant overlap with current covenant committee for unbonding signatures
-func (s *V2Service) evaluateCanExpand(ctx context.Context, delegation indexerdbmodel.IndexerDelegationDetails) bool {
-	// Condition 1: Check if delegation is in Active state
-	if delegation.State != indexertypes.StateActive {
-		return false
-	}
-
-	// Condition 2: Must not have reached the maximum finality providers limit
-	maxFinalityProviders, err := s.getLatestMaxFinalityProviders(ctx)
-	if err != nil {
-		// Log error but don't block expansion - use conservative approach
-		log.Ctx(ctx).Error().Err(err).Msg("Failed to get max finality providers, using conservative approach")
-		return false
-	}
-
-	if uint32(len(delegation.FinalityProviderBtcPksHex)) >= maxFinalityProviders {
-		return false
-	}
-
-	// Condition 3: Must have sufficient covenant overlap with current covenant committee
-	// TODO: Implement covenant overlap validation for unbonding signature availability
-	return true
 }
 
 // getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
@@ -179,10 +150,23 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
 
-	// Evaluate canExpand before creating delegation document
-	canExpand := s.evaluateCanExpand(ctx, *delegation)
+	return FromDelegationDocument(*delegation)
+}
 
-	return FromDelegationDocument(*delegation, canExpand)
+func (s *V2Service) GetDelegationsByBabylonAddress(ctx context.Context, stakerBabylonAddress string, states []indexertypes.DelegationState) ([]*DelegationPublic, string, *types.Error) {
+	delegations, err := s.dbClients.IndexerDBClient.GetDelegationsByBabylonAddress(ctx, stakerBabylonAddress, states)
+	if err != nil {
+		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegations")
+	}
+	delegationsPublic := make([]*DelegationPublic, 0, len(delegations))
+	for _, delegation := range delegations {
+		delegationPublic, delErr := FromDelegationDocument(delegation)
+		if delErr != nil {
+			return nil, "", delErr
+		}
+		delegationsPublic = append(delegationsPublic, delegationPublic)
+	}
+	return delegationsPublic, "", nil
 }
 
 func (s *V2Service) GetDelegations(
@@ -208,10 +192,7 @@ func (s *V2Service) GetDelegations(
 
 	// Type delegations by state
 	for _, delegation := range resultMap.Data {
-		// Evaluate canExpand before creating delegation document
-		canExpand := s.evaluateCanExpand(ctx, delegation)
-
-		delegationPublic, delErr := FromDelegationDocument(delegation, canExpand)
+		delegationPublic, delErr := FromDelegationDocument(delegation)
 		if delErr != nil {
 			return nil, "", delErr
 		}

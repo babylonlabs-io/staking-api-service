@@ -69,3 +69,32 @@ func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *typ
 	}
 	return handler.NewResultWithPagination(delegations, paginationToken), nil
 }
+
+func (h *V2Handler) GetDelegationsByBabylonAddress(
+	request *http.Request,
+) (*handler.Result, *types.Error) {
+	bbnAddress, err := handler.ParseBabylonAddressQuery(
+		request, "babylon_address", false,
+	)
+	if err != nil {
+		return nil, err
+	}
+	state, err := handler.ParseDelegationStateQuery(request)
+	if err != nil {
+		return nil, err
+	}
+	// Only support active state for now
+	if state != types.Active {
+		return nil, types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, "state is not supported",
+		)
+	}
+
+	delegations, err := h.Service.GetDelegationsByBabylonAddress(
+		request.Context(), *bbnAddress, state,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return handler.NewResult(delegations), nil
+}

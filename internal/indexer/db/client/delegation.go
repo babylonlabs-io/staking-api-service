@@ -8,6 +8,7 @@ import (
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -32,6 +33,26 @@ func (indexerdbclient *IndexerDatabase) GetDelegation(
 		return nil, err
 	}
 	return &delegation, nil
+}
+
+// GetDelegationsByBabylonAddress retrieves all delegations by babylon address
+// and filters by states if provided
+func (indexerdbclient *IndexerDatabase) GetDelegationsByBabylonAddress(
+	ctx context.Context,
+	stakerBabylonAddress string,
+	states []indexertypes.DelegationState,
+) ([]indexerdbmodel.IndexerDelegationDetails, error) {
+	client := indexerdbclient.Client.Database(indexerdbclient.DbName).
+		Collection(indexerdbmodel.BTCDelegationDetailsCollection)
+
+	filter := bson.M{"staker_babylon_address": stakerBabylonAddress}
+	if len(states) > 0 {
+		filter["state"] = bson.M{"$in": states}
+	}
+
+	return pkg.FetchAll[indexerdbmodel.IndexerDelegationDetails](
+		ctx, client, filter,
+	)
 }
 
 func (indexerdbclient *IndexerDatabase) GetDelegations(

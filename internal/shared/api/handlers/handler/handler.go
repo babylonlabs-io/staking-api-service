@@ -221,3 +221,17 @@ func ParseBooleanQuery(
 	}
 	return value == "true", nil
 }
+
+func ParseDelegationStateQuery(r *http.Request) (types.DelegationState, *types.Error) {
+	states := r.URL.Query().Get("state")
+	if states == "" {
+		return "", types.NewErrorWithMsg(
+			http.StatusBadRequest, types.BadRequest, "state is required",
+		)
+	}
+	state, err := types.FromStringToDelegationState(states)
+	if err != nil {
+		return "", types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "invalid state")
+	}
+	return state, nil
+}
