@@ -34,7 +34,7 @@ func WithState(state indexertypes.DelegationState) DelegationsQueryFilter {
 	}
 }
 
-// DumpFilters iterates over filteres and record all the changes in a map
+// DumpFilters iterates over filters and record all the changes in a map
 // this function should be used only for logging purposes
 func DumpFilters(filters ...DelegationsQueryFilter) map[string]any {
 	filtersOptions := bson.M{}
