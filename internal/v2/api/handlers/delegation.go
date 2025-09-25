@@ -5,6 +5,7 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	v2service "github.com/babylonlabs-io/staking-api-service/internal/v2/service"
 )
 
 // GetDelegation @Summary Get a delegation
@@ -36,8 +37,9 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 // @Description Fetches delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.
 // @Produce json
 // @Tags v2
-// @Param staker_pk_hex query string true "Staker public key in hex format"
+// @Param staker_pk_hex query string false "Staker public key in hex format"
 // @Param babylon_address query string false "Babylon address"
+// @Param state query string false "State of delegations"
 // @Param pagination_key query string false "Pagination key to fetch the next page of delegations"
 // @Success 200 {object} handler.PublicResponse[[]v2service.DelegationPublic]{array} "List of staker delegations and pagination token"
 // @Failure 400 {object} types.Error "Error: Bad Request"
@@ -45,15 +47,11 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 // @Failure 500 {object} types.Error "Error: Internal Server Error"
 // @Router /v2/delegations [get]
 func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *types.Error) {
-	const stakerPKHexKey = "staker_pk_hex"
-	stakerPKHex, err := handler.ParsePublicKeyQuery(request, stakerPKHexKey, false)
+	stakerPKHex, err := handler.ParsePublicKeyQuery(request, "staker_pk_hex", true)
 	if err != nil {
 		return nil, err
 	}
-	paginationKey, err := handler.ParsePaginationQuery(request)
-	if err != nil {
-		return nil, err
-	}
+
 	bbnAddress, err := handler.ParseBabylonAddressQuery(
 		request, "babylon_address", true,
 	)
@@ -61,40 +59,47 @@ func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *typ
 		return nil, err
 	}
 
-	delegations, paginationToken, err := h.Service.GetDelegations(
-		request.Context(), stakerPKHex, bbnAddress, paginationKey,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return handler.NewResultWithPagination(delegations, paginationToken), nil
-}
-
-func (h *V2Handler) GetDelegationsByBabylonAddress(
-	request *http.Request,
-) (*handler.Result, *types.Error) {
-	bbnAddress, err := handler.ParseBabylonAddressQuery(
-		request, "babylon_address", false,
-	)
-	if err != nil {
-		return nil, err
-	}
-	state, err := handler.ParseDelegationStateQuery(request)
-	if err != nil {
-		return nil, err
-	}
-	// Only support active state for now
-	if state != types.Active {
+	if stakerPKHex == "" && bbnAddress == nil {
 		return nil, types.NewErrorWithMsg(
-			http.StatusBadRequest, types.BadRequest, "state is not supported",
+			http.StatusBadRequest, types.BadRequest, "staker_pk_hex or babylon_address is required",
 		)
 	}
 
-	delegations, err := h.Service.GetDelegationsByBabylonAddress(
-		request.Context(), *bbnAddress, state,
-	)
+	paginationKey, err := handler.ParsePaginationQuery(request)
 	if err != nil {
 		return nil, err
 	}
-	return handler.NewResult(delegations), nil
+
+	ctx := request.Context()
+
+	var (
+		delegations         []*v2service.DelegationPublic
+		paginationKeyResult string // pagination key that is returned from API
+	)
+	if stakerPKHex == "" {
+		// if staker pk is omitted then babylon_address is the main query param and state is required as well
+		state, parseErr := handler.ParseDelegationStateQuery(request)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+
+		// only support active state for now
+		if state != types.Active {
+			return nil, types.NewErrorWithMsg(
+				http.StatusBadRequest, types.BadRequest, "state is not supported",
+			)
+		}
+
+		delegations, paginationKeyResult, err = h.Service.GetDelegationsByStakerPKHex(ctx, stakerPKHex, bbnAddress, paginationKey)
+	} else {
+		delegations, paginationKeyResult, err = h.Service.GetDelegationsByStakerPKHex(
+			request.Context(), stakerPKHex, bbnAddress, paginationKey,
+		)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.NewResultWithPagination(delegations, paginationKeyResult), nil
 }

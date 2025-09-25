@@ -73,7 +73,7 @@ func TestV2_Delegation(t *testing.T) {
 			endpoint:         "/v2/delegation?staking_tx_hash_hex=61325403c5a553f7e5a061d314904c02a9ec4202a2616b531335998b4506d43b",
 			expectedHttpCode: http.StatusNotFound,
 			expectedContents: `{"errorCode":"NOT_FOUND", "message":"staking delegation not found, please retry"}`,
-		}
+		},
 	}
 
 	checkCases(t, cases)
@@ -85,7 +85,7 @@ func TestV2_Delegations(t *testing.T) {
 			testName:         "missing parameters",
 			endpoint:         "/v2/delegations",
 			expectedHttpCode: http.StatusBadRequest,
-			expectedContents: `{"errorCode":"BAD_REQUEST", "message":"staker_pk_hex is required"}`,
+			expectedContents: `{"errorCode":"BAD_REQUEST", "message":"staker_pk_hex or babylon_address is required"}`,
 		},
 		{
 			testName:         "invalid staker_pk_hex",

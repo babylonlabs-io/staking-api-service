@@ -8,12 +8,42 @@ import (
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
-	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type DelegationsQueryFilter func(options bson.M)
+
+func WithStakerPKHex(pkHex string) DelegationsQueryFilter {
+	return func(options bson.M) {
+		options["staker_btc_pk_hex"] = pkHex
+	}
+}
+
+func WithBabylonAddress(address string) DelegationsQueryFilter {
+	return func(options bson.M) {
+		options["staker_babylon_address"] = address
+	}
+}
+
+func WithState(state indexertypes.DelegationState) DelegationsQueryFilter {
+	return func(options bson.M) {
+		options["state"] = state
+	}
+}
+
+// DumpFilters iterates over filteres and record all the changes in a map
+// this function should be used only for logging purposes
+func DumpFilters(filters ...DelegationsQueryFilter) map[string]any {
+	filtersOptions := bson.M{}
+	for _, filter := range filters {
+		filter(filtersOptions)
+	}
+
+	return filtersOptions
+}
 
 func (indexerdbclient *IndexerDatabase) GetDelegation(
 	ctx context.Context, stakingTxHashHex string,
@@ -35,43 +65,21 @@ func (indexerdbclient *IndexerDatabase) GetDelegation(
 	return &delegation, nil
 }
 
-// GetDelegationsByBabylonAddress retrieves all delegations by babylon address
-// and filters by states if provided
-func (indexerdbclient *IndexerDatabase) GetDelegationsByBabylonAddress(
-	ctx context.Context,
-	stakerBabylonAddress string,
-	states []indexertypes.DelegationState,
-) ([]indexerdbmodel.IndexerDelegationDetails, error) {
-	client := indexerdbclient.Client.Database(indexerdbclient.DbName).
-		Collection(indexerdbmodel.BTCDelegationDetailsCollection)
-
-	filter := bson.M{"staker_babylon_address": stakerBabylonAddress}
-	if len(states) > 0 {
-		filter["state"] = bson.M{"$in": states}
-	}
-
-	return pkg.FetchAll[indexerdbmodel.IndexerDelegationDetails](
-		ctx, client, filter,
-	)
-}
-
 func (indexerdbclient *IndexerDatabase) GetDelegations(
 	ctx context.Context,
-	stakerPKHex string,
-	stakerBabylonAddress *string,
 	paginationToken string,
+	filters ...DelegationsQueryFilter,
 ) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
 	client := indexerdbclient.Client.Database(indexerdbclient.DbName).
 		Collection(indexerdbmodel.BTCDelegationDetailsCollection)
 
-	// Base filter with stakingTxHashHex
-	filter := bson.M{"staker_btc_pk_hex": stakerPKHex}
-	if stakerBabylonAddress != nil {
-		filter["staker_babylon_address"] = *stakerBabylonAddress
+	filterMap := bson.M{}
+	for _, filter := range filters {
+		filter(filterMap)
 	}
 
 	// Default sort by start_height for stable sorting
-	options := options.Find().SetSort(bson.D{
+	opts := options.Find().SetSort(bson.D{
 		{Key: "btc_delegation_created_bbn_block.height", Value: -1},
 		{Key: "_id", Value: 1},
 	})
@@ -87,27 +95,26 @@ func (indexerdbclient *IndexerDatabase) GetDelegations(
 
 		orConditions := []bson.M{
 			{
-				"staker_btc_pk_hex":                       stakerPKHex,
 				"btc_delegation_created_bbn_block.height": bson.M{"$lt": decodedToken.StartHeight},
 			},
 			{
-				"staker_btc_pk_hex":                       stakerPKHex,
 				"btc_delegation_created_bbn_block.height": decodedToken.StartHeight,
 				"_id": bson.M{"$gt": decodedToken.StakingTxHashHex},
 			},
 		}
-		if stakerBabylonAddress != nil {
-			addr := *stakerBabylonAddress
-			orConditions[0]["staker_babylon_address"] = addr
-			orConditions[1]["staker_babylon_address"] = addr
+
+		for _, filter := range filters {
+			filter(orConditions[0])
+			filter(orConditions[1])
 		}
-		filter = bson.M{
+
+		filterMap = bson.M{
 			"$or": orConditions,
 		}
 	}
 
 	return db.FindWithPagination(
-		ctx, client, filter, options, indexerdbclient.Cfg.MaxPaginationLimit,
+		ctx, client, filterMap, opts, indexerdbclient.Cfg.MaxPaginationLimit,
 		indexerdbmodel.BuildDelegationPaginationToken,
 	)
 }

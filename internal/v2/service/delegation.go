@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"slices"
 
+	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
@@ -153,35 +154,41 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 	return FromDelegationDocument(*delegation)
 }
 
-func (s *V2Service) GetDelegationsByBabylonAddress(ctx context.Context, stakerBabylonAddress string, states []indexertypes.DelegationState) ([]*DelegationPublic, string, *types.Error) {
-	delegations, err := s.dbClients.IndexerDBClient.GetDelegationsByBabylonAddress(ctx, stakerBabylonAddress, states)
-	if err != nil {
-		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegations")
+func (s *V2Service) GetDelegationsByBabylonAddress(ctx context.Context, bbnAddress string, state indexertypes.DelegationState, paginationKey string) ([]*DelegationPublic, string, *types.Error) {
+	filters := []indexerdbclient.DelegationsQueryFilter{
+		indexerdbclient.WithBabylonAddress(bbnAddress),
+		indexerdbclient.WithState(state),
 	}
-	delegationsPublic := make([]*DelegationPublic, 0, len(delegations))
-	for _, delegation := range delegations {
-		delegationPublic, delErr := FromDelegationDocument(delegation)
-		if delErr != nil {
-			return nil, "", delErr
-		}
-		delegationsPublic = append(delegationsPublic, delegationPublic)
-	}
-	return delegationsPublic, "", nil
+
+	return s.getDelegations(ctx, paginationKey, filters)
 }
 
-func (s *V2Service) GetDelegations(
+func (s *V2Service) GetDelegationsByStakerPKHex(
 	ctx context.Context,
 	stakerPkHex string,
 	stakerBabylonAddress *string,
 	paginationKey string,
 ) ([]*DelegationPublic, string, *types.Error) {
+	filters := []indexerdbclient.DelegationsQueryFilter{
+		indexerdbclient.WithStakerPKHex(stakerPkHex),
+	}
+
+	if stakerBabylonAddress != nil {
+		filters = append(filters, indexerdbclient.WithBabylonAddress(*stakerBabylonAddress))
+	}
+
+	return s.getDelegations(ctx, paginationKey, filters)
+}
+
+func (s *V2Service) getDelegations(ctx context.Context, paginationKey string, filters []indexerdbclient.DelegationsQueryFilter) ([]*DelegationPublic, string, *types.Error) {
 	resultMap, err := s.dbClients.IndexerDBClient.GetDelegations(
-		ctx, stakerPkHex, stakerBabylonAddress, paginationKey,
+		ctx, paginationKey, filters...,
 	)
 	if err != nil {
 		// todo this statement is not reachable
 		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Warn().Err(err).Str("stakingTxHashHex", stakerPkHex).Msg("Staking delegations not found")
+			filtersDump := indexerdbclient.DumpFilters(filters...)
+			log.Ctx(ctx).Warn().Err(err).Any("filters", filtersDump).Msg("Staking delegations not found")
 			return nil, "", types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "staking delegation not found, please retry")
 		}
 		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegations")

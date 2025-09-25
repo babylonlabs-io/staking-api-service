@@ -3,6 +3,7 @@ package v2service
 import (
 	"context"
 
+	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/integrations/chainalysis"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
@@ -16,10 +17,8 @@ type V2ServiceProvider interface {
 	)
 	GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error)
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error)
-	GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationKey string) ([]*DelegationPublic, string, *types.Error)
-	GetDelegationsByBabylonAddress(
-		ctx context.Context, stakerBabylonAddress string, state types.DelegationState,
-	) ([]*DelegationPublic, *types.Error)
+	GetDelegationsByStakerPKHex(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationKey string) ([]*DelegationPublic, string, *types.Error)
+	GetDelegationsByBabylonAddress(ctx context.Context, bbnAddress string, state indexertypes.DelegationState, paginationKey string) ([]*DelegationPublic, string, *types.Error)
 	MarkV1DelegationAsTransitioned(
 		ctx context.Context,
 		stakingTxHashHex, stakerPkHex, fpPkHex string,

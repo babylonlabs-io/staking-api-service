@@ -51,7 +51,7 @@ func ReplayUnprocessableMessages(ctx context.Context, cfg *config.Config, queues
 	}
 
 	log.Info().Msg("Reprocessing of unprocessable messages completed.")
-	return
+	return //nolint:gofumpt
 }
 
 // processEventMessage processes the event message based on its EventType.
