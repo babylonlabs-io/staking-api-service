@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strings"
 
 	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
@@ -154,10 +155,12 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 	return FromDelegationDocument(*delegation)
 }
 
-func (s *V2Service) GetDelegationsByBabylonAddress(ctx context.Context, bbnAddress string, state indexertypes.DelegationState, paginationKey string) ([]*DelegationPublic, string, *types.Error) {
+func (s *V2Service) GetDelegationsByBabylonAddress(ctx context.Context, bbnAddress string, state types.DelegationState, paginationKey string) ([]*DelegationPublic, string, *types.Error) {
+	// todo for review: maybe map explicitly?
+	stateStr := strings.ToUpper(state.ToString())
 	filters := []indexerdbclient.DelegationsQueryFilter{
 		indexerdbclient.WithBabylonAddress(bbnAddress),
-		indexerdbclient.WithState(state),
+		indexerdbclient.WithState(indexertypes.DelegationState(stateStr)),
 	}
 
 	return s.getDelegations(ctx, paginationKey, filters)

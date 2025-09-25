@@ -90,7 +90,7 @@ func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *typ
 			)
 		}
 
-		delegations, paginationKeyResult, err = h.Service.GetDelegationsByStakerPKHex(ctx, stakerPKHex, bbnAddress, paginationKey)
+		delegations, paginationKeyResult, err = h.Service.GetDelegationsByBabylonAddress(ctx, *bbnAddress, state, paginationKey)
 	} else {
 		delegations, paginationKeyResult, err = h.Service.GetDelegationsByStakerPKHex(
 			request.Context(), stakerPKHex, bbnAddress, paginationKey,
