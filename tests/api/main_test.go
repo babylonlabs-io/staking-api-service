@@ -114,7 +114,7 @@ func setupServices(ctx context.Context, cfg *config.Config) (*services.Services,
 
 	clients := clients.New(cfg)
 
-	// Create chain info for BSN service
+	// Create chain info
 	chainInfo := &types.ChainInfo{
 		ChainID: "bbn-chain-id",
 	}

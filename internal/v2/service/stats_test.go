@@ -141,7 +141,7 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 		statsErr := s.ProcessActiveDelegationStats(ctx, stakingTxHashHex, stakerPkHex, nil, 30)
 		require.Error(t, statsErr)
 	})
-	t.Run("BSN stats", func(t *testing.T) {
+	t.Run("Active stats", func(t *testing.T) {
 		stakingTxHashHex := `19caaf9dcf7be81120a503b8e007189ecee53e5912c8fa542b187224ce45000a`
 		stakerPkHex := `21d17b47e1d763f478cba5c414b7adf2778fa4ff6a5ba3d79f08f7a494781e06`
 		amount := uint64(77)
@@ -156,27 +156,21 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 			OverallStats:          true,
 			StakerStats:           true,
 			FinalityProviderStats: true,
-			BsnStats:              false, // we test only bsn logic in this subtest
 		}
 		dbV2.On("GetOrCreateStatsLock", ctx, stakingTxHashHex, "active").Return(locks, nil).Once()
 
 		fps := []*indexerdbmodel.IndexerFinalityProviderDetails{
 			{
 				BtcPk: fp1ID,
-				BsnID: "babylon",
 			},
 			{
 				BtcPk: fp2ID,
-				BsnID: "bsn2",
 			},
 			{
 				BtcPk: "fp3",
-				BsnID: "bsn3",
 			},
 		}
 		dbIndexer.On("GetFinalityProvidersByID", ctx, []string{fp1ID, fp2ID}).Return(fps, nil).Once()
-
-		dbV2.On("IncrementBsnStats", ctx, stakingTxHashHex, []string{"babylon", "bsn2"}, amount).Return(nil).Once()
 
 		fpBtcPkHexes := []string{fp1ID, fp2ID}
 		statsErr := s.ProcessActiveDelegationStats(ctx, stakingTxHashHex, stakerPkHex, fpBtcPkHexes, amount)

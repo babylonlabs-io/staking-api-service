@@ -48,16 +48,16 @@ func parseUnbondDelegationRequestPayload(request *http.Request) (*UnbondDelegati
 }
 
 // UnbondDelegation godoc
-// @Summary Unbond phase-1 delegation
-// @Description Unbonds a phase-1 delegation by processing the provided transaction details. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
-// @Description This is an async operation.
-// @Accept json
-// @Produce json
-// @Tags v1
-// @Param payload body UnbondDelegationRequestPayload true "Unbonding Request Payload"
-// @Success 202 "Request accepted and will be processed asynchronously"
-// @Failure 400 {object} types.Error "Invalid request payload"
-// @Router /v1/unbonding [post]
+//	@Summary		Unbond phase-1 delegation
+//	@Description	Unbonds a phase-1 delegation by processing the provided transaction details. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
+//	@Description	This is an async operation.
+//	@Accept			json
+//	@Produce		json
+//	@Tags			v1
+//	@Param			payload	body	UnbondDelegationRequestPayload	true	"Unbonding Request Payload"
+//	@Success		202		"Request accepted and will be processed asynchronously"
+//	@Failure		400		{object}	types.Error	"Invalid request payload"
+//	@Router			/v1/unbonding [post]
 func (h *V1Handler) UnbondDelegation(request *http.Request) (*handler.Result, *types.Error) {
 	payload, err := parseUnbondDelegationRequestPayload(request)
 	if err != nil {
@@ -76,14 +76,14 @@ func (h *V1Handler) UnbondDelegation(request *http.Request) (*handler.Result, *t
 }
 
 // GetUnbondingEligibility godoc
-// @Summary Check unbonding eligibility
-// @Description Checks if a delegation identified by its staking transaction hash is eligible for unbonding. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
-// @Produce json
-// @Tags v1
-// @Param staking_tx_hash_hex query string true "Staking Transaction Hash Hex"
-// @Success 200 "The delegation is eligible for unbonding"
-// @Failure 400 {object} types.Error "Missing or invalid 'staking_tx_hash_hex' query parameter"
-// @Router /v1/unbonding/eligibility [get]
+//	@Summary		Check unbonding eligibility
+//	@Description	Checks if a delegation identified by its staking transaction hash is eligible for unbonding. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
+//	@Produce		json
+//	@Tags			v1
+//	@Param			staking_tx_hash_hex	query	string	true	"Staking Transaction Hash Hex"
+//	@Success		200					"The delegation is eligible for unbonding"
+//	@Failure		400					{object}	types.Error	"Missing or invalid 'staking_tx_hash_hex' query parameter"
+//	@Router			/v1/unbonding/eligibility [get]
 func (h *V1Handler) GetUnbondingEligibility(request *http.Request) (*handler.Result, *types.Error) {
 	stakingTxHashHex, err := handler.ParseTxHashQuery(request, "staking_tx_hash_hex")
 	if err != nil {

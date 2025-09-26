@@ -28,26 +28,26 @@ func init() {
 	}
 }
 
-// @title           Babylon Staking API
-// @version         2.0
-// @description     The Babylon Staking API offers information about the state of the Babylon BTC Staking system.
-// @description     Your access and use is governed by the API Access License linked to below.
-// @license.name    API Access License
-// @license.url     https://docs.babylonlabs.io/assets/files/api-access-license.pdf
-// @contact.email   contact@babylonlabs.io
+//	@title			Babylon Staking API
+//	@version		2.0
+//	@description	The Babylon Staking API offers information about the state of the Babylon BTC Staking system.
+//	@description	Your access and use is governed by the API Access License linked to below.
+//	@license.name	API Access License
+//	@license.url	https://docs.babylonlabs.io/assets/files/api-access-license.pdf
+//	@contact.email	contact@babylonlabs.io
 
-// @tag.name shared
-// @tag.description Shared API endpoints
-// @tag.order 1
+//	@tag.name			shared
+//	@tag.description	Shared API endpoints
+//	@tag.order			1
 
-// @tag.name v2
-// @tag.description Babylon Phase-2 API endpoints
-// @tag.order 2
+//	@tag.name			v2
+//	@tag.description	Babylon Phase-2 API endpoints
+//	@tag.order			2
 
-// @tag.name v1
-// @tag.description Babylon Phase-1 API endpoints (Deprecated)
-// @tag.deprecated
-// @tag.order 2
+//	@tag.name			v1
+//	@tag.description	Babylon Phase-1 API endpoints (Deprecated)
+//	@tag.deprecated
+//	@tag.order	2
 func main() {
 	ctx := context.Background()
 
