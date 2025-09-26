@@ -24,7 +24,6 @@ type BbnStakingParams struct {
 	DelegationCreationBaseGasFee uint64   `json:"delegation_creation_base_gas_fee"`
 	AllowListExpirationHeight    uint64   `json:"allow_list_expiration_height"`
 	BtcActivationHeight          uint32   `json:"btc_activation_height"`
-	MaxFinalityProviders         uint32   `json:"max_finality_providers"`
 }
 
 type BtcCheckpointParams struct {
