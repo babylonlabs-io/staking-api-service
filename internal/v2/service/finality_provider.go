@@ -32,7 +32,6 @@ func mapToFinalityProviderStatsPublic(
 	fpStats *v2dbmodel.V2FinalityProviderStatsDocument,
 	fpLogoURL string,
 ) *FinalityProviderPublic {
-
 	return &FinalityProviderPublic{
 		BtcPk:             provider.BtcPk,
 		State:             types.FinalityProviderQueryingState(provider.State),

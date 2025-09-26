@@ -7,6 +7,7 @@ import (
 )
 
 // HealthCheck godoc
+//
 //	@Summary		Health check endpoint
 //	@Description	Health check the service, including ping database connection
 //	@Produce		json

@@ -8,6 +8,7 @@ import (
 )
 
 // GetDelegationByTxHash @Summary Get a delegation (Deprecated)
+//
 //	@Description	[DEPRECATED] Retrieves a delegation by a given transaction hash. Please use /v2/delegation instead.
 //	@Produce		json
 //	@Tags			v1

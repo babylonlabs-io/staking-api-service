@@ -9,6 +9,7 @@ import (
 )
 
 // GetFinalityProviders gets active finality providers sorted by ActiveTvl.
+//
 //	@Summary		Get Active Finality Providers (Deprecated)
 //	@Description	[DEPRECATED] Fetches details of all active finality providers sorted by their active total value locked (ActiveTvl) in descending order. Please use /v2/finality-providers instead.
 //	@Produce		json

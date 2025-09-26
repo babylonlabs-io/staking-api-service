@@ -8,6 +8,7 @@ import (
 )
 
 // GetNetworkInfo @Summary Get network info
+//
 //	@Description	Get network info, including staking status and param
 //	@Produce		json
 //	@Tags			v2

@@ -14,6 +14,7 @@ type DelegationCheckPublicResponse struct {
 }
 
 // GetStakerDelegations @Summary Get phase-1 staker delegations
+//
 //	@Description	Retrieves phase-1 delegations for a given staker. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
 //	@Description	This endpoint is only used to show legacy phase-1 delegations for the purpose of unbonding or registering into phase-2.
 //	@Produce		json
@@ -58,6 +59,7 @@ func (h *V1Handler) GetStakerDelegations(request *http.Request) (*handler.Result
 }
 
 // CheckStakerDelegationExist @Summary Check if a staker has an active delegation
+//
 //	@Description	Check if a staker has an active delegation by the staker BTC address (Taproot or Native Segwit).
 //	@Description	Optionally, you can provide a timeframe to check if the delegation is active within the provided timeframe
 //	@Description	The available timeframe is "today" which checks after UTC 12AM of the current day

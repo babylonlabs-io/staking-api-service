@@ -59,6 +59,9 @@ func TestMain(t *testing.M) {
 		AddressScreeningConfig: &config.AddressScreeningConfig{
 			Enabled: true,
 		},
+		ExternalAPIs: &config.ExternalAPIsConfig{
+			CoinMarketCap: &config.CoinMarketCapConfig{},
+		},
 	}
 
 	s, err := setupServices(ctx, cfg)
@@ -114,12 +117,7 @@ func setupServices(ctx context.Context, cfg *config.Config) (*services.Services,
 
 	clients := clients.New(cfg)
 
-	// Create chain info
-	chainInfo := &types.ChainInfo{
-		ChainID: "bbn-chain-id",
-	}
-
-	return services.New(cfg, globals, fp, clients, dbClients, nil, chainInfo)
+	return services.New(cfg, globals, fp, clients, dbClients, nil)
 }
 
 type db struct {
@@ -137,7 +135,11 @@ func setupDB(ctx context.Context) (*db, error) {
 	stakingConfig := createDbConfig(mongoCfg, "api")
 	indexerConfig := createDbConfig(mongoCfg, "indexer")
 
-	err = dbmodel.Setup(ctx, stakingConfig, nil)
+	err = dbmodel.Setup(ctx, stakingConfig, &config.ExternalAPIsConfig{
+		CoinMarketCap: &config.CoinMarketCapConfig{
+			CacheTTL: time.Minute,
+		},
+	})
 	if err != nil {
 		cleanup()
 		return nil, err

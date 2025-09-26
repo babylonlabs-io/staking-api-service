@@ -8,6 +8,7 @@ import (
 )
 
 // GetBabylonGlobalParams @Summary Get Babylon global parameters (Deprecated)
+//
 //	@Description	[DEPRECATED] Retrieves the global parameters for Babylon, including finality provider details. Please use /v2/network-info instead.
 //	@Produce		json
 //	@Tags			v1

@@ -8,6 +8,7 @@ import (
 )
 
 // GetDelegation @Summary Get a delegation
+//
 //	@Summary		Get a delegation
 //	@Description	Retrieves a delegation by a given transaction hash
 //	@Produce		json
@@ -32,6 +33,7 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 }
 
 // GetDelegations gets delegations for babylon staking
+//
 //	@Summary		Get Delegations
 //	@Description	Fetches delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.
 //	@Produce		json

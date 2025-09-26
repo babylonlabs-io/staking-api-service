@@ -19,6 +19,7 @@ const (
 )
 
 // GetPubKeys godoc
+//
 //	@Summary		Get stakers' public keys
 //	@Description	Retrieves public keys for the given BTC addresses. This endpoint
 //	@Description	only returns public keys for addresses that have associated delegations in

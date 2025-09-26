@@ -48,6 +48,7 @@ func parseUnbondDelegationRequestPayload(request *http.Request) (*UnbondDelegati
 }
 
 // UnbondDelegation godoc
+//
 //	@Summary		Unbond phase-1 delegation
 //	@Description	Unbonds a phase-1 delegation by processing the provided transaction details. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
 //	@Description	This is an async operation.
@@ -76,6 +77,7 @@ func (h *V1Handler) UnbondDelegation(request *http.Request) (*handler.Result, *t
 }
 
 // GetUnbondingEligibility godoc
+//
 //	@Summary		Check unbonding eligibility
 //	@Description	Checks if a delegation identified by its staking transaction hash is eligible for unbonding. This endpoint will be deprecated once all phase-1 delegations are either withdrawn or registered into phase-2.
 //	@Produce		json

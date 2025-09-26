@@ -8,7 +8,6 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
@@ -44,10 +43,10 @@ func init() {
 //	@tag.description	Babylon Phase-2 API endpoints
 //	@tag.order			2
 
-//	@tag.name			v1
-//	@tag.description	Babylon Phase-1 API endpoints (Deprecated)
-//	@tag.deprecated
-//	@tag.order	2
+// @tag.name			v1
+// @tag.description	Babylon Phase-1 API endpoints (Deprecated)
+// @tag.deprecated
+// @tag.order	2
 func main() {
 	ctx := context.Background()
 
@@ -93,25 +92,8 @@ func main() {
 		log.Fatal().Err(err).Msg("error while setting up staking db clients")
 	}
 
-	chainInfo, err := dbClients.IndexerDBClient.GetChainInfo(ctx)
-	if db.IsNotFoundError(err) {
-		log.Fatal().Err(err).Msg("network_info collection is not populated by indexer")
-	} else if err != nil {
-		log.Fatal().Err(err).Msg("error while getting network info")
-	}
-
 	keybaseClient := keybase.NewClient()
-	services, err := services.New(
-		cfg,
-		params,
-		finalityProviders,
-		clients,
-		dbClients,
-		keybaseClient,
-		&types.ChainInfo{
-			ChainID: chainInfo.ChainID,
-		},
-	)
+	services, err := services.New(cfg, params, finalityProviders, clients, dbClients, keybaseClient)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking services layer")
 	}

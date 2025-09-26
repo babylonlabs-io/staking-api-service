@@ -9,6 +9,7 @@ import (
 )
 
 // GetOverallStats gets overall stats for babylon staking
+//
 //	@Summary		Get Overall Stats (Deprecated)
 //	@Description	[DEPRECATED] Fetches overall stats for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers. Please use /v2/stats instead.
 //	@Produce		json
@@ -26,6 +27,7 @@ func (h *V1Handler) GetOverallStats(request *http.Request) (*handler.Result, *ty
 }
 
 // GetStakersStats gets staker stats for babylon staking
+//
 //	@Summary		Get Staker Stats (Deprecated)
 //	@Description	[DEPRECATED] Fetches staker stats for babylon staking including tvl, total delegations, active tvl and active delegations. Please use /v2/staker/stats instead.
 //	@Description	If staker_btc_pk query parameter is provided, it will return stats for the specific staker.

@@ -8,12 +8,15 @@ import (
 )
 
 // GetStakerStats gets staker stats for babylon staking
+//
 //	@Summary		Get Staker Stats
 //	@Description	Fetches staker stats for babylon staking including active tvl,
+//
 // active delegations, unbonding tvl, unbonding delegations, withdrawable tvl,
 // withdrawable delegations, slashed tvl and slashed delegations. If the babylon
 // address is not provided, the stats will be calculated for all the delegations
 // of the staker based on the staker's BTC public key.
+//
 //	@Produce		json
 //	@Tags			v2
 //	@Param			staker_pk_hex	query		string												true	"Public key of the staker to fetch"
@@ -46,6 +49,7 @@ func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *typ
 }
 
 // GetStats @Summary Get overall system stats
+//
 //	@Description	Overall system stats
 //	@Produce		json
 //	@Tags			v2
@@ -61,6 +65,7 @@ func (h *V2Handler) GetOverallStats(request *http.Request) (*handler.Result, *ty
 }
 
 // GetPrices @Summary Get latest prices for all available symbols
+//
 //	@Description	Get latest prices for all available symbols
 //	@Produce		json
 //	@Tags			v2
