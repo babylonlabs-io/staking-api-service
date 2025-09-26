@@ -198,29 +198,36 @@ func (_m *IndexerDBClient) GetDelegation(ctx context.Context, stakingTxHashHex s
 	return r0, r1
 }
 
-// GetDelegations provides a mock function with given fields: ctx, stakerPKHex, stakerBabylonAddress, paginationToken
-func (_m *IndexerDBClient) GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationToken string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
-	ret := _m.Called(ctx, stakerPKHex, stakerBabylonAddress, paginationToken)
+// GetDelegations provides a mock function with given fields: ctx, paginationToken, filters
+func (_m *IndexerDBClient) GetDelegations(ctx context.Context, paginationToken string, filters ...indexerdbclient.DelegationsQueryFilter) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error) {
+	_va := make([]interface{}, len(filters))
+	for _i := range filters {
+		_va[_i] = filters[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, paginationToken)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetDelegations")
+		panic("no return value specified for GetDelegationsByStakerPKHex")
 	}
 
 	var r0 *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *string, string) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)); ok {
-		return rf(ctx, stakerPKHex, stakerBabylonAddress, paginationToken)
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...indexerdbclient.DelegationsQueryFilter) (*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails], error)); ok {
+		return rf(ctx, paginationToken, filters...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, *string, string) *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]); ok {
-		r0 = rf(ctx, stakerPKHex, stakerBabylonAddress, paginationToken)
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...indexerdbclient.DelegationsQueryFilter) *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]); ok {
+		r0 = rf(ctx, paginationToken, filters...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*db.DbResultMap[indexerdbmodel.IndexerDelegationDetails])
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, *string, string) error); ok {
-		r1 = rf(ctx, stakerPKHex, stakerBabylonAddress, paginationToken)
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...indexerdbclient.DelegationsQueryFilter) error); ok {
+		r1 = rf(ctx, paginationToken, filters...)
 	} else {
 		r1 = ret.Error(1)
 	}

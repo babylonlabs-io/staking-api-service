@@ -16,7 +16,8 @@ type V2ServiceProvider interface {
 	)
 	GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error)
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error)
-	GetDelegations(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationKey string) ([]*DelegationPublic, string, *types.Error)
+	GetDelegationsByStakerPKHex(ctx context.Context, stakerPKHex string, stakerBabylonAddress *string, paginationKey string) ([]*DelegationPublic, string, *types.Error)
+	GetDelegationsByBabylonAddress(ctx context.Context, bbnAddress string, state types.DelegationState, paginationKey string) ([]*DelegationPublic, string, *types.Error)
 	MarkV1DelegationAsTransitioned(
 		ctx context.Context,
 		stakingTxHashHex, stakerPkHex, fpPkHex string,

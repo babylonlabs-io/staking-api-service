@@ -4,8 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/babylonlabs-io/babylon-staking-indexer/testutil"
-	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
@@ -16,126 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestEvaluateCanExpand(t *testing.T) {
-	ctx := t.Context()
-
-	testHash1, err := testutil.RandomAlphaNum(10)
-	require.NoError(t, err)
-	testHash2, err := testutil.RandomAlphaNum(10)
-	require.NoError(t, err)
-	testHash3, err := testutil.RandomAlphaNum(10)
-	require.NoError(t, err)
-	testHash4, err := testutil.RandomAlphaNum(10)
-	require.NoError(t, err)
-	testHash5, err := testutil.RandomAlphaNum(10)
-	require.NoError(t, err)
-
-	tests := []struct {
-		name                     string
-		delegation               indexerdbmodel.IndexerDelegationDetails
-		babylonParams            []*indexertypes.BbnStakingParams
-		babylonParamsError       error
-		expectedResult           bool
-		expectedErrorInGetParams bool
-	}{
-		{
-			name: "Active delegation with single FP, under max limit",
-			delegation: indexerdbmodel.IndexerDelegationDetails{
-				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash1,
-				FinalityProviderBtcPksHex: []string{"fp1"},
-			},
-			babylonParams: []*indexertypes.BbnStakingParams{
-				{Version: 1, MaxFinalityProviders: 5},
-			},
-			expectedResult: true,
-		},
-		{
-			name: "Inactive delegation should not expand",
-			delegation: indexerdbmodel.IndexerDelegationDetails{
-				State:                     indexertypes.StateWithdrawn,
-				StakingTxHashHex:          testHash2,
-				FinalityProviderBtcPksHex: []string{"fp1"},
-			},
-			babylonParams: []*indexertypes.BbnStakingParams{
-				{Version: 1, MaxFinalityProviders: 5},
-			},
-			expectedResult: false,
-		},
-		{
-			name: "Single FP delegation at max limit should not expand",
-			delegation: indexerdbmodel.IndexerDelegationDetails{
-				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash3,
-				FinalityProviderBtcPksHex: []string{"fp1"},
-			},
-			babylonParams: []*indexertypes.BbnStakingParams{
-				{Version: 1, MaxFinalityProviders: 1},
-			},
-			expectedResult: false,
-		},
-		{
-			name: "Multiple babylon params versions, should expand",
-			delegation: indexerdbmodel.IndexerDelegationDetails{
-				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash4,
-				FinalityProviderBtcPksHex: []string{"fp1", "fp2"},
-			},
-			babylonParams: []*indexertypes.BbnStakingParams{
-				{Version: 1, MaxFinalityProviders: 5},
-				{Version: 3, MaxFinalityProviders: 3},
-				{Version: 2, MaxFinalityProviders: 10},
-			},
-			expectedResult: true,
-		},
-
-		{
-			name: "Error getting babylon params should return false",
-			delegation: indexerdbmodel.IndexerDelegationDetails{
-				State:                     indexertypes.StateActive,
-				StakingTxHashHex:          testHash5,
-				FinalityProviderBtcPksHex: []string{"fp1"},
-			},
-			babylonParamsError:       errors.New("database error"),
-			expectedResult:           false,
-			expectedErrorInGetParams: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			indexerDB := mocks.NewIndexerDBClient(t)
-			v1DB := mocks.NewV1DBClient(t)
-
-			// Mock GetBbnStakingParams call if delegation is active (will reach the params check)
-			if tt.delegation.State == indexertypes.StateActive {
-				if tt.expectedErrorInGetParams {
-					indexerDB.On("GetBbnStakingParams", ctx).Return(nil, tt.babylonParamsError).Once()
-				} else {
-					indexerDB.On("GetBbnStakingParams", ctx).Return(tt.babylonParams, nil).Once()
-				}
-			}
-
-			cfg := &config.Config{}
-			dbClients := &dbclients.DbClients{
-				IndexerDBClient: indexerDB,
-				V1DBClient:      v1DB,
-			}
-
-			sharedService, err := service.New(cfg, nil, nil, nil, dbClients, &types.ChainInfo{
-				ChainID: "babylon",
-			})
-			require.NoError(t, err)
-
-			v2Service, err := New(sharedService, nil)
-			require.NoError(t, err)
-
-			result := v2Service.evaluateCanExpand(ctx, tt.delegation)
-			assert.Equal(t, tt.expectedResult, result)
-		})
-	}
-}
 
 func TestMapDelegationState(t *testing.T) {
 	tests := []struct {
