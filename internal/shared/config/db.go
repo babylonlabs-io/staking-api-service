@@ -41,7 +41,7 @@ func (cfg *DbConfig) Validate() error {
 		return fmt.Errorf("invalid db address: %w", err)
 	}
 
-	if u.Scheme != "mongodb" {
+	if u.Scheme != "mongodb" && u.Scheme != "mongodb+srv" {
 		return fmt.Errorf("unsupported db scheme: %s", u.Scheme)
 	}
 
@@ -49,18 +49,20 @@ func (cfg *DbConfig) Validate() error {
 		return fmt.Errorf("missing host in db address")
 	}
 
-	port := u.Port()
-	if port == "" {
-		return fmt.Errorf("missing port in db address")
-	}
+	if u.Scheme == "mongodb" {
+		port := u.Port()
+		if port == "" {
+			return fmt.Errorf("missing port in db address")
+		}
 
-	portNum, err := strconv.Atoi(port)
-	if err != nil {
-		return fmt.Errorf("invalid port in db address: %w", err)
-	}
+		portNum, err := strconv.Atoi(port)
+		if err != nil {
+			return fmt.Errorf("invalid port in db address: %w", err)
+		}
 
-	if portNum < 1024 || portNum > 65535 {
-		return fmt.Errorf("port number must be between 1024 and 65535 (inclusive)")
+		if portNum < 1024 || portNum > 65535 {
+			return fmt.Errorf("port number must be between 1024 and 65535 (inclusive)")
+		}
 	}
 
 	if cfg.MaxPaginationLimit < 2 {
