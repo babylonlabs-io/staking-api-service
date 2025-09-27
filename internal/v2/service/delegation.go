@@ -108,8 +108,6 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 	return delegationPublic, nil
 }
 
-
-
 func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error) {
 	delegation, err := s.dbClients.IndexerDBClient.GetDelegation(ctx, stakingTxHashHex)
 	if err != nil {
@@ -119,7 +117,6 @@ func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) 
 		}
 		return nil, types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegation")
 	}
-
 
 	return FromDelegationDocument(*delegation)
 }
@@ -147,7 +144,6 @@ func (s *V2Service) GetDelegations(
 
 	// Type delegations by state
 	for _, delegation := range resultMap.Data {
-
 		delegationPublic, delErr := FromDelegationDocument(delegation)
 		if delErr != nil {
 			return nil, "", delErr

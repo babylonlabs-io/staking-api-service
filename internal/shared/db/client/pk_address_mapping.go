@@ -5,9 +5,9 @@ import (
 
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"github.com/babylonlabs-io/staking-api-service/pkg"
 )
 
 func (db *Database) InsertPkAddressMappings(

@@ -11,22 +11,13 @@ import (
 // GetFinalityProviders retrieves finality providers filtered by state
 func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 	ctx context.Context,
-	bsnID *string,
 ) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
 	client := indexerdbclient.Client.Database(
 		indexerdbclient.DbName,
 	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
 
-	// default filter to fetch all finality providers if bsnID is nil
+	// Fetch all finality providers
 	filter := bson.M{}
-	if bsnID != nil {
-		if *bsnID == "all" {
-			// When bsnID is "all", fetch all values without any filter
-			filter = bson.M{}
-		} else {
-			filter["bsn_id"] = *bsnID
-		}
-	}
 
 	return pkg.FetchAll[*indexerdbmodel.IndexerFinalityProviderDetails](ctx, client, filter)
 }

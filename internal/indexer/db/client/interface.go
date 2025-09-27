@@ -15,7 +15,7 @@ type IndexerDBClient interface {
 	GetBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, error)
 	GetBtcCheckpointParams(ctx context.Context) ([]*indexertypes.BtcCheckpointParams, error)
 	// Finality Providers
-	GetFinalityProviders(ctx context.Context, bsnID *string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)
+	GetFinalityProviders(ctx context.Context) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)
 	GetFinalityProvidersByID(ctx context.Context, ids []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)
 	// Staker Delegations
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error)
@@ -31,7 +31,6 @@ type IndexerDBClient interface {
 		stakerBabylonAddress *string,
 		states []indexertypes.DelegationState,
 	) ([]indexerdbmodel.IndexerDelegationDetails, error)
-	GetAllBSN(ctx context.Context) ([]indexerdbmodel.BSN, error)
 	GetChainInfo(ctx context.Context) (*indexerdbmodel.ChainInfo, error)
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 func TestMapDelegationState(t *testing.T) {
 	tests := []struct {
 		name           string
