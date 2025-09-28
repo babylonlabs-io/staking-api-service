@@ -37,7 +37,6 @@ const (
 	V2StakerStatsCollection               = "v2_staker_stats"
 	V2FinalityProvidersMetadataCollection = "v2_finality_providers_metadata"
 	// v3
-	BsnStatsCollection = "bsn_stats"
 )
 
 type index struct {
@@ -74,7 +73,6 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"active_delegations": 1}, Unique: false},
 	},
 	V2FinalityProvidersMetadataCollection: {{Indexes: map[string]int{}}},
-	BsnStatsCollection:                    {{Indexes: map[string]int{}}},
 }
 
 func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *config.ExternalAPIsConfig) error {

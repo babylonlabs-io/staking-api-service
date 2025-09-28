@@ -396,31 +396,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v2/bsn": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v2"
-                ],
-                "summary": "Get event consumers",
-                "responses": {
-                    "200": {
-                        "description": "List of available event consumers",
-                        "schema": {
-                            "$ref": "#/definitions/handler.PublicResponse-array_v2service_BSN"
-                        }
-                    },
-                    "500": {
-                        "description": "Error: Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
-                        }
-                    }
-                }
-            }
-        },
         "/v2/delegation": {
             "get": {
                 "description": "Retrieves a delegation by a given transaction hash",
@@ -537,14 +512,6 @@ const docTemplate = `{
                     "v2"
                 ],
                 "summary": "List Finality Providers",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Filter by bsn id",
-                        "name": "bsn_id",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "List of finality providers with its stats",
@@ -751,20 +718,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.PublicResponse-array_v2service_BSN": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/v2service.BSN"
-                    }
-                },
-                "pagination": {
-                    "$ref": "#/definitions/handler.paginationResponse"
-                }
-            }
-        },
         "handler.PublicResponse-array_v2service_DelegationPublic": {
             "type": "object",
             "properties": {
@@ -908,9 +861,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "delegation_creation_base_gas_fee": {
-                    "type": "integer"
-                },
-                "max_finality_providers": {
                     "type": "integer"
                 },
                 "max_staking_time_blocks": {
@@ -1266,23 +1216,6 @@ const docTemplate = `{
                 }
             }
         },
-        "v2service.BSN": {
-            "type": "object",
-            "properties": {
-                "active_tvl": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "v2service.CovenantSignature": {
             "type": "object",
             "properties": {
@@ -1300,9 +1233,6 @@ const docTemplate = `{
         "v2service.DelegationPublic": {
             "type": "object",
             "properties": {
-                "can_expand": {
-                    "type": "boolean"
-                },
                 "delegation_staking": {
                     "$ref": "#/definitions/v2service.DelegationStaking"
                 },
@@ -1392,9 +1322,6 @@ const docTemplate = `{
                 },
                 "active_tvl": {
                     "type": "integer"
-                },
-                "bsn_id": {
-                    "type": "string"
                 },
                 "btc_pk": {
                     "type": "string"

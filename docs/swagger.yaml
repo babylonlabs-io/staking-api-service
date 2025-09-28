@@ -34,15 +34,6 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
-  handler.PublicResponse-array_v2service_BSN:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/v2service.BSN'
-        type: array
-      pagination:
-        $ref: '#/definitions/handler.paginationResponse'
-    type: object
   handler.PublicResponse-array_v2service_DelegationPublic:
     properties:
       data:
@@ -135,8 +126,6 @@ definitions:
       covenant_quorum:
         type: integer
       delegation_creation_base_gas_fee:
-        type: integer
-      max_finality_providers:
         type: integer
       max_staking_time_blocks:
         type: integer
@@ -374,17 +363,6 @@ definitions:
       version:
         type: integer
     type: object
-  v2service.BSN:
-    properties:
-      active_tvl:
-        type: integer
-      description:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-    type: object
   v2service.CovenantSignature:
     properties:
       covenant_btc_pk_hex:
@@ -396,8 +374,6 @@ definitions:
     type: object
   v2service.DelegationPublic:
     properties:
-      can_expand:
-        type: boolean
       delegation_staking:
         $ref: '#/definitions/v2service.DelegationStaking'
       delegation_unbonding:
@@ -457,8 +433,6 @@ definitions:
         type: integer
       active_tvl:
         type: integer
-      bsn_id:
-        type: string
       btc_pk:
         type: string
       commission:
@@ -887,22 +861,6 @@ paths:
       summary: Check unbonding eligibility
       tags:
       - v1
-  /v2/bsn:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of available event consumers
-          schema:
-            $ref: '#/definitions/handler.PublicResponse-array_v2service_BSN'
-        "500":
-          description: 'Error: Internal Server Error'
-          schema:
-            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
-      summary: Get event consumers
-      tags:
-      - v2
   /v2/delegation:
     get:
       description: Retrieves a delegation by a given transaction hash
@@ -978,11 +936,6 @@ paths:
     get:
       description: Fetches finality providers with its stats, currently does not support
         pagination
-      parameters:
-      - description: Filter by bsn id
-        in: query
-        name: bsn_id
-        type: string
       produces:
       - application/json
       responses:
