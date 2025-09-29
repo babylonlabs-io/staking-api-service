@@ -897,14 +897,19 @@ paths:
       description: Fetches delegations for babylon staking including tvl, total delegations,
         active tvl, active delegations and total stakers.
       parameters:
-      - description: Staker public key in hex format
+      - description: Staker public key in hex format. If omitted, babylon_address
+          is used as the main query parameter and state is required.
         in: query
         name: staker_pk_hex
-        required: true
         type: string
-      - description: Babylon address
+      - description: Babylon address. Required if staker_pk_hex is omitted.
         in: query
         name: babylon_address
+        type: string
+      - description: State of delegations (only 'active' is supported). Required if
+          staker_pk_hex is omitted.
+        in: query
+        name: state
         type: string
       - description: Pagination key to fetch the next page of delegations
         in: query

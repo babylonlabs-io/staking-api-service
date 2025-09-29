@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	model "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
-	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"github.com/cometbft/cometbft/libs/os"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 )
 
 func TestDelegations(t *testing.T) {
@@ -36,7 +36,7 @@ func TestDelegations(t *testing.T) {
 
 		var token string
 		for {
-			result, err := testDB.GetDelegations(ctx, stakerPKHex, nil, token)
+			result, err := testDB.GetDelegations(ctx, token, indexerdbclient.WithStakerPKHex(stakerPKHex))
 			require.NoError(t, err)
 
 			// for simplicity we just collect ids of found records in ids map
@@ -58,7 +58,9 @@ func TestDelegations(t *testing.T) {
 		var numOfFoundRecords int
 
 		for {
-			result, err := testDB.GetDelegations(ctx, stakerPKHex, pkg.Ptr(bbnAddress1), token)
+			filter1 := indexerdbclient.WithStakerPKHex(stakerPKHex)
+			filter2 := indexerdbclient.WithBabylonAddress(bbnAddress1)
+			result, err := testDB.GetDelegations(ctx, token, filter1, filter2)
 			require.NoError(t, err)
 
 			numOfFoundRecords += len(result.Data)

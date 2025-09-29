@@ -34,6 +34,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v2/finality-providers", registerHandler(handlers.V2Handler.GetFinalityProviders))
 	r.Get("/v2/delegation", registerHandler(handlers.V2Handler.GetDelegation))
 	r.Get("/v2/delegations", registerHandler(handlers.V2Handler.GetDelegations))
+
 	r.Get("/v2/stats", registerHandler(handlers.V2Handler.GetOverallStats))
 	r.Get("/v2/staker/stats", registerHandler(handlers.V2Handler.GetStakerStats))
 	r.Get("/v2/prices", registerHandler(handlers.V2Handler.GetPrices))
