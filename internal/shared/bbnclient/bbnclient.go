@@ -68,7 +68,7 @@ func (c *BBNClient) AnnualProvisions(ctx context.Context) (cosmosMath.LegacyDec,
 
 	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
 	if err != nil {
-		return cosmosMath.LegacyDec{}, fmt.Errorf("failed to get total supply: %w", err)
+		return cosmosMath.LegacyDec{}, fmt.Errorf("failed to get annual provisions: %w", err)
 	}
 	return response.AnnualProvisions, nil
 }
@@ -86,7 +86,7 @@ func (c *BBNClient) BTCStakingRewardsPortion(ctx context.Context) (cosmosMath.Le
 
 	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
 	if err != nil {
-		return cosmosMath.LegacyDec{}, fmt.Errorf("failed to get total supply: %w", err)
+		return cosmosMath.LegacyDec{}, fmt.Errorf("failed to get total incentive params: %w", err)
 	}
 	return response.Params.BtcStakingPortion, nil
 }

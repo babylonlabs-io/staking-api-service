@@ -28,7 +28,7 @@ func TestBBNClient(t *testing.T) {
 	provisions, err := cl.AnnualProvisions(ctx)
 	require.NoError(t, err)
 
-	result, err := params.Mul(provisions).QuoInt64(1e6).Float64()
+	result, err := params.Mul(provisions).QuoInt64(pkg.UbbnPerBaby).Float64()
 	require.NoError(t, err)
 
 	fmt.Printf("Baby annual rewards: %f\n", result)
