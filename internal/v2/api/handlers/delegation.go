@@ -39,9 +39,9 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 //		@Description	Fetches delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.
 //		@Produce		json
 //		@Tags			v2
-//		@Param			staker_pk_hex	query		string														false	"Staker public key in hex format"
-//		@Param			babylon_address	query		string														false	"Babylon address"
-//	 @Param state query string false "State of delegations"
+//		@Param			staker_pk_hex	query		string														false	"Staker public key in hex format. If omitted, babylon_address is used as the main query parameter and state is required."
+//		@Param			babylon_address	query		string														false	"Babylon address. Required if staker_pk_hex is omitted."
+//		@Param			state			query		string														false	"State of delegations (only 'active' is supported). Required if staker_pk_hex is omitted."
 //		@Param			pagination_key	query		string														false	"Pagination key to fetch the next page of delegations"
 //		@Success		200				{object}	handler.PublicResponse[[]v2service.DelegationPublic]{array}	"List of staker delegations and pagination token"
 //		@Failure		400				{object}	types.Error													"Error: Bad Request"

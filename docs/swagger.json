@@ -448,15 +448,20 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Staker public key in hex format",
+                        "description": "Staker public key in hex format. If omitted, babylon_address is used as the main query parameter and state is required.",
                         "name": "staker_pk_hex",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Babylon address",
+                        "description": "Babylon address. Required if staker_pk_hex is omitted.",
                         "name": "babylon_address",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "State of delegations (only 'active' is supported). Required if staker_pk_hex is omitted.",
+                        "name": "state",
                         "in": "query"
                     },
                     {
