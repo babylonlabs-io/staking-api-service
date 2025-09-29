@@ -35,19 +35,19 @@ func (h *V2Handler) GetDelegation(request *http.Request) (*handler.Result, *type
 
 // GetDelegations gets delegations for babylon staking
 //
-//		@Summary		Get Delegations
-//		@Description	Fetches delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.
-//		@Produce		json
-//		@Tags			v2
-//		@Param			staker_pk_hex	query		string														false	"Staker public key in hex format. If omitted, babylon_address is used as the main query parameter and state is required."
-//		@Param			babylon_address	query		string														false	"Babylon address. Required if staker_pk_hex is omitted."
-//		@Param			state			query		string														false	"State of delegations (only 'active' is supported). Required if staker_pk_hex is omitted."
-//		@Param			pagination_key	query		string														false	"Pagination key to fetch the next page of delegations"
-//		@Success		200				{object}	handler.PublicResponse[[]v2service.DelegationPublic]{array}	"List of staker delegations and pagination token"
-//		@Failure		400				{object}	types.Error													"Error: Bad Request"
-//		@Failure		404				{object}	types.Error													"Error: Not Found"
-//		@Failure		500				{object}	types.Error													"Error: Internal Server Error"
-//		@Router			/v2/delegations [get]
+//	@Summary		Get Delegations
+//	@Description	Fetches delegations for babylon staking including tvl, total delegations, active tvl, active delegations and total stakers.
+//	@Produce		json
+//	@Tags			v2
+//	@Param			staker_pk_hex	query		string														false	"Staker public key in hex format. If omitted, babylon_address is used as the main query parameter and state is required."
+//	@Param			babylon_address	query		string														false	"Babylon address. Required if staker_pk_hex is omitted."
+//	@Param			state			query		string														false	"State of delegations (only 'active' is supported). Required if staker_pk_hex is omitted."
+//	@Param			pagination_key	query		string														false	"Pagination key to fetch the next page of delegations"
+//	@Success		200				{object}	handler.PublicResponse[[]v2service.DelegationPublic]{array}	"List of staker delegations and pagination token"
+//	@Failure		400				{object}	types.Error													"Error: Bad Request"
+//	@Failure		404				{object}	types.Error													"Error: Not Found"
+//	@Failure		500				{object}	types.Error													"Error: Internal Server Error"
+//	@Router			/v2/delegations [get]
 func (h *V2Handler) GetDelegations(request *http.Request) (*handler.Result, *types.Error) {
 	stakerPKHex, err := handler.ParsePublicKeyQuery(request, "staker_pk_hex", true)
 	if err != nil {
