@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	cosmosMath "cosmossdk.io/math"
 	"github.com/avast/retry-go/v4"
 	bbncfg "github.com/babylonlabs-io/babylon/v4/client/config"
 	"github.com/babylonlabs-io/babylon/v4/client/query"
+	incentiveTypes "github.com/babylonlabs-io/babylon/v4/x/incentive/types"
+	minttypes "github.com/babylonlabs-io/babylon/v4/x/mint/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types"
@@ -35,21 +38,57 @@ func New(cfg *config.BBNConfig) (*BBNClient, error) {
 }
 
 func (c *BBNClient) GetTotalSupply(ctx context.Context, denom string) (types.Coin, error) {
-	callForStatus := func() (*banktypes.QuerySupplyOfResponse, error) {
+	callForResponse := func() (*banktypes.QuerySupplyOfResponse, error) {
 		queryClient := banktypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
-		status, err := queryClient.SupplyOf(ctx, &banktypes.QuerySupplyOfRequest{denom})
+		response, err := queryClient.SupplyOf(ctx, &banktypes.QuerySupplyOfRequest{denom})
 		if err != nil {
 			return nil, err
 		}
 
-		return status, nil
+		return response, nil
 	}
 
-	status, err := clientCallWithRetry(ctx, callForStatus, c.cfg)
+	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
 	if err != nil {
 		return types.Coin{}, fmt.Errorf("failed to get total supply: %w", err)
 	}
-	return status.Amount, nil
+	return response.Amount, nil
+}
+
+func (c *BBNClient) AnnualProvisions(ctx context.Context) (cosmosMath.LegacyDec, error) {
+	callForResponse := func() (*minttypes.QueryAnnualProvisionsResponse, error) {
+		queryClient := minttypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
+		response, err := queryClient.AnnualProvisions(ctx, &minttypes.QueryAnnualProvisionsRequest{})
+		if err != nil {
+			return nil, err
+		}
+
+		return response, nil
+	}
+
+	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
+	if err != nil {
+		return cosmosMath.LegacyDec{}, fmt.Errorf("failed to get total supply: %w", err)
+	}
+	return response.AnnualProvisions, nil
+}
+
+func (c *BBNClient) BTCStakingRewardsPortion(ctx context.Context) (cosmosMath.LegacyDec, error) {
+	callForResponse := func() (*incentiveTypes.QueryParamsResponse, error) {
+		queryClient := incentiveTypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
+		response, err := queryClient.Params(ctx, &incentiveTypes.QueryParamsRequest{})
+		if err != nil {
+			return nil, err
+		}
+
+		return response, nil
+	}
+
+	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
+	if err != nil {
+		return cosmosMath.LegacyDec{}, fmt.Errorf("failed to get total supply: %w", err)
+	}
+	return response.Params.BtcStakingPortion, nil
 }
 
 func clientCallWithRetry[T any](
