@@ -34,7 +34,7 @@ func (h *Handler) babyTotalSupply(req *http.Request) (any, error) {
 	}
 	ctx := req.Context()
 
-	coin, err := h.bbnClient.GetTotalSupply(ctx, "ubbn")
+	coin, err := h.bbnClient.TotalSupply(ctx, "ubbn")
 	if err != nil {
 		log.Ctx(ctx).Err(err).Msg("Failed to get total supply")
 		return nil, fmt.Errorf("internal error")

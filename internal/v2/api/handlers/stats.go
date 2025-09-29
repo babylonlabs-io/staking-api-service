@@ -80,3 +80,22 @@ func (h *V2Handler) GetPrices(request *http.Request) (*handler.Result, *types.Er
 
 	return handler.NewResult(prices), nil
 }
+
+// GetAPR
+//
+//	 @Summary Get latest prices for all available symbols
+//
+//		@Description	Get latest prices for all available symbols
+//		@Produce		json
+//		@Tags			v2
+//		@Success		200	{object}	handler.PublicResponse[v2service.StakingAPRPublic]	""
+//		@Failure		400	{object}	types.Error									"Error: Bad Request"
+//		@Router			/v2/apr [get]
+func (h *V2Handler) GetAPR(request *http.Request) (*handler.Result, *types.Error) {
+	stakingAPR, err := h.Service.GetStakingAPR(request.Context())
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.NewResult(stakingAPR), nil
+}

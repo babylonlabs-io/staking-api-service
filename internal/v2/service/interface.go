@@ -25,6 +25,7 @@ type V2ServiceProvider interface {
 	) *types.Error
 	GetOverallStats(ctx context.Context) (*OverallStatsPublic, *types.Error)
 	GetLatestPrices(ctx context.Context) (map[string]float64, *types.Error)
+	GetStakingAPR(ctx context.Context) (*StakingAPRPublic, *types.Error)
 	/*
 		Returns the staker stats for the given staker PK hex and babylon address.
 		If the babylon address is not provided, the stats will be calculated for
