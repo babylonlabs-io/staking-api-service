@@ -64,7 +64,7 @@ linters:
         - make
     nolintlint:
       require-explanation: false
-      require-specific: false
+      require-specific: true
       allow-unused: false
   exclusions:
     generated: lax

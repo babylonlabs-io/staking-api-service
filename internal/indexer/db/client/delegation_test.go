@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 	model "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/cometbft/cometbft/libs/os"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
 )
 
 func TestDelegations(t *testing.T) {
