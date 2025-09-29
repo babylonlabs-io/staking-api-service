@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/avast/retry-go/v4"
-	bbncfg "github.com/babylonlabs-io/babylon/client/config"
-	"github.com/babylonlabs-io/babylon/client/query"
+	bbncfg "github.com/babylonlabs-io/babylon/v4/client/config"
+	"github.com/babylonlabs-io/babylon/v4/client/query"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types"
