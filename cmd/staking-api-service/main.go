@@ -148,3 +148,4 @@ func handleScriptExecution(ctx context.Context, cfg *config.Config, v2queues *v2
 		return false
 	}
 }
+
