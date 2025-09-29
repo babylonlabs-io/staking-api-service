@@ -12,6 +12,7 @@ import (
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -33,7 +34,6 @@ func (db *V2Database) GetOrCreateStatsLock(
 	update := bson.M{
 		"$setOnInsert": v2dbmodel.NewV2StatsLockDocument(
 			id,
-			false,
 			false,
 			false,
 			false,
@@ -148,14 +148,8 @@ func (v2dbclient *V2Database) GetOverallStats(ctx context.Context) (*v2dbmodel.V
 
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2OverallStatsCollection)
 	filter := bson.M{"_id": bson.M{"$in": shardsId}}
-	cursor, err := client.Find(ctx, filter)
+	overallStats, err := pkg.FetchAll[v2dbmodel.V2OverallStatsDocument](ctx, client, filter)
 	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var overallStats []v2dbmodel.V2OverallStatsDocument
-	if err = cursor.All(ctx, &overallStats); err != nil {
 		return nil, err
 	}
 
@@ -439,63 +433,6 @@ func (v2dbclient *V2Database) GetActiveStakersCount(ctx context.Context) (int64,
 	return count, nil
 }
 
-func (v2 *V2Database) IncrementBsnStats(ctx context.Context, stakingTxHashHex string, bsnIds []string, amount uint64) error {
-	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
-
-	// Create bulk write operations for each bsn
-	var operations []mongo.WriteModel
-	for _, bsnID := range bsnIds {
-		operation := mongo.NewUpdateOneModel().
-			SetFilter(bson.M{"_id": bsnID}).
-			SetUpdate(bson.M{
-				"$inc": bson.M{
-					"active_tvl":         int64(amount),
-					"active_delegations": 1,
-				},
-			}).
-			SetUpsert(true)
-		operations = append(operations, operation)
-	}
-
-	return v2.updateBsnStats(
-		ctx,
-		types.Active.ToString(),
-		stakingTxHashHex,
-		operations,
-	)
-}
-
-func (v2 *V2Database) SubtractBsnStats(
-	ctx context.Context,
-	stakingTxHashHex string,
-	bsnIds []string,
-	amount uint64,
-) error {
-	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
-
-	// Create bulk write operations for each bsn
-	var operations []mongo.WriteModel
-	for _, bsnID := range bsnIds {
-		operation := mongo.NewUpdateOneModel().
-			SetFilter(bson.M{"_id": bsnID}).
-			SetUpdate(bson.M{
-				"$inc": bson.M{
-					"active_tvl":         -int64(amount),
-					"active_delegations": -1,
-				},
-			}).
-			SetUpsert(true)
-		operations = append(operations, operation)
-	}
-
-	return v2.updateBsnStats(
-		ctx,
-		types.Unbonding.ToString(),
-		stakingTxHashHex,
-		operations,
-	)
-}
-
 func (v2dbclient *V2Database) IncrementFinalityProviderStats(
 	ctx context.Context,
 	stakingTxHashHex string,
@@ -560,44 +497,6 @@ func (v2dbclient *V2Database) SubtractFinalityProviderStats(
 	)
 }
 
-func (v2 *V2Database) updateBsnStats(
-	ctx context.Context,
-	state string,
-	stakingTxHashHex string,
-	operations []mongo.WriteModel,
-) error {
-	stakingTxHashHex = strings.ToLower(stakingTxHashHex)
-
-	client := v2.Client.Database(v2.DbName).Collection(dbmodel.BsnStatsCollection)
-
-	session, sessionErr := v2.Client.StartSession()
-	if sessionErr != nil {
-		return sessionErr
-	}
-	defer session.EndSession(ctx)
-
-	transactionWork := func(sessCtx mongo.SessionContext) (interface{}, error) {
-		// Single lock for the entire operation
-		err := v2.updateStatsLockByFieldName(
-			sessCtx,
-			stakingTxHashHex,
-			state,
-			"bsn_stats",
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		// Execute all updates in a single bulk write
-		opts := options.BulkWrite().SetOrdered(true)
-		_, err = client.BulkWrite(sessCtx, operations, opts)
-		return nil, err
-	}
-
-	_, txErr := session.WithTransaction(ctx, transactionWork)
-	return txErr
-}
-
 func (v2dbclient *V2Database) updateFinalityProviderStats(
 	ctx context.Context,
 	state string,
@@ -640,32 +539,5 @@ func (v2dbclient *V2Database) GetFinalityProviderStats(
 	ctx context.Context,
 ) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
-	cursor, err := client.Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var results []*v2dbmodel.V2FinalityProviderStatsDocument
-	if err := cursor.All(ctx, &results); err != nil {
-		return nil, err
-	}
-	return results, nil
-}
-
-func (v2dbclient *V2Database) GetBsnStats(
-	ctx context.Context,
-) ([]*v2dbmodel.BSNStatsDocument, error) {
-	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.BsnStatsCollection)
-	cursor, err := client.Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var results []*v2dbmodel.BSNStatsDocument
-	if err := cursor.All(ctx, &results); err != nil {
-		return nil, err
-	}
-	return results, nil
+	return pkg.FetchAll[*v2dbmodel.V2FinalityProviderStatsDocument](ctx, client, bson.M{})
 }

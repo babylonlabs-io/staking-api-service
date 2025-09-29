@@ -37,7 +37,6 @@ const (
 	V2StakerStatsCollection               = "v2_staker_stats"
 	V2FinalityProvidersMetadataCollection = "v2_finality_providers_metadata"
 	// v3
-	BsnStatsCollection = "bsn_stats"
 )
 
 type index struct {
@@ -74,7 +73,6 @@ var collections = map[string][]index{
 		{Indexes: map[string]int{"active_delegations": 1}, Unique: false},
 	},
 	V2FinalityProvidersMetadataCollection: {{Indexes: map[string]int{}}},
-	BsnStatsCollection:                    {{Indexes: map[string]int{}}},
 }
 
 func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *config.ExternalAPIsConfig) error {
@@ -106,12 +104,9 @@ func Setup(ctx context.Context, stakingDB *config.DbConfig, externalConfig *conf
 		}
 	}
 
-	// If external APIs are configured, create TTL index for BTC price collection
-	if externalConfig != nil {
-		if err := createTTLIndexes(ctx, database, PriceCollection, externalConfig.CoinMarketCap.CacheTTL); err != nil {
-			log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
-			return err
-		}
+	if err := createTTLIndexes(ctx, database, PriceCollection, externalConfig.CoinMarketCap.CacheTTL); err != nil {
+		log.Error().Err(err).Msg("Failed to create TTL index for BTC price")
+		return err
 	}
 
 	err = createTTLIndexes(ctx, database, V2FinalityProvidersMetadataCollection, pkg.Day)

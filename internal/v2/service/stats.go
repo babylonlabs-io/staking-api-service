@@ -52,10 +52,8 @@ func (s *V2Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	// We only care about the Babylon finality providers stats for now
-	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(
-		ctx, &s.sharedService.ChainInfo.ChainID,
-	)
+	// Fetch all finality providers stats
+	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("error while fetching finality providers")
 		return nil, types.NewInternalServiceError(err)
@@ -114,13 +112,6 @@ func (s *V2Service) getBTCStakingAPR(
 ) (float64, error) {
 	// Skip calculation if activeTvl is 0
 	if activeTvl <= 0 {
-		return 0, nil
-	}
-
-	// CoinMarketCap integration is optional since not all deployments require
-	// APR calculation. If CoinMarketCap is not configured in the service config,
-	// return 0 as the APR.
-	if s.clients.CoinMarketCap == nil {
 		return 0, nil
 	}
 
@@ -223,27 +214,6 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 		}
 	}
 
-	if !statsLockDocument.BsnStats {
-		bsnIds, err := s.getBsnForFinalityProviders(ctx, fpBtcPkHexes)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while fetching bsn for finality providers")
-			return nil
-		}
-
-		err = s.dbClients.V2DBClient.IncrementBsnStats(
-			ctx, stakingTxHashHex, bsnIds, amount,
-		)
-		if err != nil {
-			if db.IsNotFoundError(err) {
-				return nil
-			}
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while incrementing bsn stats")
-			return types.NewInternalServiceError(err)
-		}
-	}
-
 	if !statsLockDocument.StakerStats {
 		err = s.dbClients.V2DBClient.HandleActiveStakerStats(
 			ctx, stakingTxHashHex, stakerPkHex, amount,
@@ -283,31 +253,6 @@ func (s *V2Service) ProcessActiveDelegationStats(ctx context.Context, stakingTxH
 	return nil
 }
 
-func (s *V2Service) getBsnForFinalityProviders(ctx context.Context, fpBtcPkHexes []string) ([]string, error) {
-	fps, err := s.dbClients.IndexerDBClient.GetFinalityProvidersByID(ctx, fpBtcPkHexes)
-	if err != nil {
-		return nil, err
-	}
-
-	uniqueFinalityProviders := make(map[string]struct{}, len(fpBtcPkHexes))
-	for _, fp := range fpBtcPkHexes {
-		uniqueFinalityProviders[fp] = struct{}{}
-	}
-
-	// todo for review should it be unique ?
-	var bsnIds []string
-	for _, fp := range fps {
-		_, ok := uniqueFinalityProviders[fp.BtcPk]
-		if !ok {
-			continue
-		}
-
-		bsnIds = append(bsnIds, fp.BsnID)
-	}
-
-	return bsnIds, nil
-}
-
 // todo test this method
 // ProcessUnbondingDelegationStats calculates the unbonding delegation stats
 func (s *V2Service) ProcessUnbondingDelegationStats(
@@ -342,26 +287,6 @@ func (s *V2Service) ProcessUnbondingDelegationStats(
 			}
 			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
 				Msg("error while subtracting finality stats")
-			return types.NewInternalServiceError(err)
-		}
-	}
-	if !statsLockDocument.BsnStats {
-		bsnIds, err := s.getBsnForFinalityProviders(ctx, fpBtcPkHexes)
-		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while fetching bsn for finality providers")
-			return nil
-		}
-
-		err = s.dbClients.V2DBClient.SubtractBsnStats(
-			ctx, stakingTxHashHex, bsnIds, amount,
-		)
-		if err != nil {
-			if db.IsNotFoundError(err) {
-				return nil
-			}
-			log.Ctx(ctx).Error().Err(err).Str("stakingTxHashHex", stakingTxHashHex).
-				Msg("error while subtracting bsn stats")
 			return types.NewInternalServiceError(err)
 		}
 	}

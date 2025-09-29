@@ -7,6 +7,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
 	v2dbmodel "github.com/babylonlabs-io/staking-api-service/internal/v2/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -33,17 +34,7 @@ func (v2 *V2Database) InsertFinalityProviderLogo(ctx context.Context, fpID strin
 func (v2 *V2Database) GetFinalityProviderLogos(ctx context.Context) ([]v2dbmodel.FinalityProviderLogo, error) {
 	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersMetadataCollection)
 
-	cursor, err := client.Find(ctx, bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var logos []v2dbmodel.FinalityProviderLogo
-	if err := cursor.All(ctx, &logos); err != nil {
-		return nil, err
-	}
-	return logos, nil
+	return pkg.FetchAll[v2dbmodel.FinalityProviderLogo](ctx, client, bson.M{})
 }
 
 func (v2 *V2Database) GetFinalityProviderLogosByID(ctx context.Context, ids []string) ([]v2dbmodel.FinalityProviderLogo, error) {
@@ -52,17 +43,7 @@ func (v2 *V2Database) GetFinalityProviderLogosByID(ctx context.Context, ids []st
 	}
 
 	client := v2.Client.Database(v2.DbName).Collection(dbmodel.V2FinalityProvidersMetadataCollection)
-
 	filter := bson.M{"_id": bson.M{"$in": ids}}
-	cursor, err := client.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
 
-	var logos []v2dbmodel.FinalityProviderLogo
-	if err := cursor.All(ctx, &logos); err != nil {
-		return nil, err
-	}
-	return logos, nil
+	return pkg.FetchAll[v2dbmodel.FinalityProviderLogo](ctx, client, filter)
 }

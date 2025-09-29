@@ -1,11 +1,8 @@
 package v2service
 
 import (
-	"cmp"
 	"context"
-	"fmt"
 	"net/http"
-	"slices"
 	"strings"
 
 	indexerdbclient "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/client"
@@ -112,34 +109,6 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 	}
 
 	return delegationPublic, nil
-}
-
-// getLatestMaxFinalityProviders retrieves the MaxFinalityProviders value from the latest Babylon staking params
-// Uses version-based selection to find the highest version
-// TODO: Use BTC height-based selection when current BTC height implementation is available
-func (s *V2Service) getLatestMaxFinalityProviders(ctx context.Context) (uint32, error) {
-	params, err := s.getBbnStakingParams(ctx)
-	if err != nil {
-		return 0, fmt.Errorf("failed to get babylon staking params: %w", err)
-	}
-
-	if len(params) == 0 {
-		return 0, fmt.Errorf("no babylon staking params found")
-	}
-
-	// Sort params by version in ascending order to find the latest (highest version)
-	slices.SortFunc(params, func(a, b *indexertypes.BbnStakingParams) int {
-		return cmp.Compare(a.Version, b.Version)
-	})
-
-	// Get the latest params (last element after sorting)
-	latestParams := params[len(params)-1]
-
-	log.Ctx(ctx).Debug().
-		Uint32("selected_version", latestParams.Version).
-		Msg("Selected staking params by version")
-
-	return latestParams.MaxFinalityProviders, nil
 }
 
 func (s *V2Service) GetDelegation(ctx context.Context, stakingTxHashHex string) (*DelegationPublic, *types.Error) {

@@ -64,7 +64,7 @@ func (s *V1Service) DelegationsByStakerPk(
 	}
 
 	// Get list of all finality providers in phase-2
-	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx, nil)
+	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get finality providers")
 		return nil, "", types.NewInternalServiceError(err)
@@ -130,7 +130,7 @@ func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*Deleg
 	}
 
 	// Get list of all finality providers in phase-2
-	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx, nil)
+	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get finality providers")
 		return nil, types.NewInternalServiceError(err)

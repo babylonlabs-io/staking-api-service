@@ -11,7 +11,7 @@ type V2ServiceProvider interface {
 	chainalysis.Interface
 
 	// todo rename this method ?
-	GetFinalityProvidersWithStats(ctx context.Context, bsnID *string) (
+	GetFinalityProvidersWithStats(ctx context.Context) (
 		[]*FinalityProviderPublic, *types.Error,
 	)
 	GetNetworkInfo(ctx context.Context) (*NetworkInfoPublic, *types.Error)
@@ -41,5 +41,4 @@ type V2ServiceProvider interface {
 	ProcessUnbondingDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, fpBtcPkHexes []string, amount uint64, stateHistory []string) *types.Error
 	ProcessWithdrawableDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string) *types.Error
 	ProcessWithdrawnDelegationStats(ctx context.Context, stakingTxHashHex, stakerPkHex string, amount uint64, stateHistory []string) *types.Error
-	GetAllBSN(ctx context.Context) ([]BSN, error)
 }

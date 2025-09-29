@@ -23,13 +23,17 @@ type ChainAnalysisConfig struct {
 }
 
 func (cfg *ExternalAPIsConfig) Validate() error {
-	if cfg.CoinMarketCap != nil {
-		err := cfg.CoinMarketCap.Validate()
-		if err != nil {
-			return err
-		}
+	if cfg == nil {
+		return fmt.Errorf("external api configuration is required")
 	}
 
+	// coinmarketcap is required
+	err := cfg.CoinMarketCap.Validate()
+	if err != nil {
+		return err
+	}
+
+	// chainalysis is optional
 	if cfg.Chainalysis != nil {
 		err := cfg.Chainalysis.Validate()
 		if err != nil {
@@ -41,6 +45,10 @@ func (cfg *ExternalAPIsConfig) Validate() error {
 }
 
 func (cfg *CoinMarketCapConfig) Validate() error {
+	if cfg == nil {
+		return fmt.Errorf("coinmarketcap configuration is required")
+	}
+
 	if cfg.APIKey == "" {
 		return fmt.Errorf("missing coinmarketcap api key")
 	}

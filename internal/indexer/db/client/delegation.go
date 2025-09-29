@@ -8,6 +8,7 @@ import (
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -138,18 +139,7 @@ func (indexerdbclient *IndexerDatabase) GetDelegationsInStates(
 		filter["staker_babylon_address"] = *stakerBabylonAddress
 	}
 
-	cursor, err := client.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-
-	var result []indexerdbmodel.IndexerDelegationDetails
-	if err = cursor.All(ctx, &result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return pkg.FetchAll[indexerdbmodel.IndexerDelegationDetails](ctx, client, filter)
 }
 
 // CheckDelegationExistByStakerPk checks if a staker has any
