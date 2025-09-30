@@ -2,9 +2,10 @@ package v2service
 
 import (
 	"context"
+	"errors"
 
 	"cosmossdk.io/math"
-	"errors"
+
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
