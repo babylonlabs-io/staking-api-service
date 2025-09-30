@@ -3,10 +3,10 @@
 package bbnclient
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
-	"fmt"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"github.com/stretchr/testify/require"

@@ -29,7 +29,7 @@ func (cfg *Config) Validate() error {
 		Validate() error
 	}
 
-	configs := []configValidator{cfg.Server, cfg.StakingDb, cfg.IndexerDb, cfg.Metrics, cfg.Queue, cfg.NetworkUpgrade, cfg.ExternalAPIs}
+	configs := []configValidator{cfg.Server, cfg.StakingDb, cfg.IndexerDb, cfg.Metrics, cfg.Queue, cfg.NetworkUpgrade, cfg.ExternalAPIs, cfg.BBN}
 	for _, config := range configs {
 		err := config.Validate()
 		if err != nil {
@@ -46,12 +46,6 @@ func (cfg *Config) Validate() error {
 
 	if cfg.DelegationTransition != nil {
 		if err := cfg.DelegationTransition.Validate(); err != nil {
-			return err
-		}
-	}
-
-	if cfg.BBN != nil {
-		if err := cfg.BBN.Validate(); err != nil {
 			return err
 		}
 	}
