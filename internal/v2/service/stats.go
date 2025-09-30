@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"cosmossdk.io/math"
-
 	cosmosMath "cosmossdk.io/math"
 
 	costakingTypes "github.com/babylonlabs-io/babylon/v4/x/costaking/types"
@@ -277,7 +275,7 @@ func (s *V2Service) calculateBabyStakingAPR(ctx context.Context) (float64, error
 func (s *V2Service) getAnnualBabyRewardsForBTCStaking(ctx context.Context) (float64, error) {
 	bbnClient := s.bbnClient
 
-	var annualProvisions, stakingRewards math.LegacyDec
+	var annualProvisions, stakingRewards cosmosMath.LegacyDec
 	var provisionsErr, stakingRewardsErr error
 
 	wg := conc.NewWaitGroup()
