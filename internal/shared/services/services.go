@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/bbnclient"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients"
@@ -17,7 +18,15 @@ type Services struct {
 	V2Service     v2service.V2ServiceProvider
 }
 
-func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders []types.FinalityProviderDetails, clients *clients.Clients, dbClients *dbclients.DbClients, keybaseClient *keybase.Client) (*Services, error) {
+func New(
+	cfg *config.Config,
+	globalParams *types.GlobalParams,
+	finalityProviders []types.FinalityProviderDetails,
+	clients *clients.Clients,
+	dbClients *dbclients.DbClients,
+	keybaseClient *keybase.Client,
+	bbnClient *bbnclient.BBNClient,
+) (*Services, error) {
 	// todo remove errors in service constructors (they are always nil)
 	sharedService, err := service.New(cfg, globalParams, finalityProviders, clients, dbClients)
 	if err != nil {
@@ -29,7 +38,7 @@ func New(cfg *config.Config, globalParams *types.GlobalParams, finalityProviders
 		return nil, err
 	}
 
-	v2Service, err := v2service.New(sharedService, keybaseClient)
+	v2Service, err := v2service.New(sharedService, keybaseClient, bbnClient)
 	if err != nil {
 		return nil, err
 	}

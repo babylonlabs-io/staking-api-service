@@ -9,6 +9,7 @@ import (
 	"time"
 
 	cosmosMath "cosmossdk.io/math"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"github.com/rs/zerolog/log"
 )
 
@@ -40,8 +41,7 @@ func (h *Handler) babyTotalSupply(req *http.Request) (any, error) {
 		return nil, fmt.Errorf("internal error")
 	}
 
-	const ubbnPerBabyToken = 1e6
-	babyAmount := coin.Amount.Quo(cosmosMath.NewInt(ubbnPerBabyToken))
+	babyAmount := coin.Amount.Quo(cosmosMath.NewInt(pkg.UbbnPerBaby))
 	if !babyAmount.IsInt64() {
 		return nil, fmt.Errorf("cosmos.int %s overflowed int64", coin.Amount)
 	}

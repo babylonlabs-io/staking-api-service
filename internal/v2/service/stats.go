@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"cosmossdk.io/math"
+
 	cosmosMath "cosmossdk.io/math"
 
 	costakingTypes "github.com/babylonlabs-io/babylon/v4/x/costaking/types"
@@ -12,16 +14,11 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/rs/zerolog/log"
 	"github.com/sourcegraph/conc"
-)
-
-const (
-	// Hardcoded value based on 4% of BABY's annual inflation
-	// Assuming 10 billion total annual inflation (10_000_000_000)
-	AnnualBabyRewardsForBtcStaking float64 = 400_000_000
 )
 
 type OverallStatsPublic struct {
@@ -76,7 +73,12 @@ func (s *V2Service) GetStakingAPR(ctx context.Context) (*StakingAPRPublic, *type
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	btcStakingAPR := s.calculateBTCStakingAPR(overallStats.ActiveTvl, btcPrice, babyPrice)
+	btcStakingAPR, err := s.calculateBTCStakingAPR(ctx, overallStats.ActiveTvl, btcPrice, babyPrice)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("failed to calculate btc staking apr")
+		return nil, types.NewInternalServiceError(err)
+	}
+
 	babyStakingAPR, err := s.calculateBabyStakingAPR(ctx)
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("failed to calculate baby staking apr")
@@ -99,7 +101,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context) (*StakingAPRPublic, *type
 }
 
 func (s *V2Service) calculateCostakingAPR(ctx context.Context) (float64, error) {
-	bbnClient := s.sharedService.BBNClient
+	bbnClient := s.bbnClient
 
 	// 2.35%
 	const costakingInflationRate = 0.0235
@@ -211,13 +213,13 @@ func (s *V2Service) getBTCStakingAPR(
 		return 0, err
 	}
 
-	return s.calculateBTCStakingAPR(activeTvl, btcPrice, babyPrice), nil
+	return s.calculateBTCStakingAPR(ctx, activeTvl, btcPrice, babyPrice)
 }
 
-func (s *V2Service) calculateBTCStakingAPR(activeTvl int64, btcPrice, babyPrice float64) float64 {
+func (s *V2Service) calculateBTCStakingAPR(ctx context.Context, activeTvl int64, btcPrice, babyPrice float64) (float64, error) {
 	// Skip calculation if activeTvl is 0
 	if activeTvl <= 0 {
-		return 0
+		return 0, nil
 	}
 
 	// Convert the activeTvl which is in satoshis to BTC as APR is calculated per
@@ -226,13 +228,17 @@ func (s *V2Service) calculateBTCStakingAPR(activeTvl int64, btcPrice, babyPrice 
 
 	// Calculate the APR of the BTC staking on Babylon Genesis
 	// APR = (400,000,000 * BABY Price) / (Total BTC Staked * BTC price)
-	btcStakingAPR := (AnnualBabyRewardsForBtcStaking * babyPrice) / (btcTvl * btcPrice)
+	rewards, err := s.getAnnualBabyRewardsForBTCStaking(ctx)
+	if err != nil {
+		return 0, err
+	}
 
-	return btcStakingAPR
+	btcStakingAPR := (rewards * babyPrice) / (btcTvl * btcPrice)
+	return btcStakingAPR, nil
 }
 
 func (s *V2Service) calculateBabyStakingAPR(ctx context.Context) (float64, error) {
-	bbnClient := s.sharedService.BBNClient
+	bbnClient := s.bbnClient
 
 	var totalSupplyErr, stakingPoolErr error
 	var totalRewardsSupply cosmostypes.Coin
@@ -266,6 +272,31 @@ func (s *V2Service) calculateBabyStakingAPR(ctx context.Context) (float64, error
 
 	aprFloat, err := apr.Float64()
 	return aprFloat, err
+}
+
+func (s *V2Service) getAnnualBabyRewardsForBTCStaking(ctx context.Context) (float64, error) {
+	bbnClient := s.bbnClient
+
+	var annualProvisions, stakingRewards math.LegacyDec
+	var provisionsErr, stakingRewardsErr error
+
+	wg := conc.NewWaitGroup()
+	wg.Go(func() {
+		annualProvisions, provisionsErr = bbnClient.AnnualProvisions(ctx)
+	})
+	wg.Go(func() {
+		stakingRewards, stakingRewardsErr = bbnClient.BTCStakingRewardsPortion(ctx)
+	})
+	wg.Wait()
+
+	// if one of methods failed - combine all errors and return as one error
+	if provisionsErr != nil || stakingRewardsErr != nil {
+		err := errors.Join(provisionsErr, stakingRewardsErr)
+		return 0, err
+	}
+
+	annualRewards, err := annualProvisions.Mul(stakingRewards).QuoInt64(pkg.UbbnPerBaby).Float64()
+	return annualRewards, err
 }
 
 func (s *V2Service) GetStakerStats(

@@ -7,6 +7,7 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/cli"
 	"github.com/babylonlabs-io/staking-api-service/cmd/staking-api-service/scripts"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/bbnclient"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	dbclients "github.com/babylonlabs-io/staking-api-service/internal/shared/db/clients"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
@@ -92,8 +93,13 @@ func main() {
 		log.Fatal().Err(err).Msg("error while setting up staking db clients")
 	}
 
+	bbnClient, err := bbnclient.New(cfg.BBN)
+	if err != nil {
+		log.Error().Err(err).Msg("error while setting up bbn client")
+	}
+
 	keybaseClient := keybase.NewClient()
-	services, err := services.New(cfg, params, finalityProviders, clients, dbClients, keybaseClient)
+	services, err := services.New(cfg, params, finalityProviders, clients, dbClients, keybaseClient, bbnClient)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error while setting up staking services layer")
 	}

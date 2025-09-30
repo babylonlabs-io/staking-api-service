@@ -36,7 +36,7 @@ func Test_GetOverallStats(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	s, err := New(sharedService, nil)
+	s, err := New(sharedService, nil, nil)
 	require.NoError(t, err)
 
 	t.Run("V2 DB failure", func(t *testing.T) {
@@ -106,7 +106,7 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	s, err := New(sharedService, nil)
+	s, err := New(sharedService, nil, nil)
 	require.NoError(t, err)
 
 	t.Run("V2 DB failure", func(t *testing.T) {
