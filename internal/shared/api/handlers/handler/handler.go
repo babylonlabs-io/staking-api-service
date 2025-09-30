@@ -26,7 +26,6 @@ func New(config *config.Config, service service.SharedServiceProvider) (*Handler
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("BBN created", bbnClient)
 
 	return &Handler{Config: config, Service: service, bbnClient: bbnClient}, nil
 }
