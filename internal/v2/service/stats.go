@@ -3,18 +3,16 @@ package v2service
 import (
 	"context"
 
+	"cosmossdk.io/math"
+	"errors"
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"github.com/rs/zerolog/log"
-)
-
-const (
-	// Hardcoded value based on 4% of BABY's annual inflation
-	// Assuming 10 billion total annual inflation (10_000_000_000)
-	AnnualBabyRewardsForBtcStaking float64 = 400_000_000
+	"github.com/sourcegraph/conc"
 )
 
 type OverallStatsPublic struct {
@@ -131,9 +129,39 @@ func (s *V2Service) getBTCStakingAPR(
 
 	// Calculate the APR of the BTC staking on Babylon Genesis
 	// APR = (400,000,000 * BABY Price) / (Total BTC Staked * BTC price)
-	btcStakingAPR := (AnnualBabyRewardsForBtcStaking * babyPrice) / (btcTvl * btcPrice)
+	rewards, err := s.getAnnualBabyRewardsForBTCStaking(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	btcStakingAPR := (rewards * babyPrice) / (btcTvl * btcPrice)
 
 	return btcStakingAPR, nil
+}
+
+func (s *V2Service) getAnnualBabyRewardsForBTCStaking(ctx context.Context) (float64, error) {
+	bbnClient := s.sharedService.BBNClient
+
+	var annualProvisions, stakingRewards math.LegacyDec
+	var provisionsErr, stakingRewardsErr error
+
+	wg := conc.NewWaitGroup()
+	wg.Go(func() {
+		annualProvisions, provisionsErr = bbnClient.AnnualProvisions(ctx)
+	})
+	wg.Go(func() {
+		stakingRewards, stakingRewardsErr = bbnClient.BTCStakingRewardsPortion(ctx)
+	})
+	wg.Wait()
+
+	// if one of methods failed - combine all errors and return as one error
+	if provisionsErr != nil || stakingRewardsErr != nil {
+		err := errors.Join(provisionsErr, stakingRewardsErr)
+		return 0, err
+	}
+
+	annualRewards, err := annualProvisions.Mul(stakingRewards).QuoInt64(pkg.UbbnPerBaby).Float64()
+	return annualRewards, err
 }
 
 func (s *V2Service) GetStakerStats(
