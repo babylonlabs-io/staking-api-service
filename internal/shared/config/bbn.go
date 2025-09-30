@@ -14,6 +14,10 @@ type BBNConfig struct {
 }
 
 func (cfg *BBNConfig) Validate() error {
+	if cfg == nil {
+		return fmt.Errorf("bbn config is nil")
+	}
+
 	if _, err := url.Parse(cfg.RPCAddr); err != nil {
 		return fmt.Errorf("cfg.RPCAddr is not correctly formatted: %w", err)
 	}

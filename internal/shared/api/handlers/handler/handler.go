@@ -22,14 +22,11 @@ type Handler struct {
 }
 
 func New(config *config.Config, service service.SharedServiceProvider) (*Handler, error) {
-	var bbnClient *bbnclient.BBNClient
-	if config.BBN != nil {
-		var err error
-		bbnClient, err = bbnclient.New(config.BBN)
-		if err != nil {
-			return nil, err
-		}
+	bbnClient, err := bbnclient.New(config.BBN)
+	if err != nil {
+		return nil, err
 	}
+	fmt.Println("BBN created", bbnClient)
 
 	return &Handler{Config: config, Service: service, bbnClient: bbnClient}, nil
 }

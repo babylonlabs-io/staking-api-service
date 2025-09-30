@@ -83,6 +83,8 @@ func (s *V2Service) GetOverallStats(
 		phase1Stats.ActiveDelegations = 0
 	}
 
+	overallStats.ActiveTvl = 3232
+
 	// Calculate the APR for BTC staking on Babylon Genesis
 	// The APR is calculated based on the activeTvl of the overall stats
 	btcStakingAPR, errAprCalculation := s.getBTCStakingAPR(
@@ -140,7 +142,7 @@ func (s *V2Service) getBTCStakingAPR(
 }
 
 func (s *V2Service) getAnnualBabyRewardsForBTCStaking(ctx context.Context) (float64, error) {
-	bbnClient := s.sharedService.BBNClient
+	bbnClient := s.bbnClient
 
 	var annualProvisions, stakingRewards math.LegacyDec
 	var provisionsErr, stakingRewardsErr error
