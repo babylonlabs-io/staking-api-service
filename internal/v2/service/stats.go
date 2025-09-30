@@ -101,7 +101,8 @@ func (s *V2Service) GetStakingAPR(ctx context.Context) (*StakingAPRPublic, *type
 func (s *V2Service) calculateCostakingAPR(ctx context.Context) (float64, error) {
 	bbnClient := s.sharedService.BBNClient
 
-	const costakingInflationRate = 0.02
+	// 2.35%
+	const costakingInflationRate = 0.0235
 
 	var totalSupplyErr, totalScoreSumErr, paramsErr error
 	var totalRewardsSupply cosmostypes.Coin
@@ -128,7 +129,7 @@ func (s *V2Service) calculateCostakingAPR(ctx context.Context) (float64, error) 
 
 	totalCostakingRewardSupply := float64(totalRewardsSupply.Amount.Int64()) * costakingInflationRate
 	denominator := totalScoreSum.Mul(params.ScoreRatioBtcByBaby)
-	// apr = totalCostakingRewardSupply / (totalScoreSum * scoreRationBtcByBaby
+	// apr = totalCostakingRewardSupply / (totalScoreSum * scoreRatioBtcByBaby
 	apr := totalCostakingRewardSupply / float64(denominator.Int64())
 	return apr, nil
 }

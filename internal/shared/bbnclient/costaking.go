@@ -41,7 +41,7 @@ func (c *BBNClient) CostakingParams(ctx context.Context) (costakingTypes.Params,
 
 	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
 	if err != nil {
-		return costakingTypes.Params{}, fmt.Errorf("failed to get costaking total score: %w", err)
+		return costakingTypes.Params{}, fmt.Errorf("failed to get costaking params: %w", err)
 	}
 	return response.Params, nil
 }

@@ -66,7 +66,7 @@ func (c *BBNClient) StakingPool(ctx context.Context) (stakingtypes.Pool, error) 
 
 	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
 	if err != nil {
-		return stakingtypes.Pool{}, fmt.Errorf("failed to get total supply: %w", err)
+		return stakingtypes.Pool{}, fmt.Errorf("failed to get staking pool: %w", err)
 	}
 	return response.Pool, nil
 }
