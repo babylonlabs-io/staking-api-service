@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 
-	"cosmossdk.io/math"
+	cosmosMath "cosmossdk.io/math"
 
+	costakingTypes "github.com/babylonlabs-io/babylon/v4/x/costaking/types"
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/babylonlabs-io/staking-api-service/pkg"
+	cosmostypes "github.com/cosmos/cosmos-sdk/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/rs/zerolog/log"
 	"github.com/sourcegraph/conc"
 )
@@ -40,6 +43,95 @@ type StakerStatsPublic struct {
 	WithdrawableDelegations int64 `json:"withdrawable_delegations"`
 	SlashedTvl              int64 `json:"slashed_tvl"`
 	SlashedDelegations      int64 `json:"slashed_delegations"`
+}
+
+type StakingAPRPublic struct {
+	BTCStaking  float64 `json:"btc_staking"`
+	BabyStaking float64 `json:"baby_staking"`
+	CoStaking   float64 `json:"co_staking"`
+	MaxAPR      float64 `json:"max_apr"` // not sure we need this
+}
+
+func (s *V2Service) GetStakingAPR(ctx context.Context) (*StakingAPRPublic, *types.Error) {
+	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("failed to get overall stats")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	btcPrice, err := s.sharedService.GetLatestBTCPrice(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("failed to get latest btc price")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	babyPrice, err := s.sharedService.GetLatestBABYPrice(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("failed to get latest baby price")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	btcStakingAPR, err := s.calculateBTCStakingAPR(ctx, overallStats.ActiveTvl, btcPrice, babyPrice)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("failed to calculate btc staking apr")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	babyStakingAPR, err := s.calculateBabyStakingAPR(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("failed to calculate baby staking apr")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	costakingAPR, err := s.calculateCostakingAPR(ctx)
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("failed to calculate costaking apr")
+		return nil, types.NewInternalServiceError(err)
+	}
+
+	maxAPR := btcStakingAPR + babyStakingAPR + costakingAPR
+	return &StakingAPRPublic{
+		BTCStaking:  btcStakingAPR,
+		BabyStaking: babyStakingAPR,
+		CoStaking:   costakingAPR,
+		MaxAPR:      maxAPR,
+	}, nil
+}
+
+func (s *V2Service) calculateCostakingAPR(ctx context.Context) (float64, error) {
+	bbnClient := s.bbnClient
+
+	// 2.35%
+	const costakingInflationRate = 0.0235
+
+	var totalSupplyErr, totalScoreSumErr, paramsErr error
+	var totalRewardsSupply cosmostypes.Coin
+	var totalScoreSum cosmosMath.Int
+	var params costakingTypes.Params
+
+	var wg conc.WaitGroup
+	wg.Go(func() {
+		totalRewardsSupply, totalSupplyErr = bbnClient.TotalSupply(ctx, "ubbn")
+	})
+	wg.Go(func() {
+		totalScoreSum, totalScoreSumErr = bbnClient.CostakingTotalScoreSum(ctx)
+	})
+	wg.Go(func() {
+		params, paramsErr = bbnClient.CostakingParams(ctx)
+	})
+	wg.Wait()
+
+	// if all errors are nil then errors.Join returns nil, otherwise combined error
+	err := errors.Join(totalSupplyErr, totalScoreSumErr, paramsErr)
+	if err != nil {
+		return 0, err
+	}
+
+	totalCostakingRewardSupply := float64(totalRewardsSupply.Amount.Int64()) * costakingInflationRate
+	denominator := totalScoreSum.Mul(params.ScoreRatioBtcByBaby)
+	// apr = totalCostakingRewardSupply / (totalScoreSum * scoreRatioBtcByBaby
+	apr := totalCostakingRewardSupply / float64(denominator.Int64())
+	return apr, nil
 }
 
 func (s *V2Service) GetOverallStats(
@@ -109,15 +201,6 @@ func (s *V2Service) GetOverallStats(
 func (s *V2Service) getBTCStakingAPR(
 	ctx context.Context, activeTvl int64,
 ) (float64, error) {
-	// Skip calculation if activeTvl is 0
-	if activeTvl <= 0 {
-		return 0, nil
-	}
-
-	// Convert the activeTvl which is in satoshis to BTC as APR is calculated per
-	// BTC
-	btcTvl := float64(activeTvl) / 1e8
-
 	btcPrice, err := s.sharedService.GetLatestBTCPrice(ctx)
 	if err != nil {
 		return 0, err
@@ -128,6 +211,19 @@ func (s *V2Service) getBTCStakingAPR(
 		return 0, err
 	}
 
+	return s.calculateBTCStakingAPR(ctx, activeTvl, btcPrice, babyPrice)
+}
+
+func (s *V2Service) calculateBTCStakingAPR(ctx context.Context, activeTvl int64, btcPrice, babyPrice float64) (float64, error) {
+	// Skip calculation if activeTvl is 0
+	if activeTvl <= 0 {
+		return 0, nil
+	}
+
+	// Convert the activeTvl which is in satoshis to BTC as APR is calculated per
+	// BTC
+	btcTvl := float64(activeTvl) / 1e8
+
 	// Calculate the APR of the BTC staking on Babylon Genesis
 	// APR = (400,000,000 * BABY Price) / (Total BTC Staked * BTC price)
 	rewards, err := s.getAnnualBabyRewardsForBTCStaking(ctx)
@@ -136,14 +232,50 @@ func (s *V2Service) getBTCStakingAPR(
 	}
 
 	btcStakingAPR := (rewards * babyPrice) / (btcTvl * btcPrice)
-
 	return btcStakingAPR, nil
+}
+
+func (s *V2Service) calculateBabyStakingAPR(ctx context.Context) (float64, error) {
+	bbnClient := s.bbnClient
+
+	var totalSupplyErr, stakingPoolErr error
+	var totalRewardsSupply cosmostypes.Coin
+	var stakingPool stakingtypes.Pool
+
+	var wg conc.WaitGroup
+	wg.Go(func() {
+		totalRewardsSupply, totalSupplyErr = bbnClient.TotalSupply(ctx, "ubbn")
+	})
+	wg.Go(func() {
+		stakingPool, stakingPoolErr = bbnClient.StakingPool(ctx)
+	})
+	wg.Wait()
+
+	// if we failed to get some info - return joined error
+	if totalSupplyErr != nil || stakingPoolErr != nil {
+		err := errors.Join(totalSupplyErr, stakingPoolErr)
+		return 0, err
+	}
+
+	// 0.02
+	babyInflationRate := cosmosMath.LegacyNewDecWithPrec(2, 2)
+
+	//nolint: gocritic
+	// totalBabyRewardsSupply = totalRewardsSupply * babyInflationRate
+	totalBabyRewardsSupply := totalRewardsSupply.Amount.ToLegacyDec().Mul(babyInflationRate)
+	totalBabyStaked := stakingPool.BondedTokens.ToLegacyDec()
+	//nolint: gocritic
+	// apr = totalBabyRewardsSupply / totalBabyStaked
+	apr := totalBabyRewardsSupply.Quo(totalBabyStaked)
+
+	aprFloat, err := apr.Float64()
+	return aprFloat, err
 }
 
 func (s *V2Service) getAnnualBabyRewardsForBTCStaking(ctx context.Context) (float64, error) {
 	bbnClient := s.bbnClient
 
-	var annualProvisions, stakingRewards math.LegacyDec
+	var annualProvisions, stakingRewards cosmosMath.LegacyDec
 	var provisionsErr, stakingRewardsErr error
 
 	wg := conc.NewWaitGroup()

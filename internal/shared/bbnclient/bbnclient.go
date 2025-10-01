@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -37,7 +38,7 @@ func New(cfg *config.BBNConfig) (*BBNClient, error) {
 	}, nil
 }
 
-func (c *BBNClient) GetTotalSupply(ctx context.Context, denom string) (types.Coin, error) {
+func (c *BBNClient) TotalSupply(ctx context.Context, denom string) (types.Coin, error) {
 	callForResponse := func() (*banktypes.QuerySupplyOfResponse, error) {
 		queryClient := banktypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
 		response, err := queryClient.SupplyOf(ctx, &banktypes.QuerySupplyOfRequest{denom})
@@ -89,6 +90,24 @@ func (c *BBNClient) BTCStakingRewardsPortion(ctx context.Context) (cosmosMath.Le
 		return cosmosMath.LegacyDec{}, fmt.Errorf("failed to get total incentive params: %w", err)
 	}
 	return response.Params.BtcStakingPortion, nil
+}
+
+func (c *BBNClient) StakingPool(ctx context.Context) (stakingtypes.Pool, error) {
+	callForResponse := func() (*stakingtypes.QueryPoolResponse, error) {
+		queryClient := stakingtypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
+		response, err := queryClient.Pool(ctx, &stakingtypes.QueryPoolRequest{})
+		if err != nil {
+			return nil, err
+		}
+
+		return response, nil
+	}
+
+	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
+	if err != nil {
+		return stakingtypes.Pool{}, fmt.Errorf("failed to get staking pool: %w", err)
+	}
+	return response.Pool, nil
 }
 
 func clientCallWithRetry[T any](

@@ -38,6 +38,7 @@ func (a *Server) SetupRoutes(r *chi.Mux) {
 	r.Get("/v2/stats", registerHandler(handlers.V2Handler.GetOverallStats))
 	r.Get("/v2/staker/stats", registerHandler(handlers.V2Handler.GetStakerStats))
 	r.Get("/v2/prices", registerHandler(handlers.V2Handler.GetPrices))
+	r.Get("/v2/apr", registerHandler(handlers.V2Handler.GetAPR))
 
 	if a.cfg.AddressScreeningConfig != nil && a.cfg.AddressScreeningConfig.Enabled {
 		r.Get("/address/screening", registerHandler(handlers.V2Handler.AddressScreening))
