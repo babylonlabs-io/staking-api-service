@@ -161,42 +161,6 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 	}, nil
 }
 
-func (s *V2Service) calculateCostakingAPR(ctx context.Context) (float64, error) {
-	bbnClient := s.bbnClient
-
-	// 2.35%
-	const costakingInflationRate = 0.0235
-
-	var totalSupplyErr, totalScoreSumErr, paramsErr error
-	var totalRewardsSupply cosmostypes.Coin
-	var totalScoreSum cosmosMath.Int
-	var params costakingTypes.Params
-
-	var wg conc.WaitGroup
-	wg.Go(func() {
-		totalRewardsSupply, totalSupplyErr = bbnClient.TotalSupply(ctx, "ubbn")
-	})
-	wg.Go(func() {
-		totalScoreSum, totalScoreSumErr = bbnClient.CostakingTotalScore(ctx)
-	})
-	wg.Go(func() {
-		params, paramsErr = bbnClient.CostakingParams(ctx)
-	})
-	wg.Wait()
-
-	// if all errors are nil then errors.Join returns nil, otherwise combined error
-	err := errors.Join(totalSupplyErr, totalScoreSumErr, paramsErr)
-	if err != nil {
-		return 0, err
-	}
-
-	totalCostakingRewardSupply := float64(totalRewardsSupply.Amount.Int64()) * costakingInflationRate
-	denominator := totalScoreSum.Mul(params.ScoreRatioBtcByBaby)
-	// apr = (totalRewardsSupply * inflation) / (totalScoreSum * scoreRatioBtcByBaby)
-	apr := totalCostakingRewardSupply / float64(denominator.Int64())
-	return apr, nil
-}
-
 func (s *V2Service) GetOverallStats(
 	ctx context.Context,
 ) (*OverallStatsPublic, *types.Error) {
