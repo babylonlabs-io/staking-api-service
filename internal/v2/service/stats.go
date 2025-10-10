@@ -32,7 +32,7 @@ type OverallStatsPublic struct {
 	// This represents the total active delegations on BTC chain which includes
 	// both phase-1 and phase-2 active delegations
 	TotalActiveDelegations int64 `json:"total_active_delegations"`
-	// Represents the apr for BTC staking as a decimal (e.g., 0.035 = 3.5%)
+	// Represents the APR for BTC staking as a decimal (e.g., 0.035 = 3.5%)
 	BTCStakingAPR float64 `json:"btc_staking_apr"`
 }
 
@@ -74,7 +74,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to get latest baby price: %w", err))
 	}
 
-	// Calculate BTC staking apr (this is the same for everyone)
+	// Calculate BTC staking APR (this is the same for everyone)
 	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
 	if err != nil {
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to get overall stats: %w", err))
@@ -85,7 +85,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to calculate btc staking apr: %w", err))
 	}
 
-	// Calculate BABY staking apr (this is the same for everyone)
+	// Calculate BABY staking APR (this is the same for everyone)
 	babyStakingAPR, err := s.calculateBabyStakingAPR(ctx)
 	if err != nil {
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to calculate baby staking apr: %w", err))
@@ -125,7 +125,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to fetch co-staking data: %w", err))
 	}
 
-	// Calculate current apr with user's current stake
+	// Calculate current APR with user's current stake
 	currentCoStakingAPR := s.calculateUserCoStakingAPR(
 		btcStaked, babyStaked, globalTotalScore, scoreRatio,
 		totalCoStakingRewardSupply, btcPrice, babyPrice,
@@ -135,7 +135,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 	requiredBabyForFullEligibility := btcStaked * scoreRatio
 	additionalBabyNeeded := float64(max(0, requiredBabyForFullEligibility-babyStaked))
 
-	// Calculate boost apr (at 100% eligibility)
+	// Calculate boost APR (at 100% eligibility)
 	boostCoStakingAPR := s.calculateBoostCoStakingAPR(
 		btcStaked, babyStaked, globalTotalScore, scoreRatio,
 		totalCoStakingRewardSupply, btcPrice, babyPrice,
@@ -239,7 +239,7 @@ func (s *V2Service) GetOverallStats(
 		phase1Stats.ActiveDelegations = 0
 	}
 
-	// Calculate the apr for BTC staking on Babylon Genesis
+	// Calculate the APR for BTC staking on Babylon Genesis
 	// The apr is calculated based on the activeTvl of the overall stats
 	btcStakingAPR, errAprCalculation := s.getBTCStakingAPR(
 		ctx, overallStats.ActiveTvl,
@@ -283,11 +283,10 @@ func (s *V2Service) calculateBTCStakingAPR(ctx context.Context, activeTvl int64,
 		return 0, nil
 	}
 
-	// Convert the activeTvl which is in satoshis to BTC as apr is calculated per
-	// BTC
+	// Convert the activeTvl which is in satoshis to BTC as APR is calculated per BTC
 	btcTvl := float64(activeTvl) / 1e8
 
-	// Calculate the apr of the BTC staking on Babylon Genesis
+	// Calculate the APR of the BTC staking on Babylon Genesis
 	// apr = (400,000,000 * BABY Price) / (Total BTC Staked * BTC price)
 	rewards, err := s.getAnnualBabyRewardsForBTCStaking(ctx)
 	if err != nil {
