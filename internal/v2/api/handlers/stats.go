@@ -2,6 +2,7 @@ package v2handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
@@ -83,19 +84,70 @@ func (h *V2Handler) GetPrices(request *http.Request) (*handler.Result, *types.Er
 
 // GetAPR
 //
-//	 @Summary Get latest prices for all available symbols
-//
-//		@Description	Get latest prices for all available symbols
-//		@Produce		json
-//		@Tags			v2
-//		@Success		200	{object}	handler.PublicResponse[v2service.StakingAPRPublic]	""
-//		@Failure		400	{object}	types.Error									"Error: Bad Request"
-//		@Router			/v2/apr [get]
+//	@Summary		Get personalized staking APR
+//	@Description	Get personalized staking APR based on user's BTC and BABY stake amounts
+//	@Produce		json
+//	@Tags			v2
+//	@Param			btc_staked	query		int														false	"Total BTC staked in satoshis (confirmed + pending)"	default(0)
+//	@Param			baby_staked	query		int														false	"Total BABY staked in ubbn (confirmed + pending)"	default(0)
+//	@Success		200			{object}	handler.PublicResponse[v2service.StakingAPRPublic]		""
+//	@Failure		400			{object}	types.Error												"Error: Bad Request"
+//	@Router			/v2/apr [get]
 func (h *V2Handler) GetAPR(request *http.Request) (*handler.Result, *types.Error) {
-	stakingAPR, err := h.Service.GetStakingAPR(request.Context())
+	// Parse btc_staked parameter (optional, defaults to 0)
+	btcStaked, err := parseInt64Query(request, "btc_staked", true)
 	if err != nil {
 		return nil, err
 	}
 
+	// Parse baby_staked parameter (optional, defaults to 0)
+	babyStaked, err := parseInt64Query(request, "baby_staked", true)
+	if err != nil {
+		return nil, err
+	}
+
+	stakingAPR, serviceErr := h.Service.GetStakingAPR(request.Context(), btcStaked, babyStaked)
+	if serviceErr != nil {
+		return nil, serviceErr
+	}
+
 	return handler.NewResult(stakingAPR), nil
+}
+
+// parseInt64Query parses an int64 query parameter
+func parseInt64Query(r *http.Request, paramName string, isOptional bool) (int64, *types.Error) {
+	value := r.URL.Query().Get(paramName)
+
+	// If parameter is missing
+	if value == "" {
+		if isOptional {
+			return 0, nil // Return 0 as default for optional parameters
+		}
+		return 0, types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			"missing required query parameter: "+paramName,
+		)
+	}
+
+	// Parse the value
+	parsed, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return 0, types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			"invalid "+paramName+": must be a valid integer",
+		)
+	}
+
+	// Validate non-negative
+	if parsed < 0 {
+		return 0, types.NewErrorWithMsg(
+			http.StatusBadRequest,
+			types.BadRequest,
+			"invalid "+paramName+": must be non-negative",
+		)
+	}
+
+	return parsed, nil
 }

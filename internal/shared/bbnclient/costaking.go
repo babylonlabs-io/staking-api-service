@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 )
 
-func (c *BBNClient) CostakingTotalScoreSum(ctx context.Context) (cosmosMath.Int, error) {
+func (c *BBNClient) CostakingTotalScore(ctx context.Context) (cosmosMath.Int, error) {
 	callForResponse := func() (*costakingTypes.QueryCurrentRewardsResponse, error) {
 		queryClient := costakingTypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
 		response, err := queryClient.CurrentRewards(ctx, &costakingTypes.QueryCurrentRewardsRequest{})

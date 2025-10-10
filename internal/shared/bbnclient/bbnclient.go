@@ -92,6 +92,25 @@ func (c *BBNClient) BTCStakingRewardsPortion(ctx context.Context) (cosmosMath.Le
 	return response.Params.BtcStakingPortion, nil
 }
 
+// IncentiveParams returns the incentive module parameters including BTC staking and FP portions
+func (c *BBNClient) IncentiveParams(ctx context.Context) (*incentiveTypes.Params, error) {
+	callForResponse := func() (*incentiveTypes.QueryParamsResponse, error) {
+		queryClient := incentiveTypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
+		response, err := queryClient.Params(ctx, &incentiveTypes.QueryParamsRequest{})
+		if err != nil {
+			return nil, err
+		}
+
+		return response, nil
+	}
+
+	response, err := clientCallWithRetry(ctx, callForResponse, c.cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get incentive params: %w", err)
+	}
+	return &response.Params, nil
+}
+
 func (c *BBNClient) StakingPool(ctx context.Context) (stakingtypes.Pool, error) {
 	callForResponse := func() (*stakingtypes.QueryPoolResponse, error) {
 		queryClient := stakingtypes.NewQueryClient(client.Context{Client: c.queryClient.RPCClient})
