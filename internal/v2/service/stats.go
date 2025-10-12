@@ -149,14 +149,14 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 			BtcStaking:  btcStakingAPR,
 			BabyStaking: babyStakingAPR,
 			CoStaking:   currentCoStakingAPR,
-			Total:       btcStakingAPR + babyStakingAPR + currentCoStakingAPR,
+			Total:       btcStakingAPR + currentCoStakingAPR,
 		},
 		AdditionalBabyNeededForBoost: additionalBabyNeededInBaby,
 		Boost: apr{
 			BtcStaking:  btcStakingAPR,
 			BabyStaking: babyStakingAPR,
 			CoStaking:   boostCoStakingAPR,
-			Total:       btcStakingAPR + babyStakingAPR + boostCoStakingAPR,
+			Total:       btcStakingAPR + boostCoStakingAPR,
 		},
 	}, nil
 }
