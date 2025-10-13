@@ -60,9 +60,9 @@ type StakingAPRPublic struct {
 }
 
 // GetStakingAPR calculates personalized apr based on user's BTC and BABY stake
-// btcStaked: total satoshis (confirmed + pending)
-// babyStaked: total ubbn (confirmed + pending)
-func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int64) (*StakingAPRPublic, *types.Error) {
+// satoshisStaked: total satoshis (confirmed + pending)
+// ubbnStaked: total ubbn (confirmed + pending)
+func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStaked int64) (*StakingAPRPublic, *types.Error) {
 	// Fetch prices
 	btcPrice, err := s.sharedService.GetLatestBTCPrice(ctx)
 	if err != nil {
@@ -127,17 +127,17 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 
 	// Calculate current APR with user's current stake
 	currentCoStakingAPR := s.calculateUserCoStakingAPR(
-		btcStaked, babyStaked, globalTotalScore, scoreRatio,
+		satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio,
 		totalCoStakingRewardSupply, btcPrice, babyPrice,
 	)
 
 	// Calculate additional BABY needed for 100% eligibility
-	requiredBabyForFullEligibility := btcStaked * scoreRatio
-	additionalBabyNeeded := float64(max(0, requiredBabyForFullEligibility-babyStaked))
+	requiredBabyForFullEligibility := satoshisStaked * scoreRatio
+	additionalBabyNeeded := float64(max(0, requiredBabyForFullEligibility-ubbnStaked))
 
 	// Calculate boost APR (at 100% eligibility)
 	boostCoStakingAPR := s.calculateBoostCoStakingAPR(
-		btcStaked, babyStaked, globalTotalScore, scoreRatio,
+		satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio,
 		totalCoStakingRewardSupply, btcPrice, babyPrice,
 	)
 
@@ -674,17 +674,17 @@ func (s *V2Service) calculateTotalCoStakingRewardSupply(ctx context.Context) (fl
 
 // calculateUserCoStakingAPR calculates the user's personalized co-staking apr
 func (s *V2Service) calculateUserCoStakingAPR(
-	btcStaked, babyStaked, globalTotalScore, scoreRatio int64,
+	satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio int64,
 	totalCoStakingRewardSupply, btcPrice, babyPrice float64,
 ) float64 {
 	// Edge cases
-	if btcStaked == 0 || globalTotalScore == 0 {
+	if satoshisStaked == 0 || globalTotalScore == 0 {
 		return 0
 	}
 
 	// Calculate user's total score based on eligible satoshis
-	// user_total_score = min(btcStaked, babyStaked / scoreRatio)
-	eligibleSats := min(btcStaked, babyStaked/scoreRatio)
+	// user_total_score = min(satoshisStaked, ubbnStaked / scoreRatio)
+	eligibleSats := min(satoshisStaked, ubbnStaked/scoreRatio)
 	userTotalScore := eligibleSats
 
 	// Calculate pool share
@@ -695,7 +695,7 @@ func (s *V2Service) calculateUserCoStakingAPR(
 
 	// Convert to USD (Fisher correction: measure apr relative to BTC investment)
 	userAnnualRewardsUSD := userAnnualRewardsInBaby * babyPrice / float64(pkg.UbbnPerBaby)
-	userActiveBTCinUSD := float64(btcStaked) / 1e8 * btcPrice
+	userActiveBTCinUSD := float64(satoshisStaked) / 1e8 * btcPrice
 
 	// Calculate apr as percentage: (annual_rewards_usd / btc_investment_usd)
 	if userActiveBTCinUSD == 0 {
@@ -708,20 +708,20 @@ func (s *V2Service) calculateUserCoStakingAPR(
 
 // calculateBoostCoStakingAPR calculates the boost apr at 100% eligibility
 func (s *V2Service) calculateBoostCoStakingAPR(
-	btcStaked, babyStaked, globalTotalScore, scoreRatio int64,
+	satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio int64,
 	totalCoStakingRewardSupply, btcPrice, babyPrice float64,
 ) float64 {
 	// Edge cases
-	if btcStaked == 0 || globalTotalScore == 0 {
+	if satoshisStaked == 0 || globalTotalScore == 0 {
 		return 0
 	}
 
 	// Calculate current user score
-	eligibleSats := min(btcStaked, babyStaked/scoreRatio)
+	eligibleSats := min(satoshisStaked, ubbnStaked/scoreRatio)
 	currentUserScore := eligibleSats
 
 	// At 100% eligibility, user's score equals their BTC staked
-	maxUserTotalScore := btcStaked
+	maxUserTotalScore := satoshisStaked
 
 	// Calculate the increase in score
 	scoreIncrease := maxUserTotalScore - currentUserScore
@@ -737,7 +737,7 @@ func (s *V2Service) calculateBoostCoStakingAPR(
 
 	// Convert to USD (Fisher formula)
 	boostAnnualRewardsUSD := boostAnnualRewardsInBaby * babyPrice / float64(pkg.UbbnPerBaby)
-	userActiveBTCinUSD := float64(btcStaked) / 1e8 * btcPrice
+	userActiveBTCinUSD := float64(satoshisStaked) / 1e8 * btcPrice
 
 	// Calculate apr as percentage
 	if userActiveBTCinUSD == 0 {
