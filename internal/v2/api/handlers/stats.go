@@ -82,7 +82,7 @@ func (h *V2Handler) GetPrices(request *http.Request) (*handler.Result, *types.Er
 	return handler.NewResult(prices), nil
 }
 
-// GetAPR
+// GetAPR is used by frontend app and external partners (e.g., wallets)
 //
 //	@Summary		Get personalized staking APR
 //	@Description	Get personalized staking APR based on user's BTC and BABY stake amounts

@@ -108,6 +108,13 @@ definitions:
       pagination:
         $ref: '#/definitions/handler.paginationResponse'
     type: object
+  handler.PublicResponse-v2service_StakingAPRPublic:
+    properties:
+      data:
+        $ref: '#/definitions/v2service.StakingAPRPublic'
+      pagination:
+        $ref: '#/definitions/handler.paginationResponse'
+    type: object
   handler.paginationResponse:
     properties:
       next_key:
@@ -524,6 +531,15 @@ definitions:
       withdrawable_tvl:
         type: integer
     type: object
+  v2service.StakingAPRPublic:
+    properties:
+      additional_baby_needed_for_boost:
+        type: number
+      boost:
+        $ref: '#/definitions/v2service.apr'
+      current:
+        $ref: '#/definitions/v2service.apr'
+    type: object
   v2service.StakingSlashing:
     properties:
       slashing_tx_hex:
@@ -542,6 +558,17 @@ definitions:
         type: integer
       unbonding_slashing_tx_hex:
         type: string
+    type: object
+  v2service.apr:
+    properties:
+      baby_staking_apr:
+        type: number
+      btc_staking_apr:
+        type: number
+      co_staking_apr:
+        type: number
+      total_apr:
+        type: number
     type: object
   v2types.DelegationState:
     enum:
@@ -861,6 +888,35 @@ paths:
       summary: Check unbonding eligibility
       tags:
       - v1
+  /v2/apr:
+    get:
+      description: Get personalized staking APR based on user's BTC and BABY stake
+        amounts
+      parameters:
+      - default: 0
+        description: Total satoshis staked (confirmed + pending)
+        in: query
+        name: satoshis_staked
+        type: integer
+      - default: 0
+        description: Total ubbn staked (confirmed + pending)
+        in: query
+        name: ubbn_staked
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.PublicResponse-v2service_StakingAPRPublic'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
+      summary: Get personalized staking APR
+      tags:
+      - v2
   /v2/delegation:
     get:
       description: Retrieves a delegation by a given transaction hash
