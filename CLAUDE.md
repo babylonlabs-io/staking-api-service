@@ -14,7 +14,7 @@ It's part of the backend services for cosmos network called Babylon ("bbn" for s
 - MongoDB as database
 - babylon node
 - rabbitmq as message bus
-- Different 3rd party APIs that are used in few places (like price fetching etc.)
+- Different 3rd party APIs that are used in a few places (like price fetching etc.)
 
 ## Development workflow
 
