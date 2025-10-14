@@ -22,7 +22,7 @@ It's part of the backend services for cosmos network called Babylon ("bbn" for s
 - If there are formatting errors you must fix them by calling `make format`
 - Do not modify mocks manually - always call `make generate` (it will generate code for interfaces using mockery). Mocks located in `tests/mocks/`
 - If you want to run it locally just call `make run-local` (do not use make commands for docker)
-- If you modify API request/response please update comment above corresponding handler it's used for autogenerating swagger docs (`make build-swagger` command).
+- If you modify API request/response please update the comment above the corresponding handler, as it's used for autogenerating swagger docs (`make build-swagger` command).
 Once you update API comment run `make build-swagger` so the doc is up to date.
 
 ## Testing
