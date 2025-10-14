@@ -388,6 +388,48 @@
                 }
             }
         },
+        "/v2/apr": {
+            "get": {
+                "description": "Get personalized staking APR based on user's BTC and BABY stake amounts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "v2"
+                ],
+                "summary": "Get personalized staking APR",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Total satoshis staked (confirmed + pending)",
+                        "name": "satoshis_staked",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Total ubbn staked (confirmed + pending)",
+                        "name": "ubbn_staked",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.PublicResponse-v2service_StakingAPRPublic"
+                        }
+                    },
+                    "400": {
+                        "description": "Error: Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/v2/delegation": {
             "get": {
                 "description": "Retrieves a delegation by a given transaction hash",
@@ -825,6 +867,17 @@
             "properties": {
                 "data": {
                     "$ref": "#/definitions/v2service.StakerStatsPublic"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/handler.paginationResponse"
+                }
+            }
+        },
+        "handler.PublicResponse-v2service_StakingAPRPublic": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/v2service.StakingAPRPublic"
                 },
                 "pagination": {
                     "$ref": "#/definitions/handler.paginationResponse"
@@ -1451,6 +1504,20 @@
                 }
             }
         },
+        "v2service.StakingAPRPublic": {
+            "type": "object",
+            "properties": {
+                "additional_baby_needed_for_boost": {
+                    "type": "number"
+                },
+                "boost": {
+                    "$ref": "#/definitions/v2service.apr"
+                },
+                "current": {
+                    "$ref": "#/definitions/v2service.apr"
+                }
+            }
+        },
         "v2service.StakingSlashing": {
             "type": "object",
             "properties": {
@@ -1478,6 +1545,23 @@
                 },
                 "unbonding_slashing_tx_hex": {
                     "type": "string"
+                }
+            }
+        },
+        "v2service.apr": {
+            "type": "object",
+            "properties": {
+                "baby_staking_apr": {
+                    "type": "number"
+                },
+                "btc_staking_apr": {
+                    "type": "number"
+                },
+                "co_staking_apr": {
+                    "type": "number"
+                },
+                "total_apr": {
+                    "type": "number"
                 }
             }
         },

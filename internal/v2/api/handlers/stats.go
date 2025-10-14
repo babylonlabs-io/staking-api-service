@@ -82,31 +82,31 @@ func (h *V2Handler) GetPrices(request *http.Request) (*handler.Result, *types.Er
 	return handler.NewResult(prices), nil
 }
 
-// GetAPR
+// GetAPR is used by frontend app and external partners (e.g., wallets)
 //
 //	@Summary		Get personalized staking APR
 //	@Description	Get personalized staking APR based on user's BTC and BABY stake amounts
 //	@Produce		json
 //	@Tags			v2
-//	@Param			btc_staked	query		int														false	"Total BTC staked in satoshis (confirmed + pending)"	default(0)
-//	@Param			baby_staked	query		int														false	"Total BABY staked in ubbn (confirmed + pending)"	default(0)
+//	@Param			satoshis_staked	query		int														false	"Total satoshis staked (confirmed + pending)"	default(0)
+//	@Param			ubbn_staked	query		int														false	"Total ubbn staked (confirmed + pending)"	default(0)
 //	@Success		200			{object}	handler.PublicResponse[v2service.StakingAPRPublic]		""
 //	@Failure		400			{object}	types.Error												"Error: Bad Request"
 //	@Router			/v2/apr [get]
 func (h *V2Handler) GetAPR(request *http.Request) (*handler.Result, *types.Error) {
-	// Parse btc_staked parameter (optional, defaults to 0)
-	btcStaked, err := parseInt64Query(request, "btc_staked", true)
+	// Parse satoshis_staked parameter (optional, defaults to 0)
+	satoshisStaked, err := parseInt64Query(request, "satoshis_staked", true)
 	if err != nil {
 		return nil, err
 	}
 
-	// Parse baby_staked parameter (optional, defaults to 0)
-	babyStaked, err := parseInt64Query(request, "baby_staked", true)
+	// Parse ubbn_staked parameter (optional, defaults to 0)
+	ubbnStaked, err := parseInt64Query(request, "ubbn_staked", true)
 	if err != nil {
 		return nil, err
 	}
 
-	stakingAPR, serviceErr := h.Service.GetStakingAPR(request.Context(), btcStaked, babyStaked)
+	stakingAPR, serviceErr := h.Service.GetStakingAPR(request.Context(), satoshisStaked, ubbnStaked)
 	if serviceErr != nil {
 		return nil, serviceErr
 	}

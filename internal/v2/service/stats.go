@@ -60,9 +60,9 @@ type StakingAPRPublic struct {
 }
 
 // GetStakingAPR calculates personalized apr based on user's BTC and BABY stake
-// btcStaked: total satoshis (confirmed + pending)
-// babyStaked: total ubbn (confirmed + pending)
-func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int64) (*StakingAPRPublic, *types.Error) {
+// satoshisStaked: total satoshis (confirmed + pending)
+// ubbnStaked: total ubbn (confirmed + pending)
+func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStaked int64) (*StakingAPRPublic, *types.Error) {
 	// Fetch prices
 	btcPrice, err := s.sharedService.GetLatestBTCPrice(ctx)
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 	}
 
 	// Calculate BABY staking APR (this is the same for everyone)
-	babyStakingAPR, err := s.calculateBabyStakingAPR(ctx)
+	babyStakingAPR, err := s.getBabyStakingAPR(ctx)
 	if err != nil {
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to calculate baby staking apr: %w", err))
 	}
@@ -99,25 +99,13 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 
 	var wg conc.WaitGroup
 	wg.Go(func() {
-		totalCoStakingRewardSupply, rewardSupplyErr = s.calculateTotalCoStakingRewardSupply(ctx)
+		totalCoStakingRewardSupply, rewardSupplyErr = s.getCostakingRewardSupply(ctx)
 	})
 	wg.Go(func() {
-		totalScoreInt, err := s.bbnClient.CostakingTotalScore(ctx)
-		if err != nil {
-			totalScoreErr = err
-			return
-		}
-		if !totalScoreInt.IsNil() {
-			globalTotalScore = totalScoreInt.Int64()
-		}
+		globalTotalScore, totalScoreErr = s.getCostakingTotalScore(ctx)
 	})
 	wg.Go(func() {
-		params, err := s.bbnClient.CostakingParams(ctx)
-		if err != nil {
-			paramsErr = err
-			return
-		}
-		scoreRatio = params.ScoreRatioBtcByBaby.Int64()
+		scoreRatio, paramsErr = s.getCostakingScoreRatio(ctx)
 	})
 	wg.Wait()
 
@@ -127,17 +115,17 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 
 	// Calculate current APR with user's current stake
 	currentCoStakingAPR := s.calculateUserCoStakingAPR(
-		btcStaked, babyStaked, globalTotalScore, scoreRatio,
+		satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio,
 		totalCoStakingRewardSupply, btcPrice, babyPrice,
 	)
 
 	// Calculate additional BABY needed for 100% eligibility
-	requiredBabyForFullEligibility := btcStaked * scoreRatio
-	additionalBabyNeeded := float64(max(0, requiredBabyForFullEligibility-babyStaked))
+	requiredBabyForFullEligibility := satoshisStaked * scoreRatio
+	additionalBabyNeeded := float64(max(0, requiredBabyForFullEligibility-ubbnStaked))
 
 	// Calculate boost APR (at 100% eligibility)
 	boostCoStakingAPR := s.calculateBoostCoStakingAPR(
-		btcStaked, babyStaked, globalTotalScore, scoreRatio,
+		satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio,
 		totalCoStakingRewardSupply, btcPrice, babyPrice,
 	)
 
@@ -674,17 +662,17 @@ func (s *V2Service) calculateTotalCoStakingRewardSupply(ctx context.Context) (fl
 
 // calculateUserCoStakingAPR calculates the user's personalized co-staking apr
 func (s *V2Service) calculateUserCoStakingAPR(
-	btcStaked, babyStaked, globalTotalScore, scoreRatio int64,
+	satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio int64,
 	totalCoStakingRewardSupply, btcPrice, babyPrice float64,
 ) float64 {
 	// Edge cases
-	if btcStaked == 0 || globalTotalScore == 0 {
+	if satoshisStaked == 0 || globalTotalScore == 0 {
 		return 0
 	}
 
 	// Calculate user's total score based on eligible satoshis
-	// user_total_score = min(btcStaked, babyStaked / scoreRatio)
-	eligibleSats := min(btcStaked, babyStaked/scoreRatio)
+	// user_total_score = min(satoshisStaked, ubbnStaked / scoreRatio)
+	eligibleSats := min(satoshisStaked, ubbnStaked/scoreRatio)
 	userTotalScore := eligibleSats
 
 	// Calculate pool share
@@ -695,7 +683,7 @@ func (s *V2Service) calculateUserCoStakingAPR(
 
 	// Convert to USD (Fisher correction: measure apr relative to BTC investment)
 	userAnnualRewardsUSD := userAnnualRewardsInBaby * babyPrice / float64(pkg.UbbnPerBaby)
-	userActiveBTCinUSD := float64(btcStaked) / 1e8 * btcPrice
+	userActiveBTCinUSD := float64(satoshisStaked) / 1e8 * btcPrice
 
 	// Calculate apr as percentage: (annual_rewards_usd / btc_investment_usd)
 	if userActiveBTCinUSD == 0 {
@@ -708,20 +696,20 @@ func (s *V2Service) calculateUserCoStakingAPR(
 
 // calculateBoostCoStakingAPR calculates the boost apr at 100% eligibility
 func (s *V2Service) calculateBoostCoStakingAPR(
-	btcStaked, babyStaked, globalTotalScore, scoreRatio int64,
+	satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio int64,
 	totalCoStakingRewardSupply, btcPrice, babyPrice float64,
 ) float64 {
 	// Edge cases
-	if btcStaked == 0 || globalTotalScore == 0 {
+	if satoshisStaked == 0 || globalTotalScore == 0 {
 		return 0
 	}
 
 	// Calculate current user score
-	eligibleSats := min(btcStaked, babyStaked/scoreRatio)
+	eligibleSats := min(satoshisStaked, ubbnStaked/scoreRatio)
 	currentUserScore := eligibleSats
 
 	// At 100% eligibility, user's score equals their BTC staked
-	maxUserTotalScore := btcStaked
+	maxUserTotalScore := satoshisStaked
 
 	// Calculate the increase in score
 	scoreIncrease := maxUserTotalScore - currentUserScore
@@ -737,7 +725,7 @@ func (s *V2Service) calculateBoostCoStakingAPR(
 
 	// Convert to USD (Fisher formula)
 	boostAnnualRewardsUSD := boostAnnualRewardsInBaby * babyPrice / float64(pkg.UbbnPerBaby)
-	userActiveBTCinUSD := float64(btcStaked) / 1e8 * btcPrice
+	userActiveBTCinUSD := float64(satoshisStaked) / 1e8 * btcPrice
 
 	// Calculate apr as percentage
 	if userActiveBTCinUSD == 0 {
@@ -746,4 +734,75 @@ func (s *V2Service) calculateBoostCoStakingAPR(
 
 	apr := boostAnnualRewardsUSD / userActiveBTCinUSD
 	return apr
+}
+
+func (s *V2Service) getBabyStakingAPR(ctx context.Context) (float64, error) {
+	const key = "baby_staking_apr"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(float64), nil
+	}
+
+	apr, err := s.calculateBabyStakingAPR(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	s.aprCache.SetDefault(key, apr)
+	return apr, nil
+}
+
+func (s *V2Service) getCostakingRewardSupply(ctx context.Context) (float64, error) {
+	const key = "costaking_reward_supply"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(float64), nil
+	}
+
+	supply, err := s.calculateTotalCoStakingRewardSupply(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	s.aprCache.SetDefault(key, supply)
+	return supply, nil
+}
+
+func (s *V2Service) getCostakingTotalScore(ctx context.Context) (int64, error) {
+	const key = "costaking_total_score"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(int64), nil
+	}
+
+	totalScoreInt, err := s.bbnClient.CostakingTotalScore(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	var totalScore int64
+	if !totalScoreInt.IsNil() {
+		totalScore = totalScoreInt.Int64()
+		s.aprCache.SetDefault(key, totalScore)
+	}
+
+	return totalScore, nil
+}
+
+func (s *V2Service) getCostakingScoreRatio(ctx context.Context) (int64, error) {
+	const key = "costaking_score_ratio"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(int64), nil
+	}
+
+	params, err := s.bbnClient.CostakingParams(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	scoreRatio := params.ScoreRatioBtcByBaby.Int64()
+	s.aprCache.SetDefault(key, scoreRatio)
+
+	return scoreRatio, nil
 }
