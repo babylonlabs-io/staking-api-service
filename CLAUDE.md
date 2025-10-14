@@ -1,7 +1,7 @@
 ## Project Overview
 
 This is a backend service that provides API for data that is fetched and indexed by another service called `babylon-staking-indexer`.
-It's part of the backend services for cosmos network called Babylon ("bbn" for short)
+It's part of the backend services for the cosmos network called Babylon ("bbn" for short)
 
 ## Overview
 
