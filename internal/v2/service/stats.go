@@ -86,7 +86,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 	}
 
 	// Calculate BABY staking APR (this is the same for everyone)
-	babyStakingAPR, err := s.calculateBabyStakingAPR(ctx)
+	babyStakingAPR, err := s.getBabyStakingAPR(ctx)
 	if err != nil {
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to calculate baby staking apr: %w", err))
 	}
@@ -99,25 +99,13 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, btcStaked, babyStaked int
 
 	var wg conc.WaitGroup
 	wg.Go(func() {
-		totalCoStakingRewardSupply, rewardSupplyErr = s.calculateTotalCoStakingRewardSupply(ctx)
+		totalCoStakingRewardSupply, rewardSupplyErr = s.getCostakingRewardSupply(ctx)
 	})
 	wg.Go(func() {
-		totalScoreInt, err := s.bbnClient.CostakingTotalScore(ctx)
-		if err != nil {
-			totalScoreErr = err
-			return
-		}
-		if !totalScoreInt.IsNil() {
-			globalTotalScore = totalScoreInt.Int64()
-		}
+		globalTotalScore, totalScoreErr = s.getCostakingTotalScore(ctx)
 	})
 	wg.Go(func() {
-		params, err := s.bbnClient.CostakingParams(ctx)
-		if err != nil {
-			paramsErr = err
-			return
-		}
-		scoreRatio = params.ScoreRatioBtcByBaby.Int64()
+		scoreRatio, paramsErr = s.getCostakingScoreRatio(ctx)
 	})
 	wg.Wait()
 
@@ -746,4 +734,75 @@ func (s *V2Service) calculateBoostCoStakingAPR(
 
 	apr := boostAnnualRewardsUSD / userActiveBTCinUSD
 	return apr
+}
+
+func (s *V2Service) getBabyStakingAPR(ctx context.Context) (float64, error) {
+	const key = "baby_staking_apr"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(float64), nil
+	}
+
+	apr, err := s.calculateBabyStakingAPR(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	s.aprCache.SetDefault(key, apr)
+	return apr, nil
+}
+
+func (s *V2Service) getCostakingRewardSupply(ctx context.Context) (float64, error) {
+	const key = "costaking_reward_supply"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(float64), nil
+	}
+
+	supply, err := s.calculateTotalCoStakingRewardSupply(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	s.aprCache.SetDefault(key, supply)
+	return supply, nil
+}
+
+func (s *V2Service) getCostakingTotalScore(ctx context.Context) (int64, error) {
+	const key = "costaking_total_score"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(int64), nil
+	}
+
+	totalScoreInt, err := s.bbnClient.CostakingTotalScore(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	var totalScore int64
+	if !totalScoreInt.IsNil() {
+		totalScore = totalScoreInt.Int64()
+		s.aprCache.SetDefault(key, totalScore)
+	}
+
+	return totalScore, nil
+}
+
+func (s *V2Service) getCostakingScoreRatio(ctx context.Context) (int64, error) {
+	const key = "costaking_score_ratio"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(int64), nil
+	}
+
+	params, err := s.bbnClient.CostakingParams(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	scoreRatio := params.ScoreRatioBtcByBaby.Int64()
+	s.aprCache.SetDefault(key, scoreRatio)
+
+	return scoreRatio, nil
 }
