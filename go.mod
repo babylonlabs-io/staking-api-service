@@ -8,7 +8,7 @@ require (
 	github.com/babylonlabs-io/babylon-staking-indexer v1.0.5
 	github.com/babylonlabs-io/babylon/v4 v4.0.0-rc.0
 	github.com/babylonlabs-io/networks/parameters v0.2.2
-	github.com/babylonlabs-io/staking-queue-client v1.0.0
+	github.com/babylonlabs-io/staking-queue-client v1.1.0
 	github.com/btcsuite/btcd v0.24.3-0.20241011125836-24eb815168f4
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4
 	github.com/btcsuite/btcd/btcutil v1.1.6
