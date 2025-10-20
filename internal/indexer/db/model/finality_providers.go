@@ -1,5 +1,7 @@
 package indexerdbmodel
 
+import dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+
 type FinalityProviderState string
 
 const (
@@ -27,6 +29,13 @@ type Description struct {
 }
 
 type IndexerFinalityProviderPagination struct {
-	BtcPk      string `json:"btc_pk"`
-	Commission string `json:"commission"`
+	BtcPk string `json:"btc_pk"`
+}
+
+func BuildIndexerFinalityProviderPaginationToken(d *IndexerFinalityProviderDetails) (string, error) {
+	page := IndexerFinalityProviderPagination{
+		BtcPk: d.BtcPk,
+	}
+
+	return dbmodel.GetPaginationToken(page)
 }

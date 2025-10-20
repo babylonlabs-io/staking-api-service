@@ -64,14 +64,14 @@ func (s *V1Service) DelegationsByStakerPk(
 	}
 
 	// Get list of all finality providers in phase-2
-	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	transitionedFpsResult, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx, "")
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get finality providers")
 		return nil, "", types.NewInternalServiceError(err)
 	}
 
 	for _, d := range resultMap.Data {
-		delegations = append(delegations, s.FromDelegationDocument(&d, bbnHeight, transitionedFps))
+		delegations = append(delegations, s.FromDelegationDocument(&d, bbnHeight, transitionedFpsResult.Data))
 	}
 	return delegations, resultMap.PaginationToken, nil
 }
@@ -130,13 +130,13 @@ func (s *V1Service) GetDelegation(ctx context.Context, txHashHex string) (*Deleg
 	}
 
 	// Get list of all finality providers in phase-2
-	transitionedFps, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	transitionedFpsResult, err := s.Service.DbClients.IndexerDBClient.GetFinalityProviders(ctx, "")
 	if err != nil {
 		log.Ctx(ctx).Error().Err(err).Msg("Failed to get finality providers")
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	return s.FromDelegationDocument(delegation, bbnHeight, transitionedFps), nil
+	return s.FromDelegationDocument(delegation, bbnHeight, transitionedFpsResult.Data), nil
 }
 
 func (s *V1Service) CheckStakerHasActiveDelegationByPk(

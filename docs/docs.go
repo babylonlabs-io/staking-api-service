@@ -551,7 +551,7 @@ const docTemplate = `{
         },
         "/v2/finality-providers": {
             "get": {
-                "description": "Fetches finality providers with its stats, currently does not support pagination",
+                "description": "Fetches finality providers with its stats with pagination support",
                 "produces": [
                     "application/json"
                 ],
@@ -559,11 +559,25 @@ const docTemplate = `{
                     "v2"
                 ],
                 "summary": "List Finality Providers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Pagination key to fetch the next page of finality providers",
+                        "name": "pagination_key",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of finality providers with its stats",
                         "schema": {
                             "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid pagination token",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error"
                         }
                     },
                     "404": {

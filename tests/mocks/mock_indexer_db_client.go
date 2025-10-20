@@ -48,6 +48,36 @@ func (_m *IndexerDBClient) CheckDelegationExistByStakerPk(ctx context.Context, a
 	return r0, r1
 }
 
+// CountFinalityProvidersByStatus provides a mock function with given fields: ctx
+func (_m *IndexerDBClient) CountFinalityProvidersByStatus(ctx context.Context) (map[indexerdbmodel.FinalityProviderState]uint64, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CountFinalityProvidersByStatus")
+	}
+
+	var r0 map[indexerdbmodel.FinalityProviderState]uint64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (map[indexerdbmodel.FinalityProviderState]uint64, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) map[indexerdbmodel.FinalityProviderState]uint64); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[indexerdbmodel.FinalityProviderState]uint64)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetBbnStakingParams provides a mock function with given fields: ctx
 func (_m *IndexerDBClient) GetBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, error) {
 	ret := _m.Called(ctx)
@@ -180,7 +210,7 @@ func (_m *IndexerDBClient) GetDelegations(ctx context.Context, paginationToken s
 	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetDelegationsByStakerPKHex")
+		panic("no return value specified for GetDelegations")
 	}
 
 	var r0 *db.DbResultMap[indexerdbmodel.IndexerDelegationDetails]
@@ -235,59 +265,29 @@ func (_m *IndexerDBClient) GetDelegationsInStates(ctx context.Context, stakerPKH
 	return r0, r1
 }
 
-// GetFinalityProviders provides a mock function with given fields: ctx
-func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
-	ret := _m.Called(ctx)
+// GetFinalityProviders provides a mock function with given fields: ctx, paginationToken
+func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context, paginationToken string) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderDetails], error) {
+	ret := _m.Called(ctx, paginationToken)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetFinalityProviders")
 	}
 
-	var r0 []*indexerdbmodel.IndexerFinalityProviderDetails
+	var r0 *db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderDetails]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderDetails], error)); ok {
+		return rf(ctx, paginationToken)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []*indexerdbmodel.IndexerFinalityProviderDetails); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderDetails]); ok {
+		r0 = rf(ctx, paginationToken)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*indexerdbmodel.IndexerFinalityProviderDetails)
+			r0 = ret.Get(0).(*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderDetails])
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetFinalityProvidersByID provides a mock function with given fields: ctx, ids
-func (_m *IndexerDBClient) GetFinalityProvidersByID(ctx context.Context, ids []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
-	ret := _m.Called(ctx, ids)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetFinalityProvidersByID")
-	}
-
-	var r0 []*indexerdbmodel.IndexerFinalityProviderDetails
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)); ok {
-		return rf(ctx, ids)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, []string) []*indexerdbmodel.IndexerFinalityProviderDetails); ok {
-		r0 = rf(ctx, ids)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*indexerdbmodel.IndexerFinalityProviderDetails)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
-		r1 = rf(ctx, ids)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, paginationToken)
 	} else {
 		r1 = ret.Error(1)
 	}
