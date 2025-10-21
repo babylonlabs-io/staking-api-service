@@ -42,8 +42,6 @@ assets:
     host: "http://ord-poc.devnet.babylonchain.io"
     port: 8888
     timeout: 1000
-terms_acceptance_logging:
-  enabled: true
 network_upgrade:
   pop_upgrade_height: 1
 external_apis:
