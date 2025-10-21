@@ -10,22 +10,28 @@ import (
 // GetFinalityProviders gets a list of finality providers with its stats
 //
 //	@Summary		List Finality Providers
-//	@Description	Fetches finality providers with its stats, currently does not support pagination
-//
-// the response contains a field for pagination token, but it's not used yet
-// this is for the future when we will support pagination
-//
+//	@Description	Fetches finality providers with its stats with pagination support
 //	@Produce		json
 //	@Tags			v2
-//	@Success		200	{object}	handler.PublicResponse[[]v2service.FinalityProviderPublic]	"List of finality providers with its stats"
-//	@Failure		404	{object}	types.Error													"No finality providers found"
-//	@Failure		500	{object}	types.Error													"Internal server error occurred"
+//	@Param			pagination_key	query		string													false	"Pagination key to fetch the next page of finality providers"
+//	@Success		200				{object}	handler.PublicResponse[[]v2service.FinalityProviderPublic]	"List of finality providers with its stats"
+//	@Failure		400				{object}	types.Error													"Invalid pagination token"
+//	@Failure		404				{object}	types.Error													"No finality providers found"
+//	@Failure		500				{object}	types.Error													"Internal server error occurred"
 //	@Router			/v2/finality-providers [get]
 func (h *V2Handler) GetFinalityProviders(request *http.Request) (*handler.Result, *types.Error) {
-	providers, err := h.Service.GetFinalityProvidersWithStats(request.Context())
+	paginationToken, err := handler.ParsePaginationQuery(request)
 	if err != nil {
 		return nil, err
 	}
 
-	return handler.NewResultWithPagination(providers, ""), nil
+	providers, nextPaginationToken, err := h.Service.GetFinalityProvidersWithStats(
+		request.Context(),
+		paginationToken,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return handler.NewResultWithPagination(providers, nextPaginationToken), nil
 }

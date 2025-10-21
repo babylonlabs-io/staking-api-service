@@ -995,8 +995,12 @@ paths:
       - v2
   /v2/finality-providers:
     get:
-      description: Fetches finality providers with its stats, currently does not support
-        pagination
+      description: Fetches finality providers with its stats with pagination support
+      parameters:
+      - description: Pagination key to fetch the next page of finality providers
+        in: query
+        name: pagination_key
+        type: string
       produces:
       - application/json
       responses:
@@ -1004,6 +1008,10 @@ paths:
           description: List of finality providers with its stats
           schema:
             $ref: '#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic'
+        "400":
+          description: Invalid pagination token
+          schema:
+            $ref: '#/definitions/github_com_babylonlabs-io_staking-api-service_internal_shared_types.Error'
         "404":
           description: No finality providers found
           schema:

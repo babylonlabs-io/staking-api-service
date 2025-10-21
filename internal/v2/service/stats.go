@@ -158,19 +158,18 @@ func (s *V2Service) GetOverallStats(
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	// Fetch all finality providers stats
-	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	fpCountsByStatus, err := s.dbClients.IndexerDBClient.CountFinalityProvidersByStatus(ctx)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("error while fetching finality providers")
+		log.Ctx(ctx).Error().Err(err).Msg("error while counting finality providers")
 		return nil, types.NewInternalServiceError(err)
 	}
 
-	activeFinalityProvidersCount := 0
-	for _, fp := range finalityProviders {
-		if fp.State == indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE {
-			activeFinalityProvidersCount++
-		}
+	var totalFinalityProvidersCount uint64
+	for _, count := range fpCountsByStatus {
+		totalFinalityProvidersCount += count
 	}
+
+	activeFinalityProvidersCount := fpCountsByStatus[indexerdbmodel.FinalityProviderStatus_FINALITY_PROVIDER_STATUS_ACTIVE]
 
 	// Fetch phase-1 overall stats to calculate the total active tvl and
 	// total active delegations
@@ -207,8 +206,8 @@ func (s *V2Service) GetOverallStats(
 		ActiveDelegations:       overallStats.ActiveDelegations,
 		TotalActiveTvl:          overallStats.ActiveTvl + phase1Stats.ActiveTvl,
 		TotalActiveDelegations:  overallStats.ActiveDelegations + phase1Stats.ActiveDelegations,
-		ActiveFinalityProviders: uint64(activeFinalityProvidersCount),
-		TotalFinalityProviders:  uint64(len(finalityProviders)),
+		ActiveFinalityProviders: activeFinalityProvidersCount,
+		TotalFinalityProviders:  totalFinalityProvidersCount,
 		BTCStakingAPR:           btcStakingAPR,
 	}, nil
 }

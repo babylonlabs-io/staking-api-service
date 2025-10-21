@@ -44,31 +44,42 @@ func mapToFinalityProviderStatsPublic(
 	}
 }
 
-// GetFinalityProvidersWithStats retrieves all finality providers and their associated statistics
+// GetFinalityProvidersWithStats retrieves finality providers and their associated statistics with pagination
 func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
-) ([]*FinalityProviderPublic, *types.Error) {
-	// Fetch all finality providers
-	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx)
+	paginationToken string,
+) ([]*FinalityProviderPublic, string, *types.Error) {
+	finalityProvidersResult, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, paginationToken)
 	if err != nil {
 		if db.IsNotFoundError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("No finality providers found")
-			return nil, types.NewErrorWithMsg(
+			return nil, "", types.NewErrorWithMsg(
 				http.StatusNotFound,
 				types.NotFound,
 				"finality providers not found, please retry",
 			)
 		}
-		return nil, types.NewErrorWithMsg(
+		if db.IsInvalidPaginationTokenError(err) {
+			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching finality providers")
+			return nil, "", types.NewError(http.StatusBadRequest, types.BadRequest, err)
+		}
+		return nil, "", types.NewErrorWithMsg(
 			http.StatusInternalServerError,
 			types.InternalServiceError,
 			"failed to get finality providers",
 		)
 	}
 
-	providerStats, err := s.dbClients.V2DBClient.GetFinalityProviderStats(ctx)
+	finalityProviders := finalityProvidersResult.Data
+
+	fpPkHexes := make([]string, 0, len(finalityProviders))
+	for _, fp := range finalityProviders {
+		fpPkHexes = append(fpPkHexes, fp.BtcPk)
+	}
+
+	providerStats, err := s.dbClients.V2DBClient.GetFinalityProviderStats(ctx, fpPkHexes)
 	if err != nil {
-		return nil, types.NewErrorWithMsg(
+		return nil, "", types.NewErrorWithMsg(
 			http.StatusInternalServerError,
 			types.InternalServiceError,
 			"failed to get finality provider stats",
@@ -106,7 +117,8 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 			mapToFinalityProviderStatsPublic(*provider, providerStats, logoURL),
 		)
 	}
-	return finalityProvidersPublic, nil
+
+	return finalityProvidersPublic, finalityProvidersResult.PaginationToken, nil
 }
 
 func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.IndexerFinalityProviderDetails) map[string]string {

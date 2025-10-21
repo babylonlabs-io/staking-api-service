@@ -537,7 +537,14 @@ func (v2dbclient *V2Database) updateFinalityProviderStats(
 
 func (v2dbclient *V2Database) GetFinalityProviderStats(
 	ctx context.Context,
+	fpPkHexes []string,
 ) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
+	if len(fpPkHexes) == 0 {
+		return nil, nil
+	}
+
 	client := v2dbclient.Client.Database(v2dbclient.DbName).Collection(dbmodel.V2FinalityProviderStatsCollection)
-	return pkg.FetchAll[*v2dbmodel.V2FinalityProviderStatsDocument](ctx, client, bson.M{})
+	filter := bson.M{"_id": bson.M{"$in": fpPkHexes}}
+
+	return pkg.FetchAll[*v2dbmodel.V2FinalityProviderStatsDocument](ctx, client, filter)
 }

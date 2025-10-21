@@ -212,9 +212,9 @@ func (_m *V2DBClient) GetFinalityProviderLogosByID(ctx context.Context, ids []st
 	return r0, r1
 }
 
-// GetFinalityProviderStats provides a mock function with given fields: ctx
-func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
-	ret := _m.Called(ctx)
+// GetFinalityProviderStats provides a mock function with given fields: ctx, fpPkHexes
+func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context, fpPkHexes []string) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error) {
+	ret := _m.Called(ctx, fpPkHexes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetFinalityProviderStats")
@@ -222,19 +222,19 @@ func (_m *V2DBClient) GetFinalityProviderStats(ctx context.Context) ([]*v2dbmode
 
 	var r0 []*v2dbmodel.V2FinalityProviderStatsDocument
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*v2dbmodel.V2FinalityProviderStatsDocument, error)); ok {
+		return rf(ctx, fpPkHexes)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []*v2dbmodel.V2FinalityProviderStatsDocument); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*v2dbmodel.V2FinalityProviderStatsDocument); ok {
+		r0 = rf(ctx, fpPkHexes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v2dbmodel.V2FinalityProviderStatsDocument)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, fpPkHexes)
 	} else {
 		r1 = ret.Error(1)
 	}
