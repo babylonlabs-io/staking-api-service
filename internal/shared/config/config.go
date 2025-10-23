@@ -18,7 +18,6 @@ type Config struct {
 	Assets                 *AssetsConfig               `mapstructure:"assets"`
 	DelegationTransition   *DelegationTransitionConfig `mapstructure:"delegation-transition"`
 	ExternalAPIs           *ExternalAPIsConfig         `mapstructure:"external_apis"`
-	TermsAcceptanceLogging *TermsAcceptanceConfig      `mapstructure:"terms_acceptance_logging"`
 	AddressScreeningConfig *AddressScreeningConfig     `mapstructure:"address_screening"`
 	BBN                    *BBNConfig                  `mapstructure:"bbn"`
 	NetworkUpgrade         *NetworkUpgrade             `mapstructure:"network_upgrade,omitempty"`

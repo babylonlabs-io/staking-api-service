@@ -564,24 +564,6 @@ func (_m *V1DBClient) SaveActiveStakingDelegation(ctx context.Context, stakingTx
 	return r0
 }
 
-// SaveTermsAcceptance provides a mock function with given fields: ctx, termsAcceptance
-func (_m *V1DBClient) SaveTermsAcceptance(ctx context.Context, termsAcceptance *dbmodel.TermsAcceptance) error {
-	ret := _m.Called(ctx, termsAcceptance)
-
-	if len(ret) == 0 {
-		panic("no return value specified for SaveTermsAcceptance")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *dbmodel.TermsAcceptance) error); ok {
-		r0 = rf(ctx, termsAcceptance)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // SaveTimeLockExpireCheck provides a mock function with given fields: ctx, stakingTxHashHex, expireHeight, txType
 func (_m *V1DBClient) SaveTimeLockExpireCheck(ctx context.Context, stakingTxHashHex string, expireHeight uint64, txType string) error {
 	ret := _m.Called(ctx, stakingTxHashHex, expireHeight, txType)
