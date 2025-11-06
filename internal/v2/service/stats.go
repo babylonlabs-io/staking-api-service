@@ -160,6 +160,10 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 }
 
 func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPrice float64, totalScore int64) (float64, error) {
+	if totalScore == 0 {
+		return 0, nil
+	}
+
 	const (
 		totalInflation         = 5.5
 		coStakingInflationPart = 2.35
@@ -169,6 +173,13 @@ func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPri
 	if err != nil {
 		return 0, err
 	}
+
+	log.Ctx(ctx).Info().
+		Float64("annualProvisions", annualProvisions).
+		Float64("babyPrice", babyPrice).
+		Float64("btcPrice", btcPrice).
+		Int64("totalScore", totalScore).
+		Msg("values for costaking apr calculation")
 
 	// annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / (total_score / satoshisPerBTC * btcPrice) / ubbnPerBaby
 	// if you need percentage multiply final value by 100 (done on frontend)
