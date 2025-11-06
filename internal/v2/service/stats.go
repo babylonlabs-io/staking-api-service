@@ -161,6 +161,7 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 
 func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPrice float64, totalScore int64) (float64, error) {
 	if totalScore == 0 {
+		log.Ctx(ctx).Info().Msg("empty total score")
 		return 0, nil
 	}
 
