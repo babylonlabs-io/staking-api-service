@@ -17,7 +17,6 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/pkg"
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/rs/zerolog/log"
 	"github.com/sourcegraph/conc"
 )
@@ -170,7 +169,6 @@ func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPri
 	if err != nil {
 		return 0, err
 	}
-	spew.Dump("ANNUAL", annualProvisions)
 
 	// (annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / (total_score / satoshisPerBTC * btcPrice) / ubbnPerBaby) * 100
 	apr := (annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / (float64(totalScore) / pkg.SatoshiPerBTC * btcPrice) / pkg.UbbnPerBaby) * 100
@@ -731,38 +729,28 @@ func (s *V2Service) calculateBoostCoStakingAPR(
 		return 0
 	}
 
-	spew.Dump("BOOST", satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio, totalCoStakingRewardSupply, btcPrice, babyPrice)
-
 	// Calculate current user score
 	eligibleSats := min(satoshisStaked, ubbnStaked/scoreRatio)
 	currentUserScore := eligibleSats
-	spew.Dump("currentUserScore", currentUserScore)
 
 	// At 100% eligibility, user's score equals their BTC staked
 	maxUserTotalScore := satoshisStaked
 
 	// Calculate the increase in score
 	scoreIncrease := maxUserTotalScore - currentUserScore
-	spew.Dump("scoreIncrease", scoreIncrease)
 
 	// Adjust global score
 	adjustedGlobalScore := globalTotalScore + scoreIncrease
-	spew.Dump("globalTotalScore", globalTotalScore)
-	spew.Dump("adjustedGlobalScore", adjustedGlobalScore)
 
 	// Calculate boost pool share
 	boostPoolShare := float64(maxUserTotalScore) / float64(adjustedGlobalScore)
-	spew.Dump("boostPoolShare", boostPoolShare)
 
 	// Calculate boost annual rewards in BABY (ubbn)
 	boostAnnualRewardsInBaby := boostPoolShare * totalCoStakingRewardSupply
-	spew.Dump("boostAnnualRewardsInBaby", boostAnnualRewardsInBaby)
 
 	// Convert to USD (Fisher formula)
 	boostAnnualRewardsUSD := boostAnnualRewardsInBaby * babyPrice / float64(pkg.UbbnPerBaby)
-	spew.Dump("boostAnnualRewardsUSD", boostAnnualRewardsUSD)
 	userActiveBTCinUSD := float64(satoshisStaked) / 1e8 * btcPrice
-	spew.Dump("userActiveBTCinUSD", userActiveBTCinUSD)
 
 	// Calculate apr as percentage
 	if userActiveBTCinUSD == 0 {
