@@ -172,7 +172,7 @@ func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPri
 
 	// annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / (total_score / satoshisPerBTC * btcPrice) / ubbnPerBaby
 	// if you need percentage multiply final value by 100 (done on frontend)
-	apr := annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / (float64(totalScore) / pkg.SatoshiPerBTC * btcPrice) / pkg.UbbnPerBaby
+	apr := annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / ((float64(totalScore) / pkg.SatoshiPerBTC) * btcPrice) / pkg.UbbnPerBaby
 	return apr, nil
 }
 
