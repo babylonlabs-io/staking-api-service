@@ -57,6 +57,9 @@ type StakingAPRPublic struct {
 	Current                      apr     `json:"current"`
 	AdditionalBabyNeededForBoost float64 `json:"additional_baby_needed_for_boost"`
 	Boost                        apr     `json:"boost"`
+
+	BtcStaking float64 `json:"btc_staking_apr"`
+	MaxStaking float64 `json:"max_staking_apr"`
 }
 
 // GetStakingAPR calculates personalized apr based on user's BTC and BABY stake
@@ -132,6 +135,11 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 	// Convert from ubbn to BABY for display
 	additionalBabyNeededInBaby := additionalBabyNeeded / float64(pkg.UbbnPerBaby)
 
+	coStakingAPR, err := s.calculateCoStakingAPR(ctx, babyPrice, btcPrice, globalTotalScore)
+	if err != nil {
+		return nil, types.NewInternalServiceError(fmt.Errorf("failed to calculate co-staking apr: %w", err))
+	}
+
 	return &StakingAPRPublic{
 		Current: apr{
 			BtcStaking:  btcStakingAPR,
@@ -146,7 +154,26 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 			CoStaking:   boostCoStakingAPR,
 			Total:       btcStakingAPR + boostCoStakingAPR,
 		},
+		BtcStaking: btcStakingAPR,
+		MaxStaking: btcStakingAPR + coStakingAPR,
 	}, nil
+}
+
+func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPrice float64, totalScore int64) (float64, error) {
+	const (
+		totalInflation         = 5.5
+		coStakingInflationPart = 2.35
+	)
+
+	annualProvisions, err := s.getAnnualProvisions(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	// annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / (total_score / satoshisPerBTC * btcPrice) / ubbnPerBaby
+	// if you need percentage multiply final value by 100 (done on frontend)
+	apr := annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / ((float64(totalScore) / pkg.SatoshiPerBTC) * btcPrice) / pkg.UbbnPerBaby
+	return apr, nil
 }
 
 func (s *V2Service) GetOverallStats(
@@ -749,6 +776,27 @@ func (s *V2Service) getBabyStakingAPR(ctx context.Context) (float64, error) {
 
 	s.aprCache.SetDefault(key, apr)
 	return apr, nil
+}
+
+func (s *V2Service) getAnnualProvisions(ctx context.Context) (float64, error) {
+	const key = "annual_provisions"
+
+	if cached, found := s.aprCache.Get(key); found {
+		return cached.(float64), nil
+	}
+
+	provisions, err := s.bbnClient.AnnualProvisions(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	provisionsFloat, err := provisions.Float64()
+	if err != nil {
+		return 0, err
+	}
+
+	s.aprCache.SetDefault(key, provisionsFloat)
+	return provisionsFloat, nil
 }
 
 func (s *V2Service) getCostakingRewardSupply(ctx context.Context) (float64, error) {
