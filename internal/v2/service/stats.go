@@ -78,12 +78,12 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 	}
 
 	// Calculate BTC staking APR (this is the same for everyone)
-	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
+	activeTvl, _, err := s.getOverallStatsFromIndexer(ctx)
 	if err != nil {
-		return nil, types.NewInternalServiceError(fmt.Errorf("failed to get overall stats: %w", err))
+		return nil, types.NewInternalServiceError(fmt.Errorf("failed to get indexer overall stats: %w", err))
 	}
 
-	btcStakingAPR, err := s.calculateBTCStakingAPR(ctx, overallStats.ActiveTvl, btcPrice, babyPrice)
+	btcStakingAPR, err := s.calculateBTCStakingAPR(ctx, activeTvl, btcPrice, babyPrice)
 	if err != nil {
 		return nil, types.NewInternalServiceError(fmt.Errorf("failed to calculate btc staking apr: %w", err))
 	}
@@ -188,12 +188,22 @@ func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPri
 	return apr, nil
 }
 
+// getOverallStatsFromIndexer fetches stats from indexer and converts to V2 format
+func (s *V2Service) getOverallStatsFromIndexer(ctx context.Context) (int64, int64, error) {
+	indexerStats, err := s.dbClients.IndexerDBClient.GetOverallStats(ctx)
+	if err != nil {
+		return 0, 0, err
+	}
+	// Convert uint64 to int64
+	return int64(indexerStats.ActiveTvl), int64(indexerStats.ActiveDelegations), nil
+}
+
 func (s *V2Service) GetOverallStats(
 	ctx context.Context,
 ) (*OverallStatsPublic, *types.Error) {
-	overallStats, err := s.dbClients.V2DBClient.GetOverallStats(ctx)
+	activeTvl, activeDelegations, err := s.getOverallStatsFromIndexer(ctx)
 	if err != nil {
-		log.Ctx(ctx).Error().Err(err).Msg("error while fetching overall stats")
+		log.Ctx(ctx).Error().Err(err).Msg("error while fetching indexer overall stats")
 		return nil, types.NewInternalServiceError(err)
 	}
 
@@ -230,9 +240,9 @@ func (s *V2Service) GetOverallStats(
 	}
 
 	// Calculate the APR for BTC staking on Babylon Genesis
-	// The apr is calculated based on the activeTvl of the overall stats
+	// The apr is calculated based on the activeTvl from the indexer stats
 	btcStakingAPR, errAprCalculation := s.getBTCStakingAPR(
-		ctx, overallStats.ActiveTvl,
+		ctx, activeTvl,
 	)
 	if errAprCalculation != nil {
 		log.Ctx(ctx).Error().Err(errAprCalculation).
@@ -241,10 +251,10 @@ func (s *V2Service) GetOverallStats(
 	}
 
 	return &OverallStatsPublic{
-		ActiveTvl:               overallStats.ActiveTvl,
-		ActiveDelegations:       overallStats.ActiveDelegations,
-		TotalActiveTvl:          overallStats.ActiveTvl + phase1Stats.ActiveTvl,
-		TotalActiveDelegations:  overallStats.ActiveDelegations + phase1Stats.ActiveDelegations,
+		ActiveTvl:               activeTvl,
+		ActiveDelegations:       activeDelegations,
+		TotalActiveTvl:          activeTvl + phase1Stats.ActiveTvl,
+		TotalActiveDelegations:  activeDelegations + phase1Stats.ActiveDelegations,
 		ActiveFinalityProviders: activeFinalityProvidersCount,
 		TotalFinalityProviders:  totalFinalityProvidersCount,
 		BTCStakingAPR:           btcStakingAPR,

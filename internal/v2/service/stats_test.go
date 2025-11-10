@@ -40,18 +40,17 @@ func Test_GetOverallStats(t *testing.T) {
 	s, err := New(sharedService, nil, nil)
 	require.NoError(t, err)
 
-	t.Run("V2 DB failure", func(t *testing.T) {
-		err := errors.New("v2 err")
-		dbV2.On("GetOverallStats", ctx).Return(nil, err).Once()
+	t.Run("Indexer DB failure - GetOverallStats", func(t *testing.T) {
+		err := errors.New("indexer err")
+		dbIndexer.On("GetOverallStats", ctx).Return(nil, err).Once()
 
 		resp, respErr := s.GetOverallStats(ctx)
 		assert.Equal(t, types.NewInternalServiceError(err), respErr)
 		assert.Nil(t, resp)
 	})
-	t.Run("Indexer DB failure", func(t *testing.T) {
-		// we pass zero value as 1st return value which is ok - we won't use its values anyway
-		dbV2.On("GetOverallStats", ctx).Return(&v2dbmodel.V2OverallStatsDocument{}, nil).Once()
-		err := errors.New("indexer err")
+	t.Run("Indexer DB failure - CountFinalityProviders", func(t *testing.T) {
+		dbIndexer.On("GetOverallStats", ctx).Return(&indexerdbmodel.IndexerStatsDocument{}, nil).Once()
+		err := errors.New("indexer count err")
 		dbIndexer.On("CountFinalityProvidersByStatus", ctx).Return(nil, err).Once()
 
 		resp, respErr := s.GetOverallStats(ctx)
@@ -59,8 +58,7 @@ func Test_GetOverallStats(t *testing.T) {
 		assert.Nil(t, resp)
 	})
 	t.Run("V1 DB failure", func(t *testing.T) {
-		// we pass zero value as 1st return value which is ok - we won't use its values anyway
-		dbV2.On("GetOverallStats", ctx).Return(&v2dbmodel.V2OverallStatsDocument{}, nil).Once()
+		dbIndexer.On("GetOverallStats", ctx).Return(&indexerdbmodel.IndexerStatsDocument{}, nil).Once()
 		dbIndexer.On("CountFinalityProvidersByStatus", ctx).Return(map[indexerdbmodel.FinalityProviderState]uint64{}, nil).Once()
 		err := errors.New("v1 err")
 		dbV1.On("GetOverallStats", ctx).Return(nil, err).Once()
@@ -70,7 +68,7 @@ func Test_GetOverallStats(t *testing.T) {
 		assert.Nil(t, resp)
 	})
 	t.Run("Ok with GetLatestPrice failure", func(t *testing.T) {
-		dbV2.On("GetOverallStats", ctx).Return(&v2dbmodel.V2OverallStatsDocument{
+		dbIndexer.On("GetOverallStats", ctx).Return(&indexerdbmodel.IndexerStatsDocument{
 			ActiveTvl: 777, // here is important to pass non-zero tvl so it triggers staking BTC calculation
 		}, nil).Once()
 		dbIndexer.On("CountFinalityProvidersByStatus", ctx).Return(map[indexerdbmodel.FinalityProviderState]uint64{}, nil).Once()
