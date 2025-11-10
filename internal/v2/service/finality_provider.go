@@ -77,7 +77,7 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		fpPkHexes = append(fpPkHexes, fp.BtcPk)
 	}
 
-	providerStats, err := s.dbClients.V2DBClient.GetFinalityProviderStats(ctx, fpPkHexes)
+	indexerProviderStats, err := s.dbClients.IndexerDBClient.GetFinalityProviderStats(ctx, fpPkHexes)
 	if err != nil {
 		return nil, "", types.NewErrorWithMsg(
 			http.StatusInternalServerError,
@@ -89,8 +89,13 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 	logoMap := s.fetchLogos(ctx, finalityProviders)
 
 	statsLookup := make(map[string]*v2dbmodel.V2FinalityProviderStatsDocument)
-	for _, stats := range providerStats {
-		statsLookup[stats.FinalityProviderPkHex] = stats
+	for _, stats := range indexerProviderStats {
+		// Convert indexer stats (uint64) to V2 format (int64)
+		statsLookup[stats.FpBtcPkHex] = &v2dbmodel.V2FinalityProviderStatsDocument{
+			FinalityProviderPkHex: stats.FpBtcPkHex,
+			ActiveTvl:             int64(stats.ActiveTvl),
+			ActiveDelegations:     int64(stats.ActiveDelegations),
+		}
 	}
 
 	finalityProvidersPublic := make([]*FinalityProviderPublic, 0, len(finalityProviders))
