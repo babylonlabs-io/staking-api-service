@@ -700,7 +700,7 @@ const docTemplate = `{
         },
         "/v2/stats": {
             "get": {
-                "description": "Overall system stats",
+                "description": "Overall system stats including max staking APR (BTC + co-staking)",
                 "produces": [
                     "application/json"
                 ],
@@ -1456,6 +1456,10 @@ const docTemplate = `{
                     "description": "Represents the APR for BTC staking as a decimal (e.g., 0.035 = 3.5%)",
                     "type": "number"
                 },
+                "max_staking_apr": {
+                    "description": "Represents the max staking APR (BTC + Co-staking) as a decimal",
+                    "type": "number"
+                },
                 "total_active_delegations": {
                     "description": "This represents the total active delegations on BTC chain which includes\nboth phase-1 and phase-2 active delegations",
                     "type": "integer"
@@ -1535,8 +1539,14 @@ const docTemplate = `{
                 "boost": {
                     "$ref": "#/definitions/v2service.apr"
                 },
+                "btc_staking_apr": {
+                    "type": "number"
+                },
                 "current": {
                     "$ref": "#/definitions/v2service.apr"
+                },
+                "max_staking_apr": {
+                    "type": "number"
                 }
             }
         },

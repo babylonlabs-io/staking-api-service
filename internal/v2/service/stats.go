@@ -34,6 +34,8 @@ type OverallStatsPublic struct {
 	TotalActiveDelegations int64 `json:"total_active_delegations"`
 	// Represents the APR for BTC staking as a decimal (e.g., 0.035 = 3.5%)
 	BTCStakingAPR float64 `json:"btc_staking_apr"`
+	// Represents the max staking APR (BTC + Co-staking) as a decimal
+	MaxStakingAPR float64 `json:"max_staking_apr"`
 }
 
 type StakerStatsPublic struct {
@@ -240,6 +242,29 @@ func (s *V2Service) GetOverallStats(
 		// in case of error we use zero value in BTCStakingAPR
 	}
 
+	// Calculate max staking APR (BTC staking + co-staking)
+	var maxStakingAPR float64
+	btcPrice, errBtcPrice := s.sharedService.GetLatestBTCPrice(ctx)
+	babyPrice, errBabyPrice := s.sharedService.GetLatestBABYPrice(ctx)
+	totalScore, errTotalScore := s.getCostakingTotalScore(ctx)
+
+	if errBtcPrice != nil || errBabyPrice != nil || errTotalScore != nil {
+		log.Ctx(ctx).Error().
+			Err(errors.Join(errBtcPrice, errBabyPrice, errTotalScore)).
+			Msg("error while fetching data for max staking apr calculation")
+		// in case of error we use zero value in MaxStakingAPR
+	} else {
+		coStakingAPR, errCoStaking := s.calculateCoStakingAPR(ctx, babyPrice, btcPrice, totalScore)
+		if errCoStaking != nil {
+			log.Ctx(ctx).Error().Err(errCoStaking).
+				Msg("error while calculating co-staking apr")
+			// in case of error, maxStakingAPR = btcStakingAPR
+			maxStakingAPR = btcStakingAPR
+		} else {
+			maxStakingAPR = btcStakingAPR + coStakingAPR
+		}
+	}
+
 	return &OverallStatsPublic{
 		ActiveTvl:               overallStats.ActiveTvl,
 		ActiveDelegations:       overallStats.ActiveDelegations,
@@ -248,6 +273,7 @@ func (s *V2Service) GetOverallStats(
 		ActiveFinalityProviders: activeFinalityProvidersCount,
 		TotalFinalityProviders:  totalFinalityProvidersCount,
 		BTCStakingAPR:           btcStakingAPR,
+		MaxStakingAPR:           maxStakingAPR,
 	}, nil
 }
 
@@ -832,6 +858,10 @@ func (s *V2Service) getCostakingTotalScore(ctx context.Context) (int64, error) {
 
 	if cached, found := s.aprCache.Get(key); found {
 		return cached.(int64), nil
+	}
+
+	if s.bbnClient == nil {
+		return 0, errors.New("bbnClient is nil")
 	}
 
 	totalScoreInt, err := s.bbnClient.CostakingTotalScore(ctx)

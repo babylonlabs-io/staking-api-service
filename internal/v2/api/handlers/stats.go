@@ -51,7 +51,7 @@ func (h *V2Handler) GetStakerStats(request *http.Request) (*handler.Result, *typ
 
 // GetStats @Summary Get overall system stats
 //
-//	@Description	Overall system stats
+//	@Description	Overall system stats including max staking APR (BTC + co-staking)
 //	@Produce		json
 //	@Tags			v2
 //	@Success		200	{object}	handler.PublicResponse[v2service.OverallStatsPublic]	""

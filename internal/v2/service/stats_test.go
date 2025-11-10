@@ -77,7 +77,8 @@ func Test_GetOverallStats(t *testing.T) {
 		dbV1.On("GetOverallStats", ctx).Return(&v1dbmodel.OverallStatsDocument{}, nil).Once()
 		err := errors.New("db err")
 		// this error shouldn't trigger error in GetOverallStats method
-		dbShared.On("GetLatestPrice", ctx, mock.Anything).Return(float64(0), err).Once()
+		// We now call GetLatestPrice multiple times: for BTC APR calculation and for max staking APR calculation
+		dbShared.On("GetLatestPrice", ctx, mock.Anything).Return(float64(0), err).Times(3)
 
 		resp, respErr := s.GetOverallStats(ctx)
 		assert.Nil(t, respErr)
