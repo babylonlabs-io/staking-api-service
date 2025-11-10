@@ -244,13 +244,27 @@ func (s *V2Service) GetOverallStats(
 
 	// Calculate max staking APR (BTC staking + co-staking)
 	var maxStakingAPR float64
-	btcPrice, errBtcPrice := s.sharedService.GetLatestBTCPrice(ctx)
-	babyPrice, errBabyPrice := s.sharedService.GetLatestBABYPrice(ctx)
-	totalScore, errTotalScore := s.getCostakingTotalScore(ctx)
 
-	if errBtcPrice != nil || errBabyPrice != nil || errTotalScore != nil {
+	var totalScore int64
+	var btcPrice, babyPrice float64
+	var errBtcPrice, errBabyPrice, errTotalScore error
+
+	var wg conc.WaitGroup
+	wg.Go(func() {
+		btcPrice, errBtcPrice = s.sharedService.GetLatestBTCPrice(ctx)
+	})
+	wg.Go(func() {
+		babyPrice, errBabyPrice = s.sharedService.GetLatestBABYPrice(ctx)
+	})
+	wg.Go(func() {
+		totalScore, errTotalScore = s.getCostakingTotalScore(ctx)
+	})
+	wg.Wait()
+
+	err = errors.Join(errBtcPrice, errBabyPrice, errTotalScore)
+	if err != nil {
 		log.Ctx(ctx).Error().
-			Err(errors.Join(errBtcPrice, errBabyPrice, errTotalScore)).
+			Err(err).
 			Msg("error while fetching data for max staking apr calculation")
 		// in case of error we use zero value in MaxStakingAPR
 	} else {
