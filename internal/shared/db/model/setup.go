@@ -35,6 +35,9 @@ const (
 	V2FinalityProviderStatsCollection     = "v2_finality_providers_stats"
 	V2StakerStatsCollection               = "v2_staker_stats"
 	V2FinalityProvidersMetadataCollection = "v2_finality_providers_metadata"
+	// Indexer collections (source of truth, read-only from API perspective)
+	IndexerStatsCollection                 = "stats"
+	IndexerFinalityProviderStatsCollection = "finality_provider_stats"
 	// v3
 )
 

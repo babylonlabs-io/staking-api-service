@@ -32,6 +32,9 @@ type IndexerDBClient interface {
 		states []indexertypes.DelegationState,
 	) ([]indexerdbmodel.IndexerDelegationDetails, error)
 	GetChainInfo(ctx context.Context) (*indexerdbmodel.ChainInfo, error)
+	// Stats
+	GetOverallStats(ctx context.Context) (*indexerdbmodel.IndexerStatsDocument, error)
+	GetFinalityProviderStats(ctx context.Context, fpPkHexes []string) ([]*indexerdbmodel.IndexerFinalityProviderStatsDocument, error)
 }
 
 type DelegationFilter struct {
