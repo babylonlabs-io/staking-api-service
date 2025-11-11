@@ -540,12 +540,8 @@ definitions:
         type: number
       boost:
         $ref: '#/definitions/v2service.apr'
-      btc_staking_apr:
-        type: number
       current:
         $ref: '#/definitions/v2service.apr'
-      max_staking_apr:
-        type: number
     type: object
   v2service.StakingSlashing:
     properties:
