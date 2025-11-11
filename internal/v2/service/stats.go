@@ -59,9 +59,6 @@ type StakingAPRPublic struct {
 	Current                      apr     `json:"current"`
 	AdditionalBabyNeededForBoost float64 `json:"additional_baby_needed_for_boost"`
 	Boost                        apr     `json:"boost"`
-
-	BtcStaking float64 `json:"btc_staking_apr"`
-	MaxStaking float64 `json:"max_staking_apr"`
 }
 
 // GetStakingAPR calculates personalized apr based on user's BTC and BABY stake
@@ -137,11 +134,6 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 	// Convert from ubbn to BABY for display
 	additionalBabyNeededInBaby := additionalBabyNeeded / float64(pkg.UbbnPerBaby)
 
-	coStakingAPR, err := s.calculateCoStakingAPR(ctx, babyPrice, btcPrice, globalTotalScore)
-	if err != nil {
-		return nil, types.NewInternalServiceError(fmt.Errorf("failed to calculate co-staking apr: %w", err))
-	}
-
 	return &StakingAPRPublic{
 		Current: apr{
 			BtcStaking:  btcStakingAPR,
@@ -156,8 +148,6 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 			CoStaking:   boostCoStakingAPR,
 			Total:       btcStakingAPR + boostCoStakingAPR,
 		},
-		BtcStaking: btcStakingAPR,
-		MaxStaking: btcStakingAPR + coStakingAPR,
 	}, nil
 }
 
