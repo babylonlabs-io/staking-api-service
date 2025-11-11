@@ -61,10 +61,6 @@ func processEventMessage(ctx context.Context, queues *v2queue.Queues, event Gene
 		return queues.ActiveStakingQueueClient.SendMessage(ctx, messageBody)
 	case queueClient.UnbondingStakingEventType:
 		return queues.UnbondingStakingQueueClient.SendMessage(ctx, messageBody)
-	case queueClient.WithdrawableStakingEventType:
-		return queues.WithdrawableStakingQueueClient.SendMessage(ctx, messageBody)
-	case queueClient.WithdrawnStakingEventType:
-		return queues.WithdrawnStakingQueueClient.SendMessage(ctx, messageBody)
 	default:
 		return fmt.Errorf("unknown event type: %v", event.EventType)
 	}
