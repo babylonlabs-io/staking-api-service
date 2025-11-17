@@ -47,7 +47,7 @@ address_screening:
   enabled: true
 external_apis:
   coinmarketcap:
-    api_key: "coinmarketcap_api_key"
+    api_key: "9d2f6ffe-2fc0-4208-91b6-453701b558b1"
     base_url: "https://pro-api.coinmarketcap.com/v1"
     timeout: 10s  # http client timeout
     cache_ttl: 300s  # mongodb ttl
@@ -55,7 +55,7 @@ external_apis:
     api_key: "chainalysis_api_key"
     base_url: "https://api.chainalysis.com"
 bbn:
-  rpc-addr: https://rpc-dapp.devnet.babylonlabs.io:443
+  rpc-addr: https://rpc.canon-devnet.babylonlabs.io:443/
   timeout: 30s
   maxretrytimes: 5
   retryinterval: 500ms
