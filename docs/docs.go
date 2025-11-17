@@ -1539,14 +1539,8 @@ const docTemplate = `{
                 "boost": {
                     "$ref": "#/definitions/v2service.apr"
                 },
-                "btc_staking_apr": {
-                    "type": "number"
-                },
                 "current": {
                     "$ref": "#/definitions/v2service.apr"
-                },
-                "max_staking_apr": {
-                    "type": "number"
                 }
             }
         },
