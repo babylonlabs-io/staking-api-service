@@ -269,9 +269,6 @@ func (s *V2Service) GetOverallStats(
 	wg.Go(func() {
 		totalScore, errTotalScore = s.getCostakingTotalScore(ctx)
 	})
-	wg.Go(func() {
-
-	})
 	wg.Wait()
 
 	err = errors.Join(errBtcPrice, errBabyPrice, errTotalScore)
