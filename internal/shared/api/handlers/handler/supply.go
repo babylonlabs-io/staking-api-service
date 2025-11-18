@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -10,8 +11,11 @@ import (
 
 	cosmosMath "cosmossdk.io/math"
 	"github.com/babylonlabs-io/staking-api-service/pkg"
+	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog/log"
 )
+
+const ubbnTotalSupplyExpiration = time.Minute
 
 // InfoMetrics handler returns supply information to an external client (e.g., CoinMarketCap).
 // Note that the error text is returned to the client, so avoid including sensitive data in errors.
@@ -35,7 +39,7 @@ func (h *Handler) babyTotalSupply(req *http.Request) (any, error) {
 	}
 	ctx := req.Context()
 
-	coin, err := h.bbnClient.TotalSupply(ctx, "ubbn")
+	coin, err := h.getTotalUbbnSupply(ctx)
 	if err != nil {
 		log.Ctx(ctx).Err(err).Msg("Failed to get total supply")
 		return nil, fmt.Errorf("internal error")
@@ -47,6 +51,26 @@ func (h *Handler) babyTotalSupply(req *http.Request) (any, error) {
 	}
 
 	return babyAmount.Int64(), nil
+}
+
+func (h *Handler) getTotalUbbnSupply(ctx context.Context) (types.Coin, error) {
+	const cacheKey = "ubbn_total_supply"
+
+	cacheValue, ok := h.bbnClientCache.Get(cacheKey)
+	if ok {
+		return cacheValue.(types.Coin), nil
+	}
+
+	// using single flight to prevent multiple goroutines fetching data from bbn node at the same time
+	value, err, _ := h.sfGroup.Do("total_supply", func() (any, error) {
+		return h.bbnClient.TotalSupply(ctx, "ubbn")
+	})
+	if err != nil {
+		return types.Coin{}, err
+	}
+
+	h.bbnClientCache.Set(cacheKey, value, ubbnTotalSupplyExpiration)
+	return value.(types.Coin), nil
 }
 
 type vestingFrequency string

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/bbnclient"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
@@ -13,12 +14,18 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 	"github.com/btcsuite/btcd/chaincfg"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/patrickmn/go-cache"
+	"golang.org/x/sync/singleflight"
 )
 
+const bbnClientCacheTTL = time.Minute
+
 type Handler struct {
-	Config    *config.Config
-	Service   service.SharedServiceProvider
-	bbnClient *bbnclient.BBNClient
+	Config         *config.Config
+	Service        service.SharedServiceProvider
+	bbnClient      *bbnclient.BBNClient
+	bbnClientCache *cache.Cache
+	sfGroup        singleflight.Group
 }
 
 func New(config *config.Config, service service.SharedServiceProvider) (*Handler, error) {
@@ -31,7 +38,14 @@ func New(config *config.Config, service service.SharedServiceProvider) (*Handler
 		}
 	}
 
-	return &Handler{Config: config, Service: service, bbnClient: bbnClient}, nil
+	bbnClientCache := cache.New(bbnClientCacheTTL, -1)
+
+	return &Handler{
+		Config:         config,
+		Service:        service,
+		bbnClient:      bbnClient,
+		bbnClientCache: bbnClientCache,
+	}, nil
 }
 
 type ResultOptions struct {
