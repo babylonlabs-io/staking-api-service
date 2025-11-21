@@ -578,7 +578,6 @@ definitions:
     - PENDING
     - VERIFIED
     - ACTIVE
-    - SLASHED
     - TIMELOCK_UNBONDING
     - EARLY_UNBONDING
     - TIMELOCK_WITHDRAWABLE
@@ -589,13 +588,13 @@ definitions:
     - EARLY_UNBONDING_WITHDRAWN
     - TIMELOCK_SLASHING_WITHDRAWN
     - EARLY_UNBONDING_SLASHING_WITHDRAWN
+    - SLASHED
     - EXPANDED
     type: string
     x-enum-varnames:
     - StatePending
     - StateVerified
     - StateActive
-    - StateSlashed
     - StateTimelockUnbonding
     - StateEarlyUnbonding
     - StateTimelockWithdrawable
@@ -606,6 +605,7 @@ definitions:
     - StateEarlyUnbondingWithdrawn
     - StateTimelockSlashingWithdrawn
     - StateEarlyUnbondingSlashingWithdrawn
+    - StateSlashed
     - StateExpanded
 info:
   contact:

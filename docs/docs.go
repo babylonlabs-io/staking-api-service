@@ -1597,7 +1597,6 @@ const docTemplate = `{
                 "PENDING",
                 "VERIFIED",
                 "ACTIVE",
-                "SLASHED",
                 "TIMELOCK_UNBONDING",
                 "EARLY_UNBONDING",
                 "TIMELOCK_WITHDRAWABLE",
@@ -1608,13 +1607,13 @@ const docTemplate = `{
                 "EARLY_UNBONDING_WITHDRAWN",
                 "TIMELOCK_SLASHING_WITHDRAWN",
                 "EARLY_UNBONDING_SLASHING_WITHDRAWN",
+                "SLASHED",
                 "EXPANDED"
             ],
             "x-enum-varnames": [
                 "StatePending",
                 "StateVerified",
                 "StateActive",
-                "StateSlashed",
                 "StateTimelockUnbonding",
                 "StateEarlyUnbonding",
                 "StateTimelockWithdrawable",
@@ -1625,6 +1624,7 @@ const docTemplate = `{
                 "StateEarlyUnbondingWithdrawn",
                 "StateTimelockSlashingWithdrawn",
                 "StateEarlyUnbondingSlashingWithdrawn",
+                "StateSlashed",
                 "StateExpanded"
             ]
         }

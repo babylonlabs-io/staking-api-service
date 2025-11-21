@@ -78,15 +78,41 @@ against the unbonding transaction and
 stores it for further processing by the unbonding pipeline.
 3. **Committee Co-Signing**: The unbonding pipeline collects additional signatures 
 from the covenant committee and submits the unbonding transaction to the Bitcoin network.
-4. **Transaction Detection**: The unbonding transaction is detected by the staking-indexer 
-once it receives a sufficient number of confirmations and a corresponding [unbonding event](https://github.com/babylonlabs-io/staking-queue-client/blob/main/client/schema.go#L70) 
+4. **Transaction Detection**: The unbonding transaction is detected by the staking-indexer
+once it receives a sufficient number of confirmations and a corresponding [unbonding event](https://github.com/babylonlabs-io/staking-queue-client/blob/main/client/schema.go#L70)
 is placed into the RabbitMQ queue.
-5. **Processing and State Management**: Similar to the standard path, the staking API service 
+5. **Processing and State Management**: Similar to the standard path, the staking API service
 handles statistical updates, adjusts the staking state, and inserts a record into the `timelock_queue`.
-6. **Finalization**: The expire-service processes items from the `timelock_queue` in 
-MongoDB and emits an [expired event](https://github.com/babylonlabs-io/staking-queue-client/blob/main/client/schema.go#L130) 
-to RabbitMQ for the staking-api-service to process. This marks completed staking 
+6. **Finalization**: The expire-service processes items from the `timelock_queue` in
+MongoDB and emits an [expired event](https://github.com/babylonlabs-io/staking-queue-client/blob/main/client/schema.go#L130)
+to RabbitMQ for the staking-api-service to process. This marks completed staking
 transactions as `unbonded`. This status displays to the user that the staking transaction is ready for withdrawal.
+
+## Documentation
+
+### Delegation Statuses
+
+The Staking API returns detailed status information for each delegation. Understanding these statuses is crucial for building user interfaces and handling delegation lifecycle events properly.
+
+📖 **[Complete Delegation Status Guide](docs/delegation-statuses.md)**
+
+This guide explains:
+- All 15 possible delegation status values
+- What each status means for stakers
+- What actions users can/should take in each status
+- Common delegation journeys (happy path, early unbonding, slashing scenarios)
+- Technical details about how statuses are generated from indexer states
+
+**Quick Reference - Status Categories**:
+- **Setup**: PENDING, VERIFIED, ACTIVE
+- **Unbonding**: TIMELOCK_UNBONDING, EARLY_UNBONDING
+- **Withdrawable**: TIMELOCK_WITHDRAWABLE, EARLY_UNBONDING_WITHDRAWABLE, TIMELOCK_SLASHING_WITHDRAWABLE, EARLY_UNBONDING_SLASHING_WITHDRAWABLE
+- **Withdrawn**: TIMELOCK_WITHDRAWN, EARLY_UNBONDING_WITHDRAWN, TIMELOCK_SLASHING_WITHDRAWN, EARLY_UNBONDING_SLASHING_WITHDRAWN
+- **Special**: SLASHED, EXPANDED
+
+### Additional Documentation
+
+- [Ordinals Support](docs/ordinals.md) - Information about Bitcoin ordinals handling
 
 ## Getting Started
 
@@ -130,6 +156,14 @@ make tests
 1. Make sure the interfaces such as the `DBClient`is up to date
 2. Install `mockery`: https://vektra.github.io/mockery/latest/
 3. Run `make generate-mock-interface`
+
+### Regenerate Swagger Documentation
+
+After making changes to API handlers or type definitions (especially delegation states):
+
+1. Install `swag`: `go install github.com/swaggo/swag/cmd/swag@latest`
+2. Run `make build-swagger`
+3. The updated swagger files will be generated in `docs/` directory
 
 ## Contribution
 
