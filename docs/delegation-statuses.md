@@ -29,8 +29,6 @@ The Babylon blockchain tracks delegations using 5 core states:
 - **UNBONDED**: Either unbonded early or timelock conditions met
 - **EXPIRED**: Natural expiration occurred
 
-**Code Reference**: `babylon/x/btcstaking/types/btcstaking.pb.go:37-66`
-
 ### Indexer Layer
 
 The Staking Indexer enhances Babylon's states with:
@@ -48,8 +46,6 @@ The Staking Indexer enhances Babylon's states with:
 The Staking API **flattens** the indexer's state model into 15 user-friendly statuses:
 - Combines State + SubState into a single status field
 - Example: `State=UNBONDING, SubState=EARLY_UNBONDING` → `status=EARLY_UNBONDING`
-
-**Code Reference**: `staking-api-service/internal/v2/types/delegation_states.go:69` (MapDelegationState function)
 
 ---
 
