@@ -30,7 +30,7 @@ type SlashingTx struct {
 }
 
 type WithdrawalTx struct {
-	TxHash string `bson:"tx_hash"`
+	TxHash string `bson:"tx_hash,omitempty"`
 }
 
 type IndexerDelegationDetails struct {
