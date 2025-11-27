@@ -29,6 +29,10 @@ type SlashingTx struct {
 	SpendingHeight         uint32 `bson:"spending_height"`
 }
 
+type WithdrawalTx struct {
+	TxHash string `bson:"tx_hash,omitempty"`
+}
+
 type IndexerDelegationDetails struct {
 	StakingTxHashHex             string                          `bson:"_id"` // Primary key
 	StakingTxHex                 string                          `bson:"staking_tx_hex"`
@@ -48,6 +52,7 @@ type IndexerDelegationDetails struct {
 	CovenantSignatures           []CovenantSignature             `bson:"covenant_unbonding_signatures"`
 	BTCDelegationCreatedBbnBlock BTCDelegationCreatedBbnBlock    `bson:"btc_delegation_created_bbn_block"`
 	SlashingTx                   SlashingTx                      `bson:"slashing_tx"`
+	WithdrawalTx                 WithdrawalTx                    `bson:"withdrawal_tx,omitempty"`
 	PreviousStakingTxHashHex     string                          `bson:"previous_staking_tx_hash_hex"`
 }
 
