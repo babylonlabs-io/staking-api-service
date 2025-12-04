@@ -39,6 +39,10 @@ type UnbondingSlashing struct {
 	SpendingHeight         uint32 `json:"spending_height"`
 }
 
+type WithdrawalInfo struct {
+	TxHash string `json:"tx_hash"`
+}
+
 type CovenantSignature struct {
 	CovenantBtcPkHex           string `json:"covenant_btc_pk_hex"`
 	SignatureHex               string `json:"signature_hex"`
@@ -59,6 +63,7 @@ type DelegationPublic struct {
 	DelegationStaking         DelegationStaking       `json:"delegation_staking"`
 	DelegationUnbonding       DelegationUnbonding     `json:"delegation_unbonding"`
 	State                     v2types.DelegationState `json:"state"`
+	WithdrawalInfo            *WithdrawalInfo         `json:"withdrawal_info,omitempty"`
 	PreviousStakingTxHashHex  string                  `json:"previous_staking_tx_hash_hex,omitempty"`
 }
 
@@ -106,6 +111,13 @@ func FromDelegationDocument(delegation indexerdbmodel.IndexerDelegationDetails) 
 		},
 		State:                    state,
 		PreviousStakingTxHashHex: delegation.PreviousStakingTxHashHex,
+	}
+
+	// Add withdrawal info if available
+	if delegation.WithdrawalTx.TxHash != "" {
+		delegationPublic.WithdrawalInfo = &WithdrawalInfo{
+			TxHash: delegation.WithdrawalTx.TxHash,
+		}
 	}
 
 	return delegationPublic, nil
