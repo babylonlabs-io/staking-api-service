@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const defaultTimeout = 5 * 1000 * time.Millisecond // 5 seconds
+const defaultTimeout = 5 * time.Second
 
 type Interface interface {
 	AssessAddress(ctx context.Context, address string) (*AddressAssessment, error)

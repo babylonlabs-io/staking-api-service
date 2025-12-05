@@ -19,7 +19,7 @@ func (c *Client) GetBaseURL() string {
 }
 
 func (c *Client) GetDefaultRequestTimeoutMS() time.Duration {
-	return 5000 * time.Millisecond // 5 seconds
+	return 5 * time.Second
 }
 
 func (c *Client) GetHttpClient() *http.Client {
