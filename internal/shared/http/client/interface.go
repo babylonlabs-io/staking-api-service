@@ -1,9 +1,12 @@
 package client
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 type HttpClient interface {
 	GetBaseURL() string
-	GetDefaultRequestTimeout() int
+	GetDefaultRequestTimeoutMS() time.Duration
 	GetHttpClient() *http.Client
 }

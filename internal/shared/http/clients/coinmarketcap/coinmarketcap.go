@@ -38,8 +38,8 @@ func (c *Client) GetBaseURL() string {
 	return baseURL
 }
 
-func (c *Client) GetDefaultRequestTimeout() int {
-	return c.requestTimeout
+func (c *Client) GetDefaultRequestTimeoutMS() time.Duration {
+	return time.Duration(c.requestTimeout) * time.Millisecond
 }
 
 func (c *Client) GetHttpClient() *http.Client {
