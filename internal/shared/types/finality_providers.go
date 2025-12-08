@@ -13,6 +13,14 @@ const (
 	FinalityProviderStateStandby FinalityProviderQueryingState = "standby"
 )
 
+// MapFinalityProviderState maps database states to API-facing states.
+func MapFinalityProviderState(dbState string) FinalityProviderQueryingState {
+	if dbState == "FINALITY_PROVIDER_STATUS_ACTIVE" {
+		return FinalityProviderStateActive
+	}
+	return FinalityProviderStateStandby
+}
+
 type FinalityProviderDescription struct {
 	Moniker         string `json:"moniker"`
 	Identity        string `json:"identity"`

@@ -168,6 +168,7 @@ definitions:
     type: object
   map_string_float64:
     additionalProperties:
+      format: float64
       type: number
     type: object
   map_string_string:
@@ -205,14 +206,6 @@ definitions:
       website:
         type: string
     type: object
-  types.FinalityProviderQueryingState:
-    enum:
-    - active
-    - standby
-    type: string
-    x-enum-varnames:
-    - FinalityProviderStateActive
-    - FinalityProviderStateStandby
   v1handlers.DelegationCheckPublicResponse:
     properties:
       code:
@@ -397,6 +390,8 @@ definitions:
         type: string
       state:
         $ref: '#/definitions/v2types.DelegationState'
+      withdrawal_info:
+        $ref: '#/definitions/v2service.WithdrawalInfo'
     type: object
   v2service.DelegationStaking:
     properties:
@@ -449,7 +444,7 @@ definitions:
       logo_url:
         type: string
       state:
-        $ref: '#/definitions/types.FinalityProviderQueryingState'
+        $ref: '#/definitions/v2types.FinalityProviderQueryingState'
       type:
         type: string
     type: object
@@ -562,6 +557,11 @@ definitions:
       unbonding_slashing_tx_hex:
         type: string
     type: object
+  v2service.WithdrawalInfo:
+    properties:
+      tx_hash:
+        type: string
+    type: object
   v2service.apr:
     properties:
       baby_staking_apr:
@@ -607,6 +607,14 @@ definitions:
     - StateEarlyUnbondingSlashingWithdrawn
     - StateSlashed
     - StateExpanded
+  v2types.FinalityProviderQueryingState:
+    enum:
+    - active
+    - standby
+    type: string
+    x-enum-varnames:
+    - FinalityProviderStateActive
+    - FinalityProviderStateStandby
 info:
   contact:
     email: contact@babylonlabs.io

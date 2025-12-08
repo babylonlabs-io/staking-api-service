@@ -987,7 +987,8 @@ const docTemplate = `{
         "map_string_float64": {
             "type": "object",
             "additionalProperties": {
-                "type": "number"
+                "type": "number",
+                "format": "float64"
             }
         },
         "map_string_string": {
@@ -1036,17 +1037,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "types.FinalityProviderQueryingState": {
-            "type": "string",
-            "enum": [
-                "active",
-                "standby"
-            ],
-            "x-enum-varnames": [
-                "FinalityProviderStateActive",
-                "FinalityProviderStateStandby"
-            ]
         },
         "v1handlers.DelegationCheckPublicResponse": {
             "type": "object",
@@ -1328,6 +1318,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/v2types.DelegationState"
+                },
+                "withdrawal_info": {
+                    "$ref": "#/definitions/v2service.WithdrawalInfo"
                 }
             }
         },
@@ -1408,7 +1401,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "state": {
-                    "$ref": "#/definitions/types.FinalityProviderQueryingState"
+                    "$ref": "#/definitions/v2types.FinalityProviderQueryingState"
                 },
                 "type": {
                     "type": "string"
@@ -1574,6 +1567,14 @@ const docTemplate = `{
                 }
             }
         },
+        "v2service.WithdrawalInfo": {
+            "type": "object",
+            "properties": {
+                "tx_hash": {
+                    "type": "string"
+                }
+            }
+        },
         "v2service.apr": {
             "type": "object",
             "properties": {
@@ -1626,6 +1627,17 @@ const docTemplate = `{
                 "StateEarlyUnbondingSlashingWithdrawn",
                 "StateSlashed",
                 "StateExpanded"
+            ]
+        },
+        "v2types.FinalityProviderQueryingState": {
+            "type": "string",
+            "enum": [
+                "active",
+                "standby"
+            ],
+            "x-enum-varnames": [
+                "FinalityProviderStateActive",
+                "FinalityProviderStateStandby"
             ]
         }
     },

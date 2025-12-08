@@ -34,7 +34,7 @@ func mapToFinalityProviderStatsPublic(
 ) *FinalityProviderPublic {
 	return &FinalityProviderPublic{
 		BtcPk:             provider.BtcPk,
-		State:             types.FinalityProviderQueryingState(provider.State),
+		State:             types.MapFinalityProviderState(string(provider.State)),
 		Description:       types.FinalityProviderDescription(provider.Description),
 		Commission:        provider.Commission,
 		ActiveTvl:         fpStats.ActiveTvl,
