@@ -18,7 +18,7 @@ func (c *Client) GetBaseURL() string {
 	return "https://keybase.io"
 }
 
-func (c *Client) GetDefaultRequestTimeoutMS() time.Duration {
+func (c *Client) GetDefaultRequestTimeout() time.Duration {
 	return 5 * time.Second
 }
 

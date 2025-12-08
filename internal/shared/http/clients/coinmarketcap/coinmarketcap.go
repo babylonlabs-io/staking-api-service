@@ -38,7 +38,7 @@ func (c *Client) GetBaseURL() string {
 	return baseURL
 }
 
-func (c *Client) GetDefaultRequestTimeoutMS() time.Duration {
+func (c *Client) GetDefaultRequestTimeout() time.Duration {
 	return time.Duration(c.requestTimeout) * time.Millisecond
 }
 

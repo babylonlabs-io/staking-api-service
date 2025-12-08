@@ -23,7 +23,7 @@ func (c *Client) GetBaseURL() string {
 	return c.baseURL
 }
 
-func (c *Client) GetDefaultRequestTimeoutMS() time.Duration {
+func (c *Client) GetDefaultRequestTimeout() time.Duration {
 	return defaultTimeout
 }
 

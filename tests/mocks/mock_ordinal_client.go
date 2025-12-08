@@ -70,12 +70,12 @@ func (_m *OrdinalsClient) GetBaseURL() string {
 	return r0
 }
 
-// GetDefaultRequestTimeoutMS provides a mock function with no fields
-func (_m *OrdinalsClient) GetDefaultRequestTimeoutMS() time.Duration {
+// GetDefaultRequestTimeout provides a mock function with no fields
+func (_m *OrdinalsClient) GetDefaultRequestTimeout() time.Duration {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetDefaultRequestTimeoutMS")
+		panic("no return value specified for GetDefaultRequestTimeout")
 	}
 
 	var r0 time.Duration

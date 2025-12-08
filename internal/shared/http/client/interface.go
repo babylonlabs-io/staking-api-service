@@ -7,6 +7,6 @@ import (
 
 type HttpClient interface {
 	GetBaseURL() string
-	GetDefaultRequestTimeoutMS() time.Duration
+	GetDefaultRequestTimeout() time.Duration
 	GetHttpClient() *http.Client
 }

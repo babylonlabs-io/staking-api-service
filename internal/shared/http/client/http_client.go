@@ -45,7 +45,7 @@ func sendRequest[I any, R any](
 		return nil, types.NewInternalServiceError(fmt.Errorf("method %s is not allowed", method))
 	}
 	url := fmt.Sprintf("%s%s", client.GetBaseURL(), opts.Path)
-	timeout := client.GetDefaultRequestTimeoutMS()
+	timeout := client.GetDefaultRequestTimeout()
 	// If timeout is set, use it instead of the default
 	if opts.Timeout != 0 {
 		timeout = opts.Timeout

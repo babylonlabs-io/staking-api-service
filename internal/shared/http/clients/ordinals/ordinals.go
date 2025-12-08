@@ -46,7 +46,7 @@ func (c *Ordinals) GetBaseURL() string {
 	return fmt.Sprintf("%s:%s", c.config.Host, c.config.Port)
 }
 
-func (c *Ordinals) GetDefaultRequestTimeoutMS() time.Duration {
+func (c *Ordinals) GetDefaultRequestTimeout() time.Duration {
 	return time.Duration(c.config.Timeout) * time.Millisecond
 }
 

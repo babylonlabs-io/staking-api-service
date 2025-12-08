@@ -11,7 +11,7 @@ import (
 //go:generate mockery --name=OrdinalsClient --output=../../../../../tests/mocks --outpkg=mocks --filename=mock_ordinal_client.go
 type OrdinalsClient interface {
 	GetBaseURL() string
-	GetDefaultRequestTimeoutMS() time.Duration
+	GetDefaultRequestTimeout() time.Duration
 	GetHttpClient() *http.Client
 	/*
 		FetchUTXOInfos fetches UTXO information from the ordinal service
