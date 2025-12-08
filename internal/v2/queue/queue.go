@@ -18,13 +18,11 @@ import (
 )
 
 type Queues struct {
-	Handlers                       *v2queuehandler.V2QueueHandler
-	processingTimeout              time.Duration
-	maxRetryAttempts               int32
-	ActiveStakingQueueClient       client.QueueClient
-	UnbondingStakingQueueClient    client.QueueClient
-	WithdrawableStakingQueueClient client.QueueClient
-	WithdrawnStakingQueueClient    client.QueueClient
+	Handlers                    *v2queuehandler.V2QueueHandler
+	processingTimeout           time.Duration
+	maxRetryAttempts            int32
+	ActiveStakingQueueClient    client.QueueClient
+	UnbondingStakingQueueClient client.QueueClient
 }
 
 func New(cfg *queueConfig.QueueConfig, service *services.Services) (*Queues, error) {
@@ -42,29 +40,13 @@ func New(cfg *queueConfig.QueueConfig, service *services.Services) (*Queues, err
 		return nil, fmt.Errorf("error while creating UnbondingStakingQueueClient: %w", err)
 	}
 
-	withdrawableStakingQueueClient, err := client.NewQueueClient(
-		cfg, client.WithdrawableStakingQueueName,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error while creating WithdrawableStakingQueueClient: %w", err)
-	}
-
-	withdrawnStakingQueueClient, err := client.NewQueueClient(
-		cfg, client.WithdrawnStakingQueueName,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error while creating WithdrawnStakingQueueClient: %w", err)
-	}
-
 	handlers := v2queuehandler.NewV2QueueHandler(service)
 	return &Queues{
-		Handlers:                       handlers,
-		processingTimeout:              cfg.QueueProcessingTimeout,
-		maxRetryAttempts:               cfg.MsgMaxRetryAttempts,
-		ActiveStakingQueueClient:       activeStakingQueueClient,
-		UnbondingStakingQueueClient:    unbondingStakingQueueClient,
-		WithdrawableStakingQueueClient: withdrawableStakingQueueClient,
-		WithdrawnStakingQueueClient:    withdrawnStakingQueueClient,
+		Handlers:                    handlers,
+		processingTimeout:           cfg.QueueProcessingTimeout,
+		maxRetryAttempts:            cfg.MsgMaxRetryAttempts,
+		ActiveStakingQueueClient:    activeStakingQueueClient,
+		UnbondingStakingQueueClient: unbondingStakingQueueClient,
 	}, nil
 }
 
@@ -83,14 +65,6 @@ func (q *Queues) StartReceivingMessages() error {
 		{
 			q.UnbondingStakingQueueClient,
 			q.Handlers.UnbondingStakingHandler, q.Handlers.HandleUnprocessedMessage,
-		},
-		{
-			q.WithdrawableStakingQueueClient,
-			q.Handlers.WithdrawableStakingHandler, q.Handlers.HandleUnprocessedMessage,
-		},
-		{
-			q.WithdrawnStakingQueueClient,
-			q.Handlers.WithdrawnStakingHandler, q.Handlers.HandleUnprocessedMessage,
 		},
 		// ...add more queues here
 	}
@@ -121,18 +95,6 @@ func (q *Queues) StopReceivingMessages() {
 	if unbondingQueueErr != nil {
 		log.Error().Err(unbondingQueueErr).
 			Str("queueName", q.UnbondingStakingQueueClient.GetQueueName()).
-			Msg("error while stopping queue")
-	}
-	withdrawableQueueErr := q.WithdrawableStakingQueueClient.Stop()
-	if withdrawableQueueErr != nil {
-		log.Error().Err(withdrawableQueueErr).
-			Str("queueName", q.WithdrawableStakingQueueClient.GetQueueName()).
-			Msg("error while stopping queue")
-	}
-	withdrawnQueueErr := q.WithdrawnStakingQueueClient.Stop()
-	if withdrawnQueueErr != nil {
-		log.Error().Err(withdrawnQueueErr).
-			Str("queueName", q.WithdrawnStakingQueueClient.GetQueueName()).
 			Msg("error while stopping queue")
 	}
 	// ...add more queues here
@@ -252,8 +214,6 @@ func (q *Queues) IsConnectionHealthy() error {
 
 	checkQueue("ActiveStakingQueueClient", q.ActiveStakingQueueClient)
 	checkQueue("UnbondingStakingQueueClient", q.UnbondingStakingQueueClient)
-	checkQueue("WithdrawableStakingQueueClient", q.WithdrawableStakingQueueClient)
-	checkQueue("WithdrawnStakingQueueClient", q.WithdrawnStakingQueueClient)
 
 	if len(errorMessages) > 0 {
 		return fmt.Errorf("queue health check failed: %s", strings.Join(errorMessages, "; "))
