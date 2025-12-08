@@ -168,12 +168,33 @@ definitions:
     type: object
   map_string_float64:
     additionalProperties:
+      format: float64
       type: number
     type: object
   map_string_string:
     additionalProperties:
       type: string
     type: object
+  types.DelegationState:
+    enum:
+    - active
+    - unbonding_requested
+    - unbonding
+    - unbonded
+    - withdrawable
+    - withdrawn
+    - transitioned
+    - slashed
+    type: string
+    x-enum-varnames:
+    - Active
+    - UnbondingRequested
+    - Unbonding
+    - Unbonded
+    - Withdrawable
+    - Withdrawn
+    - Transitioned
+    - Slashed
   types.ErrorCode:
     enum:
     - INTERNAL_SERVICE_ERROR
@@ -250,7 +271,7 @@ definitions:
       staking_value:
         type: integer
       state:
-        type: string
+        $ref: '#/definitions/types.DelegationState'
       unbonding_tx:
         $ref: '#/definitions/v1service.TransactionPublic'
     type: object
@@ -397,6 +418,8 @@ definitions:
         type: string
       state:
         $ref: '#/definitions/v2types.DelegationState'
+      withdrawal_info:
+        $ref: '#/definitions/v2service.WithdrawalInfo'
     type: object
   v2service.DelegationStaking:
     properties:
@@ -560,6 +583,11 @@ definitions:
       spending_height:
         type: integer
       unbonding_slashing_tx_hex:
+        type: string
+    type: object
+  v2service.WithdrawalInfo:
+    properties:
+      tx_hash:
         type: string
     type: object
   v2service.apr:

@@ -987,7 +987,8 @@ const docTemplate = `{
         "map_string_float64": {
             "type": "object",
             "additionalProperties": {
-                "type": "number"
+                "type": "number",
+                "format": "float64"
             }
         },
         "map_string_string": {
@@ -995,6 +996,29 @@ const docTemplate = `{
             "additionalProperties": {
                 "type": "string"
             }
+        },
+        "types.DelegationState": {
+            "type": "string",
+            "enum": [
+                "active",
+                "unbonding_requested",
+                "unbonding",
+                "unbonded",
+                "withdrawable",
+                "withdrawn",
+                "transitioned",
+                "slashed"
+            ],
+            "x-enum-varnames": [
+                "Active",
+                "UnbondingRequested",
+                "Unbonding",
+                "Unbonded",
+                "Withdrawable",
+                "Withdrawn",
+                "Transitioned",
+                "Slashed"
+            ]
         },
         "types.ErrorCode": {
             "type": "string",
@@ -1104,7 +1128,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "state": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.DelegationState"
                 },
                 "unbonding_tx": {
                     "$ref": "#/definitions/v1service.TransactionPublic"
@@ -1328,6 +1352,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/v2types.DelegationState"
+                },
+                "withdrawal_info": {
+                    "$ref": "#/definitions/v2service.WithdrawalInfo"
                 }
             }
         },
@@ -1570,6 +1597,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "unbonding_slashing_tx_hex": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2service.WithdrawalInfo": {
+            "type": "object",
+            "properties": {
+                "tx_hash": {
                     "type": "string"
                 }
             }
