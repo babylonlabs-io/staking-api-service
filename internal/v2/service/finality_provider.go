@@ -64,6 +64,15 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 
 	finalityProviders := finalityProvidersResult.Data
 
+	if len(finalityProviders) == 0 {
+		log.Ctx(ctx).Warn().Msg("No finality providers found")
+		return nil, "", types.NewErrorWithMsg(
+			http.StatusNotFound,
+			types.NotFound,
+			"finality providers not found, please retry",
+		)
+	}
+
 	fpPkHexes := make([]string, 0, len(finalityProviders))
 	for _, fp := range finalityProviders {
 		fpPkHexes = append(fpPkHexes, fp.BtcPk)
