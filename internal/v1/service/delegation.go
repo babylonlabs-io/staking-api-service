@@ -24,16 +24,16 @@ type TransactionPublic struct {
 }
 
 type DelegationPublic struct {
-	StakingTxHashHex        string             `json:"staking_tx_hash_hex"`
-	StakerPkHex             string             `json:"staker_pk_hex"`
-	FinalityProviderPkHex   string             `json:"finality_provider_pk_hex"`
-	State                   string             `json:"state"`
-	StakingValue            uint64             `json:"staking_value"`
-	StakingTx               *TransactionPublic `json:"staking_tx"`
-	UnbondingTx             *TransactionPublic `json:"unbonding_tx,omitempty"`
-	IsOverflow              bool               `json:"is_overflow"`
-	IsEligibleForTransition bool               `json:"is_eligible_for_transition"`
-	IsSlashed               bool               `json:"is_slashed"`
+	StakingTxHashHex        string                `json:"staking_tx_hash_hex"`
+	StakerPkHex             string                `json:"staker_pk_hex"`
+	FinalityProviderPkHex   string                `json:"finality_provider_pk_hex"`
+	State                   types.DelegationState `json:"state"`
+	StakingValue            uint64                `json:"staking_value"`
+	StakingTx               *TransactionPublic    `json:"staking_tx"`
+	UnbondingTx             *TransactionPublic    `json:"unbonding_tx,omitempty"`
+	IsOverflow              bool                  `json:"is_overflow"`
+	IsEligibleForTransition bool                  `json:"is_eligible_for_transition"`
+	IsSlashed               bool                  `json:"is_slashed"`
 }
 
 func (s *V1Service) DelegationsByStakerPk(
@@ -203,7 +203,7 @@ func (s *V1Service) FromDelegationDocument(
 		StakerPkHex:           d.StakerPkHex,
 		FinalityProviderPkHex: d.FinalityProviderPkHex,
 		StakingValue:          d.StakingValue,
-		State:                 d.State.ToString(),
+		State:                 d.State,
 		StakingTx: &TransactionPublic{
 			TxHex:          d.StakingTx.TxHex,
 			OutputIndex:    d.StakingTx.OutputIndex,
