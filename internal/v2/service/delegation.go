@@ -169,10 +169,7 @@ func (s *V2Service) getDelegations(ctx context.Context, paginationKey string, fi
 		ctx, paginationKey, filters...,
 	)
 	if err != nil {
-		if db.IsInvalidPaginationTokenError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching delegations")
-			return nil, "", types.NewError(http.StatusBadRequest, types.BadRequest, err)
-		}
+		// No need for special handling of invalid pagination token, frontend treats all errors the same here
 		return nil, "", types.NewErrorWithMsg(http.StatusInternalServerError, types.InternalServiceError, "failed to get staker delegations")
 	}
 
