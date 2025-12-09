@@ -597,7 +597,7 @@ const docTemplate = `{
         },
         "/v2/network-info": {
             "get": {
-                "description": "Get network info, including staking status and param",
+                "description": "Get network info, including params",
                 "produces": [
                     "application/json"
                 ],
@@ -987,7 +987,8 @@ const docTemplate = `{
         "map_string_float64": {
             "type": "object",
             "additionalProperties": {
-                "type": "number"
+                "type": "number",
+                "format": "float64"
             }
         },
         "map_string_string": {
@@ -1328,6 +1329,9 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/v2types.DelegationState"
+                },
+                "withdrawal_info": {
+                    "$ref": "#/definitions/v2service.WithdrawalInfo"
                 }
             }
         },
@@ -1423,9 +1427,6 @@ const docTemplate = `{
                 },
                 "params": {
                     "$ref": "#/definitions/v2service.ParamsPublic"
-                },
-                "staking_status": {
-                    "$ref": "#/definitions/v2service.StakingStatusPublic"
                 }
             }
         },
@@ -1555,14 +1556,6 @@ const docTemplate = `{
                 }
             }
         },
-        "v2service.StakingStatusPublic": {
-            "type": "object",
-            "properties": {
-                "is_staking_open": {
-                    "type": "boolean"
-                }
-            }
-        },
         "v2service.UnbondingSlashing": {
             "type": "object",
             "properties": {
@@ -1570,6 +1563,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "unbonding_slashing_tx_hex": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2service.WithdrawalInfo": {
+            "type": "object",
+            "properties": {
+                "tx_hash": {
                     "type": "string"
                 }
             }
