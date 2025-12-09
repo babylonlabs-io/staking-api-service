@@ -10,7 +10,7 @@ require (
 	github.com/babylonlabs-io/networks/parameters v0.2.3
 	github.com/babylonlabs-io/staking-queue-client v1.0.0
 	github.com/btcsuite/btcd v0.24.3-0.20241011125836-24eb815168f4
-	github.com/btcsuite/btcd/btcec/v2 v2.3.4
+	github.com/btcsuite/btcd/btcec/v2 v2.3.6
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0
 	github.com/cometbft/cometbft v0.38.19
