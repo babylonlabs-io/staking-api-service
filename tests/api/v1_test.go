@@ -55,16 +55,22 @@ func TestV1_FinalityProviders(t *testing.T) {
 			expectedContents: `{"errorCode":"BAD_REQUEST", "message":"invalid pagination key format"}`,
 		},
 		{
-			testName:         "list all providers",
+			testName:         "list all providers sorted by active_tvl desc",
 			endpoint:         "/v1/finality-providers",
 			expectedHttpCode: http.StatusOK,
-			expectedContents: `{"data":[{"description":{"moniker":"Babylon Foundation 2","identity":"","website":"","security_contact":"","details":""},"commission":"0.080000000000000000","btc_pk":"094f5861be4128861d69ea4b66a5f974943f100f55400bf26f5cce124b4c9af7","active_tvl":0,"total_tvl":0,"active_delegations":0,"total_delegations":0},{"description":{"moniker":"Babylon Foundation 1","identity":"","website":"","security_contact":"","details":""},"commission":"0.060000000000000000","btc_pk":"063deb187a4bf11c114cf825a4726e4c2c35fea5c4c44a20ff08a30a752ec7e0","active_tvl":0,"total_tvl":0,"active_delegations":0,"total_delegations":0},{"description":{"moniker":"Babylon Foundation 3","identity":"","website":"","security_contact":"","details":""},"commission":"0.090000000000000000","btc_pk":"0d2f9728abc45c0cdeefdd73f52a0e0102470e35fb689fc5bc681959a61b021f","active_tvl":0,"total_tvl":0,"active_delegations":0,"total_delegations":0},{"description":{"moniker":"Babylon Foundation 0","identity":"","website":"","security_contact":"","details":""},"commission":"0.050000000000000000","btc_pk":"03d5a0bb72d71993e435d6c5a70e2aa4db500a62cfaae33c56050deefee64ec0","active_tvl":0,"total_tvl":0,"active_delegations":0,"total_delegations":0}],"pagination":{"next_key":""}}`,
+			expectedContents: `{"data":[{"description":{"moniker":"Babylon Foundation 0","identity":"","website":"","security_contact":"","details":""},"commission":"0.050000000000000000","btc_pk":"03d5a0bb72d71993e435d6c5a70e2aa4db500a62cfaae33c56050deefee64ec0","active_tvl":5000000000,"total_tvl":6000000000,"active_delegations":100,"total_delegations":120},{"description":{"moniker":"Babylon Foundation 3","identity":"","website":"","security_contact":"","details":""},"commission":"0.090000000000000000","btc_pk":"0d2f9728abc45c0cdeefdd73f52a0e0102470e35fb689fc5bc681959a61b021f","active_tvl":3000000000,"total_tvl":4000000000,"active_delegations":80,"total_delegations":100}],"pagination":{"next_key":"eyJmaW5hbGl0eV9wcm92aWRlcl9wa19oZXgiOiIwZDJmOTcyOGFiYzQ1YzBjZGVlZmRkNzNmNTJhMGUwMTAyNDcwZTM1ZmI2ODlmYzViYzY4MTk1OWE2MWIwMjFmIiwiYWN0aXZlX3R2bCI6MzAwMDAwMDAwMH0="}}`,
+		},
+		{
+			testName:         "list providers second page sorted by active_tvl desc",
+			endpoint:         "/v1/finality-providers?pagination_key=eyJmaW5hbGl0eV9wcm92aWRlcl9wa19oZXgiOiIwZDJmOTcyOGFiYzQ1YzBjZGVlZmRkNzNmNTJhMGUwMTAyNDcwZTM1ZmI2ODlmYzViYzY4MTk1OWE2MWIwMjFmIiwiYWN0aXZlX3R2bCI6MzAwMDAwMDAwMH0=",
+			expectedHttpCode: http.StatusOK,
+			expectedContents: `{"data":[{"description":{"moniker":"Babylon Foundation 2","identity":"","website":"","security_contact":"","details":""},"commission":"0.080000000000000000","btc_pk":"094f5861be4128861d69ea4b66a5f974943f100f55400bf26f5cce124b4c9af7","active_tvl":2000000000,"total_tvl":2500000000,"active_delegations":50,"total_delegations":60},{"description":{"moniker":"Babylon Foundation 1","identity":"","website":"","security_contact":"","details":""},"commission":"0.060000000000000000","btc_pk":"063deb187a4bf11c114cf825a4726e4c2c35fea5c4c44a20ff08a30a752ec7e0","active_tvl":1000000000,"total_tvl":1500000000,"active_delegations":30,"total_delegations":40}],"pagination":{"next_key":""}}`,
 		},
 		{
 			testName:         "select specific finality provider",
 			endpoint:         "/v1/finality-providers?fp_btc_pk=03d5a0bb72d71993e435d6c5a70e2aa4db500a62cfaae33c56050deefee64ec0",
 			expectedHttpCode: http.StatusOK,
-			expectedContents: `{"data":[{"active_delegations":0,"active_tvl":0,"btc_pk":"03d5a0bb72d71993e435d6c5a70e2aa4db500a62cfaae33c56050deefee64ec0","commission":"0.050000000000000000","description":{"details":"","identity":"","moniker":"Babylon Foundation 0","security_contact":"","website":""},"total_delegations":0,"total_tvl":0}]}`,
+			expectedContents: `{"data":[{"active_delegations":100,"active_tvl":5000000000,"btc_pk":"03d5a0bb72d71993e435d6c5a70e2aa4db500a62cfaae33c56050deefee64ec0","commission":"0.050000000000000000","description":{"details":"","identity":"","moniker":"Babylon Foundation 0","security_contact":"","website":""},"total_delegations":120,"total_tvl":6000000000}]}`,
 		},
 		{
 			testName:         "select non existing finality provider",
