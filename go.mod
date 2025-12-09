@@ -21,7 +21,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/viper v1.21.0
 	github.com/swaggo/swag v1.16.6
-	github.com/unrolled/secure v1.14.0
+	github.com/unrolled/secure v1.17.0
 	golang.org/x/sync v0.16.0
 )
 
