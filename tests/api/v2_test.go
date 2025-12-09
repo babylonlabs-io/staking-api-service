@@ -8,8 +8,13 @@ import (
 )
 
 func TestV2_FinalityProviders(t *testing.T) {
-	contents := `{"data":[{"btc_pk":"bef341a7adb10213a7ec7825afeb7d57fbfa7b5f7bdf201204fb0ef62fb9cfa6","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"verse2","identity":"","website":"https://verse2.io","security_contact":"ted@verse2.io","details":""},"commission":"0.050000000000000000","active_tvl":0,"active_delegations":0,"type":""},{"btc_pk":"d23c2c25e1fcf8fd1c21b9a402c19e2e309e531e45e92fb1e9805b6056b0cc76","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"Babylon Foundation 0","identity":"","website":"https://babylonlabs.io","security_contact":"","details":""},"commission":"0.100000000000000000","active_tvl":0,"active_delegations":0,"type":""},{"btc_pk":"e4889630fa8695dae630c41cd9b85ef165ccc2dc5e5935d5a24393a9defee9ef","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"Babylon Foundation 1","identity":"","website":"https://babylonlabs.io","security_contact":"","details":""},"commission":"0.070000000000000000","active_tvl":0,"active_delegations":0,"type":""}],"pagination":{"next_key":""}}`
-	assertResponse(t, "/v2/finality-providers", http.StatusOK, contents)
+	// First page: returns 2 providers (MaxPaginationLimit=2) with pagination token
+	firstPageContents := `{"data":[{"btc_pk":"bef341a7adb10213a7ec7825afeb7d57fbfa7b5f7bdf201204fb0ef62fb9cfa6","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"verse2","identity":"","website":"https://verse2.io","security_contact":"ted@verse2.io","details":""},"commission":"0.050000000000000000","active_tvl":0,"active_delegations":0,"type":""},{"btc_pk":"d23c2c25e1fcf8fd1c21b9a402c19e2e309e531e45e92fb1e9805b6056b0cc76","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"Babylon Foundation 0","identity":"","website":"https://babylonlabs.io","security_contact":"","details":""},"commission":"0.100000000000000000","active_tvl":0,"active_delegations":0,"type":""}],"pagination":{"next_key":"eyJidGNfcGsiOiJkMjNjMmMyNWUxZmNmOGZkMWMyMWI5YTQwMmMxOWUyZTMwOWU1MzFlNDVlOTJmYjFlOTgwNWI2MDU2YjBjYzc2In0="}}`
+	assertResponse(t, "/v2/finality-providers", http.StatusOK, firstPageContents)
+
+	// Second page: returns remaining 1 provider with empty pagination token
+	secondPageContents := `{"data":[{"btc_pk":"e4889630fa8695dae630c41cd9b85ef165ccc2dc5e5935d5a24393a9defee9ef","state":"FINALITY_PROVIDER_STATUS_ACTIVE","description":{"moniker":"Babylon Foundation 1","identity":"","website":"https://babylonlabs.io","security_contact":"","details":""},"commission":"0.070000000000000000","active_tvl":0,"active_delegations":0,"type":""}],"pagination":{"next_key":""}}`
+	assertResponse(t, "/v2/finality-providers?pagination_key=eyJidGNfcGsiOiJkMjNjMmMyNWUxZmNmOGZkMWMyMWI5YTQwMmMxOWUyZTMwOWU1MzFlNDVlOTJmYjFlOTgwNWI2MDU2YjBjYzc2In0=", http.StatusOK, secondPageContents)
 }
 
 func TestV2_NetworkInfo(t *testing.T) {

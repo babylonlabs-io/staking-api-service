@@ -10,9 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// todo use indexerdbclient.Cfg.MaxPaginationLimit once frontend is ready
-const finalityProvidersLimit = 150
-
 // CountFinalityProvidersByStatus returns counts of finality providers grouped by status
 func (indexerdbclient *IndexerDatabase) CountFinalityProvidersByStatus(
 	ctx context.Context,
@@ -83,7 +80,7 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 		client,
 		filter,
 		opts,
-		finalityProvidersLimit,
+		indexerdbclient.Cfg.MaxPaginationLimit,
 		indexerdbmodel.BuildIndexerFinalityProviderPaginationToken,
 	)
 }
