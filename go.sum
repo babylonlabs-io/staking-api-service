@@ -113,8 +113,8 @@ github.com/babylonlabs-io/babylon-staking-indexer v1.0.5 h1:HNkjuNPuSDpB/BvALd5E
 github.com/babylonlabs-io/babylon-staking-indexer v1.0.5/go.mod h1:6cbnqQ7mP6lznELkO5foLWrStjk9fNYAsQeT1AMBON0=
 github.com/babylonlabs-io/babylon/v4 v4.1.0 h1:IGIWpvh996k6dyOOE3UIw9J23NLCCe3H+nV4DR+2+7U=
 github.com/babylonlabs-io/babylon/v4 v4.1.0/go.mod h1:6vRR3bwtUDElFe9rO8MABHDFOcA21D0ix6KFfGRbgQc=
-github.com/babylonlabs-io/networks/parameters v0.2.2 h1:TCu39fZvjX5f6ZZrjhYe54M6wWxglNewuKu56yE+zrc=
-github.com/babylonlabs-io/networks/parameters v0.2.2/go.mod h1:iEJVOzaLsE33vpP7J4u+CRGfkSIfErUAwRmgCFCBpyI=
+github.com/babylonlabs-io/networks/parameters v0.2.3 h1:T1nigYrU61GWSpJZko3Gylt3T3eHHoxXLWkhw7s3uz0=
+github.com/babylonlabs-io/networks/parameters v0.2.3/go.mod h1:iEJVOzaLsE33vpP7J4u+CRGfkSIfErUAwRmgCFCBpyI=
 github.com/babylonlabs-io/staking-queue-client v1.0.0 h1:mXAxZLJX/NbHW0R/pP3DXu75cIvl8B8ZIVeEdgao6w8=
 github.com/babylonlabs-io/staking-queue-client v1.0.0/go.mod h1:n3fr3c+9LNiJlyETmcrVk94Zn76rAADhGZKxX+rVf+Q=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
