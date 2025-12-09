@@ -9,7 +9,7 @@ import (
 
 // GetNetworkInfo @Summary Get network info
 //
-//	@Description	Get network info, including staking status and param
+//	@Description	Get network info, including params
 //	@Produce		json
 //	@Tags			v2
 //	@Success		200	{object}	v2service.NetworkInfoPublic	"Network info"
