@@ -13,7 +13,6 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.6
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0
-	github.com/cometbft/cometbft v0.38.19
 	github.com/cosmos/cosmos-sdk v0.53.4
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/ory/dockertest v3.3.5+incompatible
@@ -61,6 +60,7 @@ require (
 	github.com/cockroachdb/pebble v1.1.5 // indirect
 	github.com/cockroachdb/redact v1.1.6 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
+	github.com/cometbft/cometbft v0.38.19 // indirect
 	github.com/cometbft/cometbft-db v0.15.0 // indirect
 	github.com/containerd/continuity v0.4.5 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
