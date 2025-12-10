@@ -1,6 +1,6 @@
 module github.com/babylonlabs-io/staking-api-service
 
-go 1.24.3
+go 1.24.11
 
 require (
 	cosmossdk.io/math v1.5.3
