@@ -21,7 +21,7 @@ func New(cfg *config.Config) *Clients {
 	}
 
 	cmcConfig := cfg.ExternalAPIs.CoinMarketCap
-	cmcClient := coinmarketcap.NewClient(cmcConfig.APIKey, int(cmcConfig.Timeout))
+	cmcClient := coinmarketcap.NewClient(cmcConfig.APIKey, cmcConfig.Timeout)
 
 	var chainalysisClient *chainalysis.Client
 	if cfg.ExternalAPIs.Chainalysis != nil {

@@ -22,11 +22,11 @@ const baseURL = "https://pro-api.coinmarketcap.com/v1"
 
 type Client struct {
 	apiKey         string
-	requestTimeout int
+	requestTimeout time.Duration
 	httpClient     *http.Client
 }
 
-func NewClient(apiKey string, requestTimeout int) *Client {
+func NewClient(apiKey string, requestTimeout time.Duration) *Client {
 	return &Client{
 		apiKey:         apiKey,
 		requestTimeout: requestTimeout,
@@ -39,7 +39,7 @@ func (c *Client) GetBaseURL() string {
 }
 
 func (c *Client) GetDefaultRequestTimeout() time.Duration {
-	return time.Duration(c.requestTimeout) * time.Millisecond
+	return c.requestTimeout
 }
 
 func (c *Client) GetHttpClient() *http.Client {

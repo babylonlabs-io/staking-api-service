@@ -47,7 +47,7 @@ func (c *Ordinals) GetBaseURL() string {
 }
 
 func (c *Ordinals) GetDefaultRequestTimeout() time.Duration {
-	return time.Duration(c.config.Timeout) * time.Millisecond
+	return c.config.Timeout
 }
 
 func (c *Ordinals) GetHttpClient() *http.Client {

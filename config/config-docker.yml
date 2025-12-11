@@ -41,7 +41,7 @@ assets:
   ordinals:
     host: "http://ord-poc.devnet.babylonchain.io"
     port: 8888
-    timeout: 1000
+    timeout: 1s
 network_upgrade:
   pop_upgrade_height: 1
 external_apis:
