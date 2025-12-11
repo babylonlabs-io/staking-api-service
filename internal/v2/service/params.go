@@ -6,6 +6,7 @@ import (
 
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/rs/zerolog/log"
 )
 
 type ParamsPublic struct {
@@ -22,6 +23,15 @@ func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.Bb
 		)
 	}
 
+	if len(params) == 0 {
+		log.Ctx(ctx).Warn().Msg("No babylon staking params found")
+		return nil, types.NewErrorWithMsg(
+			http.StatusNotFound,
+			types.NotFound,
+			"babylon staking params not found, please retry",
+		)
+	}
+
 	return params, nil
 }
 
@@ -33,5 +43,15 @@ func (s *V2Service) getBtcCheckpointParams(ctx context.Context) ([]*indexertypes
 			"failed to get btc params",
 		)
 	}
+
+	if len(params) == 0 {
+		log.Ctx(ctx).Warn().Msg("No btc checkpoint params found")
+		return nil, types.NewErrorWithMsg(
+			http.StatusNotFound,
+			types.NotFound,
+			"btc checkpoint params not found, please retry",
+		)
+	}
+
 	return params, nil
 }
