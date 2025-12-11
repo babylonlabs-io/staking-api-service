@@ -1,4 +1,4 @@
-FROM golang:1.24.3-alpine AS builder
+FROM golang:1.24.11-alpine AS builder
 
 ARG VERSION="HEAD"
 
