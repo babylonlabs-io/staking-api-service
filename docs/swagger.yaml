@@ -175,6 +175,26 @@ definitions:
     additionalProperties:
       type: string
     type: object
+  types.DelegationState:
+    enum:
+    - active
+    - unbonding_requested
+    - unbonding
+    - unbonded
+    - withdrawable
+    - withdrawn
+    - transitioned
+    - slashed
+    type: string
+    x-enum-varnames:
+    - Active
+    - UnbondingRequested
+    - Unbonding
+    - Unbonded
+    - Withdrawable
+    - Withdrawn
+    - Transitioned
+    - Slashed
   types.ErrorCode:
     enum:
     - INTERNAL_SERVICE_ERROR
@@ -251,7 +271,7 @@ definitions:
       staking_value:
         type: integer
       state:
-        type: string
+        $ref: '#/definitions/types.DelegationState'
       unbonding_tx:
         $ref: '#/definitions/v1service.TransactionPublic'
     type: object
