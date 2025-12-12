@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	indexertypes "github.com/babylonlabs-io/staking-api-service/internal/indexer/types"
-	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 	"github.com/rs/zerolog/log"
 )
@@ -18,13 +17,18 @@ type ParamsPublic struct {
 func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.BbnStakingParams, *types.Error) {
 	params, err := s.dbClients.IndexerDBClient.GetBbnStakingParams(ctx)
 	if err != nil {
-		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("Babylon params not found")
-			return nil, types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "babylon params not found.")
-		}
 		return nil, types.NewErrorWithMsg(
 			http.StatusInternalServerError, types.InternalServiceError,
 			"failed to get babylon params",
+		)
+	}
+
+	if len(params) == 0 {
+		log.Ctx(ctx).Warn().Msg("No babylon staking params found")
+		return nil, types.NewErrorWithMsg(
+			http.StatusNotFound,
+			types.NotFound,
+			"babylon staking params not found, please retry",
 		)
 	}
 
@@ -34,14 +38,20 @@ func (s *V2Service) getBbnStakingParams(ctx context.Context) ([]*indexertypes.Bb
 func (s *V2Service) getBtcCheckpointParams(ctx context.Context) ([]*indexertypes.BtcCheckpointParams, *types.Error) {
 	params, err := s.dbClients.IndexerDBClient.GetBtcCheckpointParams(ctx)
 	if err != nil {
-		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("BTC params not found")
-			return nil, types.NewErrorWithMsg(http.StatusNotFound, types.NotFound, "btc params not found, please retry")
-		}
 		return nil, types.NewErrorWithMsg(
 			http.StatusInternalServerError, types.InternalServiceError,
 			"failed to get btc params",
 		)
 	}
+
+	if len(params) == 0 {
+		log.Ctx(ctx).Warn().Msg("No btc checkpoint params found")
+		return nil, types.NewErrorWithMsg(
+			http.StatusNotFound,
+			types.NotFound,
+			"btc checkpoint params not found, please retry",
+		)
+	}
+
 	return params, nil
 }

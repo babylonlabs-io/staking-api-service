@@ -51,14 +51,6 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 ) ([]*FinalityProviderPublic, string, *types.Error) {
 	finalityProvidersResult, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, paginationToken)
 	if err != nil {
-		if db.IsNotFoundError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("No finality providers found")
-			return nil, "", types.NewErrorWithMsg(
-				http.StatusNotFound,
-				types.NotFound,
-				"finality providers not found, please retry",
-			)
-		}
 		if db.IsInvalidPaginationTokenError(err) {
 			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching finality providers")
 			return nil, "", types.NewError(http.StatusBadRequest, types.BadRequest, err)
@@ -71,6 +63,15 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 	}
 
 	finalityProviders := finalityProvidersResult.Data
+
+	if len(finalityProviders) == 0 {
+		log.Ctx(ctx).Warn().Msg("No finality providers found")
+		return nil, "", types.NewErrorWithMsg(
+			http.StatusNotFound,
+			types.NotFound,
+			"finality providers not found, please retry",
+		)
+	}
 
 	fpPkHexes := make([]string, 0, len(finalityProviders))
 	for _, fp := range finalityProviders {
