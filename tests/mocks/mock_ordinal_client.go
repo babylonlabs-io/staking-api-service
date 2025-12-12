@@ -10,6 +10,8 @@ import (
 
 	ordinals "github.com/babylonlabs-io/staking-api-service/internal/shared/http/clients/ordinals"
 
+	time "time"
+
 	types "github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
@@ -69,18 +71,18 @@ func (_m *OrdinalsClient) GetBaseURL() string {
 }
 
 // GetDefaultRequestTimeout provides a mock function with no fields
-func (_m *OrdinalsClient) GetDefaultRequestTimeout() int {
+func (_m *OrdinalsClient) GetDefaultRequestTimeout() time.Duration {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetDefaultRequestTimeout")
 	}
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func() int); ok {
+	var r0 time.Duration
+	if rf, ok := ret.Get(0).(func() time.Duration); ok {
 		r0 = rf()
 	} else {
-		r0 = ret.Get(0).(int)
+		r0 = ret.Get(0).(time.Duration)
 	}
 
 	return r0

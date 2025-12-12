@@ -3,6 +3,7 @@ package ordinals
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
@@ -10,7 +11,7 @@ import (
 //go:generate mockery --name=OrdinalsClient --output=../../../../../tests/mocks --outpkg=mocks --filename=mock_ordinal_client.go
 type OrdinalsClient interface {
 	GetBaseURL() string
-	GetDefaultRequestTimeout() int
+	GetDefaultRequestTimeout() time.Duration
 	GetHttpClient() *http.Client
 	/*
 		FetchUTXOInfos fetches UTXO information from the ordinal service

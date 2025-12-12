@@ -5,6 +5,7 @@ package coinmarketcap
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"
 	"github.com/davecgh/go-spew/spew"
@@ -18,7 +19,7 @@ func TestClient(t *testing.T) {
 
 	metrics.Init(0)
 
-	cl := NewClient(key, 5000)
+	cl := NewClient(key, 5*time.Second)
 
 	t.Run("ok", func(t *testing.T) {
 		quotes, err := cl.LatestQuote(t.Context(), BtcID)

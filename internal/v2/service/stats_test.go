@@ -3,6 +3,7 @@ package v2service
 import (
 	"errors"
 	"testing"
+	"time"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
@@ -28,7 +29,7 @@ func Test_GetOverallStats(t *testing.T) {
 	dbIndexer := mocks.NewIndexerDBClient(t)
 
 	sharedService, err := service.New(&config.Config{}, nil, nil, &clients.Clients{
-		CoinMarketCap: coinmarketcap.NewClient("", 0),
+		CoinMarketCap: coinmarketcap.NewClient("", 0*time.Second),
 	}, &dbclients.DbClients{
 		SharedDBClient:  dbShared,
 		V1DBClient:      dbV1,
@@ -96,7 +97,7 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 	dbIndexer := mocks.NewIndexerDBClient(t)
 
 	sharedService, err := service.New(&config.Config{}, nil, nil, &clients.Clients{
-		CoinMarketCap: coinmarketcap.NewClient("", 0),
+		CoinMarketCap: coinmarketcap.NewClient("", 0*time.Second),
 	}, &dbclients.DbClients{
 		SharedDBClient:  dbShared,
 		V1DBClient:      dbV1,
