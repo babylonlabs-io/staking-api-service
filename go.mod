@@ -5,7 +5,7 @@ go 1.24.11
 require (
 	cosmossdk.io/math v1.5.3
 	github.com/avast/retry-go/v4 v4.7.0
-	github.com/babylonlabs-io/babylon-staking-indexer v1.0.5
+	github.com/babylonlabs-io/babylon-staking-indexer v1.0.6
 	github.com/babylonlabs-io/babylon/v4 v4.1.0
 	github.com/babylonlabs-io/networks/parameters v0.2.3
 	github.com/babylonlabs-io/staking-queue-client v1.0.0
