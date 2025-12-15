@@ -111,8 +111,8 @@ github.com/aws/aws-sdk-go v1.49.0/go.mod h1:LF8svs817+Nz+DmiMQKTO3ubZ/6IaTpq3Tju
 github.com/aws/aws-sdk-go-v2 v0.18.0/go.mod h1:JWVYvqSMppoMJC0x5wdwiImzgXTI9FuZwxzkQq9wy+g=
 github.com/babylonlabs-io/babylon-staking-indexer v1.0.6 h1:GaT3Ju4eVUExqGLc4VpMDxd23Wyw42Q+2oBK/yWv3qA=
 github.com/babylonlabs-io/babylon-staking-indexer v1.0.6/go.mod h1:6cbnqQ7mP6lznELkO5foLWrStjk9fNYAsQeT1AMBON0=
-github.com/babylonlabs-io/babylon/v4 v4.1.0 h1:IGIWpvh996k6dyOOE3UIw9J23NLCCe3H+nV4DR+2+7U=
-github.com/babylonlabs-io/babylon/v4 v4.1.0/go.mod h1:6vRR3bwtUDElFe9rO8MABHDFOcA21D0ix6KFfGRbgQc=
+github.com/babylonlabs-io/babylon/v4 v4.2.1 h1:kFq7PEuxqy9SKh/TRajI21SR2o/I405XFmPkkqYk6AY=
+github.com/babylonlabs-io/babylon/v4 v4.2.1/go.mod h1:6vRR3bwtUDElFe9rO8MABHDFOcA21D0ix6KFfGRbgQc=
 github.com/babylonlabs-io/networks/parameters v0.2.3 h1:T1nigYrU61GWSpJZko3Gylt3T3eHHoxXLWkhw7s3uz0=
 github.com/babylonlabs-io/networks/parameters v0.2.3/go.mod h1:iEJVOzaLsE33vpP7J4u+CRGfkSIfErUAwRmgCFCBpyI=
 github.com/babylonlabs-io/staking-queue-client v1.0.0 h1:mXAxZLJX/NbHW0R/pP3DXu75cIvl8B8ZIVeEdgao6w8=
