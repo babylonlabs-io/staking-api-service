@@ -153,10 +153,10 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 
 // calculateCoStakingAPR calculates the co-staking APR using dynamic values from the BBN node.
 // totalCoStakingRewardSupply is calculated as: annualProvisions * (1 - btcStakingPortion - fpPortion) * costakingPortion
-func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPrice float64, totalScore int64, totalCoStakingRewardSupply float64) (float64, error) {
+func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPrice float64, totalScore int64, totalCoStakingRewardSupply float64) float64 {
 	if totalScore == 0 {
 		log.Ctx(ctx).Info().Msg("empty total score")
-		return 0, nil
+		return 0
 	}
 
 	log.Ctx(ctx).Info().
@@ -170,7 +170,7 @@ func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPri
 	// where totalCoStakingRewardSupply = annualProvisions * (1 - btcStakingPortion - fpPortion) * costakingPortion
 	// if you need percentage multiply final value by 100 (done on frontend)
 	apr := totalCoStakingRewardSupply * babyPrice / ((float64(totalScore) / pkg.SatoshiPerBTC) * btcPrice) / pkg.UbbnPerBaby
-	return apr, nil
+	return apr
 }
 
 // getOverallStatsFromIndexer fetches stats from indexer and converts to V2 format
@@ -265,15 +265,8 @@ func (s *V2Service) GetOverallStats(
 			Msg("error while fetching data for max staking apr calculation")
 		// in case of error we use zero value in MaxStakingAPR
 	} else {
-		coStakingAPR, errCoStaking := s.calculateCoStakingAPR(ctx, babyPrice, btcPrice, totalScore, totalCoStakingRewardSupply)
-		if errCoStaking != nil {
-			log.Ctx(ctx).Error().Err(errCoStaking).
-				Msg("error while calculating co-staking apr")
-			// in case of error, maxStakingAPR = btcStakingAPR
-			maxStakingAPR = btcStakingAPR
-		} else {
-			maxStakingAPR = btcStakingAPR + coStakingAPR
-		}
+		coStakingAPR := s.calculateCoStakingAPR(ctx, babyPrice, btcPrice, totalScore, totalCoStakingRewardSupply)
+		maxStakingAPR = btcStakingAPR + coStakingAPR
 	}
 
 	return &OverallStatsPublic{
@@ -349,11 +342,9 @@ func (s *V2Service) calculateBabyStakingAPR(ctx context.Context) (float64, error
 	// 0.02
 	babyInflationRate := cosmosMath.LegacyNewDecWithPrec(2, 2)
 
-	//nolint: gocritic
 	// totalBabyRewardsSupply = totalRewardsSupply * babyInflationRate
 	totalBabyRewardsSupply := totalRewardsSupply.Amount.ToLegacyDec().Mul(babyInflationRate)
 	totalBabyStaked := stakingPool.BondedTokens.ToLegacyDec()
-	//nolint: gocritic
 	// apr = totalBabyRewardsSupply / totalBabyStaked
 	apr := totalBabyRewardsSupply.Quo(totalBabyStaked)
 
