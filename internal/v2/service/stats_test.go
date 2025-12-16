@@ -155,7 +155,7 @@ func Test_calculateUserCoStakingAPR(t *testing.T) {
 			50000,
 			0.5,
 		)
-		assert.Equal(t, float64(0), apr)
+		assert.Zero(t, apr)
 	})
 
 	t.Run("zero global score returns zero", func(t *testing.T) {
@@ -168,7 +168,7 @@ func Test_calculateUserCoStakingAPR(t *testing.T) {
 			50000,
 			0.5,
 		)
-		assert.Equal(t, float64(0), apr)
+		assert.Zero(t, apr)
 	})
 
 	t.Run("calculates correctly with valid inputs", func(t *testing.T) {
@@ -181,7 +181,7 @@ func Test_calculateUserCoStakingAPR(t *testing.T) {
 			50000,
 			0.5,
 		)
-		assert.Greater(t, apr, float64(0))
+		assert.Positive(t, apr)
 	})
 
 	t.Run("no BABY staked returns zero co-staking APR", func(t *testing.T) {
@@ -194,7 +194,7 @@ func Test_calculateUserCoStakingAPR(t *testing.T) {
 			50000,
 			0.5,
 		)
-		assert.Equal(t, float64(0), apr)
+		assert.Zero(t, apr)
 	})
 }
 
@@ -211,7 +211,7 @@ func Test_calculateBoostCoStakingAPR(t *testing.T) {
 			50000,
 			0.5,
 		)
-		assert.Equal(t, float64(0), apr)
+		assert.Zero(t, apr)
 	})
 
 	t.Run("zero global score returns zero", func(t *testing.T) {
@@ -224,7 +224,7 @@ func Test_calculateBoostCoStakingAPR(t *testing.T) {
 			50000,
 			0.5,
 		)
-		assert.Equal(t, float64(0), apr)
+		assert.Zero(t, apr)
 	})
 
 	t.Run("boost APR >= current APR", func(t *testing.T) {
@@ -232,9 +232,9 @@ func Test_calculateBoostCoStakingAPR(t *testing.T) {
 		ubbnStaked := int64(50000000)
 		globalTotalScore := int64(1000000000)
 		scoreRatio := int64(1000)
-		totalCoStakingRewardSupply := float64(1000000)
-		btcPrice := float64(50000)
-		babyPrice := float64(0.5)
+		totalCoStakingRewardSupply := 1000000.0
+		btcPrice := 50000.0
+		babyPrice := 0.5
 
 		currentAPR := s.calculateUserCoStakingAPR(
 			satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio,
