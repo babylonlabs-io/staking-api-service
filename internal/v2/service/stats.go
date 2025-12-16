@@ -151,32 +151,25 @@ func (s *V2Service) GetStakingAPR(ctx context.Context, satoshisStaked, ubbnStake
 	}, nil
 }
 
-func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPrice float64, totalScore int64) (float64, error) {
+// calculateCoStakingAPR calculates the co-staking APR using dynamic values from the BBN node.
+// totalCoStakingRewardSupply is calculated as: annualProvisions * (1 - btcStakingPortion - fpPortion) * costakingPortion
+func (s *V2Service) calculateCoStakingAPR(ctx context.Context, babyPrice, btcPrice float64, totalScore int64, totalCoStakingRewardSupply float64) (float64, error) {
 	if totalScore == 0 {
 		log.Ctx(ctx).Info().Msg("empty total score")
 		return 0, nil
 	}
 
-	const (
-		totalInflation         = 5.5
-		coStakingInflationPart = 2.35
-	)
-
-	annualProvisions, err := s.getAnnualProvisions(ctx)
-	if err != nil {
-		return 0, err
-	}
-
 	log.Ctx(ctx).Info().
-		Float64("annualProvisions", annualProvisions).
+		Float64("totalCoStakingRewardSupply", totalCoStakingRewardSupply).
 		Float64("babyPrice", babyPrice).
 		Float64("btcPrice", btcPrice).
 		Int64("totalScore", totalScore).
 		Msg("values for costaking apr calculation")
 
-	// annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / (total_score / satoshisPerBTC * btcPrice) / ubbnPerBaby
+	// totalCoStakingRewardSupply * babyPrice / (total_score / satoshisPerBTC * btcPrice) / ubbnPerBaby
+	// where totalCoStakingRewardSupply = annualProvisions * (1 - btcStakingPortion - fpPortion) * costakingPortion
 	// if you need percentage multiply final value by 100 (done on frontend)
-	apr := annualProvisions * (coStakingInflationPart / totalInflation) * babyPrice / ((float64(totalScore) / pkg.SatoshiPerBTC) * btcPrice) / pkg.UbbnPerBaby
+	apr := totalCoStakingRewardSupply * babyPrice / ((float64(totalScore) / pkg.SatoshiPerBTC) * btcPrice) / pkg.UbbnPerBaby
 	return apr, nil
 }
 
@@ -246,8 +239,9 @@ func (s *V2Service) GetOverallStats(
 	var maxStakingAPR float64
 
 	var totalScore int64
+	var totalCoStakingRewardSupply float64
 	var btcPrice, babyPrice float64
-	var errBtcPrice, errBabyPrice, errTotalScore error
+	var errBtcPrice, errBabyPrice, errTotalScore, errRewardSupply error
 
 	var wg conc.WaitGroup
 	wg.Go(func() {
@@ -259,16 +253,19 @@ func (s *V2Service) GetOverallStats(
 	wg.Go(func() {
 		totalScore, errTotalScore = s.getCostakingTotalScore(ctx)
 	})
+	wg.Go(func() {
+		totalCoStakingRewardSupply, errRewardSupply = s.getCostakingRewardSupply(ctx)
+	})
 	wg.Wait()
 
-	err = errors.Join(errBtcPrice, errBabyPrice, errTotalScore)
+	err = errors.Join(errBtcPrice, errBabyPrice, errTotalScore, errRewardSupply)
 	if err != nil {
 		log.Ctx(ctx).Error().
 			Err(err).
 			Msg("error while fetching data for max staking apr calculation")
 		// in case of error we use zero value in MaxStakingAPR
 	} else {
-		coStakingAPR, errCoStaking := s.calculateCoStakingAPR(ctx, babyPrice, btcPrice, totalScore)
+		coStakingAPR, errCoStaking := s.calculateCoStakingAPR(ctx, babyPrice, btcPrice, totalScore, totalCoStakingRewardSupply)
 		if errCoStaking != nil {
 			log.Ctx(ctx).Error().Err(errCoStaking).
 				Msg("error while calculating co-staking apr")
@@ -830,32 +827,15 @@ func (s *V2Service) getBabyStakingAPR(ctx context.Context) (float64, error) {
 	return apr, nil
 }
 
-func (s *V2Service) getAnnualProvisions(ctx context.Context) (float64, error) {
-	const key = "annual_provisions"
-
-	if cached, found := s.aprCache.Get(key); found {
-		return cached.(float64), nil
-	}
-
-	provisions, err := s.bbnClient.AnnualProvisions(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	provisionsFloat, err := provisions.Float64()
-	if err != nil {
-		return 0, err
-	}
-
-	s.aprCache.SetDefault(key, provisionsFloat)
-	return provisionsFloat, nil
-}
-
 func (s *V2Service) getCostakingRewardSupply(ctx context.Context) (float64, error) {
 	const key = "costaking_reward_supply"
 
 	if cached, found := s.aprCache.Get(key); found {
 		return cached.(float64), nil
+	}
+
+	if s.bbnClient == nil {
+		return 0, errors.New("bbnClient is nil")
 	}
 
 	supply, err := s.calculateTotalCoStakingRewardSupply(ctx)
