@@ -26,8 +26,11 @@ func TestGetNetworkInfo(t *testing.T) {
 			{Version: 7},
 			{Version: 9},
 		}
+		btcCheckpointParams := []*indexertypes.BtcCheckpointParams{
+			{Version: 0},
+		}
 		indexerDB.On("GetBbnStakingParams", ctx).Return(bbnStakingParams, nil).Once()
-		indexerDB.On("GetBtcCheckpointParams", ctx).Return(nil, nil).Once()
+		indexerDB.On("GetBtcCheckpointParams", ctx).Return(btcCheckpointParams, nil).Once()
 
 		cfg := &config.Config{}
 		dbClients := &dbclients.DbClients{

@@ -32,7 +32,7 @@ func isAllowedMethod(method string) bool {
 }
 
 type HttpClientOptions struct {
-	Timeout      int
+	Timeout      time.Duration
 	Path         string
 	TemplatePath string // Metrics purpose
 	Headers      map[string]string
@@ -51,7 +51,7 @@ func sendRequest[I any, R any](
 		timeout = opts.Timeout
 	}
 	// Set a timeout for the request
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Millisecond)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	var req *http.Request
@@ -85,7 +85,7 @@ func sendRequest[I any, R any](
 			return nil, types.NewErrorWithMsg(
 				http.StatusRequestTimeout,
 				types.RequestTimeout,
-				fmt.Sprintf("request timeout after %d ms at %s", timeout, url),
+				fmt.Sprintf("request timeout after %s at %s", timeout, url),
 			)
 		}
 		return nil, types.NewErrorWithMsg(

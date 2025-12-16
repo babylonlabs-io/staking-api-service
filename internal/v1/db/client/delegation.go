@@ -179,15 +179,15 @@ func (v1dbclient *V1Database) transitionState(
 		// Add additional fields to the $set operation
 		update["$set"].(bson.M)[field] = value
 	}
-	_, err := client.UpdateOne(ctx, filter, update)
+	result, err := client.UpdateOne(ctx, filter, update)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return &db.NotFoundError{
-				Key:     stakingTxHashHex,
-				Message: "Delegation not found or not in eligible state to transition",
-			}
-		}
 		return err
+	}
+	if result.MatchedCount == 0 {
+		return &db.NotFoundError{
+			Key:     stakingTxHashHex,
+			Message: "Delegation not found or not in eligible state to transition",
+		}
 	}
 	return nil
 }

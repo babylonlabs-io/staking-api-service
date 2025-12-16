@@ -997,6 +997,29 @@ const docTemplate = `{
                 "type": "string"
             }
         },
+        "types.DelegationState": {
+            "type": "string",
+            "enum": [
+                "active",
+                "unbonding_requested",
+                "unbonding",
+                "unbonded",
+                "withdrawable",
+                "withdrawn",
+                "transitioned",
+                "slashed"
+            ],
+            "x-enum-varnames": [
+                "Active",
+                "UnbondingRequested",
+                "Unbonding",
+                "Unbonded",
+                "Withdrawable",
+                "Withdrawn",
+                "Transitioned",
+                "Slashed"
+            ]
+        },
         "types.ErrorCode": {
             "type": "string",
             "enum": [
@@ -1105,7 +1128,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "state": {
-                    "type": "string"
+                    "$ref": "#/definitions/types.DelegationState"
                 },
                 "unbonding_tx": {
                     "$ref": "#/definitions/v1service.TransactionPublic"

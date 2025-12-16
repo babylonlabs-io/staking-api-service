@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/config"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
@@ -45,7 +46,7 @@ func (c *Ordinals) GetBaseURL() string {
 	return fmt.Sprintf("%s:%s", c.config.Host, c.config.Port)
 }
 
-func (c *Ordinals) GetDefaultRequestTimeout() int {
+func (c *Ordinals) GetDefaultRequestTimeout() time.Duration {
 	return c.config.Timeout
 }
 

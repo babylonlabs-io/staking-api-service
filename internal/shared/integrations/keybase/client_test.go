@@ -3,6 +3,7 @@
 package keybase
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/observability/metrics"

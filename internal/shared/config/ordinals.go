@@ -3,12 +3,13 @@ package config
 import (
 	"errors"
 	"net/url"
+	"time"
 )
 
 type OrdinalsConfig struct {
-	Host    string `mapstructure:"host"`
-	Port    string `mapstructure:"port"`
-	Timeout int    `mapstructure:"timeout"`
+	Host    string        `mapstructure:"host"`
+	Port    string        `mapstructure:"port"`
+	Timeout time.Duration `mapstructure:"timeout"`
 }
 
 func (cfg *OrdinalsConfig) Validate() error {

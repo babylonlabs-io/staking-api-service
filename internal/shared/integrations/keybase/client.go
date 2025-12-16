@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 )
@@ -17,8 +18,8 @@ func (c *Client) GetBaseURL() string {
 	return "https://keybase.io"
 }
 
-func (c *Client) GetDefaultRequestTimeout() int {
-	return 5000 // 5 seconds
+func (c *Client) GetDefaultRequestTimeout() time.Duration {
+	return 5 * time.Second
 }
 
 func (c *Client) GetHttpClient() *http.Client {
