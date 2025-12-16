@@ -141,3 +141,110 @@ func Test_ProcessActiveDelegationStats(t *testing.T) {
 		require.Error(t, statsErr)
 	})
 }
+
+func Test_calculateUserCoStakingAPR(t *testing.T) {
+	s := &V2Service{}
+
+	t.Run("zero satoshis returns zero", func(t *testing.T) {
+		apr := s.calculateUserCoStakingAPR(
+			0,
+			1000000,
+			1000000000,
+			1000,
+			1000000,
+			50000,
+			0.5,
+		)
+		assert.Equal(t, float64(0), apr)
+	})
+
+	t.Run("zero global score returns zero", func(t *testing.T) {
+		apr := s.calculateUserCoStakingAPR(
+			100000000,
+			1000000,
+			0,
+			1000,
+			1000000,
+			50000,
+			0.5,
+		)
+		assert.Equal(t, float64(0), apr)
+	})
+
+	t.Run("calculates correctly with valid inputs", func(t *testing.T) {
+		apr := s.calculateUserCoStakingAPR(
+			100000000,
+			100000000,
+			1000000000,
+			1000,
+			1000000,
+			50000,
+			0.5,
+		)
+		assert.Greater(t, apr, float64(0))
+	})
+
+	t.Run("no BABY staked returns zero co-staking APR", func(t *testing.T) {
+		apr := s.calculateUserCoStakingAPR(
+			100000000,
+			0,
+			1000000000,
+			1000,
+			1000000,
+			50000,
+			0.5,
+		)
+		assert.Equal(t, float64(0), apr)
+	})
+}
+
+func Test_calculateBoostCoStakingAPR(t *testing.T) {
+	s := &V2Service{}
+
+	t.Run("zero satoshis returns zero", func(t *testing.T) {
+		apr := s.calculateBoostCoStakingAPR(
+			0,
+			1000000,
+			1000000000,
+			1000,
+			1000000,
+			50000,
+			0.5,
+		)
+		assert.Equal(t, float64(0), apr)
+	})
+
+	t.Run("zero global score returns zero", func(t *testing.T) {
+		apr := s.calculateBoostCoStakingAPR(
+			100000000,
+			1000000,
+			0,
+			1000,
+			1000000,
+			50000,
+			0.5,
+		)
+		assert.Equal(t, float64(0), apr)
+	})
+
+	t.Run("boost APR >= current APR", func(t *testing.T) {
+		satoshisStaked := int64(100000000)
+		ubbnStaked := int64(50000000)
+		globalTotalScore := int64(1000000000)
+		scoreRatio := int64(1000)
+		totalCoStakingRewardSupply := float64(1000000)
+		btcPrice := float64(50000)
+		babyPrice := float64(0.5)
+
+		currentAPR := s.calculateUserCoStakingAPR(
+			satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio,
+			totalCoStakingRewardSupply, btcPrice, babyPrice,
+		)
+		boostAPR := s.calculateBoostCoStakingAPR(
+			satoshisStaked, ubbnStaked, globalTotalScore, scoreRatio,
+			totalCoStakingRewardSupply, btcPrice, babyPrice,
+		)
+
+		assert.GreaterOrEqual(t, boostAPR, currentAPR)
+	})
+}

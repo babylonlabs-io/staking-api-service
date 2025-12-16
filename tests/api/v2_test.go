@@ -133,3 +133,52 @@ func TestV2_StakerStats(t *testing.T) {
 
 	checkCases(t, cases)
 }
+
+func TestV2_APR(t *testing.T) {
+	cases := []testcase{
+		{
+			testName:         "invalid satoshis_staked - non integer",
+			endpoint:         "/v2/apr?satoshis_staked=abc",
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid satoshis_staked: must be a valid integer"}`,
+		},
+		{
+			testName:         "invalid ubbn_staked - non integer",
+			endpoint:         "/v2/apr?ubbn_staked=xyz",
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid ubbn_staked: must be a valid integer"}`,
+		},
+		{
+			testName:         "negative satoshis_staked",
+			endpoint:         "/v2/apr?satoshis_staked=-100",
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid satoshis_staked: must be non-negative"}`,
+		},
+		{
+			testName:         "negative ubbn_staked",
+			endpoint:         "/v2/apr?ubbn_staked=-100",
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid ubbn_staked: must be non-negative"}`,
+		},
+		{
+			testName:         "invalid both params",
+			endpoint:         "/v2/apr?satoshis_staked=invalid&ubbn_staked=invalid",
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid satoshis_staked: must be a valid integer"}`,
+		},
+		{
+			testName:         "default params - service error due to nil bbn client",
+			endpoint:         "/v2/apr",
+			expectedHttpCode: http.StatusInternalServerError,
+			expectedContents: `{"errorCode":"INTERNAL_SERVICE_ERROR","message":"Internal service error"}`,
+		},
+		{
+			testName:         "valid params - service error due to nil bbn client",
+			endpoint:         "/v2/apr?satoshis_staked=1000000&ubbn_staked=5000000",
+			expectedHttpCode: http.StatusInternalServerError,
+			expectedContents: `{"errorCode":"INTERNAL_SERVICE_ERROR","message":"Internal service error"}`,
+		},
+	}
+
+	checkCases(t, cases)
+}
