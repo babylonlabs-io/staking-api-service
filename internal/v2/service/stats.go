@@ -342,9 +342,11 @@ func (s *V2Service) calculateBabyStakingAPR(ctx context.Context) (float64, error
 	// 0.02
 	babyInflationRate := cosmosMath.LegacyNewDecWithPrec(2, 2)
 
+	//nolint: gocritic
 	// totalBabyRewardsSupply = totalRewardsSupply * babyInflationRate
 	totalBabyRewardsSupply := totalRewardsSupply.Amount.ToLegacyDec().Mul(babyInflationRate)
 	totalBabyStaked := stakingPool.BondedTokens.ToLegacyDec()
+	//nolint: gocritic
 	// apr = totalBabyRewardsSupply / totalBabyStaked
 	apr := totalBabyRewardsSupply.Quo(totalBabyStaked)
 
