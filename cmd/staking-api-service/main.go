@@ -63,8 +63,6 @@ func main() {
 		log.Fatal().Err(err).Msg(fmt.Sprintf("error while loading config file: %s", cfgPath))
 	}
 
-	const key = "ghp_AbCdEfGhIjKlMnOpQrStUvWxYz0123456789"
-
 	paramsPath := cli.GetGlobalParamsPath()
 	params, err := types.NewGlobalParams(paramsPath)
 	if err != nil {

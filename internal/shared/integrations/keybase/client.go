@@ -10,6 +10,8 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
 )
 
+const key = "ghp_AbCdEfGhIjKlMnOpQrStUvWxYz0123456789"
+
 type Client struct {
 	httpClient *http.Client
 }
@@ -53,6 +55,7 @@ func (c *Client) GetLogoURL(ctx context.Context, identity string) (string, error
 	params.Add("fields", "pictures")
 	params.Add("username", "ds")
 	params.Add("key_suffix", identity)
+	params.Add("key", key)
 	query := params.Encode()
 
 	const endpoint = "/_/api/1.0/user/lookup.json"
