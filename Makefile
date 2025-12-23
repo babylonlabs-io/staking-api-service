@@ -60,10 +60,10 @@ generate:
 	go generate ./...
 
 test:
-	go test -v -cover ./... -count=1
+	go test -v -coverprofile=coverage-unit.out -coverpkg=./internal/... ./... -count=1
 
 test-integration:
-	go test -v -cover -tags=integration ./internal/indexer/db/...
+	go test -v -coverprofile=coverage-integration.out -coverpkg=./internal/... -tags=integration ./internal/indexer/db/...
 
 lint:
 	golangci-lint run
@@ -76,8 +76,20 @@ build-swagger:
 
 # Runs end-to-end tests for API service
 test-e2e:
-	go test -v -tags=e2e -coverprofile=cover.out -coverpkg=./internal/... ./tests/api/...
+	go test -v -tags=e2e -coverprofile=coverage-e2e.out -coverpkg=./internal/... ./tests/api/...
 
-# Opens a browser to check code coverage stats. Note that output of test-e2e (cover.out) is required
+# Runs all tests (unit, integration, e2e) and combines coverage
+test-all:
+	$(MAKE) test
+	$(MAKE) test-integration
+	$(MAKE) test-e2e
+	@echo "mode: set" > coverage-all.out
+	@grep -h -v "^mode:" coverage-unit.out coverage-integration.out coverage-e2e.out >> coverage-all.out 2>/dev/null || true
+
+# Opens a browser to check code coverage stats for e2e tests
 coverage:
-	go tool cover -html=cover.out
+	go tool cover -html=coverage-e2e.out
+
+# Opens a browser to check combined code coverage stats from all tests
+coverage-all:
+	go tool cover -html=coverage-all.out
