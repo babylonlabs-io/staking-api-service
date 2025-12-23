@@ -65,7 +65,10 @@ func (iDB *IndexerDatabase) GetFinalityProviderStatsPaginated(
 	paginationToken string,
 ) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderStatsDocument], error) {
 	collection := iDB.collection(dbmodel.IndexerFinalityProviderStatsCollection)
-	opts := options.Find().SetSort(bson.D{{Key: "active_tvl", Value: -1}})
+	opts := options.Find().SetSort(bson.D{
+		{Key: "active_tvl", Value: -1},
+		{Key: "_id", Value: -1},
+	})
 	var filter bson.M
 
 	if paginationToken != "" {
