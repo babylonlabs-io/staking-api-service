@@ -16,7 +16,7 @@ jobs:
      go-lint-version: v2.4.0
      run-unit-tests: true
      run-integration-tests: true
-     integration-tests-command: make test-integration && make test-e2e && make coverage-report
+     integration-tests-command: make test-all
      integration-tests-docker-auth: false
      run-lint: true
      run-build: true
