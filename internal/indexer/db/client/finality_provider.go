@@ -2,6 +2,7 @@ package indexerdbclient
 
 import (
 	"context"
+	"strings"
 
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
@@ -97,11 +98,16 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProvidersByPks(
 		return []*indexerdbmodel.IndexerFinalityProviderDetails{}, nil
 	}
 
+	var lowercaseFpPkHexes []string
+	for _, fpPkHex := range fpBtcPkHexes {
+		lowercaseFpPkHexes = append(lowercaseFpPkHexes, strings.ToLower(fpPkHex))
+	}
+
 	client := indexerdbclient.Client.Database(
 		indexerdbclient.DbName,
 	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
 
-	filter := bson.M{"_id": bson.M{"$in": fpBtcPkHexes}}
+	filter := bson.M{"_id": bson.M{"$in": lowercaseFpPkHexes}}
 
 	return pkg.FetchAll[*indexerdbmodel.IndexerFinalityProviderDetails](ctx, client, filter)
 }
