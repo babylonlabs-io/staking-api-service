@@ -96,3 +96,9 @@ coverage:
 # Opens a browser to check combined code coverage stats from all tests
 coverage-all:
 	go tool cover -html=coverage-all.out
+
+# Combines coverage from all tests and prints the total percentage
+coverage-report:
+	@go tool covdata textfmt -i=coverage/unit,coverage/integration,coverage/e2e -o=coverage-all.out
+	@printf "Coverage: "
+	@go tool cover -func=coverage-all.out | grep total | awk '{print $$3}'
