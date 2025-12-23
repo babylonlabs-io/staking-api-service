@@ -6,6 +6,7 @@ import (
 	indexerdbmodel "github.com/babylonlabs-io/staking-api-service/internal/indexer/db/model"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/db"
 	dbmodel "github.com/babylonlabs-io/staking-api-service/internal/shared/db/model"
+	"github.com/babylonlabs-io/staking-api-service/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -83,4 +84,24 @@ func (indexerdbclient *IndexerDatabase) GetFinalityProviders(
 		indexerdbclient.Cfg.MaxPaginationLimit,
 		indexerdbmodel.BuildIndexerFinalityProviderPaginationToken,
 	)
+}
+
+// GetFinalityProvidersByPks retrieves finality provider details for specific public keys
+// This is used in conjunction with GetFinalityProviderStatsPaginated to fetch details
+// for FPs that are already sorted by stats
+func (indexerdbclient *IndexerDatabase) GetFinalityProvidersByPks(
+	ctx context.Context,
+	fpBtcPkHexes []string,
+) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
+	if len(fpBtcPkHexes) == 0 {
+		return []*indexerdbmodel.IndexerFinalityProviderDetails{}, nil
+	}
+
+	client := indexerdbclient.Client.Database(
+		indexerdbclient.DbName,
+	).Collection(indexerdbmodel.FinalityProviderDetailsCollection)
+
+	filter := bson.M{"_id": bson.M{"$in": fpBtcPkHexes}}
+
+	return pkg.FetchAll[*indexerdbmodel.IndexerFinalityProviderDetails](ctx, client, filter)
 }
