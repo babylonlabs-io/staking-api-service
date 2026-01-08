@@ -30,9 +30,9 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-      # Prevent debug statements & credentials
+      # Detect filesystem and executable issues
       - id: check-case-conflict          # Case-insensitive filesystem issues
-      - id: check-executables-have-shebangs
+      - id: check-executables-have-shebangs  # Ensure executables have a valid shebang
 
 # For allowing secrets to be committed, add this comment: # gitleaks:allow
   - repo: https://github.com/gitleaks/gitleaks
