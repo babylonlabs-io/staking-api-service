@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "overall_stats",
+    "active_tvl": {
+      "$numberLong": "3000"
+    },
+    "active_delegations": {
+      "$numberLong": "3000"
+    },
+    "last_updated": {
+      "$numberLong": "1717595464"
+    }
+  }
+]

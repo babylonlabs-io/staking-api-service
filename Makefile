@@ -60,10 +60,12 @@ generate:
 	go generate ./...
 
 test:
-	go test -v -cover ./... -count=1
+	@mkdir -p coverage/unit
+	go test -v -cover -coverpkg=./internal/... ./... -count=1 -args -test.gocoverdir="$(PWD)/coverage/unit"
 
 test-integration:
-	go test -v -cover -tags=integration ./internal/indexer/db/...
+	@mkdir -p coverage/integration
+	go test -v -cover -coverpkg=./internal/... -tags=integration ./internal/indexer/db/... -args -test.gocoverdir="$(PWD)/coverage/integration"
 
 lint:
 	golangci-lint run
@@ -76,8 +78,27 @@ build-swagger:
 
 # Runs end-to-end tests for API service
 test-e2e:
-	go test -v -tags=e2e -coverprofile=cover.out -coverpkg=./internal/... ./tests/api/...
+	@mkdir -p coverage/e2e
+	go test -v -cover -tags=e2e -coverpkg=./internal/... ./tests/api/... -args -test.gocoverdir="$(PWD)/coverage/e2e"
 
-# Opens a browser to check code coverage stats. Note that output of test-e2e (cover.out) is required
+# Runs all tests (unit, integration, e2e) and combines coverage
+test-all:
+	$(MAKE) test
+	$(MAKE) test-integration
+	$(MAKE) test-e2e
+	@go tool covdata textfmt -i=coverage/unit,coverage/integration,coverage/e2e -o=coverage-all.out
+
+# Opens a browser to check code coverage stats for e2e tests
 coverage:
-	go tool cover -html=cover.out
+	@go tool covdata textfmt -i=coverage/e2e -o=coverage-e2e.out
+	go tool cover -html=coverage-e2e.out
+
+# Opens a browser to check combined code coverage stats from all tests
+coverage-all:
+	go tool cover -html=coverage-all.out
+
+# Combines coverage from all tests and prints the total percentage
+coverage-report:
+	@go tool covdata textfmt -i=coverage/unit,coverage/integration,coverage/e2e -o=coverage-all.out
+	@printf "Coverage: "
+	@go tool cover -func=coverage-all.out | grep total | awk '{print $$3}'
