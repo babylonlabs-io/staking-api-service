@@ -44,42 +44,18 @@ func mapToFinalityProviderStatsPublic(
 	}
 }
 
-// GetFinalityProvidersWithStats retrieves finality providers and their associated statistics with pagination
+// GetFinalityProvidersWithStats retrieves finality providers sorted by active TVL with pagination
+// Implementation follows stats-first approach: query stats sorted by active_tvl, then fetch details
 func (s *V2Service) GetFinalityProvidersWithStats(
 	ctx context.Context,
 	paginationToken string,
 ) ([]*FinalityProviderPublic, string, *types.Error) {
-	finalityProvidersResult, err := s.dbClients.IndexerDBClient.GetFinalityProviders(ctx, paginationToken)
+	fpStatsResult, err := s.dbClients.IndexerDBClient.GetFinalityProviderStatsPaginated(ctx, paginationToken)
 	if err != nil {
 		if db.IsInvalidPaginationTokenError(err) {
-			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching finality providers")
+			log.Ctx(ctx).Warn().Err(err).Msg("Invalid pagination token when fetching finality provider stats")
 			return nil, "", types.NewError(http.StatusBadRequest, types.BadRequest, err)
 		}
-		return nil, "", types.NewErrorWithMsg(
-			http.StatusInternalServerError,
-			types.InternalServiceError,
-			"failed to get finality providers",
-		)
-	}
-
-	finalityProviders := finalityProvidersResult.Data
-
-	if len(finalityProviders) == 0 {
-		log.Ctx(ctx).Warn().Msg("No finality providers found")
-		return nil, "", types.NewErrorWithMsg(
-			http.StatusNotFound,
-			types.NotFound,
-			"finality providers not found, please retry",
-		)
-	}
-
-	fpPkHexes := make([]string, 0, len(finalityProviders))
-	for _, fp := range finalityProviders {
-		fpPkHexes = append(fpPkHexes, fp.BtcPk)
-	}
-
-	indexerProviderStats, err := s.dbClients.IndexerDBClient.GetFinalityProviderStats(ctx, fpPkHexes)
-	if err != nil {
 		return nil, "", types.NewErrorWithMsg(
 			http.StatusInternalServerError,
 			types.InternalServiceError,
@@ -87,44 +63,67 @@ func (s *V2Service) GetFinalityProvidersWithStats(
 		)
 	}
 
-	logoMap := s.fetchLogos(ctx, finalityProviders)
+	fpStats := fpStatsResult.Data
 
-	statsLookup := make(map[string]*v2dbmodel.V2FinalityProviderStatsDocument)
-	for _, stats := range indexerProviderStats {
-		// Convert indexer stats (uint64) to V2 format (int64)
-		statsLookup[stats.FpBtcPkHex] = &v2dbmodel.V2FinalityProviderStatsDocument{
-			FinalityProviderPkHex: stats.FpBtcPkHex,
-			ActiveTvl:             int64(stats.ActiveTvl),
-			ActiveDelegations:     int64(stats.ActiveDelegations),
-		}
+	if len(fpStats) == 0 {
+		log.Ctx(ctx).Warn().Msg("No finality provider stats found")
+		return nil, "", types.NewErrorWithMsg(
+			http.StatusNotFound,
+			types.NotFound,
+			"finality providers not found, please retry",
+		)
 	}
 
-	finalityProvidersPublic := make([]*FinalityProviderPublic, 0, len(finalityProviders))
+	fpPkHexes := make([]string, 0, len(fpStats))
+	for _, stat := range fpStats {
+		fpPkHexes = append(fpPkHexes, stat.FpBtcPkHex)
+	}
 
-	for _, provider := range finalityProviders {
-		providerStats, hasStats := statsLookup[provider.BtcPk]
-		if !hasStats {
-			providerStats = &v2dbmodel.V2FinalityProviderStatsDocument{
-				ActiveTvl:         0,
-				ActiveDelegations: 0,
-			}
+	finalityProviders, err := s.dbClients.IndexerDBClient.GetFinalityProvidersByPks(ctx, fpPkHexes)
+	if err != nil {
+		return nil, "", types.NewErrorWithMsg(
+			http.StatusInternalServerError,
+			types.InternalServiceError,
+			"failed to get finality provider details",
+		)
+	}
+
+	logoMap := s.fetchLogos(ctx, finalityProviders)
+
+	detailsLookup := make(map[string]*indexerdbmodel.IndexerFinalityProviderDetails)
+	for _, fp := range finalityProviders {
+		detailsLookup[fp.BtcPk] = fp
+	}
+
+	finalityProvidersPublic := make([]*FinalityProviderPublic, 0, len(fpStats))
+
+	for _, stat := range fpStats {
+		fpDetails, hasDetails := detailsLookup[stat.FpBtcPkHex]
+		if !hasDetails {
 			log.Ctx(ctx).Debug().
-				Str("finality_provider_pk_hex", provider.BtcPk).
-				Msg("Initializing finality provider with default stats")
+				Str("finality_provider_pk_hex", stat.FpBtcPkHex).
+				Msg("Finality provider has stats but no details, skipping")
+			continue
+		}
+
+		v2Stats := &v2dbmodel.V2FinalityProviderStatsDocument{
+			FinalityProviderPkHex: stat.FpBtcPkHex,
+			ActiveTvl:             int64(stat.ActiveTvl),
+			ActiveDelegations:     int64(stat.ActiveDelegations),
 		}
 
 		var logoURL string
 		if logoMap != nil {
-			logoURL = logoMap[provider.BtcPk]
+			logoURL = logoMap[fpDetails.BtcPk]
 		}
 
 		finalityProvidersPublic = append(
 			finalityProvidersPublic,
-			mapToFinalityProviderStatsPublic(*provider, providerStats, logoURL),
+			mapToFinalityProviderStatsPublic(*fpDetails, v2Stats, logoURL),
 		)
 	}
 
-	return finalityProvidersPublic, finalityProvidersResult.PaginationToken, nil
+	return finalityProvidersPublic, fpStatsResult.PaginationToken, nil
 }
 
 func (s *V2Service) fetchLogos(ctx context.Context, fps []*indexerdbmodel.IndexerFinalityProviderDetails) map[string]string {

@@ -60,6 +60,9 @@ func TestMain(m *testing.M) {
 		log.Fatalf("failed to setup mongo client: %v", err)
 	}
 
+	// set global mongoDB variable for resetDatabase function
+	mongoDB = mongoClient.Database(dbConfig.DbName)
+
 	// using config from container mongo initialize client used in tests
 	testDB, err = setupClient(dbConfig, mongoClient)
 	if err != nil {
@@ -135,6 +138,7 @@ func resetDatabase(t *testing.T) {
 
 	collections := []string{
 		model.FinalityProviderDetailsCollection,
+		model.IndexerFinalityProviderStatsCollection,
 		model.BTCDelegationDetailsCollection,
 		model.TimeLockCollection,
 		model.GlobalParamsCollection,

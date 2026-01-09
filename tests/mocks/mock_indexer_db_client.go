@@ -295,6 +295,36 @@ func (_m *IndexerDBClient) GetFinalityProviderStats(ctx context.Context, fpPkHex
 	return r0, r1
 }
 
+// GetFinalityProviderStatsPaginated provides a mock function with given fields: ctx, paginationToken
+func (_m *IndexerDBClient) GetFinalityProviderStatsPaginated(ctx context.Context, paginationToken string) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderStatsDocument], error) {
+	ret := _m.Called(ctx, paginationToken)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFinalityProviderStatsPaginated")
+	}
+
+	var r0 *db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderStatsDocument]
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderStatsDocument], error)); ok {
+		return rf(ctx, paginationToken)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderStatsDocument]); ok {
+		r0 = rf(ctx, paginationToken)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderStatsDocument])
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, paginationToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetFinalityProviders provides a mock function with given fields: ctx, paginationToken
 func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context, paginationToken string) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderDetails], error) {
 	ret := _m.Called(ctx, paginationToken)
@@ -318,6 +348,36 @@ func (_m *IndexerDBClient) GetFinalityProviders(ctx context.Context, paginationT
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
 		r1 = rf(ctx, paginationToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetFinalityProvidersByPks provides a mock function with given fields: ctx, fpBtcPkHexes
+func (_m *IndexerDBClient) GetFinalityProvidersByPks(ctx context.Context, fpBtcPkHexes []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error) {
+	ret := _m.Called(ctx, fpBtcPkHexes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFinalityProvidersByPks")
+	}
+
+	var r0 []*indexerdbmodel.IndexerFinalityProviderDetails
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)); ok {
+		return rf(ctx, fpBtcPkHexes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []*indexerdbmodel.IndexerFinalityProviderDetails); ok {
+		r0 = rf(ctx, fpBtcPkHexes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*indexerdbmodel.IndexerFinalityProviderDetails)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, fpBtcPkHexes)
 	} else {
 		r1 = ret.Error(1)
 	}
