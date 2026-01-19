@@ -98,8 +98,16 @@
   {
     "name": "Inflation Year 1",
     "startTime": "2025-04-03T06:36:14Z",
+    "endTime": "2025-11-13T12:10:24Z",
+    "amount": 489275744,
+    "frequency": "daily",
+    "vestingType": "inflationary"
+  },
+  {
+    "name": "Inflation Year 1A",
+    "startTime": "2025-11-13T12:10:25Z",
     "endTime": "2026-04-03T06:36:13Z",
-    "amount": 800000000,
+    "amount": 213622925,
     "frequency": "daily",
     "vestingType": "inflationary"
   },
@@ -107,7 +115,7 @@
     "name": "Inflation Year 2",
     "startTime": "2026-04-03T06:36:14Z",
     "endTime": "2027-04-03T06:36:13Z",
-    "amount": 864000000,
+    "amount": 588659427,
     "frequency": "daily",
     "vestingType": "inflationary"
   },
@@ -115,7 +123,7 @@
     "name": "Inflation Year 3",
     "startTime": "2027-04-03T06:36:14Z",
     "endTime": "2028-04-03T06:36:13Z",
-    "amount": 933120000,
+    "amount": 621035695,
     "frequency": "daily",
     "vestingType": "inflationary"
   },
@@ -123,7 +131,7 @@
     "name": "Inflation Year 4",
     "startTime": "2028-04-03T06:36:14Z",
     "endTime": "2029-04-03T06:36:13Z",
-    "amount": 1007769600,
+    "amount": 655192659,
     "frequency": "daily",
     "vestingType": "inflationary"
   }
