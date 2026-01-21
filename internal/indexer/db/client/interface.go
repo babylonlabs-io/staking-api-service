@@ -16,6 +16,7 @@ type IndexerDBClient interface {
 	GetBtcCheckpointParams(ctx context.Context) ([]*indexertypes.BtcCheckpointParams, error)
 	// Finality Providers
 	GetFinalityProviders(ctx context.Context, paginationToken string) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderDetails], error)
+	GetFinalityProvidersByPks(ctx context.Context, fpBtcPkHexes []string) ([]*indexerdbmodel.IndexerFinalityProviderDetails, error)
 	CountFinalityProvidersByStatus(ctx context.Context) (map[indexerdbmodel.FinalityProviderState]uint64, error)
 	// Staker Delegations
 	GetDelegation(ctx context.Context, stakingTxHashHex string) (*indexerdbmodel.IndexerDelegationDetails, error)
@@ -35,6 +36,7 @@ type IndexerDBClient interface {
 	// Stats
 	GetOverallStats(ctx context.Context) (*indexerdbmodel.IndexerStatsDocument, error)
 	GetFinalityProviderStats(ctx context.Context, fpPkHexes []string) ([]*indexerdbmodel.IndexerFinalityProviderStatsDocument, error)
+	GetFinalityProviderStatsPaginated(ctx context.Context, paginationToken string) (*db.DbResultMap[*indexerdbmodel.IndexerFinalityProviderStatsDocument], error)
 }
 
 type DelegationFilter struct {
