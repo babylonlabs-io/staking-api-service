@@ -2,6 +2,7 @@ FROM golang:1.24.11-alpine AS builder
 
 ARG VERSION="HEAD"
 
+# hadolint ignore=DL3018
 RUN apk add --no-cache  \
     make \
     git \
@@ -34,7 +35,8 @@ RUN LDFLAGS='-extldflags "-static" -v' \
 FROM alpine:3.16 AS run
 
 RUN addgroup --gid 1138 -S staking-api-service && adduser --uid 1138 -S staking-api-service -G staking-api-service
-RUN apk add bash curl jq
+# hadolint ignore=DL3018
+RUN apk add --no-cache bash curl jq
 
 # Label should match your github repo
 LABEL org.opencontainers.image.source="https://github.com/babylonlabs-io/staking-api-service:${VERSION}"
