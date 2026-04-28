@@ -2,17 +2,17 @@ FROM golang:1.24.11-alpine AS builder
 
 ARG VERSION="HEAD"
 
-RUN apk add --no-cache  \
-    make \
-    git \
-    build-base \
-    linux-headers \
-    libc-dev \
-    pkgconfig \
-    alpine-sdk \
-    libsodium-dev \
-    libsodium-static \
-    openssh
+RUN apk add --no-cache \
+    make~=4.4 \
+    git~=2.47 \
+    build-base~=0.5 \
+    linux-headers~=6.6 \
+    libc-dev~=1.2 \
+    pkgconf~=2.3 \
+    alpine-sdk~=1.1 \
+    libsodium-dev~=1.0 \
+    libsodium-static~=1.0 \
+    openssh~=9.9
 
 # Build
 WORKDIR /go/src/github.com/babylonlabs-io/staking-api-service
@@ -34,7 +34,7 @@ RUN LDFLAGS='-extldflags "-static" -v' \
 FROM alpine:3.16 AS run
 
 RUN addgroup --gid 1138 -S staking-api-service && adduser --uid 1138 -S staking-api-service -G staking-api-service
-RUN apk add bash curl jq
+RUN apk add --no-cache bash~=5.1 curl~=8.5 jq~=1.6
 
 # Label should match your github repo
 LABEL org.opencontainers.image.source="https://github.com/babylonlabs-io/staking-api-service:${VERSION}"
