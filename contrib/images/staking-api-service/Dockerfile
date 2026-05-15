@@ -1,4 +1,4 @@
-FROM golang:1.24.11-alpine3.23 AS builder
+FROM golang:1.24.13-alpine3.23 AS builder
 
 ARG VERSION="HEAD"
 
@@ -31,10 +31,10 @@ RUN LDFLAGS='-extldflags "-static" -v' \
     make build
 
 # Final minimal image with binary only
-FROM alpine:3.16 AS run
+FROM alpine:3.23 AS run
 
 RUN addgroup --gid 1138 -S staking-api-service && adduser --uid 1138 -S staking-api-service -G staking-api-service
-RUN apk add --no-cache bash~=5.1 curl~=8.5 jq~=1.6
+RUN apk add --no-cache bash~=5.3 curl~=8.19 jq~=1.8
 
 # Label should match your github repo
 LABEL org.opencontainers.image.source="https://github.com/babylonlabs-io/staking-api-service:${VERSION}"
