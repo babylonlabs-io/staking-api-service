@@ -1,18 +1,18 @@
-FROM golang:1.24.11-alpine AS builder
+FROM golang:1.24.11-alpine3.23 AS builder
 
 ARG VERSION="HEAD"
 
 RUN apk add --no-cache \
     make~=4.4 \
-    git~=2.47 \
+    git~=2.52 \
     build-base~=0.5 \
-    linux-headers~=6.6 \
+    linux-headers~=6.16 \
     libc-dev~=1.2 \
-    pkgconf~=2.3 \
+    pkgconf~=2.5 \
     alpine-sdk~=1.1 \
     libsodium-dev~=1.0 \
     libsodium-static~=1.0 \
-    openssh~=9.9
+    openssh~=10.2
 
 # Build
 WORKDIR /go/src/github.com/babylonlabs-io/staking-api-service
