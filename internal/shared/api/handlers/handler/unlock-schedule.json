@@ -51,7 +51,7 @@
     "name": "Core Team 1",
     "startTime": "2026-04-10T10:00:00Z",
     "endTime": null,
-    "amount": 187500000,
+    "amount": 41666667,
     "frequency": null,
     "vestingType": "cliff"
   },
@@ -59,7 +59,7 @@
     "name": "Core Team 2",
     "startTime": "2026-05-10T10:00:00Z",
     "endTime": "2029-04-10T09:59:59Z",
-    "amount": 1312500000,
+    "amount": 1458333333,
     "frequency": "monthly",
     "vestingType": "linear"
   },
@@ -67,7 +67,7 @@
     "name": "Advisors 1",
     "startTime": "2026-04-10T10:00:00Z",
     "endTime": null,
-    "amount": 43750000,
+    "amount": 9722222,
     "frequency": null,
     "vestingType": "cliff"
   },
@@ -75,7 +75,7 @@
     "name": "Advisors 2",
     "startTime": "2026-05-10T10:00:00Z",
     "endTime": "2029-04-10T09:59:59Z",
-    "amount": 306250000,
+    "amount": 340277778,
     "frequency": "monthly",
     "vestingType": "linear"
   },
@@ -83,7 +83,7 @@
     "name": "Investors 1",
     "startTime": "2026-04-10T10:00:00Z",
     "endTime": null,
-    "amount": 381250000,
+    "amount": 84722222,
     "frequency": null,
     "vestingType": "cliff"
   },
@@ -91,7 +91,7 @@
     "name": "Investors 2",
     "startTime": "2026-05-10T10:00:00Z",
     "endTime": "2029-04-10T09:59:59Z",
-    "amount": 2668750000,
+    "amount": 2965277778,
     "frequency": "monthly",
     "vestingType": "linear"
   },
