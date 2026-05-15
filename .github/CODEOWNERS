@@ -1,1 +1,4 @@
 * @jrwbabylonlab @jeremy-babylonlabs @kirugan
+
+# DevOps team owns CI/CD workflows
+/.github/workflows/ @babylonlabs-io/devops
