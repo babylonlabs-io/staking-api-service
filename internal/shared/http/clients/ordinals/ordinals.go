@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -29,7 +30,18 @@ func New(config *config.OrdinalsConfig) *Ordinals {
 	if config == nil {
 		return nil
 	}
-	httpClient := &http.Client{}
+	// Force IPv4 for the ordinals host. It is Cloudflare-proxied, so DNS
+	// returns both A and AAAA (Cloudflare's own dual-stack), but the pods run
+	// on IPv4-only nodes with no IPv6 route. The default dialer picks the AAAA
+	// first, hits "network unreachable", and does not fall back — every call
+	// fails. Dialing "tcp4" skips the dead IPv6 path. Clone the default
+	// transport so proxy/TLS/idle-conn defaults are preserved.
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	dialer := &net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}
+	transport.DialContext = func(ctx context.Context, _, addr string) (net.Conn, error) {
+		return dialer.DialContext(ctx, "tcp4", addr)
+	}
+	httpClient := &http.Client{Transport: transport}
 	headers := map[string]string{
 		"Content-Type": "application/json",
 		"Accept":       "application/json",
