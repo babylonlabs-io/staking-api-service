@@ -7,14 +7,14 @@ import (
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
 )
 
-// GetFinalityProviders gets a list of finality providers with its stats
+// GetFinalityProviders gets a list of finality providers with their stats, sorted by active TVL
 //
 //	@Summary		List Finality Providers
-//	@Description	Fetches finality providers with its stats with pagination support
+//	@Description	Fetches finality providers with their stats, sorted by active_tvl in descending order (highest TVL first). Pagination is supported via cursor-based pagination tokens.
 //	@Produce		json
 //	@Tags			v2
 //	@Param			pagination_key	query		string													false	"Pagination key to fetch the next page of finality providers"
-//	@Success		200				{object}	handler.PublicResponse[[]v2service.FinalityProviderPublic]	"List of finality providers with its stats"
+//	@Success		200				{object}	handler.PublicResponse[[]v2service.FinalityProviderPublic]	"List of finality providers with stats, sorted by active_tvl DESC"
 //	@Failure		400				{object}	types.Error													"Invalid pagination token"
 //	@Failure		404				{object}	types.Error													"No finality providers found"
 //	@Failure		500				{object}	types.Error													"Internal server error occurred"

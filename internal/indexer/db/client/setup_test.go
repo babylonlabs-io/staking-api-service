@@ -21,6 +21,15 @@ type index struct {
 
 var collections = map[string][]index{
 	model.FinalityProviderDetailsCollection: {{Indexes: map[string]int{}}},
+	model.IndexerFinalityProviderStatsCollection: {
+		{
+			Indexes: map[string]int{
+				"active_tvl": -1,
+				"_id":        -1,
+			},
+			Unique: false,
+		},
+	},
 	model.BTCDelegationDetailsCollection: {
 		{
 			Indexes: map[string]int{

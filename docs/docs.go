@@ -551,7 +551,7 @@ const docTemplate = `{
         },
         "/v2/finality-providers": {
             "get": {
-                "description": "Fetches finality providers with its stats with pagination support",
+                "description": "Fetches finality providers with their stats, sorted by active_tvl in descending order (highest TVL first). Pagination is supported via cursor-based pagination tokens.",
                 "produces": [
                     "application/json"
                 ],
@@ -569,7 +569,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of finality providers with its stats",
+                        "description": "List of finality providers with stats, sorted by active_tvl DESC",
                         "schema": {
                             "$ref": "#/definitions/handler.PublicResponse-array_v2service_FinalityProviderPublic"
                         }
