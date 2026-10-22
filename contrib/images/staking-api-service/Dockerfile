@@ -7,7 +7,7 @@ RUN apk add --no-cache \
     git=2.52.0-r0 \
     build-base=0.5-r3 \
     linux-headers=6.16.12-r0 \
-    musl-dev=1.2.5-r23 \
+    musl-dev=1.2.5-r24 \
     pkgconf=2.5.1-r0 \
     alpine-sdk=1.1-r0 \
     libsodium-dev=1.0.20-r1 \
@@ -34,8 +34,9 @@ ARG VERSION="HEAD"
 RUN addgroup --gid 1138 -S staking-api-service && adduser --uid 1138 -S staking-api-service -G staking-api-service
 RUN apk add --no-cache \
     bash=5.3.3-r1 \
-    curl=8.19.0-r0 \
-    jq=1.8.1-r0
+    ca-certificates=20261020-r0 \
+    curl=8.22.0-r0 \
+    jq=1.8.2-r0
 
 LABEL org.opencontainers.image.source="https://github.com/babylonlabs-io/staking-api-service:${VERSION}"
 
