@@ -30,4 +30,3 @@ jobs:
       build_command: |
         make install
       docker_image_name: babylonlabs/staking-api-service:${{ inputs.tag }}
-    secrets: inherit
