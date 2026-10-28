@@ -35,7 +35,7 @@ RUN addgroup --gid 1138 -S staking-api-service && adduser --uid 1138 -S staking-
 RUN apk add --no-cache \
     bash=5.3.3-r1 \
     ca-certificates=20261020-r0 \
-    curl=8.22.0-r0 \
+    curl=8.23.0-r0 \
     jq=1.8.2-r0
 
 LABEL org.opencontainers.image.source="https://github.com/babylonlabs-io/staking-api-service:${VERSION}"
