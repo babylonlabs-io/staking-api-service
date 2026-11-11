@@ -3,6 +3,7 @@ package chainalysis
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/http/client"
@@ -63,7 +64,7 @@ func (c *Client) AssessAddress(ctx context.Context, address string) (*AddressAss
 
 func (c *Client) doAccessAddress(ctx context.Context, address string) (*riskEntityResponse, error) {
 	const endpoint = "/api/risk/v2/entities/"
-	path := endpoint + address
+	path := endpoint + url.PathEscape(address)
 
 	opts := &client.HttpClientOptions{
 		Path:         path,
