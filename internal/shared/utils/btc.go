@@ -299,6 +299,16 @@ const (
 	NativeSegwit SupportedBtcAddressType = "native_segwit"
 )
 
+// IsValidBtcAddress reports whether address decodes as a BTC address of any
+// type (legacy, P2SH, SegWit, Taproot) for the given network.
+func IsValidBtcAddress(address string, params *chaincfg.Params) bool {
+	decoded, err := btcutil.DecodeAddress(address, params)
+	if err != nil {
+		return false
+	}
+	return decoded.IsForNet(params)
+}
+
 // CheckBtcAddressType checks if the given BTC address is either a
 // native SegWit (P2WPKH) or Taproot address
 func CheckBtcAddressType(

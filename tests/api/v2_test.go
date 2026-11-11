@@ -54,8 +54,20 @@ func TestV2_AddressScreening(t *testing.T) {
 		{
 			testName:         "invalid btc_address",
 			endpoint:         "/address/screening?btc_address=invalid",
-			expectedHttpCode: http.StatusInternalServerError,
-			expectedContents: `{"errorCode":"INTERNAL_SERVICE_ERROR","message":"Internal service error"}`,
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid btc_address"}`,
+		},
+		{
+			testName:         "path traversal in btc_address",
+			endpoint:         "/address/screening?btc_address=x%2F..%2F..%2F",
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid btc_address"}`,
+		},
+		{
+			testName:         "address for another network",
+			endpoint:         "/address/screening?btc_address=tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx",
+			expectedHttpCode: http.StatusBadRequest,
+			expectedContents: `{"errorCode":"BAD_REQUEST","message":"invalid btc_address"}`,
 		},
 	}
 

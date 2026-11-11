@@ -5,6 +5,7 @@ import (
 
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/api/handlers/handler"
 	"github.com/babylonlabs-io/staking-api-service/internal/shared/types"
+	"github.com/babylonlabs-io/staking-api-service/internal/shared/utils"
 )
 
 type AddressScreeningResponse struct {
@@ -17,6 +18,11 @@ func (h *V2Handler) AddressScreening(request *http.Request) (*handler.Result, *t
 	btcAddress := request.URL.Query().Get("btc_address")
 	if btcAddress == "" {
 		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "btc_address is required")
+	}
+	// The address becomes part of the Chainalysis request path, which carries
+	// our API key, so only well-formed addresses for this network go upstream.
+	if !utils.IsValidBtcAddress(btcAddress, h.Config.Server.BTCNetParam) {
+		return nil, types.NewErrorWithMsg(http.StatusBadRequest, types.BadRequest, "invalid btc_address")
 	}
 
 	ctx := request.Context()

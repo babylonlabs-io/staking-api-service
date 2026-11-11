@@ -50,6 +50,19 @@ func TestClient(t *testing.T) {
 		assert.Equal(t, "Severe", resp.Risk)
 		assert.Equal(t, "Identified as Sanctioned Entity", *resp.RiskReason)
 	})
+	t.Run("Address cannot leave the entities path", func(t *testing.T) {
+		var gotPath string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotPath = r.URL.EscapedPath()
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		t.Cleanup(srv.Close)
+
+		client := chainalysis.NewClient(apiKey, srv.URL)
+		_, err := client.AssessAddress(ctx, "x/../../kyt/v2/users?a=b#c")
+		assert.Error(t, err)
+		assert.Equal(t, "/api/risk/v2/entities/x%2F..%2F..%2Fkyt%2Fv2%2Fusers%3Fa=b%23c", gotPath)
+	})
 	t.Run("Internal server error", func(t *testing.T) {
 		// mind nil as last parameter - it will trigger 5xx
 		srv := setupTestServer(t, apiKey, nil)
